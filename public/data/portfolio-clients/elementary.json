@@ -1,0 +1,91 @@
+{
+  "id": "elementary",
+  "name": "Elementary",
+  "industry": "food-beverage",
+  "tagline": "Restaurant website and reservation system",
+  "description": "Modern restaurant website with menu showcase and online reservations.",
+  "projectType": "Website",
+  "status": "Live",
+  "launchDate": "2024-10-01",
+  "timeline": {
+    "startDate": "2024-09-20",
+    "endDate": "2024-10-01",
+    "durationDays": 11,
+    "phases": [
+      { "name": "Intake & Goals", "description": "Collect requirements, success metrics, constraints from the client.", "duration": "1 day" },
+      { "name": "PRD & Research (47-step system)", "description": "Run our structured PRD workflow: competitive/SEO scan, booking patterns, risk/edge cases.", "duration": "2 days" },
+      { "name": "Experience Blueprint", "description": "Plan flows, states, and content; define color/typography directions.", "duration": "2 days" },
+      { "name": "Wireframes & UI Directions", "description": "Wireframe key screens against 2–3 color schemes; agree on the chosen direction.", "duration": "1 day" },
+      { "name": "Build & Integrations", "description": "Implement booking flow, CMS menus, Stripe/Twilio hooks, performance budget.", "duration": "3 days" },
+      { "name": "QA & UAT", "description": "Cross-device testing, accessibility, schema/SEO checks, load/perf validation.", "duration": "1 day" },
+      { "name": "Client Feedback Loops", "description": "Iterate with the client (2–3 cycles) until sign-off.", "duration": "1 day" },
+      { "name": "Launch & Handoff", "description": "Deploy, run smoke tests, and hand over training + Looms.", "duration": "0.5 day" }
+    ]
+  },
+  "pricing": {
+    "marketValue": 6000,
+    "sisoPrice": 2500,
+    "currency": "GBP",
+    "savings": 58
+  },
+  "features": {
+    "key": [
+      "Menu showcase",
+      "Online reservations",
+      "Contact system"
+    ],
+    "technical": [],
+    "integrations": []
+  },
+  "techStack": {
+    "frontend": [
+      "React",
+      "TypeScript"
+    ],
+    "backend": [
+      "Node.js"
+    ],
+    "database": [
+      "PostgreSQL"
+    ],
+    "hosting": [
+      "Vercel"
+    ],
+    "tools": [
+      "Vite"
+    ]
+  },
+  "media": {
+    "logo": "/portfolio/elementary/logo.png",
+    "screenshots": {
+      "desktop": [
+        "/portfolio/elementary/desktop/hero.png"
+      ],
+      "mobile": [
+        "/portfolio/elementary/mobile/home.png"
+      ],
+      "features": []
+    }
+  },
+  "faq": [
+    { "question": "How do you price?", "answer": "Fixed band with agreed scope; typical restaurant builds land between £2.5k–£6k." },
+    { "question": "Can you integrate our POS?", "answer": "Yes. Toast/Square hooks are supported; others via webhooks." },
+    { "question": "How fast can you launch?", "answer": "11–14 days for a standard booking site with menu CMS." },
+    { "question": "Do you support multiple locations?", "answer": "Yes, with per-location availability flags and menu variants." },
+    { "question": "Can staff edit the menu without developers?", "answer": "Yes. Menu items, pricing, and availability are editable in a simple CMS with scheduled publishing." },
+    { "question": "What happens if a guest cancels or no-shows?", "answer": "We can require deposits or card holds via Stripe and send automated reminder/cancellation flows to cut no-shows." },
+    { "question": "Is the site accessible?", "answer": "We build to WCAG 2.1 AA patterns: focus states, semantic HTML, ARIA for menus/modals, and high-contrast fallbacks." },
+    { "question": "Can we pipe bookings into our CRM or email tool?", "answer": "Yes. We support webhooks and native integrations (HubSpot, Klaviyo) so bookings sync with your CRM and campaigns." },
+    { "question": "Do you provide training?", "answer": "We include a 45-minute handoff with loom videos plus a quickstart doc for staff to manage bookings and menu updates." }
+  ],
+  "metadata": {
+    "featured": false,
+    "showInPortfolio": true,
+    "seoTitle": "Elementary Restaurant | SISO Portfolio",
+    "seoDescription": "Restaurant website and reservations",
+    "tags": [
+      "restaurant",
+      "food"
+    ]
+  }
+}

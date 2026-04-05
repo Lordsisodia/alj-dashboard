@@ -1,0 +1,304 @@
+"use client";
+
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import { useMobileNavigation } from "../application/navigation-store";
+import { QUICK_ACTION_PATH_LOOKUP, QUICK_ACTION_DEFAULT_PATH } from "../application/quick-action-routes";
+import { ScreenViewport } from "./components/ScreenViewport";
+import { QuickActionsContent } from "./quick-actions/QuickActionsContent";
+import { CampusHubScreen } from "@/domains/partnerships/workspace/ui/mobile";
+const LearningHubResponsive = dynamic(
+  () => import("@/domains/partnerships/academy/shared/components/LearningHubResponsive").then((m) => m.LearningHubResponsive),
+  { ssr: false },
+);
+const LazyNotificationsScreen = dynamic(
+  () => import("@/domains/partnerships/notifications/ui").then((m) => m.NotificationsScreen),
+  { ssr: false, loading: () => <NotificationsFallback /> },
+);
+import { MessagesScreen } from "@/domains/partnerships/community/06-messages/ui";
+import type { MobileTabId, QuickActionId } from "../types/navigation";
+import { useHydrateOnView } from "@/domains/shared/hooks/useHydrateOnView";
+
+const MESSAGES_CANONICAL_PATH = "/partners/community/messages";
+const LEGACY_MESSAGES_PATH = "/partners/messages";
+const ACADEMY_BASE_PATH = "/partners/academy";
+const LEGACY_ACADEMY_PATH = "/partners-academy";
+
+const TAB_ROUTE_MAP: Record<MobileTabId, string> = {
+  campus: "/partners",
+  learning: ACADEMY_BASE_PATH,
+  notifications: "/partners/inbox",
+  messages: MESSAGES_CANONICAL_PATH,
+  "quick-actions": QUICK_ACTION_DEFAULT_PATH,
+};
+
+const DEFAULT_QUICK_ACTION: QuickActionId = "settings";
+
+const normalizePartnersPath = (pathname: string): string => {
+  if (!pathname) return "/partners";
+  const noTrailing = pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  const cleaned = noTrailing.replace(/\/\([^/]+\)/g, "");
+  return cleaned || "/partners";
+};
+
+const getTabFromPath = (pathname: string): MobileTabId => {
+  const normalized = normalizePartnersPath(pathname);
+
+  if (normalized === "/partners" || normalized === "/partners/campus") {
+    return "campus";
+  }
+
+  if (normalized.startsWith("/partners/learning") || normalized.startsWith(ACADEMY_BASE_PATH) || normalized.startsWith(LEGACY_ACADEMY_PATH)) {
+    return "learning";
+  }
+
+  if (normalized.startsWith("/partners/inbox") || normalized.startsWith("/partners/notifications")) {
+    return "notifications";
+  }
+
+  if (normalized.startsWith(MESSAGES_CANONICAL_PATH) || normalized.startsWith(LEGACY_MESSAGES_PATH)) {
+    return "messages";
+  }
+
+  if (normalized.startsWith("/partners/quick")
+      || normalized.startsWith("/partners/settings")
+      || normalized.startsWith("/partners/profile")
+      || normalized.startsWith("/partners/wallet")) {
+    return "quick-actions";
+  }
+
+  return "campus";
+};
+
+const getQuickActionFromPath = (pathname: string): QuickActionId | null => {
+  const normalized = normalizePartnersPath(pathname);
+  return QUICK_ACTION_PATH_LOOKUP[normalized] ?? null;
+};
+
+type ViewportContentRenderer = (path: string) => ReactNode | null | undefined;
+
+function ShellContent({
+  children,
+  renderViewportContent,
+}: {
+  children?: ReactNode;
+  renderViewportContent?: ViewportContentRenderer;
+}) {
+  const router = useRouter();
+  const pathname = usePathname() ?? "/partners";
+  const normalizedPath = useMemo(() => normalizePartnersPath(pathname), [pathname]);
+  const navContainerRef = useRef<HTMLDivElement | null>(null);
+  const {
+    activeTab,
+    isImmersiveMode,
+    setActiveTab,
+    closeQuickActions,
+    closeDrawer,
+    isDrawerOpen,
+    activeQuickAction,
+    selectQuickAction,
+  } = useMobileNavigation();
+
+  const targetQuickAction = useMemo(() => getQuickActionFromPath(pathname), [pathname]);
+
+  useEffect(() => {
+    const nextTab = getTabFromPath(pathname);
+    const defaultImmersive = nextTab === "messages";
+
+    if (nextTab !== activeTab) {
+      setActiveTab(nextTab, { immersive: defaultImmersive });
+    }
+
+    if (nextTab === "quick-actions") {
+      const desiredQuickAction = targetQuickAction ?? activeQuickAction ?? DEFAULT_QUICK_ACTION;
+      if (activeQuickAction !== desiredQuickAction) {
+        selectQuickAction(desiredQuickAction);
+      }
+    } else if (activeTab === "quick-actions") {
+      closeQuickActions();
+    }
+
+    // Allow the drawer to remain open on selected tabs (campus, notifications, quick-actions, messages)
+    const drawerSafeTabs: MobileTabId[] = ["campus", "learning", "quick-actions", "notifications", "messages"];
+    if (!drawerSafeTabs.includes(nextTab) && isDrawerOpen) {
+      closeDrawer();
+    }
+  }, [
+    pathname,
+    activeTab,
+    setActiveTab,
+    activeQuickAction,
+    selectQuickAction,
+    closeQuickActions,
+    isDrawerOpen,
+    closeDrawer,
+    targetQuickAction,
+  ]);
+
+  const navigateToTab = (tab: MobileTabId) => {
+    const target = TAB_ROUTE_MAP[tab];
+    if (!target) return;
+
+    const normalizedTarget = normalizePartnersPath(target);
+    if (normalizedTarget === normalizedPath && tab !== "quick-actions") {
+      return;
+    }
+
+    if (tab !== "quick-actions") {
+      closeQuickActions();
+    }
+
+    if (tab !== activeTab) {
+      setActiveTab(tab, { immersive: tab === "messages" });
+    }
+
+    router.push(target);
+  };
+
+  const shouldShowNav = false; // Bottom nav removed - all navigation now in side nav
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (navContainerRef.current) {
+        const height = navContainerRef.current.offsetHeight;
+        document.documentElement.style.setProperty("--mobile-nav-height", `${height}`);
+      } else {
+        document.documentElement.style.removeProperty("--mobile-nav-height");
+      }
+    };
+    if (shouldShowNav) {
+      measure();
+      window.addEventListener("resize", measure);
+      return () => window.removeEventListener("resize", measure);
+    }
+    document.documentElement.style.removeProperty("--mobile-nav-height");
+    return () => undefined;
+  }, [shouldShowNav]);
+
+
+  const renderActiveTab = () => {
+    if (activeTab === "learning" && renderViewportContent) {
+      const override = renderViewportContent(normalizedPath);
+      if (override !== undefined) {
+        return override;
+      }
+    }
+    switch (activeTab) {
+      case "campus":
+        return <CampusHubScreen />;
+      case "learning":
+        return (
+          <Suspense fallback={<LearningTabFallback />}>
+            <LearningHubResponsive />
+          </Suspense>
+        );
+      case "notifications":
+        return <NotificationsTab />;
+      case "messages":
+        return <MessagesScreen />;
+      case "quick-actions":
+      default:
+        return <QuickActionsContent />;
+    }
+  };
+
+  const viewportContent = renderActiveTab();
+  const shouldRenderViewport = viewportContent !== null && viewportContent !== false && viewportContent !== undefined;
+
+  return (
+    <>
+      {shouldRenderViewport ? (
+        <ScreenViewport hasBottomNav={shouldShowNav}>
+          {viewportContent}
+        </ScreenViewport>
+      ) : null}
+      {children}
+    </>
+  );
+}
+export type MobileShellProps = {
+  children?: ReactNode;
+  initialTab?: MobileTabId;
+  initialQuickAction?: QuickActionId | null;
+  initialImmersiveMode?: boolean;
+  renderViewportContent?: ViewportContentRenderer;
+};
+
+export function MobileShell({
+  children,
+  initialTab = "campus",
+  initialQuickAction = null,
+  initialImmersiveMode,
+  renderViewportContent,
+}: MobileShellProps) {
+  const { setActiveTab, selectQuickAction, closeQuickActions, setImmersiveMode } = useMobileNavigation();
+
+  useEffect(() => {
+    setActiveTab(initialTab, { immersive: initialImmersiveMode ?? (initialTab === "messages") });
+    if (initialQuickAction) {
+      selectQuickAction(initialQuickAction);
+    } else {
+      closeQuickActions();
+    }
+    if (typeof initialImmersiveMode === "boolean") {
+      setImmersiveMode(initialImmersiveMode);
+    }
+  }, [initialTab, initialQuickAction, initialImmersiveMode, setActiveTab, selectQuickAction, closeQuickActions, setImmersiveMode]);
+
+  return (
+    <ShellContent renderViewportContent={renderViewportContent}>
+      {children}
+    </ShellContent>
+  );
+}
+
+// Device-agnostic alias to align naming with unified shell
+export { MobileShell as Shell };
+
+function NotificationsTab() {
+  const options = useMemo<IntersectionObserverInit>(() => ({ rootMargin: "200px 0px 0px 0px" }), []);
+  const { ref, hydrated } = useHydrateOnView<HTMLDivElement>(options);
+  return (
+    <div ref={ref} className="min-h-[60vh]">
+      {hydrated ? (
+        <Suspense fallback={<NotificationsFallback />}>
+          <LazyNotificationsScreen />
+        </Suspense>
+      ) : (
+        <NotificationsFallback />
+      )}
+    </div>
+  );
+}
+
+function NotificationsFallback() {
+  return (
+    <div className="flex min-h-[60vh] flex-col gap-6 px-4 py-10 text-siso-text-secondary">
+      <div className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/40 animate-pulse space-y-3">
+        <div className="h-5 w-32 rounded-full bg-white/20" />
+        <div className="h-3 w-48 rounded-full bg-white/10" />
+        <div className="h-3 w-24 rounded-full bg-white/10" />
+      </div>
+      {[0, 1].map((idx) => (
+        <div
+          key={`notify-skel-${idx}`}
+          className="rounded-[20px] border border-white/10 bg-white/5 p-4 shadow-inner shadow-black/30 animate-pulse space-y-3"
+        >
+          <div className="h-4 w-1/2 rounded-full bg-white/15" />
+          <div className="h-3 w-3/4 rounded-full bg-white/10" />
+          <div className="h-3 w-2/5 rounded-full bg-white/10" />
+          <div className="h-12 rounded-2xl bg-white/5" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LearningTabFallback() {
+  return (
+    <div className="min-h-[60vh] rounded-3xl border border-white/10 bg-white/5 p-6 text-white/70">
+      Loading learning hub…
+    </div>
+  );
+}

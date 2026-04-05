@@ -1,0 +1,32 @@
+{
+  "level": {
+    "currentLevel": 2,
+    "currentPoints": 1250,
+    "pointsToNextLevel": 500,
+    "nextLevel": 3,
+    "currentTierId": "builder",
+    "nextTierId": "vanguard"
+  },
+  "tiers": [
+    { "id": "trailblazer", "title": "Trailblazer", "art": "/tiers/Trailblazer.svg" },
+    { "id": "builder", "title": "Builder", "art": "/tiers/Builder.svg" },
+    { "id": "vanguard", "title": "Vanguard", "art": "/tiers/Vanguard.svg" },
+    { "id": "apex", "title": "Apex", "art": "/tiers/Apex.svg" },
+    { "id": "sovereign", "title": "Sovereign", "art": "/tiers/Sovereign.svg" }
+  ],
+  "xpFeed": [
+    { "id": "xp-001", "title": "Finished Discovery Basics", "source": "Course", "xp": 120, "when": "2h ago" },
+    { "id": "xp-002", "title": "Shared portfolio link", "source": "Engagement", "xp": 40, "when": "4h ago" },
+    { "id": "xp-003", "title": "Logged prospect follow-up", "source": "Pipeline", "xp": 60, "when": "Yesterday" },
+    { "id": "xp-004", "title": "Hosted community AMA", "source": "Community", "xp": 150, "when": "2 days ago" },
+    { "id": "xp-005", "title": "Completed Partner Wallet setup", "source": "Earnings", "xp": 80, "when": "3 days ago" },
+    { "id": "xp-006", "title": "Filed recruitment scorecard", "source": "Recruitment", "xp": 55, "when": "Last week" },
+    { "id": "xp-007", "title": "Won deal with Apex Labs", "source": "Pipeline", "xp": 300, "when": "Last week" },
+    { "id": "xp-008", "title": "Replied in mentor thread", "source": "Community", "xp": 30, "when": "8 days ago" },
+    { "id": "xp-009", "title": "Published spotlight recap", "source": "Content", "xp": 50, "when": "9 days ago" },
+    { "id": "xp-010", "title": "Scored 95% on Tier Quiz", "source": "Learning", "xp": 110, "when": "10 days ago" },
+    { "id": "xp-011", "title": "Referred a new partner", "source": "Growth", "xp": 200, "when": "11 days ago" },
+    { "id": "xp-012", "title": "Logged security review", "source": "Compliance", "xp": 35, "when": "12 days ago" }
+  ],
+  "certificates": { "count": 2, "badges": 3 }
+}

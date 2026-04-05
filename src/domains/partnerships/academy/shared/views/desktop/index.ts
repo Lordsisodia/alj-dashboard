@@ -1,0 +1,1 @@
+export { TrainingHubDesktop } from "./TrainingHubDesktop";

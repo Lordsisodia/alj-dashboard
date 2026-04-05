@@ -1,0 +1,299 @@
+@import "../domains/partnerships/_shared/styles/color-system.css";
+@import "../domains/partnerships/_shared/styles/tw-animate.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Print stylesheet for clean PDFs */
+@media print {
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  /* Hide app chrome & controls */
+  .no-print, nav, header .no-print, footer, .modern-mobile-menu, .notifications-menu {
+    display: none !important;
+  }
+  /* Remove backgrounds that can waste ink */
+  .bg-siso-bg-secondary, .bg-siso-bg-primary, .bg-siso-bg-tertiary, [class*="bg-"] {
+    background: transparent !important;
+  }
+  /* Borders lighter for print */
+  [class*="border-"] { border-color: #ccc !important; }
+  /* Ensure readable text */
+  .text-siso-text-primary, .text-siso-text-secondary, .text-siso-text-muted { color: #111 !important; }
+  /* Avoid page breaks inside chips/lists */
+ul, ol, li, .rounded-\[26px\], .rounded-3xl { break-inside: avoid; }
+  /* Margins */
+  @page { margin: 16mm; }
+}
+
+:root {
+  color-scheme: dark;
+  /* Ensure FallingPattern's var(--primary) resolves visibly */
+  --primary: var(--siso-orange, #ffa726);
+}
+
+body {
+  color: var(--siso-text-primary);
+  background-color: var(--siso-bg-primary);
+  font-family: var(--font-sans, "Inter", sans-serif);
+  min-height: 100vh;
+}
+
+/* Solid background helpers to avoid opacity utilities */
+.bg-siso-primary-solid { background-color: var(--siso-bg-primary); }
+.bg-siso-secondary-solid { background-color: var(--siso-bg-secondary); }
+.bg-siso-tertiary-solid { background-color: var(--siso-bg-tertiary); }
+
+/* Hide scrollbars where explicitly requested */
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Shared inner callout scrim to match Settings inner cards */
+.siso-inner-card {
+  /* Lighter inner scrim matching settings nested cards */
+  background-color: var(--siso-bg-tertiary);
+}
+.siso-inner-card-strong {
+  background-color: var(--siso-bg-hover);
+}
+
+:root {
+  --component-inactive-color: var(--muted-foreground);
+  --component-bg: var(--card);
+  --component-shadow: var(--border);
+  --component-active-bg: var(--secondary);
+  --component-line-inactive-color: var(--border);
+  --component-active-color-default: var(--accent-foreground);
+}
+
+.dark {
+  --component-inactive-color: var(--muted-foreground);
+  --component-bg: var(--card);
+  --component-shadow: var(--border);
+  --component-active-bg: var(--secondary);
+  --component-line-inactive-color: var(--muted-foreground);
+  --component-active-color-default: var(--accent-foreground);
+  --background: oklch(0 0 0);
+  --primary: var(--siso-orange, #ffa726);
+}
+
+@keyframes iconBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-0.3em);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-0.1em);
+  }
+  80% {
+    transform: translateY(0);
+  }
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  background: var(--component-bg);
+  border-top: 1px solid color-mix(in srgb, var(--component-shadow) 80%, transparent);
+  box-shadow: 0 -18px 30px rgba(0, 0, 0, 0.35);
+}
+
+.menu__item {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--component-inactive-color);
+  text-transform: capitalize;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.menu__item::after {
+  content: "";
+  position: absolute;
+  bottom: -0.45rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--lineWidth, 0px);
+  height: 3px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--component-line-inactive-color) 70%, transparent);
+  transition: width 0.25s ease, background 0.2s ease;
+}
+
+.menu__item.active {
+  color: var(--component-active-color);
+  transform: translateY(-0.15rem);
+}
+
+.menu__item.active::after {
+  background: var(--component-active-color);
+}
+
+.menu__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--component-active-bg) 45%, transparent);
+  transition: background 0.2s ease;
+}
+
+.menu__item.active .menu__icon {
+  background: color-mix(in srgb, var(--component-active-bg) 80%, transparent);
+  animation: iconBounce 600ms ease;
+}
+
+.menu__text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+
+.menu__text.active {
+  opacity: 1;
+}
+
+.menu__item .icon {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+:root {
+  --hu-font-geist: var(--font-geist);
+  --hu-font-jetbrains: var(--font-jetbrains-mono);
+  --radius: 0.8rem;
+  --card-radius: 1rem;
+  --hu-background: 0, 0%, 100%;
+  --hu-foreground: 0, 0%, 14%;
+  --hu-card: 0, 0%, 99%;
+  --hu-card-foreground: 0, 0%, 14%;
+  --hu-primary: 235, 100%, 60%;
+  --hu-primary-foreground: 0, 0%, 98%;
+  --hu-secondary: 0, 0%, 97%;
+  --hu-secondary-foreground: 0, 0%, 20%;
+  --hu-muted: 0, 0%, 97%;
+  --hu-muted-foreground: 0, 0%, 56%;
+  --hu-accent: 0, 0%, 96%;
+  --hu-accent-foreground: 0, 0%, 20%;
+  --hu-destructive: 9, 96%, 47%;
+  --hu-destructive-foreground: 0, 0%, 98%;
+  --hu-border: 0, 0%, 92%;
+  --hu-input: 0, 0%, 100%;
+  --hu-ring: 0, 0%, 71%;
+  --color-fd-background: hsl(var(--hu-background));
+  --color-fd-card: hsl(var(--hu-background));
+}
+
+.dark {
+  --hu-background: 0, 0%, 7%;
+  --hu-foreground: 0, 0%, 100%;
+  --hu-card: 0, 0%, 9%;
+  --hu-card-foreground: 0, 0%, 100%;
+  --hu-primary: 235, 100%, 60%;
+  --hu-primary-foreground: 0, 0%, 98%;
+  --hu-secondary: 0, 0%, 15%;
+  --hu-secondary-foreground: 0, 0%, 100%;
+  --hu-muted: 0, 0%, 15%;
+  --hu-muted-foreground: 0, 0%, 71%;
+  --hu-accent: 0, 0%, 15%;
+  --hu-accent-foreground: 0, 0%, 100%;
+  --hu-destructive: 0, 84%, 50%;
+  --hu-destructive-foreground: 0, 0%, 98%;
+  --hu-border: 0, 0%, 100%, 10%;
+  --hu-input: 0, 0%, 100%, 5%;
+  --hu-ring: 0, 0%, 56%;
+  --color-fd-background: hsl(var(--hu-background));
+  --color-fd-card: hsl(var(--hu-background));
+}
+
+
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

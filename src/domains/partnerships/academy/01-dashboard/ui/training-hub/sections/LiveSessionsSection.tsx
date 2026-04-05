@@ -1,0 +1,44 @@
+import { SettingsGroupCallout } from "@/domains/partnerships/settings/shared/components/SettingsGroupCallout";
+import type { LiveSession } from "../data";
+import { CalendarClock } from "lucide-react";
+
+const sessionDateFormatter = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "UTC",
+});
+
+interface LiveSessionsSectionProps {
+  sessions: LiveSession[];
+}
+
+function buttonLabel(status: LiveSession["status"]) {
+  if (status === "open") return "Join";
+  if (status === "rsvp") return "RSVP";
+  return "Watch replay";
+}
+
+export function LiveSessionsSection({ sessions }: LiveSessionsSectionProps) {
+  return (
+    <SettingsGroupCallout
+      icon={<CalendarClock className="h-4 w-4" />}
+      title="Live sessions"
+      subtitle="Office hours and webinars"
+      showChevron={false}
+    >
+      <div className="grid gap-3 rounded-[22px] border border-white/12 bg-[#0F0F0F] p-4 sm:grid-cols-2 shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+        {sessions.map((s) => (
+          <article key={s.id} className="rounded-3xl border border-white/8 bg-[#1F1F1F] p-4">
+            <h3 className="text-sm font-semibold text-siso-text-primary">{s.title}</h3>
+            <p className="text-xs text-siso-text-muted">{sessionDateFormatter.format(new Date(s.date))}</p>
+            <div className="mt-3">
+              <button type="button" className="rounded-full border border-siso-border px-3 py-1 text-xs text-siso-text-muted">
+                {buttonLabel(s.status)}
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </SettingsGroupCallout>
+  );
+}

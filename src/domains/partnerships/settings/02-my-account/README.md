@@ -1,0 +1,11 @@
+# 02 My Account — Structure
+- Purpose: account identity basics (name, email, auth links), plus any account-level preferences.
+- Routes: `/partners/settings/account` (and sub-routes if added later).
+- Layout:
+  - `application/` hooks/services for account settings
+  - `data/` fixtures/seeds (keep gated)
+  - `docs/` section docs (add specs here)
+  - `domain/` types/enums/rules
+  - `infrastructure/` API/adapters for account
+  - `ui/` screens/components for account
+- Shared pieces live in `settings/shared/` (route registry, shells, menu).

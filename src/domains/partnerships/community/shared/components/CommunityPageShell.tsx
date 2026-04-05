@@ -1,0 +1,114 @@
+"use client";
+
+import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import dynamic from "next/dynamic";
+import { useRouter, usePathname } from "next/navigation";
+import { MobileNavigationProvider, useMobileNavigation } from "@/domains/partnerships/_shared/shell/application/navigation-store";
+import type { NavigationState } from "@/domains/partnerships/_shared/shell/types/navigation";
+import { FloatingNavButton } from "@/domains/partnerships/_shared/ui/mobile/FloatingNavButton";
+import { CampusSidebarContent } from "@/domains/partnerships/_shared/ui/mobile/campus-sidebar/CampusSidebar";
+import { getDrawerSectionForPath, getTabForPath } from "@/domains/partnerships/_shared/shell/application/route-map";
+
+const CampusDrawerHydrator = dynamic(
+  () => import("@/domains/partnerships/_shared/ui/mobile/campus-sidebar/CampusDrawerHydrator.client").then((m) => m.CampusDrawerHydrator),
+  { ssr: false, loading: () => null },
+);
+
+const defaultNavState: Partial<NavigationState> = {
+  activeTab: "quick-actions",
+  previousTab: "quick-actions",
+  isImmersiveMode: false,
+};
+
+export function PartnersPageShell({
+  children,
+  initialState,
+  showFloatingNavButton,
+}: {
+  children: ReactNode;
+  initialState?: Partial<NavigationState>;
+  showFloatingNavButton?: boolean;
+}) {
+  const mergedState = useMemo(() => ({ ...defaultNavState, ...initialState }), [initialState]);
+
+  return (
+    <MobileNavigationProvider initialState={mergedState}>
+      <PartnersNavLayer showFloatingNavButton={showFloatingNavButton}>{children}</PartnersNavLayer>
+    </MobileNavigationProvider>
+  );
+}
+
+export function PartnersNavLayer({ children, showFloatingNavButton = true }: { children: ReactNode; showFloatingNavButton?: boolean }) {
+  const isDesktop = useIsDesktop();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { closeDrawer, isDrawerOpen, setActiveDrawerSection, setActiveTab } = useMobileNavigation();
+
+  useEffect(() => {
+    if (isDesktop && isDrawerOpen) {
+      closeDrawer();
+    }
+  }, [isDesktop, isDrawerOpen, closeDrawer]);
+
+  useEffect(() => {
+    if (!pathname) return;
+    const tab = getTabForPath(pathname);
+    setActiveTab(tab, { immersive: tab === "messages" });
+    setActiveDrawerSection(getDrawerSectionForPath(pathname));
+  }, [pathname, setActiveDrawerSection, setActiveTab]);
+
+  const handleNavigate = useCallback(
+    (href: string) => {
+      router.push(href);
+      if (!isDesktop) {
+        closeDrawer();
+      }
+    },
+    [router, closeDrawer, isDesktop],
+  );
+
+  if (isDesktop) {
+    return (
+      <div className="flex min-h-screen bg-siso-bg-primary text-siso-text-primary">
+        <aside className="hidden lg:flex lg:w-[360px] xl:w-[400px] border-r border-siso-border bg-siso-bg-secondary/80 sticky top-0 h-screen overflow-y-auto">
+          <CampusSidebarContent heightClass="h-screen" onNavigate={handleNavigate} />
+        </aside>
+        <div className="flex-1 min-h-screen overflow-x-hidden">{children}</div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Suspense fallback={<div aria-hidden className="sr-only" />}>
+        <CampusDrawerHydrator />
+      </Suspense>
+      {showFloatingNavButton && !isDrawerOpen ? <FloatingNavButton /> : null}
+      {children}
+    </>
+  );
+}
+
+function useIsDesktop(query = "(min-width: 1024px)") {
+  const getInitial = () => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia(query).matches;
+  };
+
+  const [isDesktop, setIsDesktop] = useState(getInitial);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia(query);
+    const update = (event: MediaQueryListEvent) => setIsDesktop(event.matches);
+    setIsDesktop(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [query]);
+
+  return isDesktop;
+}
+
+// Backwards-compatible aliases for community-specific imports
+export const CommunityPageShell = PartnersPageShell;
+export const CommunityNavLayer = PartnersNavLayer;

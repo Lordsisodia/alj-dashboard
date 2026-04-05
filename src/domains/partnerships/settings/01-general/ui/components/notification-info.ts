@@ -1,0 +1,96 @@
+export const notificationInfoData = {
+  deals: {
+    title: "Deal Notifications",
+    description: "Stay informed about business opportunities and revenue-generating activities",
+    items: [
+      "New deal opportunities from partners",
+      "Deal stage updates and progress",
+      "Commission earned notifications",
+      "Payment received confirmations",
+      "Deal deadline reminders",
+      "Contract renewal notifications",
+    ],
+  },
+  tasks: {
+    title: "Task Notifications",
+    description: "Keep track of your responsibilities and collaborative work",
+    items: [
+      "Task assignments from team members",
+      "Deadline reminders and alerts",
+      "Task status updates",
+      "Collaboration requests",
+      "Task completion notifications",
+      "Project milestone updates",
+    ],
+  },
+  system: {
+    title: "System Updates",
+    description: "Important platform changes and maintenance information",
+    items: [
+      "New feature releases",
+      "Platform improvements",
+      "Scheduled maintenance",
+      "Security alerts and patches",
+      "Service status updates",
+      "API changes and deprecations",
+    ],
+  },
+  social: {
+    title: "Social Interactions",
+    description: "Stay connected with your network and community",
+    items: [
+      "Comments on your content",
+      "Mentions and tags from others",
+      "Follow notifications",
+      "Likes and reactions",
+      "Connection requests",
+      "Share notifications",
+    ],
+  },
+  financial: {
+    title: "Financial Notifications",
+    description: "Monitor your earnings and financial activities",
+    items: [
+      "Payment received confirmations",
+      "Commission earned updates",
+      "Invoice generated notifications",
+      "Contract changes and updates",
+      "Billing and subscription alerts",
+      "Tax document notifications",
+    ],
+  },
+  sms: {
+    title: "SMS Notifications",
+    description: "Critical alerts delivered directly to your phone",
+    items: [
+      "Security breach alerts",
+      "Urgent payment notifications",
+      "Account verification codes",
+      "Emergency system alerts",
+      "Time-sensitive updates",
+      "Two-factor authentication codes",
+    ],
+  },
+  quietHours: {
+    title: "Quiet Hours",
+    description: "Maintain work-life balance with intelligent notification scheduling",
+    items: [
+      "Suppress non-critical notifications",
+      "Customizable sleep/wake times",
+      "Critical alerts still break through",
+      "Timezone-aware scheduling",
+      "Weekend and holiday settings",
+      "Preserve personal time",
+    ],
+  },
+  priority: {
+    title: "Priority Levels",
+    description: "Control which notification urgency levels you receive",
+    items: [
+      "Critical: Security alerts, payments, system failures",
+      "High: Deals, commissions, urgent deadlines",
+      "Medium: Messages, social interactions, task updates",
+      "Low: Likes, follows, general announcements",
+    ],
+  },
+};

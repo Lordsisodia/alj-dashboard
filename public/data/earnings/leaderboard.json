@@ -1,0 +1,331 @@
+[
+  {
+    "rank": 1,
+    "name": "Nova Carter",
+    "profileId": "nova-carter",
+    "metricLabel": "Bonus pts",
+    "metricValue": "1,240",
+    "trend": "+120",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "9d"
+      },
+      {
+        "label": "Wins",
+        "value": "12"
+      },
+      {
+        "label": "Boost",
+        "value": "+18%"
+      }
+    ]
+  },
+  {
+    "rank": 2,
+    "name": "Leo Summers",
+    "profileId": "leo-summers",
+    "metricLabel": "Bonus pts",
+    "metricValue": "1,110",
+    "trend": "+60",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "6d"
+      },
+      {
+        "label": "Wins",
+        "value": "10"
+      },
+      {
+        "label": "Boost",
+        "value": "+12%"
+      }
+    ]
+  },
+  {
+    "rank": 3,
+    "name": "Sienna Rowe",
+    "profileId": "sienna-rowe",
+    "metricLabel": "Bonus pts",
+    "metricValue": "980",
+    "trend": "+30",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "4d"
+      },
+      {
+        "label": "Wins",
+        "value": "9"
+      },
+      {
+        "label": "Boost",
+        "value": "+9%"
+      }
+    ]
+  },
+  {
+    "rank": 4,
+    "name": "Aria Kent",
+    "profileId": "aria-kent",
+    "metricLabel": "Bonus pts",
+    "metricValue": "910",
+    "trend": "+20",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "3d"
+      },
+      {
+        "label": "Wins",
+        "value": "7"
+      },
+      {
+        "label": "Boost",
+        "value": "+8%"
+      }
+    ]
+  },
+  {
+    "rank": 5,
+    "name": "Mason Wells",
+    "profileId": "mason-wells",
+    "metricLabel": "Bonus pts",
+    "metricValue": "860",
+    "trend": "+15",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "2d"
+      },
+      {
+        "label": "Wins",
+        "value": "6"
+      },
+      {
+        "label": "Boost",
+        "value": "+7%"
+      }
+    ]
+  },
+  {
+    "rank": 6,
+    "name": "Priya Lind",
+    "profileId": "priya-lind",
+    "metricLabel": "Bonus pts",
+    "metricValue": "835",
+    "trend": "+12",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "2d"
+      },
+      {
+        "label": "Wins",
+        "value": "6"
+      },
+      {
+        "label": "Boost",
+        "value": "+6%"
+      }
+    ]
+  },
+  {
+    "rank": 7,
+    "name": "Rowan Diaz",
+    "profileId": "rowan-diaz",
+    "metricLabel": "Bonus pts",
+    "metricValue": "790",
+    "trend": "+18",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "5d"
+      },
+      {
+        "label": "Wins",
+        "value": "5"
+      },
+      {
+        "label": "Boost",
+        "value": "+10%"
+      }
+    ]
+  },
+  {
+    "rank": 8,
+    "name": "You",
+    "metricLabel": "Bonus pts",
+    "metricValue": "720",
+    "trend": "+90",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "5d"
+      },
+      {
+        "label": "Wins",
+        "value": "5"
+      },
+      {
+        "label": "Boost",
+        "value": "+14%"
+      }
+    ]
+  },
+  {
+    "rank": 9,
+    "name": "Elio Tran",
+    "profileId": "elio-tran",
+    "metricLabel": "Bonus pts",
+    "metricValue": "705",
+    "trend": "+25",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "4d"
+      },
+      {
+        "label": "Wins",
+        "value": "4"
+      },
+      {
+        "label": "Boost",
+        "value": "+9%"
+      }
+    ]
+  },
+  {
+    "rank": 10,
+    "name": "Mina Ortiz",
+    "profileId": "mina-ortiz",
+    "metricLabel": "Bonus pts",
+    "metricValue": "680",
+    "trend": "+10",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "3d"
+      },
+      {
+        "label": "Wins",
+        "value": "4"
+      },
+      {
+        "label": "Boost",
+        "value": "+8%"
+      }
+    ]
+  },
+  {
+    "rank": 11,
+    "name": "Casper Hsu",
+    "profileId": "casper-hsu",
+    "metricLabel": "Bonus pts",
+    "metricValue": "640",
+    "trend": "+8",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "2d"
+      },
+      {
+        "label": "Wins",
+        "value": "4"
+      },
+      {
+        "label": "Boost",
+        "value": "+6%"
+      }
+    ]
+  },
+  {
+    "rank": 12,
+    "name": "Gia Bennett",
+    "profileId": "gia-bennett",
+    "metricLabel": "Bonus pts",
+    "metricValue": "625",
+    "trend": "+11",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "1d"
+      },
+      {
+        "label": "Wins",
+        "value": "3"
+      },
+      {
+        "label": "Boost",
+        "value": "+5%"
+      }
+    ]
+  },
+  {
+    "rank": 13,
+    "name": "Omar Bell",
+    "profileId": "omar-bell",
+    "metricLabel": "Bonus pts",
+    "metricValue": "598",
+    "trend": "+6",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "1d"
+      },
+      {
+        "label": "Wins",
+        "value": "3"
+      },
+      {
+        "label": "Boost",
+        "value": "+4%"
+      }
+    ]
+  },
+  {
+    "rank": 14,
+    "name": "Lena Cho",
+    "profileId": "lena-cho",
+    "metricLabel": "Bonus pts",
+    "metricValue": "570",
+    "trend": "+4",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "0d"
+      },
+      {
+        "label": "Wins",
+        "value": "3"
+      },
+      {
+        "label": "Boost",
+        "value": "+3%"
+      }
+    ]
+  },
+  {
+    "rank": 15,
+    "name": "Hugo Klein",
+    "profileId": "hugo-klein",
+    "metricLabel": "Bonus pts",
+    "metricValue": "545",
+    "trend": "+2",
+    "insights": [
+      {
+        "label": "Streak",
+        "value": "0d"
+      },
+      {
+        "label": "Wins",
+        "value": "2"
+      },
+      {
+        "label": "Boost",
+        "value": "+2%"
+      }
+    ]
+  }
+]

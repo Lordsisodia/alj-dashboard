@@ -1,0 +1,10 @@
+{
+  "totalPages": 1,
+  "pageSize": 4,
+  "pages": [
+    {
+      "page": 1,
+      "file": "earnings/challenges-pages/page-1.json"
+    }
+  ]
+}

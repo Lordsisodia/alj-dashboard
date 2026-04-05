@@ -1,0 +1,14 @@
+{
+  "totalPages": 2,
+  "pageSize": 10,
+  "pages": [
+    {
+      "page": 1,
+      "file": "earnings/leaderboard-pages/page-1.json"
+    },
+    {
+      "page": 2,
+      "file": "earnings/leaderboard-pages/page-2.json"
+    }
+  ]
+}
