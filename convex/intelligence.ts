@@ -5,14 +5,27 @@ import { v } from "convex/values";
 
 export const getFeed = query({
   args: {
+    handle:      v.optional(v.string()),
     niche:       v.optional(v.string()),
     contentType: v.optional(v.string()),
-    sortBy:      v.optional(v.union(v.literal("newest"), v.literal("trending"), v.literal("top"))),
+    sortBy:      v.optional(v.union(
+      v.literal("newest"),
+      v.literal("oldest"),
+      v.literal("most-likes"),
+      v.literal("most-views"),
+      v.literal("most-saves"),
+      v.literal("top-engagement"),
+      v.literal("trending"),
+      v.literal("top")
+    )),
     limit:       v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     let posts = await ctx.db.query("scrapedPosts").collect();
 
+    if (args.handle) {
+      posts = posts.filter(p => p.handle === args.handle);
+    }
     if (args.niche && args.niche !== "all") {
       posts = posts.filter(p => p.niche === args.niche);
     }
@@ -20,16 +33,32 @@ export const getFeed = query({
       posts = posts.filter(p => p.contentType === args.contentType);
     }
 
-    if (args.sortBy === "trending") {
-      // Trending = high engagement rate, posted within last 14 days
-      const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
-      posts = posts.filter(p => p.postedAt > cutoff);
-      posts.sort((a, b) => b.engagementRate - a.engagementRate);
-    } else if (args.sortBy === "top") {
-      posts.sort((a, b) => b.engagementRate - a.engagementRate);
-    } else {
-      // newest
-      posts.sort((a, b) => b.postedAt - a.postedAt);
+    switch (args.sortBy) {
+      case "oldest":
+        posts.sort((a, b) => a.postedAt - b.postedAt);
+        break;
+      case "most-likes":
+        posts.sort((a, b) => b.likes - a.likes);
+        break;
+      case "most-views":
+        posts.sort((a, b) => b.views - a.views);
+        break;
+      case "most-saves":
+        posts.sort((a, b) => b.saves - a.saves);
+        break;
+      case "top-engagement":
+      case "top":
+        posts.sort((a, b) => b.engagementRate - a.engagementRate);
+        break;
+      case "trending": {
+        const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
+        posts = posts.filter(p => p.postedAt > cutoff);
+        posts.sort((a, b) => b.engagementRate - a.engagementRate);
+        break;
+      }
+      default:
+        // newest
+        posts.sort((a, b) => b.postedAt - a.postedAt);
     }
 
     return posts.slice(0, args.limit ?? 40);

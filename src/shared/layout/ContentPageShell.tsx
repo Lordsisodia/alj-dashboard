@@ -385,14 +385,18 @@ export interface ContentPageShellProps {
   tabs?: ContentTab[];
   activeTab?: string;
   onTabChange?: (id: string) => void;
+  // Next product in pipeline (renders after last tab with arrow)
+  nextProduct?: { label: string; icon: ReactNode; href?: string };
   // Filter bar
   filterCategories?: FilterCategory[];   // drives Add Filter dropdown
   filterChips?: FilterChip[];            // right-side sort chips
   activeFilter?: string;
   onFilterChange?: (id: string) => void;
   filterRightSlot?: ReactNode;           // custom element on the right (e.g. DateRangePill)
-  // Show view toggle (grid / list)
+  // View toggle (grid / list) — controlled
   showViewToggle?: boolean;
+  viewMode?: 'grid' | 'list';
+  onViewModeChange?: (mode: 'grid' | 'list') => void;
   // Content
   children?: ReactNode;
 }
@@ -412,16 +416,21 @@ export function ContentPageShell({
   tabs,
   activeTab,
   onTabChange,
+  nextProduct,
   filterCategories,
   filterChips,
   activeFilter,
   onFilterChange,
   filterRightSlot,
   showViewToggle = false,
+  viewMode: viewModeProp,
+  onViewModeChange,
   children,
 }: ContentPageShellProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewModeInternal, setViewModeInternal] = useState<'grid' | 'list'>('grid');
+  const viewMode = viewModeProp ?? viewModeInternal;
+  const setViewMode = (m: 'grid' | 'list') => { setViewModeInternal(m); onViewModeChange?.(m); };
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -549,6 +558,22 @@ export function ContentPageShell({
               {tab.label}
             </button>
           ))}
+
+          {/* Next product arrow */}
+          {nextProduct && (
+            <>
+              <div className="w-px h-4 mx-1 flex-shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.10)' }} />
+              <ChevronRight size={13} className="text-neutral-300 flex-shrink-0" />
+              <a
+                href={nextProduct.href ?? '#'}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04] transition-all select-none"
+                title={`Next: ${nextProduct.label}`}
+              >
+                <span className="flex-shrink-0 opacity-70">{nextProduct.icon}</span>
+                <span>{nextProduct.label}</span>
+              </a>
+            </>
+          )}
         </div>
       )}
 

@@ -1,0 +1,1 @@
+export { TopPostsTable } from './TopPostsTable';

@@ -1,2 +1,1 @@
-// Schedule components
-export { default as ScheduleFeaturePage } from "./ScheduleFeaturePage";
+export { default as ScheduleFeaturePage } from './ScheduleFeaturePage';

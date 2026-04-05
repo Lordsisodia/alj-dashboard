@@ -1,2 +1,1 @@
-// Dashboard types
-export type DashboardPageProps = Record<string, never>;
+export type Tab = 'overview' | 'approvals' | 'pipeline' | 'analytics';

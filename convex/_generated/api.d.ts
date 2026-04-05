@@ -9,6 +9,7 @@
  */
 
 import type * as intelligence from "../intelligence.js";
+import type * as scraperImport from "../scraperImport.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +19,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   intelligence: typeof intelligence;
+  scraperImport: typeof scraperImport;
 }>;
 
 /**

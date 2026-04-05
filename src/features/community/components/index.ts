@@ -1,2 +1,2 @@
-// Community components
-export { default as CommunityFeaturePage } from "./CommunityFeaturePage";
+export { default as CommunityFeaturePage } from './CommunityFeaturePage';
+export { LeaderboardSidebar } from './sidebar/LeaderboardSidebar';

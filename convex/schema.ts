@@ -221,6 +221,7 @@ export default defineSchema({
   // ── Tracked accounts (Recon) ─────────────────────────────────────
   trackedAccounts: defineTable({
     handle: v.string(),
+    displayName: v.optional(v.string()),   // ownerFullName from scraper
     platform: v.union(v.literal("instagram"), v.literal("tiktok")),
     niche: v.string(),
     followerCount: v.number(),
@@ -260,6 +261,8 @@ export default defineSchema({
     engagementRate: v.number(),   // (likes+comments+saves) / reach
     postedAt: v.number(),
     scrapedAt: v.number(),
+    firstComment: v.optional(v.string()), // top comment — sentiment signal
+    outlierRatio: v.optional(v.number()), // views / followerCount — virality signal
     saved: v.boolean(),           // user saved to swipe file
     boardIds: v.array(v.string()), // which boards it's saved to
   }).index("by_account", ["accountId"])

@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Layers, Sparkles, TrendingUp, Radar, Bot,
   CheckSquare, Calendar, Rss, BarChart2, Lightbulb, Upload, Users2,
-  Search, Activity, FileText, MessageSquare, UserPlus,
+  Search, Activity, FileText, MessageSquare, UserPlus, Bell,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -41,8 +41,9 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
         title: 'Recon',
         hideTitle: true,
         items: [
-          { label: 'Competitors',  href: '/isso/recon', icon: <Radar size={16} /> },
-          { label: 'Scraping Log', href: '/isso/recon', icon: <Activity size={16} /> },
+          { label: 'Creators',     href: '/isso/recon',      icon: <Radar size={16} /> },
+          { label: 'Feed',         href: '/isso/community',  icon: <Rss size={16} /> },
+          { label: 'Scraping Log', href: '/isso/recon',      icon: <Activity size={16} /> },
         ],
       },
     ],
@@ -58,8 +59,9 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
         title: 'Intelligence',
         hideTitle: true,
         items: [
-          { label: 'Trend Search', href: '/isso/intelligence', icon: <Search size={16} /> },
-          { label: 'Discovery',    href: '/isso/intelligence', icon: <TrendingUp size={16} /> },
+          { label: 'Trends',       href: '/isso/intelligence', icon: <TrendingUp size={16} /> },
+          { label: 'Analysis',     href: '/isso/intelligence', icon: <Search size={16} /> },
+          { label: 'Pulse Report', href: '/isso/intelligence', icon: <FileText size={16} /> },
         ],
       },
     ],
@@ -121,10 +123,11 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
 
 // Persistent sidebar pages — always visible, not inside any product
 export const PERSISTENT_NAV = [
-  { label: 'Schedule',  href: '/isso/schedule',  icon: <Calendar size={16} /> },
-  { label: 'Analytics', href: '/isso/analytics', icon: <BarChart2 size={16} /> },
-  { label: 'Models',    href: '/isso/models',    icon: <Users2 size={16} /> },
-  { label: 'Team',      href: '/isso/team',      icon: <UserPlus size={16} /> },
+  { label: 'Schedule',      href: '/isso/schedule',       icon: <Calendar size={16} /> },
+  { label: 'Analytics',     href: '/isso/analytics',      icon: <BarChart2 size={16} /> },
+  { label: 'Models',        href: '/isso/models',         icon: <Users2 size={16} /> },
+  { label: 'Team',          href: '/isso/team',           icon: <UserPlus size={16} /> },
+  { label: 'Notifications', href: '/isso/notifications',  icon: <Bell size={16} />, badge: 'dot' as const },
 ];
 
 export function getSectionConfig(id: string): SectionConfig | undefined {
