@@ -1,0 +1,99 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "jsx": "preserve",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@/app/*": [
+        "./src/app/*"
+      ],
+      "@/domains/partnerships/09-settings/*": [
+        "./src/domains/partnerships/09-settings/*"
+      ],
+    "@/domains/partnerships/portfolio/*": [
+      "./src/domains/portfolio/*"
+    ],
+      "@/domains/shared/portfolio/*": [
+        "./src/domains/portfolio/*"
+      ],
+      "@/domains/portfolio/*": [
+        "./src/domains/portfolio/*"
+      ],
+      "@/domains/shared/*": [
+        "./src/domains/partnerships/_shared/*"
+      ],
+      "@/shared/*": [
+        "./src/domains/partnerships/_shared/*"
+      ],
+      "@/isso/*": [
+        "./src/shared/*"
+      ],
+      "@/domains/*": [
+        "./src/domains/*"
+      ],
+      "@/features/*": [
+        "./src/features/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
+      "@/providers/*": [
+        "./src/providers/*"
+      ],
+      "@/config/*": [
+        "./src/config/*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@/types/*": [
+        "./src/types/*"
+      ],
+      "lucide-react": [
+        "./node_modules/lucide-react/dist/lucide-react"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "archive",
+    "**/*.stories.tsx",
+    "**/*.stories.ts",
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}

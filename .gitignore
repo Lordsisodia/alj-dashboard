@@ -41,3 +41,6 @@ next-env.d.ts
 apps/*/node_modules/
 apps/*/.next/
 apps/*/.env*.local
+
+# clerk configuration (can include secrets)
+/.clerk/

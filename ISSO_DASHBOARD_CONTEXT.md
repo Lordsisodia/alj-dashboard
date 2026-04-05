@@ -5,6 +5,53 @@
 
 ---
 
+## ⚠️ Marketing Layer Added (2026-04-06)
+
+The landing page from `apps/agency-landing` has been migrated into this codebase. This is now a **unified app** — one codebase, one Vercel deploy, two domains.
+
+### New Structure
+
+| Layer | Route Group | Domain | What |
+|---|---|---|---|
+| Marketing | `src/app/(marketing)/` | `ofmsaas.com` | Landing page, pricing, blog, product pages |
+| Dashboard | `src/app/isso/` | `app.ofmsaas.com` | The product (Clerk-protected) |
+| Auth | `src/app/sign-in/`, `sign-up/`, `sso-callback/` | Both | Clerk auth pages |
+
+### Marketing Components Live At
+```
+src/features/marketing/
+├── components/
+│   ├── navbar/          ← Landing page navbar (MarketingNavBar)
+│   ├── HeroSection/
+│   ├── ProductSection/
+│   ├── CollaborationSection/
+│   ├── FeaturesSection/
+│   ├── IndustryPage/    ← Template for all industry pages
+│   ├── ProductPage/     ← Template for all product pages
+│   ├── Blog/
+│   ├── BlogPost/
+│   ├── BookDemo/
+│   ├── AffiliatesPage/
+│   ├── AgencyDirectory/
+│   ├── UniversityPage/
+│   ├── WebinarsPage/
+│   ├── WorkWithBrands/
+│   ├── Footer/          ← Marketing footer
+│   └── landing/         ← Pricing, FAQ, CTA, ChatBot components
+```
+
+### Key Rules
+- **Never import marketing components from dashboard features** — they are isolated
+- **NavBar conflict** — the marketing navbar exports as `MarketingNavBar` (named) and `default`. The dashboard has its own `IssoSidebarShell`. They do not overlap.
+- **CSS** — marketing CSS is appended to the bottom of `globals.css` under the `MARKETING / LANDING PAGE STYLES` block. Do not remove it.
+- **Clerk** — `ClerkProvider` is in root `layout.tsx`. `/isso/*` routes are protected via `src/middleware.ts`.
+- **After sign-in redirect** → `/isso` (the dashboard), not `/`
+
+### Backup
+Original landing page is preserved at `apps/agency-landing-backup/` in case of rollback.
+
+---
+
 ## What We're Building
 
 A **Foreplay.co pixel-clone** — rebranded as **ISSO** — for OFM (OnlyFans Management) agencies.

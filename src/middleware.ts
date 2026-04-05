@@ -1,51 +1,49 @@
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Global partner caching policy: cache most partner GET routes at the edge for 1h, serve stale for 24h.
-// Dynamic/interactive routes are explicitly excluded.
-export function middleware(request: NextRequest) {
-    const response = NextResponse.next();
-    const path = request.nextUrl.pathname;
-    const method = request.method.toUpperCase();
+const isProtected = createRouteMatcher(["/isso(.*)"]);
 
-    const isPartners = path.startsWith("/partners");
+// Partner routes that should NOT be edge-cached
+const DYNAMIC_PARTNER_ROUTES = [
+  "/partners/messages",
+  "/partners/pipeline-ops/submit-client",
+  "/partners/recruitment/prospects",
+  "/partners/recruitment/team",
+  "/partners/workspace",
+  "/partners/tools",
+  "/partners/wallet",
+  "/partners/earnings/wallet",
+];
 
-    // Routes that should NOT be cached at the edge (interactive / mutating / user-specific)
-    const dynamicBlocklist = [
-        "/partners/messages", // messaging threads and inbox
-        "/partners/pipeline-ops/submit-client",
-        "/partners/recruitment/prospects",
-        "/partners/recruitment/team", // team detail has editable state
-        "/partners/workspace", // editors/tasks likely user-scoped
-        "/partners/tools", // generators/editors
-        "/partners/wallet",
-        "/partners/earnings/wallet",
-    ];
+export default clerkMiddleware(async (auth, req: NextRequest) => {
+  // Protect /isso/* — require Clerk session
+  if (isProtected(req)) {
+    await auth.protect();
+  }
 
-    const isDynamic = dynamicBlocklist.some((route) => path.startsWith(route));
+  const response = NextResponse.next();
+  const path = req.nextUrl.pathname;
+  const method = req.method.toUpperCase();
 
-    if (isPartners && method === "GET" && !isDynamic) {
-        // s-maxage=3600: cached on the edge for 1 hour
-        // stale-while-revalidate=86400: serve stale for up to 1 day while revalidating
-        response.headers.set(
-            "Cache-Control",
-            "s-maxage=3600, stale-while-revalidate=86400"
-        );
-        response.headers.set("x-middleware-cache", "turbo");
-    }
+  // Edge caching for partner routes
+  const isPartners = path.startsWith("/partners");
+  const isDynamic = DYNAMIC_PARTNER_ROUTES.some((r) => path.startsWith(r));
 
-    return response;
-}
+  if (isPartners && method === "GET" && !isDynamic) {
+    response.headers.set(
+      "Cache-Control",
+      "s-maxage=3600, stale-while-revalidate=86400"
+    );
+    response.headers.set("x-middleware-cache", "turbo");
+  }
+
+  return response;
+});
 
 export const config = {
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - api (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         */
-        "/((?!api|_next/static|_next/image|favicon.ico).*)",
-    ],
+  matcher: [
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+  ],
 };

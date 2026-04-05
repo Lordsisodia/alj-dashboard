@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import React from "react";
+import { ClerkProvider } from "@clerk/nextjs";
 import WebVitals from "@/components/analytics/WebVitals";
 import { AppProviders } from "./providers";
 import { PartnershipsWaveBackdrop } from "@/domains/partnerships/_shared/ui/backgrounds/PartnershipsWaveBackdrop";
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
       </head>
       <body className="min-h-screen bg-black text-white">
+        <ClerkProvider>
         {/* Global animated partnership backdrop */}
         <PartnershipsWaveBackdrop
           position="fixed"
@@ -43,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AppProviders>{children}</AppProviders>
           {process.env.NODE_ENV === "development" ? <WebVitals /> : null}
         </div>
+        </ClerkProvider>
       </body>
     </html>
   );
