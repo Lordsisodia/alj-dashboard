@@ -1,0 +1,38 @@
+name: Partner Structure Nightly
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # 06:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  nightly-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Structure / lint / nav checks
+        run: npm run check:partners
+
+      - name: Verify portal archives are markdown-only
+        run: node scripts/check-portal-docs.mjs
+
+      - name: Upload structure logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-partner-structure
+          path: |
+            logs/partners-structure.log
+            /var/log/partners-structure.log
+          if-no-files-found: ignore

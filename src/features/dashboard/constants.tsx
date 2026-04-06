@@ -108,3 +108,18 @@ export const MODELS = [
 ];
 
 export const PIPELINE_STEPS = ['Briefed', 'Filming', 'Editing', 'Approved', 'Scheduled'];
+
+export const MODEL_PNL = [
+  { id: 'm1', name: 'Tyler Rex',  initials: 'TR', color: '#ff0069', revenue: 4200, cost: 840,  ltv: 12400, chatCvr: 0.34 },
+  { id: 'm2', name: 'Ren Rhinx',  initials: 'RR', color: '#833ab4', revenue: 3100, cost: 620,  ltv:  9800, chatCvr: 0.28 },
+  { id: 'm3', name: 'Ella Mira',  initials: 'EM', color: '#f59e0b', revenue: 2800, cost: 560,  ltv:  7600, chatCvr: 0.22 },
+  { id: 'm4', name: 'Sam Chase',  initials: 'SC', color: '#22c55e', revenue: 1900, cost: 380,  ltv:  5200, chatCvr: 0.19 },
+];
+
+export const EXPIRING_SUBSCRIBERS = [
+  { id: 'sub1', handle: '@fan_mikee',   expiresInHours: 6,  tier: 'Premium', spent: 240 },
+  { id: 'sub2', handle: '@fan_luxe99',  expiresInHours: 14, tier: 'VIP',     spent: 580 },
+  { id: 'sub3', handle: '@fan_redbull', expiresInHours: 22, tier: 'Standard',spent: 90  },
+  { id: 'sub4', handle: '@fan_ghost_x', expiresInHours: 31, tier: 'Premium', spent: 310 },
+  { id: 'sub5', handle: '@fan_ace77',   expiresInHours: 48, tier: 'Standard',spent: 60  },
+];

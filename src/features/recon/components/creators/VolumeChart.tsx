@@ -15,6 +15,13 @@ export function VolumeChart({ data }: VolumeChartProps) {
   const isInView = useInView(ref, { once: true, margin: '-20px' });
   const max = Math.max(...data.map(d => d.total));
 
+  // Trend: last 7 days vs prior 7 days
+  const half    = Math.floor(data.length / 2);
+  const recent  = data.slice(-half).reduce((s, d) => s + d.total, 0);
+  const prior   = data.slice(0, half).reduce((s, d) => s + d.total, 0);
+  const trendPct = prior > 0 ? Math.round(((recent - prior) / prior) * 100) : 0;
+  const trendUp  = trendPct >= 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -30,10 +37,13 @@ export function VolumeChart({ data }: VolumeChartProps) {
         </div>
         <div
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
-          style={{ backgroundColor: 'rgba(120,194,87,0.10)', color: '#4a8a2d' }}
+          style={{
+            backgroundColor: trendUp ? 'rgba(120,194,87,0.10)' : 'rgba(220,38,38,0.08)',
+            color: trendUp ? '#4a8a2d' : '#dc2626',
+          }}
         >
-          <TrendingUp size={11} />
-          +6.4% vs prior period
+          <TrendingUp size={11} style={{ transform: trendUp ? 'none' : 'scaleY(-1)' }} />
+          {trendUp ? '+' : ''}{trendPct}% vs prior period
         </div>
       </div>
 

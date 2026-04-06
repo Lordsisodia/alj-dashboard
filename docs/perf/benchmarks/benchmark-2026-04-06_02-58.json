@@ -1,0 +1,128 @@
+{
+  "capturedAt": "2026-04-06T02:40:05.238Z",
+  "baseUrl": "http://localhost:3030",
+  "throttle": false,
+  "runs": 2,
+  "pages": [
+    {
+      "label": "Marketing Home",
+      "path": "/",
+      "group": "marketing",
+      "fcp": 964,
+      "fp": 930,
+      "dcl": 919,
+      "load": 1408,
+      "lcp": null,
+      "timedOut": true,
+      "runs": 2
+    },
+    {
+      "label": "Pricing",
+      "path": "/pricing",
+      "group": "marketing",
+      "fcp": null,
+      "fp": null,
+      "dcl": null,
+      "load": null,
+      "lcp": null,
+      "timedOut": true,
+      "runs": 2
+    },
+    {
+      "label": "ISSO Hub",
+      "path": "/isso",
+      "group": "isso",
+      "fcp": null,
+      "fp": null,
+      "dcl": null,
+      "load": null,
+      "lcp": null,
+      "timedOut": true,
+      "runs": 2
+    },
+    {
+      "label": "ISSO Agents",
+      "path": "/isso/agents",
+      "group": "isso",
+      "fcp": 750,
+      "fp": 750,
+      "dcl": 338,
+      "load": 773,
+      "lcp": null,
+      "timedOut": false,
+      "runs": 2
+    },
+    {
+      "label": "ISSO Analytics",
+      "path": "/isso/analytics",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/analytics"
+    },
+    {
+      "label": "ISSO Approvals",
+      "path": "/isso/approvals",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/approvals"
+    },
+    {
+      "label": "ISSO Community",
+      "path": "/isso/community",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/community"
+    },
+    {
+      "label": "ISSO Content",
+      "path": "/isso/content",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/content"
+    },
+    {
+      "label": "ISSO Ideas",
+      "path": "/isso/ideas",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/ideas"
+    },
+    {
+      "label": "ISSO Intelligence",
+      "path": "/isso/intelligence",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/intelligence"
+    },
+    {
+      "label": "ISSO Models",
+      "path": "/isso/models",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/models"
+    },
+    {
+      "label": "ISSO Recon",
+      "path": "/isso/recon",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/recon"
+    },
+    {
+      "label": "ISSO Schedule",
+      "path": "/isso/schedule",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/schedule"
+    },
+    {
+      "label": "ISSO Settings",
+      "path": "/isso/settings",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/settings"
+    },
+    {
+      "label": "ISSO Team",
+      "path": "/isso/team",
+      "group": "isso",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/isso/team"
+    },
+    {
+      "label": "Partners Home",
+      "path": "/partners",
+      "group": "partners",
+      "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3030/partners"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Layers, Sparkles, TrendingUp, Radar, Bot,
   CheckSquare, Calendar, Rss, BarChart2, Lightbulb, Upload, Users2,
-  Search, Activity, FileText, MessageSquare, UserPlus, Bell,
+  Search, Activity, FileText, MessageSquare, UserPlus, Bell, ScanSearch,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -59,9 +59,9 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
         title: 'Intelligence',
         hideTitle: true,
         items: [
-          { label: 'Trends',       href: '/isso/intelligence', icon: <TrendingUp size={16} /> },
-          { label: 'Analysis',     href: '/isso/intelligence', icon: <Search size={16} /> },
-          { label: 'Pulse Report', href: '/isso/intelligence', icon: <FileText size={16} /> },
+          { label: 'Trends',   href: '/isso/intelligence', icon: <TrendingUp size={16} /> },
+          { label: 'Analysis', href: '/isso/intelligence', icon: <ScanSearch size={16} /> },
+          { label: 'Insights', href: '/isso/intelligence', icon: <Lightbulb  size={16} /> },
         ],
       },
     ],
@@ -93,8 +93,9 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
         title: 'Content Gen',
         hideTitle: true,
         items: [
-          { label: 'Generate',  href: '/isso/ideas',    icon: <Lightbulb size={16} /> },
-          { label: 'Queue',     href: '/isso/content',  icon: <Upload size={16} /> },
+          { label: 'Generate',  href: '/isso/content-gen', icon: <Lightbulb size={16} /> },
+          { label: 'Models',    href: '/isso/content-gen/models', icon: <Users2 size={16} /> },
+          { label: 'Queue',     href: '/isso/content-gen/queue', icon: <Upload size={16} /> },
           { label: 'Scenes',    href: '/isso/content',  icon: <Layers size={16} /> },
           { label: 'Approvals', href: '/isso/approvals', icon: <CheckSquare size={16} />, badge: 3 },
         ],

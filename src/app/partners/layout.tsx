@@ -2,12 +2,28 @@ import type { ReactNode } from "react";
 import { Fragment, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { PartnerPerfMetrics } from "./PartnerPerfMetrics";
+import { PartnershipsWaveBackdrop } from "@/domains/partnerships/_shared/ui/backgrounds/PartnershipsWaveBackdrop";
 
 const LazyPartnersPageShell = dynamic(() => import("@/domains/partnerships/community/shared/components/LazyPartnersPageShell"));
 
 export default function PartnersLayout({ children }: { children: ReactNode }) {
   return (
     <Fragment>
+      {/* Wave backdrop scoped to /partners — removed from root layout to avoid wasted rAF on ISSO pages */}
+      <PartnershipsWaveBackdrop
+        position="fixed"
+        className="-z-10"
+        strokeColor="#ffc27d"
+        waveBackgroundColor="transparent"
+        waveOpacity={0.55}
+        wavesClassName="h-full w-full"
+        pointerSize={0.32}
+        radialTop="#120b06"
+        radialBase="#040404"
+        overlayClassName="bg-gradient-to-b from-black/30 via-black/55 to-black/80"
+        waveBlurPx={6}
+        overlayBlurPx={2}
+      />
       <PartnerPerfMetrics />
       <Suspense
         fallback={

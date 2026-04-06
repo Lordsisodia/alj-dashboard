@@ -1,7 +1,7 @@
 'use client';
 // LensPage — assembles all Lens page sections.
 
-import NavBar from '@/features/marketing/components/navbar/NavBar';
+import NavBar from '@/features/marketing/components/layout/navbar/NavBar';
 import LensHero from './LensHero';
 import LensSolutionSection from './LensSolutionSection';
 import LensIntegrations from './LensIntegrations';

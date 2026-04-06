@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BOARDS } from '../../constants';
+import { BOARD_NAMES } from '../../constants';
 
 export function BoardPickerDropdown() {
   const [open, setOpen] = useState(false);
@@ -30,14 +30,13 @@ export function BoardPickerDropdown() {
             <div className="px-3 py-2" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
               <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide">Add to Board</span>
             </div>
-            {BOARDS.map(b => (
+            {BOARD_NAMES.map(name => (
               <button
-                key={b.id}
-                className="w-full flex items-center justify-between px-3 py-2.5 text-xs text-neutral-700 hover:bg-neutral-50 transition-colors"
+                key={name}
+                className="w-full flex items-center px-3 py-2.5 text-xs text-neutral-700 hover:bg-neutral-50 transition-colors"
                 onClick={(e) => { e.stopPropagation(); setOpen(false); }}
               >
-                <span>{b.name}</span>
-                <span className="text-neutral-400 text-[10px]">{b.count}</span>
+                {name}
               </button>
             ))}
           </motion.div>

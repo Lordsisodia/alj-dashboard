@@ -3,9 +3,14 @@
 import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 import { SectionCard } from '../stats/SectionCard';
-import { AUDIENCE_LOCATIONS } from '../../constants';
+import type { AudienceLocation } from '../../types';
 
-export function LocationsCard() {
+interface LocationsCardProps {
+  locations: AudienceLocation[];
+}
+
+export function LocationsCard({ locations }: LocationsCardProps) {
+  const maxPct = Math.max(...locations.map(l => l.pct));
   return (
     <SectionCard>
       <div className="flex items-center gap-1.5 mb-3">
@@ -13,7 +18,7 @@ export function LocationsCard() {
         <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Top Locations</span>
       </div>
       <div className="space-y-2.5">
-        {AUDIENCE_LOCATIONS.map(loc => (
+        {locations.map(loc => (
           <div key={loc.city} className="flex items-center gap-2.5">
             <span className="text-sm flex-shrink-0">{loc.flag}</span>
             <span className="text-xs text-neutral-700 w-24 flex-shrink-0">{loc.city}</span>
@@ -25,7 +30,7 @@ export function LocationsCard() {
                 className="h-full rounded-full"
                 style={{ background: 'linear-gradient(90deg, #ff0069, #833ab4)' }}
                 initial={{ width: 0 }}
-                whileInView={{ width: `${(loc.pct / 42) * 100}%` }}
+                whileInView={{ width: `${(loc.pct / maxPct) * 100}%` }}
                 viewport={{ once: true, margin: '-20px' }}
                 transition={{ duration: 0.65, type: 'spring', stiffness: 120, damping: 14 }}
               />

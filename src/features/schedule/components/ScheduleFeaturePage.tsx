@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { Plus, Calendar, BarChart2, Film, Image, BookOpen, LayoutGrid, Video } from 'lucide-react';
 import type { Tab, FilterType } from '../types';
+// CalendarView is the default tab — keep eager
 import { CalendarView } from './calendar/CalendarView';
-import { AnalyticsView } from './analytics/AnalyticsView';
+// AnalyticsView is non-default — lazy load
+const AnalyticsView = dynamic(() => import('./analytics/AnalyticsView').then(m => ({ default: m.AnalyticsView })), { ssr: false });
 
 export default function ScheduleFeaturePage() {
   const [activeTab, setActiveTab] = useState<Tab>('calendar');

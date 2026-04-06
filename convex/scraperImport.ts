@@ -55,6 +55,7 @@ export const importFromScraper = mutation({
       viewsCount:    v.optional(v.number()),
       savesCount:    v.optional(v.number()),
       followerCount: v.optional(v.number()),
+      videoUrl:      v.optional(v.string()),
     })),
     // override niche for all posts in this batch (e.g. "GFE" if you scraped a GFE account)
     nicheOverride: v.optional(v.string()),
@@ -112,13 +113,19 @@ export const importFromScraper = mutation({
         });
       }
 
-      // ── Skip duplicate posts ────────────────────────────────────────
+      // ── Upsert: update existing post if videoUrl is new ────────────────
       const existing = await ctx.db
         .query("scrapedPosts")
         .withIndex("by_posted_at", q => q.eq("postedAt", postedAt))
         .collect();
-      const isDuplicate = existing.some(p => p.externalId === shortcode);
-      if (isDuplicate) { inserted.skipped++; continue; }
+      const existingPost = existing.find(p => p.externalId === shortcode);
+      if (existingPost) {
+        if (raw.videoUrl && !existingPost.videoUrl) {
+          await ctx.db.patch(existingPost._id, { videoUrl: raw.videoUrl });
+        }
+        inserted.skipped++;
+        continue;
+      }
 
       // ── Insert scraped post ─────────────────────────────────────────
       const followerCount = raw.followerCount ?? account?.followerCount ?? 0;
@@ -144,6 +151,7 @@ export const importFromScraper = mutation({
         scrapedAt:     Date.now(),
         firstComment:  raw.firstComment || undefined,
         outlierRatio,
+        videoUrl:      raw.videoUrl || undefined,
         saved:         false,
         boardIds:      [],
       });

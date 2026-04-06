@@ -3,86 +3,80 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from 'convex/react';
-import { Plus, LayoutGrid, Sparkles, Users } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { api } from '../../../../convex/_generated/api';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon }      from '@/isso/layout/ProductIcon';
-import { DateRangePill }    from '@/isso/ui/DateRangePill';
-import { SortPill }         from './controls/SortPill';
-import { VisibilityPill }   from './controls/VisibilityPill';
-import { FeedView }         from './feed/FeedView';
-import { BoardsView }       from './boards/BoardsView';
-import { ExpertsView }      from './experts/ExpertsView';
-import { PostDetailDrawer } from './drawer/PostDetailDrawer';
-import { FILTER_CATEGORIES } from '../filterConfig';
-import { useDrawer }          from '../hooks/useDrawer';
-import { DEFAULT_VISIBILITY, type Tab, type SortId, type VisibilityState } from '../types';
+import { TrendsView }    from './trends';
+import { AnalysisView }  from './analysis';
+import { InsightsView }  from './insights';
+import { TimePill, MetricPill, TRENDS_FILTERS, ANALYSIS_FILTERS } from './IntelligenceControls';
+import type { Days, Metric } from './IntelligenceControls';
+import type { Tab } from '../types';
 
-function useIndexedCount() {
-  const stats = useQuery(api.intelligence.getStats, {});
-  return stats?.totalIndexed ?? 0;
+function StepNum({ n }: { n: number }) {
+  return (
+    <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current text-[9px] font-bold leading-none flex-shrink-0">
+      {n}
+    </span>
+  );
 }
 
 export default function IntelligenceFeaturePage() {
-  const [activeTab, setActiveTab]   = useState<Tab>('feed');
-  const [sortBy, setSortBy]         = useState<SortId>('newest');
-  const [visibility, setVisibility] = useState<VisibilityState>(DEFAULT_VISIBILITY);
-  const [viewMode, setViewMode]     = useState<'grid' | 'list'>('grid');
-  const { drawer, open, close }     = useDrawer();
-  const indexedCount                = useIndexedCount();
+  const [activeTab, setActiveTab] = useState<Tab>('trends');
+  const [days,      setDays]      = useState<Days>(30);
+  const [metric,    setMetric]    = useState<Metric>('er');
+  const [niche,     setNiche]     = useState('all');
+  const [platform,  setPlatform]  = useState('all');
+  const stats = useQuery(api.intelligence.getStats, {});
+  const indexedCount = stats?.totalIndexed ?? 0;
+
+  function handleFilterSelect(categoryId: string, value: string) {
+    if (categoryId === 'niche')    setNiche(value);
+    if (categoryId === 'platform') setPlatform(value.toLowerCase());
+  }
+
+  const filterCategories =
+    activeTab === 'trends'   ? TRENDS_FILTERS   :
+    activeTab === 'analysis' ? ANALYSIS_FILTERS :
+    undefined;
+
+  const filterRightSlot = activeTab === 'trends' ? (
+    <div className="flex items-center gap-2">
+      <MetricPill value={metric} onChange={setMetric} />
+      <TimePill   value={days}   onChange={setDays}   />
+    </div>
+  ) : undefined;
 
   return (
-    <>
-      <ContentPageShell
-        icon={<ProductIcon product="intelligence" size={32} />}
-        title="Intelligence"
-        stat={{ label: 'Posts indexed', value: indexedCount }}
-        searchPlaceholder="Search keywords, brands, categories..."
-        actionLabel="New"
-        actionIcon={<Plus size={14} />}
-        actionDropdownItems={[
-          { id: 'board',  label: 'New Board',    icon: <LayoutGrid size={13} /> },
-          { id: 'search', label: 'Saved Search', icon: <Sparkles size={13} /> },
-        ]}
-        tabs={[
-          { id: 'feed',    label: 'Community Feed', icon: <LayoutGrid size={13} /> },
-          { id: 'brands',  label: 'Brands',          icon: <Sparkles size={13} /> },
-          { id: 'experts', label: 'Experts',          icon: <Users size={13} /> },
-        ]}
-        activeTab={activeTab}
-        onTabChange={(id) => setActiveTab(id as Tab)}
-        filterCategories={FILTER_CATEGORIES}
-        filterRightSlot={
-          <div className="flex items-center gap-1.5">
-            <SortPill value={sortBy} onChange={setSortBy} />
-            <DateRangePill />
-            <VisibilityPill value={visibility} onChange={setVisibility} />
-          </div>
-        }
-        showViewToggle
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      >
-        <div className="px-6 py-6 w-full">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-            >
-              {activeTab === 'feed'    && <FeedView sortBy={sortBy} visibility={visibility} viewMode={viewMode} onPostClick={open} />}
-              {activeTab === 'brands'  && <BoardsView />}
-              {activeTab === 'experts' && <ExpertsView />}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </ContentPageShell>
-
-      <AnimatePresence>
-        {drawer && <PostDetailDrawer posts={drawer.posts} initialIndex={drawer.index} onClose={close} />}
-      </AnimatePresence>
-    </>
+    <ContentPageShell
+      icon={<ProductIcon product="intelligence" size={32} />}
+      title="Intelligence"
+      stat={{ label: 'Posts indexed', value: indexedCount }}
+      searchPlaceholder="Search hooks, niches, accounts..."
+      actionLabel="New Board"
+      actionIcon={<Plus size={14} />}
+      tabs={[
+        { id: 'trends',   label: 'Trends',   icon: <StepNum n={1} /> },
+        { id: 'analysis', label: 'Analysis', icon: <StepNum n={2} /> },
+        { id: 'insights', label: 'Insights', icon: <StepNum n={3} /> },
+      ]}
+      activeTab={activeTab}
+      onTabChange={id => { setActiveTab(id as Tab); setNiche('all'); setPlatform('all'); }}
+      nextProduct={{ label: 'Hub', icon: <ProductIcon product="hub" size={16} />, href: '/isso/community' }}
+      filterCategories={filterCategories}
+      onFilterSelect={handleFilterSelect}
+      filterRightSlot={filterRightSlot}
+    >
+      <div className="px-6 py-6 w-full">
+        <AnimatePresence mode="wait">
+          <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
+            {activeTab === 'trends'   && <TrendsView   days={days} metric={metric} niche={niche} platform={platform} />}
+            {activeTab === 'analysis' && <AnalysisView days={days} niche={niche} />}
+            {activeTab === 'insights' && <InsightsView />}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </ContentPageShell>
   );
 }

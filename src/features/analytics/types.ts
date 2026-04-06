@@ -2,6 +2,56 @@ export type Tab = 'overview' | 'growth' | 'revenue';
 
 export type PostSortKey = 'likes' | 'comments' | 'saves' | 'reach';
 
+export type ModelId = 'tyler' | 'ren' | 'ella' | 'amam';
+
+export interface ModelProfile {
+  id: ModelId;
+  handle: string;
+  displayName: string;
+  niche: string;
+  location: string;
+  color: string;
+  initials: string;
+}
+
+export interface AudienceLocation {
+  city: string;
+  flag: string;
+  pct: number;
+}
+
+export interface AgeRange {
+  range: string;
+  pct: number;
+}
+
+export interface GenderSplit {
+  male: number;
+  female: number;
+}
+
+export interface ModelStats {
+  followers: number;
+  following: number;
+  posts: number;
+  engagementRate: number;
+  avgLikes: number;
+  avgComments: number;
+  avgSaves: number;
+  avgReach: number;
+}
+
+export interface ModelAnalyticsData {
+  stats: ModelStats;
+  followerGrowth: GrowthPoint[];
+  engagementData: EngagementPoint[];
+  topPosts: TopPost[];
+  audienceLocations: AudienceLocation[];
+  ageRanges: AgeRange[];
+  genderSplit: GenderSplit;
+  activeHours: string[];
+}
+
 export interface GrowthPoint {
   label: string;
   value: number;

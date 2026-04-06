@@ -2,16 +2,21 @@
 
 import { motion } from 'framer-motion';
 import { SectionCard } from '../stats/SectionCard';
-import { AGE_RANGES } from '../../constants';
+import type { AgeRange } from '../../types';
 
-export function AgeRangeCard() {
+interface AgeRangeCardProps {
+  ranges: AgeRange[];
+}
+
+export function AgeRangeCard({ ranges }: AgeRangeCardProps) {
+  const topRange = [...ranges].sort((a, b) => b.pct - a.pct)[0]?.range;
   return (
     <SectionCard>
       <div className="mb-3">
         <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Age Range</span>
       </div>
       <div className="space-y-2.5">
-        {AGE_RANGES.map((age, i) => (
+        {ranges.map((age, i) => (
           <div key={age.range} className="flex items-center gap-2.5">
             <span className="text-xs text-neutral-600 w-12 flex-shrink-0">{age.range}</span>
             <div
@@ -20,7 +25,7 @@ export function AgeRangeCard() {
             >
               <motion.div
                 className="h-full rounded-full"
-                style={{ background: age.range === '25-34' ? 'linear-gradient(90deg, #ff0069, #833ab4)' : 'rgba(0,0,0,0.15)' }}
+                style={{ background: age.range === topRange ? 'linear-gradient(90deg, #ff0069, #833ab4)' : 'rgba(0,0,0,0.15)' }}
                 initial={{ width: 0 }}
                 whileInView={{ width: `${age.pct}%` }}
                 viewport={{ once: true, margin: '-20px' }}
@@ -29,7 +34,7 @@ export function AgeRangeCard() {
             </div>
             <span
               className="text-[11px] font-bold w-7 text-right flex-shrink-0"
-              style={{ color: age.range === '25-34' ? '#ff0069' : '#a3a3a3' }}
+              style={{ color: age.range === topRange ? '#ff0069' : '#a3a3a3' }}
             >
               {age.pct}%
             </span>

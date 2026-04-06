@@ -1,17 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { igThumb } from '../../utils';
 import type { DrawerPost } from '../../types';
-
-declare global {
-  interface Window {
-    instgrm?: { Embeds: { process: () => void } };
-  }
-}
 
 interface Props {
   post:    DrawerPost;
@@ -19,59 +12,6 @@ interface Props {
   hasNext: boolean;
   onPrev:  () => void;
   onNext:  () => void;
-}
-
-// ── Instagram embed ───────────────────────────────────────────────────────────
-function InstagramEmbed({ shortcode }: { shortcode: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const permalink = `https://www.instagram.com/p/${shortcode}/`;
-
-  useEffect(() => {
-    // If embed.js is already loaded, just re-process
-    if (window.instgrm) {
-      window.instgrm.Embeds.process();
-      return;
-    }
-    // Otherwise inject it once
-    const existing = document.getElementById('ig-embed-js');
-    if (existing) return; // already injecting
-    const script = document.createElement('script');
-    script.id = 'ig-embed-js';
-    script.src = 'https://www.instagram.com/embed.js';
-    script.async = true;
-    script.onload = () => window.instgrm?.Embeds?.process();
-    document.body.appendChild(script);
-  }, [shortcode]);
-
-  return (
-    <div
-      ref={containerRef}
-      className="w-full h-full overflow-y-auto flex items-start justify-center"
-      style={{ background: '#000' }}
-    >
-      <blockquote
-        className="instagram-media"
-        data-instgrm-permalink={permalink}
-        data-instgrm-version="14"
-        data-instgrm-captioned
-        style={{
-          background: '#FFF',
-          border: 0,
-          borderRadius: '3px',
-          boxShadow: '0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15)',
-          margin: '1px',
-          maxWidth: '540px',
-          minWidth: '326px',
-          padding: 0,
-          width: '100%',
-        }}
-      >
-        <a href={permalink} target="_blank" rel="noreferrer">
-          View on Instagram
-        </a>
-      </blockquote>
-    </div>
-  );
 }
 
 // ── Main panel ────────────────────────────────────────────────────────────────
@@ -103,7 +43,16 @@ export function DrawerMediaPanel({ post, hasPrev, hasNext, onPrev, onNext }: Pro
           style={{ maxWidth: 540 }}
         >
           {useEmbed ? (
-            <InstagramEmbed shortcode={post.externalId} />
+            <iframe
+              src={`https://www.instagram.com/p/${post.externalId}/embed/`}
+              width={340}
+              height={600}
+              frameBorder={0}
+              scrolling="no"
+              allowTransparency
+              className="rounded-2xl shadow-xl"
+              style={{ display: 'block' }}
+            />
           ) : isRealImg ? (
             <div className="relative rounded-2xl overflow-hidden shadow-xl" style={{ aspectRatio: isVideo ? '9/16' : '4/5', maxHeight: '100%' }}>
               <img

@@ -3,7 +3,6 @@ import React from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import WebVitals from "@/components/analytics/WebVitals";
 import { AppProviders } from "./providers";
-import { PartnershipsWaveBackdrop } from "@/domains/partnerships/_shared/ui/backgrounds/PartnershipsWaveBackdrop";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,25 +21,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
+        {/* Preload the most-used font weights so they're ready before CSS is parsed */}
+        <link rel="preload" href="/fonts/CircularXX-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/CircularXX-Medium.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/InterDisplay-SemiBold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body className="min-h-screen bg-black text-white">
         <ClerkProvider>
-        {/* Global animated partnership backdrop */}
-        <PartnershipsWaveBackdrop
-          position="fixed"
-          className="-z-10"
-          strokeColor="#ffc27d"
-          waveBackgroundColor="transparent"
-          waveOpacity={0.55}
-          wavesClassName="h-full w-full"
-          pointerSize={0.32}
-          radialTop="#120b06"
-          radialBase="#040404"
-          overlayClassName="bg-gradient-to-b from-black/30 via-black/55 to-black/80"
-          waveBlurPx={6}
-          overlayBlurPx={2}
-        />
-
         <div className="relative z-10">
           <AppProviders>{children}</AppProviders>
           {process.env.NODE_ENV === "development" ? <WebVitals /> : null}

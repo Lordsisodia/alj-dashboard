@@ -5,7 +5,7 @@ import UniversityHero from './UniversityHero';
 import UniversityCampusSection from './UniversityCampusSection';
 import UniversityBottomCTA from './UniversityBottomCTA';
 import Footer from '@/features/marketing/components/Footer';
-import NavBar from '@/features/marketing/components/navbar/NavBar';
+import NavBar from '@/features/marketing/components/layout/navbar/NavBar';
 import { universityData } from './data/university';
 
 export default function UniversityPage() {

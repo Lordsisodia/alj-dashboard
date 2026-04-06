@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useMutation } from 'convex/react';
 import { Heart, Eye, Bookmark } from 'lucide-react';
@@ -30,7 +31,7 @@ export function PostListItem({ post, visibility, onPostClick }: Props) {
       {/* Thumbnail */}
       <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 relative">
         {isRealImage
-          ? <img src={igThumb(post.thumbnailUrl)} alt="" className="w-full h-full object-cover" />
+          ? <Image src={igThumb(post.thumbnailUrl)} alt="" fill className="object-cover" />
           : <div className="w-full h-full" style={{ background: post.thumbnailUrl }} />
         }
         {(post.contentType === 'reel' || post.contentType === 'story') && (

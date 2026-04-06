@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "isso-dashboard",
+      "runtimeExecutable": "/opt/homebrew/opt/node@22/bin/node",
+      "runtimeArgs": [
+        "/Users/shaansisodia/SISO_Workspace/SISO_Agency/apps/isso-dashboard/node_modules/next/dist/bin/next",
+        "dev"
+      ],
+      "cwd": "../../apps/isso-dashboard",
+      "port": 3100,
+      "autoPort": true
+    }
+  ]
+}

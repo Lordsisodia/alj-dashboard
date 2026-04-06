@@ -1,10 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { AnimatePresence } from 'framer-motion';
 import type { SettingsTab } from '../types';
 import { TABS } from '../constants';
-import { ProfileTab, ConnectedAccountsTab, IntegrationsTab, ContentDefaultsTab, BillingTab } from './tabs';
+// ProfileTab is the default tab — keep eager
+import { ProfileTab } from './tabs';
+// Non-default tabs — lazy load
+const ConnectedAccountsTab = dynamic(() => import('./tabs/ConnectedAccountsTab').then(m => ({ default: m.ConnectedAccountsTab })), { ssr: false });
+const IntegrationsTab      = dynamic(() => import('./tabs/IntegrationsTab').then(m => ({ default: m.IntegrationsTab })),           { ssr: false });
+const ContentDefaultsTab   = dynamic(() => import('./tabs/ContentDefaultsTab').then(m => ({ default: m.ContentDefaultsTab })),     { ssr: false });
+const BillingTab           = dynamic(() => import('./tabs/BillingTab').then(m => ({ default: m.BillingTab })),                     { ssr: false });
 
 export default function SettingsFeaturePage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');

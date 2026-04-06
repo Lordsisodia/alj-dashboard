@@ -84,8 +84,8 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
   {
     id: 'video-length', label: 'Video Length', icon: <Clock size={13} />,
     options: [
-      { value: 'Under 15s' }, { value: '15 – 30s' }, { value: '30 – 60s' },
-      { value: '1 – 3 min' }, { value: '3+ min' },
+      { value: 'Under 15s' }, { value: '15-30s' }, { value: '30-60s' },
+      { value: '1-3 min' }, { value: '3+ min' },
     ],
   },
 ];

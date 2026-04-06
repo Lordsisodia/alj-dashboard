@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { Users2, UserPlus, BarChart2 } from 'lucide-react';
 import type { Tab } from '../types';
+// RosterView is the default tab — keep it eager
 import { RosterView } from './roster/RosterView';
-import { OnboardingView } from './onboarding/OnboardingView';
-import { PerformanceView } from './performance/PerformanceView';
+// Non-default tabs: lazy-load
+const OnboardingView  = dynamic(() => import('./onboarding/OnboardingView').then(m => ({ default: m.OnboardingView })),   { ssr: false });
+const PerformanceView = dynamic(() => import('./performance/PerformanceView').then(m => ({ default: m.PerformanceView })), { ssr: false });
 
 export default function ModelsFeaturePage() {
   const [activeTab, setActiveTab] = useState<Tab>('roster');

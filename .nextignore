@@ -1,0 +1,6 @@
+# Ignore parked/backup route folders that break Next app-router parser
+**/*.disabled
+**/*.disabled/**
+**/*.bak
+**/*.bak/**
+tmp/**

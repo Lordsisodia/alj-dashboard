@@ -1,5 +1,3 @@
-import type { Board } from './types';
-
 // ─── Animation presets ────────────────────────────────────────────────────────
 
 export const containerVariants = {
@@ -23,11 +21,6 @@ export const NICHE_COLORS: Record<string, string> = {
   Meme:          '#fcaf45',
 };
 
-// ─── Static boards (replace when Convex boards table is ready) ───────────────
+// ─── Static board names (used by BoardPickerDropdown) ────────────────────────
 
-export const BOARDS: Board[] = [
-  { id: 1, name: 'Hooks That Convert', count: 34, lastUpdated: '2 hours ago', colors: ['#ff0069','#833ab4','#fcaf45','#4a9eff'] },
-  { id: 2, name: 'GFE Vibes',          count: 21, lastUpdated: 'Yesterday',   colors: ['#833ab4','#ff0069','#4a9eff','#78c257'] },
-  { id: 3, name: 'Fitness Content',    count: 18, lastUpdated: '3 days ago',  colors: ['#78c257','#4a9eff','#fcaf45','#ff0069'] },
-  { id: 4, name: 'Lifestyle Inspo',    count: 27, lastUpdated: '5 days ago',  colors: ['#fcaf45','#ff0069','#833ab4','#78c257'] },
-];
+export const BOARD_NAMES = ['Hooks That Convert', 'GFE Vibes', 'Fitness Content', 'Lifestyle Inspo'];

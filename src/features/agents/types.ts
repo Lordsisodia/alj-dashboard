@@ -3,9 +3,10 @@ export type AgentStatus = 'running' | 'completed' | 'failed';
 export type AgentType = 'Scraper' | 'Scheduler' | 'Analyst';
 export type RequestStatus = 'Queued' | 'In Progress' | 'Delivered';
 export type ReportCategory = 'Intelligence' | 'Recon' | 'Performance';
+export type Priority = 'Low' | 'Medium' | 'High';
 
 export interface AgentTask {
-  id: number;
+  id: string;
   agentName: string;
   type: AgentType;
   description: string;
@@ -17,20 +18,21 @@ export interface AgentTask {
 }
 
 export interface Report {
-  id: number;
+  id: string;
   title: string;
   insights: string[];
   generatedBy: string;
-  date: string;
+  generatedAt: number;
   category: ReportCategory;
 }
 
 export interface FeatureRequest {
-  id: number;
+  id: string;
   title: string;
   description: string;
   requestedBy: string;
   date: string;
   status: RequestStatus;
   eta: string;
+  priority: Priority;
 }

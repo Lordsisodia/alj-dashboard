@@ -1,6 +1,6 @@
 import type { Id } from '../../../convex/_generated/dataModel';
 
-export type Tab = 'feed' | 'brands' | 'experts';
+export type Tab = 'trends' | 'analysis' | 'insights';
 
 export type SortId =
   | 'newest'
@@ -32,19 +32,24 @@ export type Post = {
   handle:          string;
   niche:           string;
   thumbnailUrl:    string;
+  videoUrl?:       string;
   likes:           number;
   views:           number;
   saves:           number;
   engagementRate?: number;
+  outlierRatio?:   number;
   postedAt:        number;
   saved:           boolean;
   contentType:     string;
+  platform?:       string;
+  caption?:        string;
+  hashtags?:       string[];
 };
 
 // Full shape for the detail drawer
 export interface DrawerPost {
   _id:             Id<'scrapedPosts'>;
-  externalId:      string;   // Instagram shortcode — used for embed URL
+  externalId:      string;
   handle:          string;
   platform:        string;
   niche:           string;
@@ -57,15 +62,12 @@ export interface DrawerPost {
   views:           number;
   saves:           number;
   engagementRate?: number;
+  outlierRatio?:   number;
   postedAt:        number;
   scrapedAt?:      number;
   saved:           boolean;
 }
 
-export interface Board {
-  id:          number;
-  name:        string;
-  count:       number;
-  lastUpdated: string;
-  colors:      string[];
-}
+// Re-export domain-specific types
+export * from './trendsTypes';
+export * from './insightsTypes';

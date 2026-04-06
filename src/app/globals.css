@@ -291,10 +291,11 @@ body {
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
 
@@ -305,132 +306,125 @@ body {
 ═══════════════════════════════════════════════════════════════════════ */
 
 
-/* ─── Custom Fonts ──────────────────────────────────────────────────────── */
-/* Inter is loaded via next/font/google in app/layout.tsx (self-hosted).    */
-/* The following fonts are CDN-only (not available in Google Fonts):        */
+/* ─── Custom Fonts (self-hosted WOFF2) ───────────────────────────────────── */
+/* Inter is loaded via next/font/google in app/layout.tsx (self-hosted).      */
+/* All other fonts are self-hosted in /public/fonts/ as WOFF2.                */
 @font-face {
   font-family: 'Inter Display';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/67b39f238024c544d2154efa_InterDisplay-SemiBold.ttf') format('truetype');
+  src: url('/fonts/InterDisplay-SemiBold.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Circular';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/64220781532814b7bb396241_CircularXX-Book.otf') format('opentype');
-  font-weight: 500;
+  src: url('/fonts/CircularXX-Thin.woff2') format('woff2');
+  font-weight: 100;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Circular';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/64220781532814b7bb396241_CircularXX-Book.otf') format('opentype');
+  src: url('/fonts/CircularXX-Light.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Circular';
+  src: url('/fonts/CircularXX-Regular.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Circular';
+  src: url('/fonts/CircularXX-Book.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Circular';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/642207812238973e4e935a49_CircularXX-Medium.otf') format('opentype');
+  src: url('/fonts/CircularXX-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Circular';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/6422078130c3f05d9e2f5bd0_CircularXX-Black.otf') format('opentype');
+  src: url('/fonts/CircularXX-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Circular';
+  src: url('/fonts/CircularXX-Black.woff2') format('woff2');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Circular';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/64220781c31d0f872ead65a9_CircularXX-Light.otf') format('opentype');
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Circular';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/64220781c8751ee2fb742f5e_CircularXX-Regular.otf') format('opentype');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Circular';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/64220781666afccbc45e3338_CircularXX-Thin.otf') format('opentype');
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Circular';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/642207818d4c8069d3fd2ccd_CircularXX-Bold.otf') format('opentype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Circular';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/64220781c3c0738f20ad26fe_CircularXX-ExtraBlack.otf') format('opentype');
+  src: url('/fonts/CircularXX-ExtraBlack.woff2') format('woff2');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Geistmono';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/66797a975f494704958c1215_GeistMono-Light.otf') format('opentype');
-  font-weight: 300;
+  src: url('/fonts/GeistMono-Thin.woff2') format('woff2');
+  font-weight: 100;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Geistmono';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/66797a97d2d10b2253095058_GeistMono-UltraLight.otf') format('opentype');
+  src: url('/fonts/GeistMono-UltraLight.woff2') format('woff2');
   font-weight: 200;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Geistmono';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/66797a978579d9337c3d18f2_GeistMono-Medium.otf') format('opentype');
-  font-weight: 500;
+  src: url('/fonts/GeistMono-Light.woff2') format('woff2');
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Geistmono';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/66797a9795bb861c5e4117f8_GeistMono-Regular.otf') format('opentype');
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Geistmono';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/66797a97834054c3de724152_GeistMono-SemiBold.otf') format('opentype');
+  src: url('/fonts/GeistMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geistmono';
+  src: url('/fonts/GeistMono-SemiBold.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Geistmono';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/66797a97a4442aa1b8605a1f_GeistMono-Black.otf') format('opentype');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geistmono';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/66797a972332d1e14f85206c_GeistMono-Bold.otf') format('opentype');
+  src: url('/fonts/GeistMono-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Geistmono';
-  src: url('https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/66797a97410300c772a1c37c_GeistMono-Thin.otf') format('opentype');
-  font-weight: 100;
+  src: url('/fonts/GeistMono-Black.woff2') format('woff2');
+  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }

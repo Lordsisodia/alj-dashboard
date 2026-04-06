@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Search,
   Plus,
@@ -12,7 +13,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BadgeTag } from '@/components/ui/badge-tag';
-import { CreatePresetModal } from '@/isso/ui/CreatePresetModal';
+// CreatePresetModal is only shown when user opens Saved Filters and clicks "Create preset"  -  lazy load
+const CreatePresetModal = dynamic(() => import('@/isso/ui/CreatePresetModal').then(m => ({ default: m.CreatePresetModal })), { ssr: false });
 
 // ─── Animated double-pill stat ────────────────────────────────────────────────
 
@@ -177,7 +179,7 @@ function CategoryPanel({
           ref={inputRef}
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder={`Search ${category.label}s…`}
+          placeholder={`Search ${category.label}s...`}
           className="flex-1 text-xs text-neutral-800 placeholder:text-neutral-400 bg-transparent outline-none"
         />
       </div>
@@ -229,7 +231,7 @@ function CategoryPanel({
 
 // ─── AddFilterPill ────────────────────────────────────────────────────────────
 
-function AddFilterPill({ categories }: { categories: FilterCategory[] }) {
+function AddFilterPill({ categories, onFilterSelect }: { categories: FilterCategory[]; onFilterSelect?: (categoryId: string, value: string) => void }) {
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<'main' | 'saved' | string>('main');
   const [search, setSearch] = useState('');
@@ -301,7 +303,7 @@ function AddFilterPill({ categories }: { categories: FilterCategory[] }) {
             <CategoryPanel
               category={activeCategory}
               onBack={goBack}
-              onSelect={() => { setOpen(false); setPanel('main'); setSearch(''); }}
+              onSelect={(value) => { onFilterSelect?.(panel, value); setOpen(false); setPanel('main'); setSearch(''); }}
             />
           ) : (
             <>
@@ -362,6 +364,7 @@ export interface ActionDropdownItem {
   id: string;
   label: string;
   icon?: ReactNode;
+  onClick?: () => void;
 }
 
 export interface FilterChip {
@@ -389,11 +392,12 @@ export interface ContentPageShellProps {
   nextProduct?: { label: string; icon: ReactNode; href?: string };
   // Filter bar
   filterCategories?: FilterCategory[];   // drives Add Filter dropdown
+  onFilterSelect?: (categoryId: string, value: string) => void; // fires when a filter value is picked
   filterChips?: FilterChip[];            // right-side sort chips
   activeFilter?: string;
   onFilterChange?: (id: string) => void;
   filterRightSlot?: ReactNode;           // custom element on the right (e.g. DateRangePill)
-  // View toggle (grid / list) — controlled
+  // View toggle (grid / list)  -  controlled
   showViewToggle?: boolean;
   viewMode?: 'grid' | 'list';
   onViewModeChange?: (mode: 'grid' | 'list') => void;
@@ -418,6 +422,7 @@ export function ContentPageShell({
   onTabChange,
   nextProduct,
   filterCategories,
+  onFilterSelect,
   filterChips,
   activeFilter,
   onFilterChange,
@@ -524,7 +529,7 @@ export function ContentPageShell({
               {actionDropdownItems!.map(item => (
                 <button
                   key={item.id}
-                  onClick={() => setDropdownOpen(false)}
+                  onClick={() => { setDropdownOpen(false); item.onClick?.(); }}
                   className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-black/[0.04] transition-colors text-left"
                 >
                   {item.icon && <span className="text-neutral-400 flex-shrink-0">{item.icon}</span>}
@@ -539,41 +544,46 @@ export function ContentPageShell({
       {/* ── Sub-nav tabs ───────────────────────────────────────────── */}
       {tabs && tabs.length > 0 && (
         <div
-          className="flex items-center gap-1.5 px-3 py-2 flex-shrink-0"
+          className="px-3 py-2 w-full flex-shrink-0"
           style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}
         >
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange?.(tab.id)}
-              className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
-                activeTab === tab.id
-                  ? 'text-white'
-                  : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
-              )}
-              style={activeTab === tab.id ? { background: 'linear-gradient(135deg, #ff0069, #833ab4)' } : undefined}
-            >
-              {tab.icon && <span className="flex-shrink-0">{tab.icon}</span>}
-              {tab.label}
-            </button>
-          ))}
-
-          {/* Next product arrow */}
-          {nextProduct && (
-            <>
-              <div className="w-px h-4 mx-1 flex-shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.10)' }} />
-              <ChevronRight size={13} className="text-neutral-300 flex-shrink-0" />
-              <a
-                href={nextProduct.href ?? '#'}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04] transition-all select-none"
-                title={`Next: ${nextProduct.label}`}
+          <div className="inline-flex items-center gap-1.5">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange?.(tab.id)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap',
+                  activeTab === tab.id
+                    ? 'text-white'
+                    : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
+                )}
+                style={activeTab === tab.id
+                  ? { background: 'linear-gradient(135deg, #ff0069, #833ab4)' }
+                  : undefined
+                }
               >
-                <span className="flex-shrink-0 opacity-70">{nextProduct.icon}</span>
-                <span>{nextProduct.label}</span>
-              </a>
-            </>
-          )}
+                {tab.icon && <span className="flex-shrink-0">{tab.icon}</span>}
+                {tab.label}
+              </button>
+            ))}
+
+            {/* Next product arrow */}
+            {nextProduct && (
+              <>
+                <div className="w-px h-4 mx-1 flex-shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.10)' }} />
+                <ChevronRight size={13} className="text-neutral-300 flex-shrink-0" />
+                <a
+                  href={nextProduct.href ?? '#'}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04] transition-colors select-none"
+                  title={`Next: ${nextProduct.label}`}
+                >
+                  <span className="flex-shrink-0 opacity-70">{nextProduct.icon}</span>
+                  <span>{nextProduct.label}</span>
+                </a>
+              </>
+            )}
+          </div>
         </div>
       )}
 
@@ -585,7 +595,7 @@ export function ContentPageShell({
         >
           {/* Left: Add Filter pill */}
           {filterCategories ? (
-            <AddFilterPill categories={filterCategories} />
+            <AddFilterPill categories={filterCategories} onFilterSelect={onFilterSelect} />
           ) : (
             <div />
           )}

@@ -1,1 +1,1 @@
-export type Tab = 'overview' | 'approvals' | 'pipeline' | 'analytics';
+export type Tab = 'overview' | 'approvals' | 'swipe-rate';

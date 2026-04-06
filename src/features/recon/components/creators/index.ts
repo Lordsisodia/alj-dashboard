@@ -1,6 +1,7 @@
 export { ScoreBadge } from './ScoreBadge';
 export { ScoreColumnHeader } from './ScoreColumnHeader';
 export { ProfileHealthBar } from './ProfileHealthBar';
+export { CreatorsFilterBar } from './CreatorsFilterBar';
 export { StatCard } from './StatCard';
 export { VolumeChart } from './VolumeChart';
 export { LogDashboard } from './LogDashboard';

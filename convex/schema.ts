@@ -250,7 +250,6 @@ export default defineSchema({
     ),
     niche: v.string(),
     thumbnailUrl: v.string(),     // CDN url — no video stored
-    videoUrl: v.optional(v.string()),
     caption: v.string(),
     hashtags: v.array(v.string()),
     likes: v.number(),
@@ -263,6 +262,7 @@ export default defineSchema({
     scrapedAt: v.number(),
     firstComment: v.optional(v.string()), // top comment — sentiment signal
     outlierRatio: v.optional(v.number()), // views / followerCount — virality signal
+    videoUrl: v.optional(v.string()),     // R2 permanent video URL (mp4)
     saved: v.boolean(),           // user saved to swipe file
     boardIds: v.array(v.string()), // which boards it's saved to
   }).index("by_account", ["accountId"])
@@ -287,6 +287,85 @@ export default defineSchema({
     ratedAt: v.number(),
   }).index("by_post", ["postId"])
     .index("by_rater", ["ratedBy"]),
+
+  // ── Agent-generated reports ───────────────────────────────────────
+  agentReports: defineTable({
+    title: v.string(),
+    category: v.union(
+      v.literal('Intelligence'),
+      v.literal('Recon'),
+      v.literal('Performance')
+    ),
+    insights: v.array(v.string()),
+    generatedBy: v.string(),
+    generatedAt: v.number(),
+  }).index('by_generated_at', ['generatedAt'])
+    .index('by_category', ['category']),
+
+  // ── Content generation jobs (FLUX → Kling/Higgsfield pipeline) ───
+  contentGenJobs: defineTable({
+    name:       v.string(),               // e.g. FLUX-KL-ref01-gym-mirror-v1
+    modelId:    v.optional(v.id("models")),
+    modelName:  v.string(),               // denormalised for fast display
+    scene:      v.string(),               // scene description / prompt
+    provider: v.union(
+      v.literal("FLUX"),
+      v.literal("Kling"),
+      v.literal("Higgsfield")
+    ),
+    status: v.union(
+      v.literal("Queued"),
+      v.literal("Generating"),
+      v.literal("Done"),
+      v.literal("Failed")
+    ),
+    progress:       v.optional(v.number()),   // 0–100, only when Generating
+    etaSeconds:     v.optional(v.number()),   // remaining seconds
+    outcome: v.optional(v.union(
+      v.literal("Approved"),
+      v.literal("Rejected"),
+      v.literal("Pending Review")
+    )),
+    completedAt:    v.optional(v.number()),
+    durationSec:    v.optional(v.number()),
+    thumbnailColor: v.optional(v.string()),   // hex placeholder until real thumb
+    errorMessage:   v.optional(v.string()),
+    createdAt:      v.number(),
+  }).index("by_status",  ["status"])
+    .index("by_created", ["createdAt"])
+    .index("by_model",   ["modelId"]),
+
+  // ── Feature Requests ─────────────────────────────────────────────
+  featureRequests: defineTable({
+    title:       v.string(),
+    description: v.string(),
+    requestedBy: v.string(),
+    submittedAt: v.number(),
+    status: v.union(
+      v.literal('Queued'),
+      v.literal('In Progress'),
+      v.literal('Delivered')
+    ),
+    eta:      v.string(),
+    priority: v.union(
+      v.literal('Low'),
+      v.literal('Medium'),
+      v.literal('High')
+    ),
+  }).index('by_submitted', ['submittedAt']),
+
+  // ── Agent runs (task execution log) ─────────────────────────────────
+  agentRuns: defineTable({
+    agentName: v.string(),
+    type: v.union(v.literal('Scraper'), v.literal('Scheduler'), v.literal('Analyst')),
+    description: v.string(),
+    status: v.union(v.literal('running'), v.literal('completed'), v.literal('failed')),
+    startedAt: v.number(),      // Unix ms timestamp
+    duration: v.string(),
+    progress: v.number(),       // 0–100
+    outputPreview: v.string(),
+  }).index('by_status', ['status'])
+    .index('by_started_at', ['startedAt']),
 
   // ── Settings (single workspace doc) ──────────────────────────────
   settings: defineTable({

@@ -1,21 +1,24 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { LayoutDashboard, CheckSquare, Layers, Sparkles, Plus } from 'lucide-react';
 import type { Tab } from '../types';
+// Overview components — all eager (they form the visible hub layout, lazy-loading causes layout shift)
 import { KpiCards } from './overview/KpiCards';
+import { ModelPnLCard } from './overview/ModelPnLCard';
 import { QuickActions } from './overview/QuickActions';
 import { ActivityFeed } from './overview/ActivityFeed';
 import { UpcomingPosts } from './overview/UpcomingPosts';
-import { ModelsOverview } from './overview/ModelsOverview';
-import { ModelPnLCard } from './overview/ModelPnLCard';
 import { ExpiringSubscriberQueue } from './overview/ExpiringSubscriberQueue';
-import { ApprovalsTabContent } from '@/features/approvals/components';
+import { ModelsOverview } from './overview/ModelsOverview';
+// Non-default tab content — lazy load (only loaded when tab is clicked)
+const ApprovalsTabContent = dynamic(() => import('@/features/approvals/components/ApprovalsTabContent').then(m => ({ default: m.ApprovalsTabContent })), { ssr: false });
+const SwipeTabContent     = dynamic(() => import('@/features/hub-swipe/components/SwipeTabContent').then(m => ({ default: m.SwipeTabContent })), { ssr: false });
 import { PlaceholderContent } from './placeholders/PlaceholderContent';
-import { SwipeTabContent } from '@/features/hub-swipe/components/SwipeTabContent';
 
 function OverviewContent() {
   const today = new Date().toLocaleDateString('en-GB', {

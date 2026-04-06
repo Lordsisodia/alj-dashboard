@@ -1,4 +1,4 @@
-import { Heart, Eye, Bookmark } from 'lucide-react';
+import { Heart, Eye, Bookmark, ExternalLink } from 'lucide-react';
 import { fmtNum, daysLive } from '../../utils';
 import { NICHE_COLORS } from '../../constants';
 import type { DrawerPost } from '../../types';
@@ -38,6 +38,26 @@ export function DetailsTab({ post }: { post: DrawerPost }) {
     { label: 'Likes',      value: <span className="flex items-center gap-1 text-xs text-neutral-700"><Heart    size={10} className="text-neutral-400" />{fmtNum(post.likes)}</span> },
     { label: 'Views',      value: <span className="flex items-center gap-1 text-xs text-neutral-700"><Eye      size={10} className="text-neutral-400" />{fmtNum(post.views)}</span> },
     { label: 'Saves',      value: <span className="flex items-center gap-1 text-xs text-neutral-700"><Bookmark size={10} className="text-neutral-400" />{fmtNum(post.saves)}</span> },
+    {
+      label: 'Post ID',
+      value: <span className="text-[10px] font-mono text-neutral-500 truncate max-w-[160px]">{post.externalId || '-'}</span>,
+    },
+    {
+      label: 'Post URL',
+      value: post.externalId && !post.externalId.startsWith('ig_')
+        ? (
+          <a
+            href={`https://www.instagram.com/p/${post.externalId}/`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1 text-[10px] text-blue-500 hover:text-blue-700 truncate max-w-[160px]"
+          >
+            instagram.com/p/{post.externalId}
+            <ExternalLink size={9} className="flex-shrink-0" />
+          </a>
+        )
+        : <span className="text-xs text-neutral-400">seed data</span>,
+    },
   ];
 
   return (
