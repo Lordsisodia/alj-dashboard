@@ -80,7 +80,7 @@ export function ResourcesDropdown() {
 
             {/* ── Right: video panel ── */}
             <a
-              href="https://shop.foreplay.co/"
+              href=""
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center shrink-0 rounded-[18px] overflow-hidden relative no-underline"

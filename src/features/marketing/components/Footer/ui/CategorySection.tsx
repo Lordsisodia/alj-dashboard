@@ -14,8 +14,8 @@ export default function CategorySection({
         className="list-none m-0 p-0 flex flex-col gap-1 items-start"
         style={{ paddingLeft: 0 }}
       >
-        {links.map((link) => (
-          <FooterLink key={link.href} href={link.href} external={link.external}>
+        {links.map((link, i) => (
+          <FooterLink key={`${link.href}-${i}`} href={link.href} external={link.external}>
             {link.children}
           </FooterLink>
         ))}

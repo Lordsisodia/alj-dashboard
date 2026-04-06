@@ -65,6 +65,11 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Serve .mov files as video/mp4 so Chrome plays them (H.264 codec inside QuickTime container)
+        source: '/assets/:path*.mov',
+        headers: [{ key: 'Content-Type', value: 'video/mp4' }],
+      },
+      {
         source: '/(.*)',
         headers: [
           {
@@ -77,6 +82,7 @@ const nextConfig = {
               "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://www.instagram.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://*.clerk.com wss://*.clerk.accounts.dev",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://cdn.prod.website-files.com https://*.website-files.com",
+              "media-src 'self' blob: https://cdn.prod.website-files.com https://*.website-files.com https://publicassets.foreplay.co",
               "worker-src 'self' blob:",
             ].join('; '),
           },

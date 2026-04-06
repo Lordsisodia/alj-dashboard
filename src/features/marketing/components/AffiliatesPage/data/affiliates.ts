@@ -40,7 +40,7 @@ export const affiliatesData: AffiliatesPageData = {
     headline: 'ISSO is better with friends',
     paragraph:
       "Helping each-other with no strings attached. Earn 20% on all new subscriptions you refer with no limit on how much you can earn.",
-    ctaHref: 'https://foreplay.getrewardful.com/signup',
+    ctaHref: '/sign-up',
     ctaLabel: 'Become an Affiliate',
   },
 

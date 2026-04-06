@@ -9,7 +9,7 @@ import { SolutionsDropdown } from './SolutionsDropdown';
 import { ResourcesDropdown } from './ResourcesDropdown';
 import { useAuth, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 
-export function MarketingNavBar() {
+export function NavBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isSignedIn } = useAuth();
 
@@ -153,4 +153,5 @@ export function MarketingNavBar() {
   );
 }
 
-export default MarketingNavBar;
+export { NavBar as MarketingNavBar };
+export default NavBar;

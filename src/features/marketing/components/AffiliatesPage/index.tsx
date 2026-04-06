@@ -192,7 +192,7 @@ function AffiliatesFAQ({ faq }: { faq: AffiliatesPageData['faq'] }) {
               </div>
             </a>
             <a
-              href="https://foreplay.featurebase.app/help"
+              href="/help"
               target="_blank"
               rel="noopener noreferrer"
               className="button-dark ghost-icon-button w-inline-block"

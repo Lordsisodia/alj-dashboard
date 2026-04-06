@@ -119,7 +119,7 @@ function FreeCard() {
 
           <div className="flex-col-gap-2">
             <div className="div-block-335">
-              <a href="https://app.foreplay.co/sign-up" className="button-dark button-secondary w-inline-block">
+              <a href="/sign-up" className="button-dark button-secondary w-inline-block">
                 <div className="button-text-block">
                   <div className="text-heading-m">Get Started</div>
                 </div>
@@ -281,7 +281,7 @@ function PerModelCard() {
 
           <div className="flex-col-gap-2">
             <div className="div-block-335">
-              <a href="https://app.foreplay.co/sign-up" className="button-dark button-primary w-inline-block">
+              <a href="/sign-up" className="button-dark button-primary w-inline-block">
                 <div className="button-text-block">
                   <div className="text-heading-m">Start</div>
                 </div>
@@ -409,7 +409,7 @@ function UnlimitedCard() {
 
           <div className="flex-col-gap-2">
             <div className="div-block-335">
-              <a href="https://app.foreplay.co/sign-up" className="button-dark button-secondary w-inline-block">
+              <a href="/sign-up" className="button-dark button-secondary w-inline-block">
                 <div className="button-text-block">
                   <div className="text-heading-m">Start</div>
                 </div>

@@ -21,9 +21,16 @@ export default function LazyVideo({
     return () => observer.disconnect();
   }, []);
 
+  const ext = src.split('?')[0].split('.').pop()?.toLowerCase();
+  const mimeType =
+    ext === 'webm' ? 'video/webm' :
+    ext === 'mov'  ? 'video/mp4' :   // .mov served as video/mp4 (H.264 container trick)
+    ext === 'mp4'  ? 'video/mp4' :
+    'video/mp4';
+
   return (
     <video ref={ref} {...props} preload="none" poster={poster}>
-      {active && <source src={src} />}
+      {active && <source src={src} type={mimeType} />}
     </video>
   );
 }

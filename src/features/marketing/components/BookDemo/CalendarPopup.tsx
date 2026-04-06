@@ -20,8 +20,8 @@ function DatePill({
   return (
     <a
       data-cal-config='{"layout":"month_view"}'
-      data-cal-link="team/foreplay/foreplay-demo-action-plan"
-      data-cal-namespace="foreplay-demo-action-plan"
+      data-cal-link="team/isso/isso-demo"
+      data-cal-namespace="isso-demo"
       href="#"
       className={`date-pill w-inline-block${isToday ? ' is-today' : ''}`}
     >
@@ -35,10 +35,10 @@ export default function CalendarPopup() {
   useEffect(() => {
     const Cal = (window as any).Cal;
     if (Cal) {
-      Cal('init', 'foreplay-demo-action-plan', {
+      Cal('init', 'isso-demo', {
         origin: 'https://app.cal.com',
       });
-      Cal.ns['foreplay-demo-action-plan']('ui', {
+      Cal.ns['isso-demo']('ui', {
         theme: 'light',
         hideEventTypeDetails: false,
         layout: 'month_view',
@@ -130,8 +130,8 @@ export default function CalendarPopup() {
               <div className="calendar-pop-cta">
                 <a
                   data-cal-config='{"layout":"month_view"}'
-                  data-cal-link="team/foreplay/foreplay-demo-action-plan"
-                  data-cal-namespace="foreplay-demo-action-plan"
+                  data-cal-link="team/isso/isso-demo"
+                  data-cal-namespace="isso-demo"
                   href="#"
                   className="button-light button-primary w-inline-block"
                 >
