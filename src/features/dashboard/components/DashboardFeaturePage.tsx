@@ -4,14 +4,18 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
-import { LayoutDashboard, CheckSquare, Activity, BarChart2, Plus } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Layers, Sparkles, Plus } from 'lucide-react';
 import type { Tab } from '../types';
 import { KpiCards } from './overview/KpiCards';
 import { QuickActions } from './overview/QuickActions';
 import { ActivityFeed } from './overview/ActivityFeed';
 import { UpcomingPosts } from './overview/UpcomingPosts';
 import { ModelsOverview } from './overview/ModelsOverview';
+import { ModelPnLCard } from './overview/ModelPnLCard';
+import { ExpiringSubscriberQueue } from './overview/ExpiringSubscriberQueue';
+import { ApprovalsTabContent } from '@/features/approvals/components';
 import { PlaceholderContent } from './placeholders/PlaceholderContent';
+import { SwipeTabContent } from '@/features/hub-swipe/components/SwipeTabContent';
 
 function OverviewContent() {
   const today = new Date().toLocaleDateString('en-GB', {
@@ -29,6 +33,10 @@ function OverviewContent() {
         <KpiCards />
       </motion.div>
 
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.08 }}>
+        <ModelPnLCard />
+      </motion.div>
+
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
         <QuickActions />
       </motion.div>
@@ -40,7 +48,10 @@ function OverviewContent() {
         className="grid grid-cols-3 gap-4"
       >
         <ActivityFeed />
-        <UpcomingPosts />
+        <div className="flex flex-col gap-4">
+          <UpcomingPosts />
+          <ExpiringSubscriberQueue />
+        </div>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
@@ -55,10 +66,9 @@ export default function DashboardFeaturePage() {
   const [activeFilter, setActiveFilter] = useState('all');
 
   const tabContent: Record<Tab, React.ReactNode> = {
-    overview:  <OverviewContent />,
-    approvals: <PlaceholderContent label="Approvals" />,
-    pipeline:  <PlaceholderContent label="Pipeline" />,
-    analytics: <PlaceholderContent label="Analytics" />,
+    overview:    <OverviewContent />,
+    approvals:   <ApprovalsTabContent />,
+    'swipe-rate': <SwipeTabContent />,
   };
 
   return (
@@ -70,11 +80,11 @@ export default function DashboardFeaturePage() {
       actionLabel="New"
       actionIcon={<Plus size={14} />}
       tabs={[
-        { id: 'overview',  label: 'Overview',  icon: <LayoutDashboard size={13} /> },
-        { id: 'approvals', label: 'Approvals', icon: <CheckSquare size={13} /> },
-        { id: 'pipeline',  label: 'Pipeline',  icon: <Activity size={13} /> },
-        { id: 'analytics', label: 'Analytics', icon: <BarChart2 size={13} /> },
+        { id: 'overview',    label: '1. Overview',    icon: <LayoutDashboard size={13} /> },
+        { id: 'approvals',   label: '2. Approvals',   icon: <CheckSquare size={13} /> },
+        { id: 'swipe-rate',  label: '3. Swipe & Rate', icon: <Layers size={13} /> },
       ]}
+      nextProduct={{ label: 'Content Gen', icon: <Sparkles size={13} />, href: '/isso/ideas' }}
       activeTab={activeTab}
       onTabChange={(id) => setActiveTab(id as Tab)}
       filterChips={[

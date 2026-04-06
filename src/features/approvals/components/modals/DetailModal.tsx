@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, CheckCircle, RefreshCw, MessageSquare, Hash } from 'lucide-react';
+import { X, Check, CheckCircle, RefreshCw, Hash } from 'lucide-react';
 import type { ApprovalItem, ApprovalStatus } from '../../types';
 import { STATUS_CONFIG } from '../../constants';
+import { RejectionReasonPicker, type RejectionReasonId } from './RejectionReasonPicker';
+import { PlatformPreviewPanel } from './PlatformPreviewPanel';
 
 interface DetailModalProps {
   item: ApprovalItem | null;
@@ -13,13 +15,20 @@ interface DetailModalProps {
 }
 
 export function DetailModal({ item, onClose, onStatusChange }: DetailModalProps) {
-  const [revisionComment, setRevisionComment] = useState('');
   const [showRevisionField, setShowRevisionField] = useState(false);
+  const [selectedReasons, setSelectedReasons] = useState<RejectionReasonId[]>([]);
+  const [revisionNote, setRevisionNote] = useState('');
   const [actionDone, setActionDone] = useState<string | null>(null);
 
   if (!item) return null;
 
   const cfg = STATUS_CONFIG[item.status];
+
+  const toggleReason = (id: RejectionReasonId) => {
+    setSelectedReasons(prev =>
+      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
+    );
+  };
 
   const handleAction = (action: string) => {
     if (action === 'publish') {
@@ -28,7 +37,7 @@ export function DetailModal({ item, onClose, onStatusChange }: DetailModalProps)
       onStatusChange(item.id, 'approved');
     } else if (action === 'revision') {
       if (!showRevisionField) { setShowRevisionField(true); return; }
-      if (!revisionComment.trim()) return;
+      if (selectedReasons.length === 0) return;
       onStatusChange(item.id, 'revision');
     }
     setActionDone(action);
@@ -36,7 +45,8 @@ export function DetailModal({ item, onClose, onStatusChange }: DetailModalProps)
       onClose();
       setActionDone(null);
       setShowRevisionField(false);
-      setRevisionComment('');
+      setSelectedReasons([]);
+      setRevisionNote('');
     }, 1000);
   };
 
@@ -96,25 +106,11 @@ export function DetailModal({ item, onClose, onStatusChange }: DetailModalProps)
           </div>
 
           {/* Content */}
-          <div className="p-5 space-y-4 max-h-[65vh] overflow-y-auto">
-            <div
-              className="aspect-video rounded-xl flex items-center justify-center"
-              style={{ background: item.thumbnailGradient, border: '1px solid rgba(0,0,0,0.06)' }}
-            >
-              <div className="flex flex-col items-center gap-2 text-neutral-400">
-                {item.thumbnailIcon}
-                <span className="text-xs font-medium">{item.contentType} Preview</span>
-              </div>
-            </div>
+          <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+            {/* Platform preview */}
+            <PlatformPreviewPanel item={item} />
 
-            <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <MessageSquare size={12} className="text-neutral-400" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Caption</span>
-              </div>
-              <p className="text-sm text-neutral-800 leading-relaxed">{item.caption}</p>
-            </div>
-
+            {/* Hashtags */}
             <div>
               <div className="flex items-center gap-1.5 mb-1.5">
                 <Hash size={12} className="text-neutral-400" />
@@ -133,29 +129,30 @@ export function DetailModal({ item, onClose, onStatusChange }: DetailModalProps)
               </div>
             </div>
 
+            <p className="text-[11px] text-neutral-400">
+              Submitted by <span className="font-semibold text-neutral-600">{item.submittedBy}</span> · {item.submittedAt}
+            </p>
+
+            {/* Revision reason picker */}
             <AnimatePresence>
               {showRevisionField && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
+                  style={{ overflow: 'hidden' }}
                 >
-                  <textarea
-                    value={revisionComment}
-                    onChange={e => setRevisionComment(e.target.value)}
-                    placeholder="Describe what needs to change..."
-                    className="w-full px-3.5 py-3 rounded-xl text-sm text-neutral-800 placeholder:text-neutral-400 resize-none outline-none transition-all"
-                    style={{ backgroundColor: '#fafafa', border: '1px solid rgba(234,88,12,0.25)' }}
-                    rows={3}
+                  <RejectionReasonPicker
+                    selected={selectedReasons}
+                    onToggle={toggleReason}
+                    note={revisionNote}
+                    onNoteChange={setRevisionNote}
                   />
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <p className="text-[11px] text-neutral-400">
-              Submitted by <span className="font-semibold text-neutral-600">{item.submittedBy}</span> · {item.submittedAt}
-            </p>
-
+            {/* Actions */}
             <AnimatePresence mode="wait">
               {!actionDone ? (
                 <motion.div key="actions" className="flex flex-wrap gap-2 pt-1">
@@ -177,7 +174,8 @@ export function DetailModal({ item, onClose, onStatusChange }: DetailModalProps)
                   </button>
                   <button
                     onClick={() => handleAction('revision')}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all hover:brightness-105"
+                    disabled={showRevisionField && selectedReasons.length === 0}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all hover:brightness-105 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ backgroundColor: 'rgba(234,88,12,0.08)', color: '#ea580c', border: '1px solid rgba(234,88,12,0.18)' }}
                   >
                     <RefreshCw size={14} />

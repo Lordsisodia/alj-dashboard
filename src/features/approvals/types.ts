@@ -14,4 +14,5 @@ export interface ApprovalItem {
   status: ApprovalStatus;
   thumbnailGradient: string;
   thumbnailIcon: React.ReactNode;
+  rejectionReasons?: string[];
 }
