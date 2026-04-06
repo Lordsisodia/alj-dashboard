@@ -13,10 +13,10 @@ export const elementary: PortfolioClient = {
       { name: 'Intake & Goals', description: 'Collect requirements, success metrics, constraints from the client.', duration: '1 day' },
       { name: 'PRD & Research (47-step system)', description: 'Run our structured PRD workflow: competitive/SEO scan, booking patterns, risk/edge cases.', duration: '2 days' },
       { name: 'Experience Blueprint', description: 'Plan flows, states, and content; define color/typography directions.', duration: '2 days' },
-      { name: 'Wireframes & UI Directions', description: 'Wireframe key screens against 2–3 color schemes; agree on the chosen direction.', duration: '1 day' },
+      { name: 'Wireframes & UI Directions', description: 'Wireframe key screens against 2-3 color schemes; agree on the chosen direction.', duration: '1 day' },
       { name: 'Build & Integrations', description: 'Implement booking flow, CMS menus, Stripe/Twilio hooks, performance budget.', duration: '3 days' },
       { name: 'QA & UAT', description: 'Cross-device testing, accessibility, schema/SEO checks, load/perf validation.', duration: '1 day' },
-      { name: 'Client Feedback Loops', description: 'Iterate with the client (2–3 cycles) until sign-off.', duration: '1 day' },
+      { name: 'Client Feedback Loops', description: 'Iterate with the client (2-3 cycles) until sign-off.', duration: '1 day' },
       { name: 'Launch & Handoff', description: 'Deploy, run smoke tests, and hand over training + Looms.', duration: '0.5 day' },
     ]
   },
@@ -92,9 +92,9 @@ export const elementary: PortfolioClient = {
     title: 'Owner, Elementary Restaurant'
   },
   faq: [
-    { question: 'How do you price?', answer: 'Fixed band with agreed scope; typical restaurant builds land between £2.5k–£6k.' },
+    { question: 'How do you price?', answer: 'Fixed band with agreed scope; typical restaurant builds land between £2.5k-£6k.' },
     { question: 'Can you integrate our POS?', answer: 'Yes. Toast/Square hooks are supported; others via webhooks.' },
-    { question: 'How fast can you launch?', answer: '11–14 days for a standard booking site with menu CMS.' },
+    { question: 'How fast can you launch?', answer: '11-14 days for a standard booking site with menu CMS.' },
     { question: 'Do you support multiple locations?', answer: 'Yes, with per-location availability flags and menu variants.' },
     { question: 'Can staff edit the menu without developers?', answer: 'Yes. Menu items, pricing, and availability are editable in a simple CMS with scheduled publishing.' },
     { question: 'What happens if a guest cancels or no-shows?', answer: 'We can require deposits or card holds via Stripe and send automated reminder/cancellation flows to cut no-shows.' },

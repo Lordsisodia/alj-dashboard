@@ -120,7 +120,7 @@ export function PublicClientPage({ client, industry, related, isLoading = false,
     { label: "Model", value: client.engagementModel ?? "Fixed bid" },
   ].filter(Boolean);
 
-  const blurb = client.description || client.tagline || `${client.name} is a ${client.industry.toLowerCase()} build delivered by SISO.`;
+  const blurb = client.description || client.tagline || `${client.name} is a ${client.industry.toLowerCase()} build delivered by ORACLE.`;
   const objectives = (client.solutionHighlights?.length ? client.solutionHighlights : client.problemStatements)?.slice(0, 3) || [
     "Ship fast with a production-ready experience in days, not months.",
     "Automate the repetitive flows so the team can focus on the core journey.",
@@ -343,7 +343,7 @@ export function PublicClientPage({ client, industry, related, isLoading = false,
               </div>
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white">Key stats</p>
-                <p className="text-xs text-white/85">Industry standard versus SISO delivery</p>
+                <p className="text-xs text-white/85">Industry standard versus ORACLE delivery</p>
               </div>
             </div>
 
@@ -416,7 +416,7 @@ export function PublicClientPage({ client, industry, related, isLoading = false,
               </div>
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white">Features</p>
-                <p className="text-xs text-white/85">What shipped for this build. Tap “i” to see details.</p>
+                <p className="text-xs text-white/85">What shipped for this build. Tap "i" to see details.</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -599,9 +599,9 @@ export function PublicClientPage({ client, industry, related, isLoading = false,
                       </p>
                     </div>
                     <div className="rounded-xl border border-white/10 bg-white/8 px-3 py-2">
-                      <p className="text-[11px] uppercase tracking-[0.2em] text-white">SISO</p>
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-white">ORACLE</p>
                       <p className="text-base font-semibold text-white">
-                        {client.pricing?.sisoPrice ? formatCurrency(client.pricing?.sisoPrice) : "—"}
+                        {client.pricing?.sisoPrice ? formatCurrency(client.pricing?.sisoPrice) : "-"}
                       </p>
                     </div>
                   </div>
@@ -616,18 +616,18 @@ export function PublicClientPage({ client, industry, related, isLoading = false,
                     <p className="text-[11px] uppercase tracking-[0.3em] text-white">Delivery</p>
                     <InfoButton
                       label="Why this delivery speed"
-                      content="Multiple AI agents work in parallel (design, build, QA), supervised by humans. That cuts handoffs and accelerates shipping—faster without cutting corners."
+                      content="Multiple AI agents work in parallel (design, build, QA), supervised by humans. That cuts handoffs and accelerates shipping-faster without cutting corners."
                       className="h-5 w-5"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
                       <p className="text-[11px] uppercase tracking-[0.2em] text-white/90">Industry</p>
-                      <p className="text-sm font-semibold text-white">{client.pricing?.marketValue ? "~14 days" : "—"}</p>
+                      <p className="text-sm font-semibold text-white">{client.pricing?.marketValue ? "~14 days" : "-"}</p>
                     </div>
                     <div className="rounded-xl border border-white/10 bg-white/8 px-3 py-2">
-                      <p className="text-[11px] uppercase tracking-[0.2em] text-white">SISO</p>
-                      <p className="text-base font-semibold text-white">{client.timeline?.durationDays ? `${client.timeline.durationDays} days` : "—"}</p>
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-white">ORACLE</p>
+                      <p className="text-base font-semibold text-white">{client.timeline?.durationDays ? `${client.timeline.durationDays} days` : "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -692,7 +692,7 @@ export function PublicClientPage({ client, industry, related, isLoading = false,
               </div>
               <div className="space-y-1 text-white">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em]">Gallery</p>
-                <p className="text-xs text-white/85">Screens from the flow—desktop hero plus mobile booking.</p>
+                <p className="text-xs text-white/85">Screens from the flow-desktop hero plus mobile booking.</p>
               </div>
             </div>
 
@@ -751,7 +751,7 @@ export function PublicClientPage({ client, industry, related, isLoading = false,
               </div>
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white">Timeline</p>
-                <p className="text-xs text-siso-text-muted">How we shipped this in {client.timeline?.durationDays ?? "—"} days.</p>
+                <p className="text-xs text-siso-text-muted">How we shipped this in {client.timeline?.durationDays ?? "-"} days.</p>
               </div>
             </div>
             {client.timeline?.phases?.length ? (

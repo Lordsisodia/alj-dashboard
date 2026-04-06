@@ -82,6 +82,56 @@ export const submitRequest = mutation({
   },
 });
 
+export const getOverview = query({
+  args: {},
+  handler: async (ctx) => {
+    const [runs, approvals, requests, costs] = await Promise.all([
+      ctx.db.query("agentRuns").collect(),
+      ctx.db.query("approvals").collect(),
+      ctx.db.query("featureRequests").collect(),
+      ctx.db.query("costs").collect(),
+    ]);
+    const activeAgents = runs.filter(r => r.status === "running").length;
+    const tasksInProgress = requests.filter(r => r.status === "In Progress").length;
+    const pendingApprovals = approvals.filter(a => a.status === "pending").length;
+    const monthSpend = costs.reduce((sum, c) => sum + c.costCents, 0);
+    const failedRuns = runs.filter(r => r.status === "failed").length;
+    const completedRuns = runs.filter(r => r.status === "completed").length;
+    return { activeAgents, tasksInProgress, pendingApprovals, monthSpend, failedRuns, completedRuns, totalRuns: runs.length };
+  },
+});
+
+export const getActivityLog = query({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("activity").collect();
+    return rows.sort((a, b) => b.timestamp - a.timestamp);
+  },
+});
+
+export const seedActivityLog = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db.query("activity").first();
+    if (existing) return;
+    const now = Date.now();
+    const min = 60000;
+    const rows = [
+      { actorName: "Recon Scraper #1", action: "agent.checked_out", target: "@fitness_king", timestamp: now - 5 * min },
+      { actorName: "Intelligence Indexer", action: "report.generated", target: "Weekly Intelligence Report", timestamp: now - 2 * 60 * min },
+      { actorName: "Post Scheduler Bot", action: "schedule.created", target: "8 posts for @abg.ricebunny", timestamp: now - 4 * 60 * min },
+      { actorName: "Recon Scraper #2", action: "agent.failed", target: "@glam.gfe - rate limit", timestamp: now - 5 * 60 * min },
+      { actorName: "System", action: "approval.requested", target: "Reel #42 - @ellamira", timestamp: now - 8 * 60 * min },
+      { actorName: "Intelligence Indexer", action: "issue.updated", target: "ISSO-2 status → in_progress", timestamp: now - 12 * 60 * min },
+      { actorName: "Recon Scraper #1", action: "agent.completed", target: "@lifestyle.nova - 23 new posts", timestamp: now - 24 * 60 * min },
+      { actorName: "System", action: "cost.recorded", target: "claude-sonnet: $3.12", timestamp: now - 26 * 60 * min },
+    ];
+    for (const row of rows) {
+      await ctx.db.insert("activity", { ...row });
+    }
+  },
+});
+
 export const seedAgents = mutation({
   args: {},
   handler: async (ctx) => {

@@ -1,4 +1,4 @@
-// IndustryTestimonials — section title and array of testimonial cards with logo, quote, headshot, bio, and screenshot.
+// IndustryTestimonials - section title and array of testimonial cards with logo, quote, headshot, bio, and screenshot.
 
 import type { IndustryPageData, Testimonial } from './types';
 

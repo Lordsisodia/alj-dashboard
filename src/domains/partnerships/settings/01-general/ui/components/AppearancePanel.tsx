@@ -57,7 +57,7 @@ export function AppearancePanel({ appearance, updateTheme, updateFontSize, toggl
         <section className="rounded-2xl border border-white/10 bg-white/5 p-3">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-siso-text-bold">Font Size</h3>
-            <InfoButton label="About font size" content="Choose the text size that’s most comfortable to read." />
+            <InfoButton label="About font size" content="Choose the text size that's most comfortable to read." />
           </div>
           <CustomDropdown
             options={fontSizeOptions}

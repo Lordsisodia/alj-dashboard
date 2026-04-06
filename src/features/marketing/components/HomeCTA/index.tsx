@@ -25,7 +25,7 @@ export default function HomeCTA() {
             Ready to automate your content pipeline?
           </h2>
           <p className="home-cta-headline-p font-body text-body-lg text-white-36" style={{ margin: 0, maxWidth: '640px' }}>
-            Start your 7-day trial. No contracts, no limits — see the pipeline run.
+            Start your 7-day trial. No contracts, no limits - see the pipeline run.
           </p>
         </div>
 

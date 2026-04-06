@@ -1,4 +1,4 @@
-// WebinarsPage — assembles all Fireside Webinars page sections.
+// WebinarsPage - assembles all Fireside Webinars page sections.
 
 import WebinarsHero from './WebinarsHero';
 import WebinarsWhyAttend from './WebinarsWhyAttend';

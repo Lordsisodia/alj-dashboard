@@ -10,7 +10,7 @@ function moduleStatus(progress: number) {
 export async function CourseProgramModules({ modulesPromise }: { modulesPromise: Promise<CourseProgramModule[]> }) {
   const modules = await modulesPromise;
   if (!modules.length) {
-    return <p className="text-sm text-siso-text-muted">This course’s chapters are being prepared. Check back soon.</p>;
+    return <p className="text-sm text-siso-text-muted">This course's chapters are being prepared. Check back soon.</p>;
   }
 
   return (

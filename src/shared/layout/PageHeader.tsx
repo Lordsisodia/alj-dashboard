@@ -9,7 +9,7 @@ interface PageHeaderProps {
 
 /**
  * Sticky page header that sits at the top of every content page.
- * Lives in the content area — NOT in the sidebar.
+ * Lives in the content area - NOT in the sidebar.
  *
  * Usage:
  *   <PageHeader title="Schedule" description="Plan your content." actions={<Button>+ Post</Button>} />

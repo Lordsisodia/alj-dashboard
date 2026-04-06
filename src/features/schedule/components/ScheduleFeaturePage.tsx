@@ -7,9 +7,9 @@ import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { Plus, Calendar, BarChart2, Film, Image, BookOpen, LayoutGrid, Video } from 'lucide-react';
 import type { Tab, FilterType } from '../types';
-// CalendarView is the default tab — keep eager
+// CalendarView is the default tab - keep eager
 import { CalendarView } from './calendar/CalendarView';
-// AnalyticsView is non-default — lazy load
+// AnalyticsView is non-default - lazy load
 const AnalyticsView = dynamic(() => import('./analytics/AnalyticsView').then(m => ({ default: m.AnalyticsView })), { ssr: false });
 
 export default function ScheduleFeaturePage() {

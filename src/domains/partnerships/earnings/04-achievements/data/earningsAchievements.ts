@@ -434,7 +434,7 @@ export const certificateSummary: CertificateSummary = {
   preview: [
     { id: "cert-sales", title: "Sales Foundations", status: "Issued", issued: "Jan 2025" },
     { id: "cert-enterprise", title: "Enterprise Sales 101", status: "In progress" },
-    { id: "cert-ops", title: "Ops Excellence", status: "Unlocked", issued: "—" },
+    { id: "cert-ops", title: "Ops Excellence", status: "Unlocked", issued: "-" },
   ],
 };
 

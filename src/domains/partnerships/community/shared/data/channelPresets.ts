@@ -191,7 +191,7 @@ export const communityChannels: Record<string, CommunityChannelPreset> = {
     ],
     announcement: {
       title: "Say hello, earn your first badge",
-      body: "Drop an intro + what you’re building. Completing this unlocks the Social Kickoff badge and Wins posting access faster.",
+      body: "Drop an intro + what you're building. Completing this unlocks the Social Kickoff badge and Wins posting access faster.",
       pill: "Starter Mission",
     },
     composer: {
@@ -228,7 +228,7 @@ export const communityChannels: Record<string, CommunityChannelPreset> = {
       },
       {
         label: "Leaderboard",
-        description: "See who’s closing this month",
+        description: "See who's closing this month",
         href: "/partners/earnings/leaderboard",
       },
     ],
@@ -259,7 +259,7 @@ export const communityChannels: Record<string, CommunityChannelPreset> = {
     ],
     composer: {
       placeholder: "Wins post unlocks after Active tier or intro challenge.",
-      lockedCopy: "Post access unlocks at Active. Finish ‘Say hello’ challenge to fast-track.",
+      lockedCopy: "Post access unlocks at Active. Finish 'Say hello' challenge to fast-track.",
     },
   },
   announcements: {
@@ -294,7 +294,7 @@ export const communityChannels: Record<string, CommunityChannelPreset> = {
       {
         id: "pin-annc-1",
         title: "Read receipt pilot",
-        summary: "We now auto-ack every announcement so you don’t lose context. Toggle in Settings → Notifications.",
+        summary: "We now auto-ack every announcement so you don't lose context. Toggle in Settings → Notifications.",
         author: "Program Ops",
         timestamp: minutesAgo(90),
       },

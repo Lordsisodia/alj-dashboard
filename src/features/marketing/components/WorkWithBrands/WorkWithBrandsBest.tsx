@@ -1,4 +1,4 @@
-// WorkWithBrandsBest — "The world's best marketers use ISSO" section
+// WorkWithBrandsBest - "The world's best marketers use ISSO" section
 // with illustration image.
 
 import type { WorkWithBrandsData } from './data/work-with-brands';

@@ -15,7 +15,7 @@ function DiagnosticsContent() {
 
 export default function ProviderDiagnosticsPage() {
   return (
-    <Suspense fallback={<div>Loading…</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <DiagnosticsContent />
     </Suspense>
   )

@@ -67,7 +67,7 @@ const insightItems = [
   },
   {
     title: "Aging payouts",
-    detail: "3 approvals pending payout >7 days — nudge finance to clear queue.",
+    detail: "3 approvals pending payout >7 days - nudge finance to clear queue.",
   },
 ];
 

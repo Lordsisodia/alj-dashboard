@@ -37,7 +37,7 @@ export function EarningsLeaderboardScreen({ leaders }: EarningsLeaderboardScreen
               color="orange"
               className="w-full max-w-none pr-16 pl-12 text-left"
               title="Leaderboard"
-              description="See who’s leading payouts, points, and boosters this season."
+              description="See who's leading payouts, points, and boosters this season."
               hideDivider
               hideFooter
               titleClassName="uppercase tracking-[0.32em] font-semibold text-[24px] leading-[1.1]"

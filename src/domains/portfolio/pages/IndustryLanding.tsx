@@ -204,7 +204,7 @@ export function IndustryLanding() {
               animationSpeed={5}
               className="text-2xl sm:text-3xl font-bold mb-4"
             >
-              Why SISO for {industry.name}?
+              Why ORACLE for {industry.name}?
             </GradientText>
             <p className="text-lg text-siso-text-muted max-w-2xl mx-auto">
               We specialize in delivering exceptional results for {industry.name.toLowerCase()} businesses
@@ -386,7 +386,7 @@ export function IndustryLanding() {
                       </GradientText>
                       <p className="text-lg text-siso-text max-w-2xl mx-auto">
                         Get your {industry.name.toLowerCase()} website or app delivered in 48-72 hours.
-                        Join the businesses already growing with SISO.
+                        Join the businesses already growing with ORACLE.
                       </p>
                     </div>
 

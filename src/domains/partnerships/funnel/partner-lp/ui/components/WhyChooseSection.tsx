@@ -25,7 +25,7 @@ export const WhyChooseSection = () => {
     {
       icon: Bot,
       title: "Recurring Commissions",
-      description: "Close SISO deals and collect recurring commissions—delivery handled by us.",
+      description: "Close SISO deals and collect recurring commissions-delivery handled by us.",
       stats: "Earn on every close",
       highlight: "Revenue-first"
     },
@@ -46,7 +46,7 @@ export const WhyChooseSection = () => {
     {
       icon: ShieldCheck,
       title: "Zero Delivery Risk",
-      description: "We build, launch, and support—your focus stays on selling and relationships.",
+      description: "We build, launch, and support-your focus stays on selling and relationships.",
       stats: "We deliver",
       highlight: "No fulfillment load"
     }

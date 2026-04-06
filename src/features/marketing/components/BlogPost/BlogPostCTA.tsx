@@ -1,5 +1,5 @@
 /**
- * BlogPostCTA — sidebar CTA and the bottom full-width "Ready to ship" CTA.
+ * BlogPostCTA - sidebar CTA and the bottom full-width "Ready to ship" CTA.
  * Mirrors the blog-cta aside and the home-cta section from the Foreplay HTML.
  */
 

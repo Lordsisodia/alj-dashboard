@@ -1,4 +1,4 @@
-// BookDemo — barrel export for all book-demo sub-components.
+// BookDemo - barrel export for all book-demo sub-components.
 
 export { default as OnboardingHero } from './OnboardingHero';
 export { default as OnboardingForm } from './OnboardingForm';

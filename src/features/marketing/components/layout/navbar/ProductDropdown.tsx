@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// ProductDropdown — mega-menu with products, analytics, and extend sections
+// ProductDropdown - mega-menu with products, analytics, and extend sections
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import { useState, useRef } from 'react';
@@ -27,7 +27,7 @@ export function ProductDropdown() {
 
       {open && (
         <DropdownContainer>
-          {/* nav-product-menu: flex row — left links area + right video banner */}
+          {/* nav-product-menu: flex row - left links area + right video banner */}
           <div className="flex">
 
             {/* nav-product-menu-links: flex:1, contains Research + Analytics side-by-side + Extend below */}
@@ -58,7 +58,7 @@ export function ProductDropdown() {
                 </div>
               </div>
 
-              {/* nav-product-menu-links-sub: Extend — full width, border-top, padding 16px */}
+              {/* nav-product-menu-links-sub: Extend - full width, border-top, padding 16px */}
               <div className="flex flex-col gap-2 p-4" style={{ borderTop: '1px solid #2a2b30' }}>
                 <div className="text-label text-white-40" style={{ fontSize: 11 }}>
                   Extend
@@ -104,7 +104,7 @@ export function ProductDropdown() {
                 border: '1px solid #2a2b30',
                 padding: 20,
               }}>
-              {/* Ambient video background — original FOREPLAY_V6 nav banner video */}
+              {/* Ambient video background - original FOREPLAY_V6 nav banner video */}
               <LazyVideo
                 src="https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/69612b690e2aeb02841afc4f_FOREPLAY_V6_webm.webm"
                 autoPlay loop muted playsInline

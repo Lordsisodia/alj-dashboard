@@ -173,7 +173,7 @@ export function MyProgressScreen({
               <p className="font-semibold">
                 {level.pointsToNextLevel} pts to {nextTier?.title ?? "next tier"}
               </p>
-              <p className="text-xs text-siso-text-muted">Est. 2–3 wins or 1 course completion to level up</p>
+              <p className="text-xs text-siso-text-muted">Est. 2-3 wins or 1 course completion to level up</p>
             </div>
 
             <div className="h-3 rounded-full bg-white/10">
@@ -182,7 +182,7 @@ export function MyProgressScreen({
 
             <div className="flex flex-wrap items-center gap-2 text-xs text-siso-text-muted">
               <Info className="h-3.5 w-3.5 text-siso-orange" />
-              <span>Complete “Discovery Basics” or log a closed-won deal to add +200 pts instantly.</span>
+              <span>Complete "Discovery Basics" or log a closed-won deal to add +200 pts instantly.</span>
             </div>
 
             <div className="flex justify-center pt-2">
@@ -268,7 +268,7 @@ export function MyProgressScreen({
           </div>
         </SettingsGroupCallout>
 
-        <SettingsGroupCallout icon={<Sparkles className="h-4 w-4" />} title="Certificates & badges" subtitle="Milestones you’ve hit" showChevron={false}>
+        <SettingsGroupCallout icon={<Sparkles className="h-4 w-4" />} title="Certificates & badges" subtitle="Milestones you've hit" showChevron={false}>
           <div className={cn(stackedPanelClass, "space-y-4 p-4 text-white/85")}>
             <div className="grid gap-4 md:grid-cols-2">
               <div className={cn(nestedCardClass, "p-4 text-white")}>

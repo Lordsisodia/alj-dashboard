@@ -23,7 +23,7 @@ const FEATURES = [
   {
     id: 'mobile-app',
     title: 'Mobile App',
-    description: 'Manage your pipeline on the go. Review content, approve reels, track performance — from your phone.',
+    description: 'Manage your pipeline on the go. Review content, approve reels, track performance - from your phone.',
     ctaText: 'Download App',
     ctaHref: '/mobile-app',
     icon: (
@@ -71,7 +71,7 @@ function FeatureCard({ feature }: { feature: typeof FEATURES[0] }) {
         } : {}),
       }}
     >
-      {/* Card Head — icon + title */}
+      {/* Card Head - icon + title */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -101,7 +101,7 @@ function FeatureCard({ feature }: { feature: typeof FEATURES[0] }) {
         </h3>
       </div>
 
-      {/* Card Image — bleeds to edges via negative margins (matches HTML) */}
+      {/* Card Image - bleeds to edges via negative margins (matches HTML) */}
       <div style={{
         height: 'auto',
         marginLeft: '-24px',
@@ -134,7 +134,7 @@ function FeatureCard({ feature }: { feature: typeof FEATURES[0] }) {
         )}
       </div>
 
-      {/* Card Footer — description + CTA */}
+      {/* Card Footer - description + CTA */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -239,7 +239,7 @@ export default function FeaturesSection() {
           </div>
         </div>
 
-        {/* Feature Cards Grid — shared border (matches lens-security-grid) */}
+        {/* Feature Cards Grid - shared border (matches lens-security-grid) */}
         <div className="features-grid" style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr',

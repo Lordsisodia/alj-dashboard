@@ -79,7 +79,7 @@ export function ProfessionalDetailsCallout(props: Props) {
           <CustomDropdown options={industryOptions} value={industry} onChange={setIndustry} placeholder="Select industry" />
         </CalloutField>
 
-        <CalloutField label="Years of Experience" info="How long you’ve been in your field.">
+        <CalloutField label="Years of Experience" info="How long you've been in your field.">
           <Input
             value={yearsOfExperience}
             onChange={(event) => setYearsOfExperience(event.target.value)}

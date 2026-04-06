@@ -17,7 +17,7 @@ export const helpCollections: HelpCollection[] = [
         sections: [
           { body: ["Check progress %, streaks, and the recommended next course first. The hero tiles are ordered by impact, so start with the top item before browsing."] },
           { body: ["Recommendations surface from your last activity, goals, and course difficulty balance. If you change goals, give the dashboard a few minutes to update suggestions."] },
-          { body: ["Stats refresh every 15 minutes or immediately after a completion event; hard refresh if you just finished a lesson and don’t see it reflected."] },
+          { body: ["Stats refresh every 15 minutes or immediately after a completion event; hard refresh if you just finished a lesson and don't see it reflected."] },
         ],
       },
       {
@@ -27,7 +27,7 @@ export const helpCollections: HelpCollection[] = [
         lastUpdated: formatDate("2025-11-17"),
         sections: [
           { body: ["Finish the checklist steps to unlock badges, levels, and access to gated content. Each step awards points that also count toward tier progression."] },
-          { body: ["Points come from lessons, quizzes, challenges, and streaks; missing a day pauses the streak but doesn’t reset your level."] },
+          { body: ["Points come from lessons, quizzes, challenges, and streaks; missing a day pauses the streak but doesn't reset your level."] },
           { body: ["Set your learning goals to personalize the order of suggested modules and the difficulty of quizzes you see."] },
         ],
       },
@@ -59,7 +59,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Pick the weekly high-impact lesson.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Spotlight is curated weekly based on current pipeline themes and common blockers we’re seeing in deals."] },
+          { body: ["Spotlight is curated weekly based on current pipeline themes and common blockers we're seeing in deals."] },
           { body: ["Bookmark the spotlight lesson to resume later; finishing within the week grants a small bonus point multiplier."] },
           { body: ["Related assets (kits, templates, decks) are linked under the spotlight card so you can act immediately."] },
         ],
@@ -91,7 +91,7 @@ export const helpCollections: HelpCollection[] = [
         sections: [
           { body: ["Provide company, buyer contact, problem statement, budget range, and urgency so Ops can triage quickly."] },
           { body: ["Ops reviews submissions within one business day; critical deals marked urgent are checked first."] },
-          { body: ["Track status and required clarifications on the Submit Client page; you’ll get a notification on decisions."] },
+          { body: ["Track status and required clarifications on the Submit Client page; you'll get a notification on decisions."] },
         ],
       },
       {
@@ -130,7 +130,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Pick the right channel and get replies fast.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["General = questions, updates, quick help; Wins and Announcements are read-only and automation-driven.", "Tag @squads or subject experts to speed answers; include your context up front.", "Enable @mention notifications so you don’t miss replies."] },
+          { body: ["General = questions, updates, quick help; Wins and Announcements are read-only and automation-driven.", "Tag @squads or subject experts to speed answers; include your context up front.", "Enable @mention notifications so you don't miss replies."] },
         ],
       },
       {
@@ -139,7 +139,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Auto rules, fields shown, reactions.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Auto posts fire for deals, course completions, challenges, new partner joins, and earning milestones; no manual posting needed.", "Win cards show value, commission if available, and links back to the source record for auditing.", "Reactions award points; replies are intentionally locked to keep wins clean—discuss in General if needed."] },
+          { body: ["Auto posts fire for deals, course completions, challenges, new partner joins, and earning milestones; no manual posting needed.", "Win cards show value, commission if available, and links back to the source record for auditing.", "Reactions award points; replies are intentionally locked to keep wins clean-discuss in General if needed."] },
         ],
       },
       {
@@ -148,7 +148,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Categories, severity, and reactions.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Categories: release, program-update, maintenance/outage, promotion/incentive, compliance/legal, event/webinar—check the pill to identify type quickly.", "Severity badges: info = FYI, warn = caution/behavior change, critical = immediate impact.", "React to acknowledge; replies are disabled. Start a thread in General for clarifications."] },
+          { body: ["Categories: release, program-update, maintenance/outage, promotion/incentive, compliance/legal, event/webinar-check the pill to identify type quickly.", "Severity badges: info = FYI, warn = caution/behavior change, critical = immediate impact.", "React to acknowledge; replies are disabled. Start a thread in General for clarifications."] },
         ],
       },
       {
@@ -166,7 +166,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Posting locks, reactions, notifications.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Wins and Announcements are intentionally read-only; use General for follow-ups.", "If reactions don’t show, refresh; if still missing, check connectivity and sign-out/sign-in.", "Re-enable notifications in Settings → Notifications if you muted a channel or set quiet hours."] },
+          { body: ["Wins and Announcements are intentionally read-only; use General for follow-ups.", "If reactions don't show, refresh; if still missing, check connectivity and sign-out/sign-in.", "Re-enable notifications in Settings → Notifications if you muted a channel or set quiet hours."] },
         ],
       },
     ],
@@ -183,7 +183,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Totals, pending, available, alerts.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Totals include cleared + pending; Available is what you can withdraw now; Pending includes items inside hold windows.", "Dashboard updates hourly or immediately after payout events.", "Alerts flag holds, missing tax info, or expiring payment methods—clear them to avoid payout delays."] },
+          { body: ["Totals include cleared + pending; Available is what you can withdraw now; Pending includes items inside hold windows.", "Dashboard updates hourly or immediately after payout events.", "Alerts flag holds, missing tax info, or expiring payment methods-clear them to avoid payout delays."] },
         ],
       },
       {
@@ -219,7 +219,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Join, rewards, failure states.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Join from Challenges after reading the requirements and deadlines; some require a specific tier.", "Rewards may be points, badges, or payout bonuses—check the reward pill before starting.", "If you miss a challenge, you can rejoin next cycle; progress does not carry over unless stated."] },
+          { body: ["Join from Challenges after reading the requirements and deadlines; some require a specific tier.", "Rewards may be points, badges, or payout bonuses-check the reward pill before starting.", "If you miss a challenge, you can rejoin next cycle; progress does not carry over unless stated."] },
         ],
       },
     ],
@@ -298,7 +298,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Assets, localization, versioning.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Browse the latest decks/one-pagers in Assets; recently updated files show a ‘new’ badge.", "Request custom or localized assets via the request form; include target industry and language.", "Version history displays on each asset so you know which revision you’re using."] },
+          { body: ["Browse the latest decks/one-pagers in Assets; recently updated files show a 'new' badge.", "Request custom or localized assets via the request form; include target industry and language.", "Version history displays on each asset so you know which revision you're using."] },
         ],
       },
       {
@@ -369,7 +369,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Public vs private, export/delete.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Choose which fields stay public vs private; private items are hidden from directory search.", "Request data export or deletion from Settings → Privacy; we’ll confirm timelines before actioning.", "Activity visibility (wins/posts/reactions) follows community policies; request removals via support if required."] },
+          { body: ["Choose which fields stay public vs private; private items are hidden from directory search.", "Request data export or deletion from Settings → Privacy; we'll confirm timelines before actioning.", "Activity visibility (wins/posts/reactions) follows community policies; request removals via support if required."] },
         ],
       },
       {
@@ -457,7 +457,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Sessions, roles, API keys.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Review active sessions/devices and revoke anything you don’t recognize.", "Roles determine what you can post and view; check the Roles page if access looks wrong.", "Enable/disable API keys and rotate them regularly; limit scopes to what you need."] },
+          { body: ["Review active sessions/devices and revoke anything you don't recognize.", "Roles determine what you can post and view; check the Roles page if access looks wrong.", "Enable/disable API keys and rotate them regularly; limit scopes to what you need."] },
         ],
       },
       {
@@ -466,7 +466,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Payment methods, invoices, dunning.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Update payment methods and billing contacts from Billing; changes apply to the next invoice.", "Download invoices/receipts any time; past-due items are flagged.", "Failed payments enter dunning—update your card and retry to clear holds."] },
+          { body: ["Update payment methods and billing contacts from Billing; changes apply to the next invoice.", "Download invoices/receipts any time; past-due items are flagged.", "Failed payments enter dunning-update your card and retry to clear holds."] },
         ],
       },
       {
@@ -484,7 +484,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Data portability and privacy controls.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Request a full data export from Settings → Privacy; we’ll email you when it’s ready.", "Submit deletion requests there as well; the UI shows expected completion timelines.", "Some records may be retained for compliance/audit; we’ll note what stays and why."] },
+          { body: ["Request a full data export from Settings → Privacy; we'll email you when it's ready.", "Submit deletion requests there as well; the UI shows expected completion timelines.", "Some records may be retained for compliance/audit; we'll note what stays and why."] },
         ],
       },
     ],
@@ -501,7 +501,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Widgets, layout, refresh.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Widgets include tasks, calendar, files, and cross-section alerts; hide ones you don’t use.", "Drag and reorder tiles to create your own layout; settings persist per user.", "Data refreshes every 10 minutes or on-demand for tasks and calendar."] },
+          { body: ["Widgets include tasks, calendar, files, and cross-section alerts; hide ones you don't use.", "Drag and reorder tiles to create your own layout; settings persist per user.", "Data refreshes every 10 minutes or on-demand for tasks and calendar."] },
         ],
       },
       {
@@ -537,7 +537,7 @@ export const helpCollections: HelpCollection[] = [
         summary: "Community/Earnings alerts in one view.",
         lastUpdated: formatDate("2025-11-17"),
         sections: [
-          { body: ["Alerts from Community and Earnings surface in the dashboard widgets so you don’t miss critical items.", "Control which alert types show in each widget via settings to avoid overload.", "Open the linked section page directly from the alert to resolve quickly."] },
+          { body: ["Alerts from Community and Earnings surface in the dashboard widgets so you don't miss critical items.", "Control which alert types show in each widget via settings to avoid overload.", "Open the linked section page directly from the alert to resolve quickly."] },
         ],
       },
     ],

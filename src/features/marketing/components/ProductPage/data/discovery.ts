@@ -6,7 +6,7 @@ export const discoveryData: ProductPageData = {
   hero: {
     subtitle: 'Intelligence',
     headline: 'Know what goes viral before your competitors post it',
-    paragraph: "ISSO scrapes thousands of top-performing reels across your niche, scores them, and surfaces the patterns — so you're always posting on the wave, never chasing it.",
+    paragraph: "ISSO scrapes thousands of top-performing reels across your niche, scores them, and surfaces the patterns - so you're always posting on the wave, never chasing it.",
     ctaHref: 'https://siso.ai/sign-up',
     animatedIconVideoSrc: `${ASSETS}/animated-icon-discovery.webm`,
     staticIconSrc: `${CDN}/682f9f722b39359a238b0ff9_pi-discovery-hq.webp`,
@@ -16,7 +16,7 @@ export const discoveryData: ProductPageData = {
   },
   beforeAfter: {
     sectionTitle: 'You need a real-time trend engine for your content pipeline',
-    sectionParagraph: 'Stop guessing what to post. Access a live feed of top-performing reels scored by engagement — filtered for your niche, updated daily.',
+    sectionParagraph: 'Stop guessing what to post. Access a live feed of top-performing reels scored by engagement - filtered for your niche, updated daily.',
     before: {
       label: 'Before ...',
       description: 'Scrolling for hours, copying trends that already peaked.',
@@ -31,7 +31,7 @@ export const discoveryData: ProductPageData = {
   useCases: {
     subtitle: 'Use Cases',
     title: 'Find what\'s working before everyone else does',
-    paragraph: "Stop posting blind. Intelligence analyzes thousands of reels across your niche so you can build a content pipeline around what actually drives growth — before the format saturates.",
+    paragraph: "Stop posting blind. Intelligence analyzes thousands of reels across your niche so you can build a content pipeline around what actually drives growth - before the format saturates.",
     items: [
       {
         title: 'Catch trends before they peak',
@@ -45,7 +45,7 @@ export const discoveryData: ProductPageData = {
       },
       {
         title: 'Reel performance history',
-        description: 'Every reel ISSO tracks is stored. Go back and see what formats dominated your niche 3, 6, or 12 months ago — and what\'s coming back around.',
+        description: 'Every reel ISSO tracks is stored. Go back and see what formats dominated your niche 3, 6, or 12 months ago - and what\'s coming back around.',
         imageSrc: `${CDN}/6452b2233aadbc8e5dddb5dd_ad-screative-time-machine.webp`,
       },
       {
@@ -58,7 +58,7 @@ export const discoveryData: ProductPageData = {
   coreFeatures: {
     subtitle: 'Core Features',
     title: 'Stop Posting Into the Void',
-    paragraph: 'How much time are you wasting scrolling for content ideas? Intelligence gives your team a daily feed of proven reels — scored, filtered by niche, ready to brief your models.',
+    paragraph: 'How much time are you wasting scrolling for content ideas? Intelligence gives your team a daily feed of proven reels - scored, filtered by niche, ready to brief your models.',
     tabs: [
       {
         label: 'AI Trend Search',
@@ -95,7 +95,7 @@ export const discoveryData: ProductPageData = {
       {
         imageSrc: `${CDN}/6452c359d7107e537d664c3e_filter-by-platform.webp`,
         title: 'Filter by Platform',
-        description: 'Analyse reel performance across Instagram, TikTok, and more — separately or combined.',
+        description: 'Analyse reel performance across Instagram, TikTok, and more - separately or combined.',
       },
       {
         imageSrc: `${CDN}/6452c3582ce631b474f7a429_Discovery-Real-Time%20Activity.webp`,
@@ -105,7 +105,7 @@ export const discoveryData: ProductPageData = {
       {
         imageSrc: `${CDN}/6452c6577004376045ccff74_Landing%20Page%20Screenshot.webp`,
         title: 'Creator & Account Metadata',
-        description: 'See the account behind every top reel — follower count, posting cadence, niche, and engagement rate.',
+        description: 'See the account behind every top reel - follower count, posting cadence, niche, and engagement rate.',
       },
       {
         imageSrc: `${CDN}/6452c64a23cd3d10d788aff5_sort-by-longest-running.webp`,
@@ -146,7 +146,7 @@ export const discoveryData: ProductPageData = {
     items: [
       {
         question: 'How does Intelligence fit into my content pipeline?',
-        answer: "Intelligence sits at the front of your pipeline — research and trend detection. Once you know what formats are working, you brief your models through Hub, source reels via Recon, and generate new content with Content Gen. Intelligence is the signal that drives everything downstream.",
+        answer: "Intelligence sits at the front of your pipeline - research and trend detection. Once you know what formats are working, you brief your models through Hub, source reels via Recon, and generate new content with Content Gen. Intelligence is the signal that drives everything downstream.",
       },
       {
         question: 'How do I find top-performing reels in my niche?',
@@ -154,7 +154,7 @@ export const discoveryData: ProductPageData = {
       },
       {
         question: 'Do you track competitor accounts automatically?',
-        answer: 'Competitor account tracking is handled by Recon — our 24/7 automated scraping feature. Intelligence surfaces broader trend patterns across your niche, while Recon keeps a constant watch on the specific accounts you care about.',
+        answer: 'Competitor account tracking is handled by Recon - our 24/7 automated scraping feature. Intelligence surfaces broader trend patterns across your niche, while Recon keeps a constant watch on the specific accounts you care about.',
       },
       {
         question: "Can I see what top creators in my niche are posting?",
@@ -162,19 +162,19 @@ export const discoveryData: ProductPageData = {
       },
       {
         question: 'How is ISSO Intelligence different from just scrolling Instagram?',
-        answer: 'Scrolling shows you what the algorithm serves you — not what\'s actually performing. Intelligence pulls from thousands of reels across your niche, scores them by real engagement data, and ranks them so you see the signal without the noise. No guessing, no hours lost.',
+        answer: 'Scrolling shows you what the algorithm serves you - not what\'s actually performing. Intelligence pulls from thousands of reels across your niche, scores them by real engagement data, and ranks them so you see the signal without the noise. No guessing, no hours lost.',
       },
       {
         question: 'How far back does the reel history go?',
-        answer: "Every reel ISSO has tracked is stored and searchable. You can look back across any time window to see which formats dominated your niche historically — useful for spotting cyclical trends and what's likely to resurface.",
+        answer: "Every reel ISSO has tracked is stored and searchable. You can look back across any time window to see which formats dominated your niche historically - useful for spotting cyclical trends and what's likely to resurface.",
       },
       {
         question: 'How often is the Intelligence feed updated?',
-        answer: 'The trend feed updates daily. New reels are scraped, scored, and surfaced automatically — so your team always has fresh data without any manual work.',
+        answer: 'The trend feed updates daily. New reels are scraped, scored, and surfaced automatically - so your team always has fresh data without any manual work.',
       },
       {
         question: 'How do I know if a reel format is worth replicating?',
-        answer: "Look at the engagement velocity score — how fast a reel gained traction in its first 48 hours. Combine that with reach and save rate to gauge whether a format has lasting pull or was a one-off spike. High velocity plus strong saves is the clearest signal.",
+        answer: "Look at the engagement velocity score - how fast a reel gained traction in its first 48 hours. Combine that with reach and save rate to gauge whether a format has lasting pull or was a one-off spike. High velocity plus strong saves is the clearest signal.",
       },
     ],
   },

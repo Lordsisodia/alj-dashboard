@@ -1,6 +1,6 @@
 'use client';
 
-// WorkWithBrandsHero — page hero: overline + headline + paragraph + brand logos
+// WorkWithBrandsHero - page hero: overline + headline + paragraph + brand logos
 // + lead capture form (Name, Phone, Email, Company Type, Budget, Message).
 
 import { useState, FormEvent } from 'react';

@@ -1,4 +1,4 @@
-// MobileAppHero — hero section with phone mockup, video, headline, and app store CTAs.
+// MobileAppHero - hero section with phone mockup, video, headline, and app store CTAs.
 
 import Image from 'next/image';
 import LazyVideo from '@/features/marketing/components/ProductSection/LazyVideo';

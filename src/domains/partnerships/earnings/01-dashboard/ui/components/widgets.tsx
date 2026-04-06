@@ -71,7 +71,7 @@ export function ChallengesWidget({ featured, activeCount, upcomingCount }: Chall
           </div>
         </div>
       ) : (
-        <p className="text-sm text-white/70">No active missions. New drops land weekly—check back soon.</p>
+        <p className="text-sm text-white/70">No active missions. New drops land weekly-check back soon.</p>
       )}
     </WidgetShell>
   );
@@ -114,7 +114,7 @@ export function AchievementsWidget({ earnedBadges, inProgressBadges }: Achieveme
             <Award className="h-4 w-4 text-siso-orange" />
             <div className="min-w-0">
               <p className="text-sm text-white">{badge.name}</p>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-white/60">Unlocked {badge.unlockedAt ?? "—"}</p>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-white/60">Unlocked {badge.unlockedAt ?? "-"}</p>
             </div>
           </div>
         ))}

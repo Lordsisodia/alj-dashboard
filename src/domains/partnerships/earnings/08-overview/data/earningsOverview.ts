@@ -26,7 +26,7 @@ export const timelineStages: TimelineStage[] = [
   { id: "submitted", label: "Submitted", count: 5, sla: "<24h" },
   { id: "verified", label: "Verified", count: 4, sla: "48h" },
   { id: "audit", label: "In audit", count: 2, sla: "72h" },
-  { id: "paid", label: "Paid", count: 12, sla: "—" },
+  { id: "paid", label: "Paid", count: 12, sla: "-" },
 ];
 
 export const opportunities: Opportunity[] = [

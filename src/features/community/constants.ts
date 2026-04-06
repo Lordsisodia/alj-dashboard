@@ -1,4 +1,4 @@
-import type { Creator, Post, ContentType } from './types';
+import type { Creator, Post, ContentType, Niche } from './types';
 
 export const CREATORS: Creator[] = [
   { handle: '@abg.ricebunny', initials: 'AB', color: '#ff0069',  followers: 245000, engagementRate: 4.2 },
@@ -27,6 +27,7 @@ export const POSTS: Post[] = [
   {
     id: '1',
     type: 'Reel',
+    niche: 'fitness',
     creator: CREATORS[0],
     gradient: GRADIENTS.pink,
     caption: 'Monday grind starts early. No excuses, just results. 5am club is real.',
@@ -34,10 +35,12 @@ export const POSTS: Post[] = [
     likes: 8412, comments: 234, saves: 180, views: 89400,
     postedAt: '2h ago',
     isVideo: true,
+    approved: true,
   },
   {
     id: '2',
     type: 'Post',
+    niche: 'lifestyle',
     creator: CREATORS[2],
     gradient: GRADIENTS.purple,
     caption: 'Vibes only. That aesthetic everyone keeps trying to copy.',
@@ -45,10 +48,12 @@ export const POSTS: Post[] = [
     likes: 6200, comments: 89, saves: 214, views: 67200,
     postedAt: '4h ago',
     isVideo: false,
+    approved: true,
   },
   {
     id: '3',
     type: 'Carousel',
+    niche: 'fashion',
     creator: CREATORS[1],
     gradient: GRADIENTS.amber,
     caption: 'OOTD but make it intentional. Every detail matters.',
@@ -60,6 +65,7 @@ export const POSTS: Post[] = [
   {
     id: '4',
     type: 'Reel',
+    niche: 'fitness',
     creator: CREATORS[3],
     gradient: GRADIENTS.green,
     caption: 'Transformation Tuesday. 12 weeks in. Same mirror, different energy.',
@@ -67,10 +73,12 @@ export const POSTS: Post[] = [
     likes: 7100, comments: 198, saves: 241, views: 76300,
     postedAt: '8h ago',
     isVideo: true,
+    approved: true,
   },
   {
     id: '5',
     type: 'Post',
+    niche: 'fitness',
     creator: CREATORS[0],
     gradient: GRADIENTS.indigo,
     caption: 'Post-workout glow. Consistency is the only hack you need.',
@@ -82,6 +90,7 @@ export const POSTS: Post[] = [
   {
     id: '6',
     type: 'Reel',
+    niche: 'fitness',
     creator: CREATORS[2],
     gradient: GRADIENTS.teal,
     caption: 'Pull-up progression: Week 1 to Week 12. No shortcuts.',
@@ -89,10 +98,12 @@ export const POSTS: Post[] = [
     likes: 12300, comments: 312, saves: 480, views: 145000,
     postedAt: '1d ago',
     isVideo: true,
+    approved: true,
   },
   {
     id: '7',
     type: 'Carousel',
+    niche: 'wellness',
     creator: CREATORS[1],
     gradient: GRADIENTS.amber,
     caption: '5 ways to stay consistent with your fitness goals.',
@@ -105,6 +116,7 @@ export const POSTS: Post[] = [
   {
     id: '8',
     type: 'Reel',
+    niche: 'lifestyle',
     creator: CREATORS[3],
     gradient: GRADIENTS.green,
     caption: 'Golden hour at the rooftop. When the city lights up.',
@@ -112,10 +124,12 @@ export const POSTS: Post[] = [
     likes: 9800, comments: 145, saves: 203, views: 91200,
     postedAt: '2d ago',
     isVideo: true,
+    saved: true,
   },
   {
     id: '9',
     type: 'Post',
+    niche: 'wellness',
     creator: CREATORS[2],
     gradient: GRADIENTS.purple,
     caption: 'Rest day = recovery day. This is where the growth actually happens.',
@@ -127,6 +141,7 @@ export const POSTS: Post[] = [
   {
     id: '10',
     type: 'Carousel',
+    niche: 'fashion',
     creator: CREATORS[0],
     gradient: GRADIENTS.pink,
     caption: 'What I eat in a day. Full transparency, no shortcuts.',
@@ -142,4 +157,29 @@ export const TYPE_COLORS: Record<ContentType, { color: string; bg: string }> = {
   Reel:     { color: '#ff0069', bg: 'rgba(255,0,105,0.12)' },
   Post:     { color: '#7c3aed', bg: 'rgba(124,58,237,0.12)' },
   Carousel: { color: '#d97706', bg: 'rgba(217,119,6,0.12)' },
+};
+
+export const NICHE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  fitness:   { label: 'Fitness',   color: '#ff0069', bg: 'rgba(255,0,105,0.08)' },
+  lifestyle: { label: 'Lifestyle', color: '#833ab4', bg: 'rgba(131,58,180,0.08)' },
+  fashion:   { label: 'Fashion',   color: '#d97706', bg: 'rgba(217,119,6,0.08)'  },
+  wellness:  { label: 'Wellness',  color: '#16a34a', bg: 'rgba(22,163,74,0.08)'  },
+};
+
+// Seed data for the Hub Dashboard tab - mock recent swipe decisions
+export const MOCK_SWIPE_ACTIVITY = [
+  { id: 'a1', decision: 'like' as const,  handle: '@rhinxrenx',    caption: 'Vibes only. That aesthetic everyone keeps trying to copy.', gradient: GRADIENTS.purple, sentTo: null,      timestamp: '2m ago'  },
+  { id: 'a2', decision: 'pass' as const,  handle: '@abg.ricebunny', caption: 'Monday grind starts early. No excuses, just results.',      gradient: GRADIENTS.pink,   sentTo: null,      timestamp: '5m ago'  },
+  { id: 'a3', decision: 'sent' as const,  handle: '@ellamira',      caption: 'Transformation Tuesday. 12 weeks in.',                      gradient: GRADIENTS.green,  sentTo: 'Tyler',   timestamp: '8m ago'  },
+  { id: 'a4', decision: 'like' as const,  handle: '@rhinxrenx',    caption: 'Pull-up progression: Week 1 to Week 12.',                   gradient: GRADIENTS.teal,   sentTo: null,      timestamp: '12m ago' },
+  { id: 'a5', decision: 'pass' as const,  handle: '@onlytylerrex', caption: 'Post-workout glow. Consistency is the only hack.',           gradient: GRADIENTS.amber,  sentTo: null,      timestamp: '18m ago' },
+];
+
+// Mock last session stats for Dashboard tab
+export const MOCK_LAST_SESSION = {
+  rated: 5,
+  passed: 3,
+  sent: 2,
+  durationMs: 252000, // 4m 12s
+  date: 'Today, 9:14 AM',
 };

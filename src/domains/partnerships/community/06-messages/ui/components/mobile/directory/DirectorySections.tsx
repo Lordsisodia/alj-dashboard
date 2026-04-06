@@ -75,7 +75,7 @@ export function DirectorySections({ sections, activeThreadId, onSelectThread }: 
         ))
       ) : (
         <div className="rounded-3xl border border-dashed border-siso-border/80 bg-siso-bg-secondary/60 px-4 py-5 text-center text-sm text-siso-text-muted">
-          You’re all caught up.
+          You're all caught up.
           <button type="button" className="ml-1 text-siso-orange underline-offset-4 hover:underline">
             Discover new partners
           </button>

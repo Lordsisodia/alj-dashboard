@@ -9,6 +9,7 @@ import type { DrawerPost } from '@/features/intelligence/types';
 import { DEFAULT_VISIBILITY } from '@/isso/ui/FeedControls';
 import type { Competitor } from '../../types';
 import { ScoreBadge } from './ScoreBadge';
+import { TrendCard, ProfileHealthSection, NotesField } from './CreatorDetailSections';
 
 interface Props { creator: Competitor; onBack: () => void; }
 
@@ -62,6 +63,14 @@ export function CreatorDetailView({ creator: c, onBack }: Props) {
               ))}
             </div>
           </div>
+          <div className="mt-4">
+            <NotesField handle={c.handle} />
+          </div>
+        </div>
+
+        <div className="px-5 pt-3 pb-2 flex flex-col gap-3">
+          <TrendCard c={c} />
+          <ProfileHealthSection c={c} />
         </div>
 
         <div className="px-4 py-4 w-full">

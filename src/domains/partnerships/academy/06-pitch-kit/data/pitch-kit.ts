@@ -62,7 +62,7 @@ export const pitchAssets: PitchAsset[] = [
     summary: "Generic pitch deck and talk-track you can use when no industry kit exists yet.",
     type: "decks",
     status: "public",
-    focus: "Default kit for any prospect; swap logos and add 1–2 proof links.",
+    focus: "Default kit for any prospect; swap logos and add 1-2 proof links.",
     relatedProofs: [{ label: "Browse portfolio", href: "/partners/academy/portfolio" }],
     link: "/partners/academy/pitch-kit/decks/standard",
     tags: ["general", "discovery", "featured"],
@@ -113,32 +113,32 @@ export const pitchKitDetails: Record<string, PitchKitDetail> = {
     researchBullets: [
       "SMBs value <90-day ROI and fast setup over bespoke builds.",
       "Standard kit covers discovery → demo → close with generic proof placeholders.",
-      "Add 1–2 portfolio links for credibility; keep deck lightweight for mobile.",
+      "Add 1-2 portfolio links for credibility; keep deck lightweight for mobile.",
     ],
     talkTrack: "Lead with time-to-value, show the deck highlight reel, then confirm a tailored proof follow-up.",
     followUps: ["Which KPI matters most: revenue, cost, or retention?", "Can we share 1 relevant proof before Friday?", "Who signs off on tooling changes?"],
     objections: [
       { objection: "We already have decks", reply: "Use yours, drop in our ROI and proof slides; 10 min edit." },
-      { objection: "Too generic", reply: "Pick 2 slides to swap with industry proof—takes <15 minutes." },
-      { objection: "No time to review", reply: "Send the 2-slide mini deck and a 90s loom; we’ll do the lift." },
+      { objection: "Too generic", reply: "Pick 2 slides to swap with industry proof-takes <15 minutes." },
+      { objection: "No time to review", reply: "Send the 2-slide mini deck and a 90s loom; we'll do the lift." },
     ],
   },
   "decks/restaurants": {
     ...pitchAssets.find((p) => p.id === "deck-restaurants")!,
     researchBullets: [
       "Operators care about table turns, online ordering mix, and labor coverage.",
-      "Loyalty + upsell lifts AOV 8–15% when paired with SMS reactivation.",
+      "Loyalty + upsell lifts AOV 8-15% when paired with SMS reactivation.",
       "Menu updates + modifiers are the biggest friction; show the flow in 30s.",
     ],
     talkTrack: "Open with lost revenue from abandoned orders, show ordering/loyalty flow, finish with 2-week pilot ask.",
     followUps: ["How do you handle peak rush today?", "What % of orders are direct vs. delivery apps?", "Who owns loyalty and reactivation?"],
     objections: [
-      { objection: "We’re locked into a POS", reply: "Keep your POS; this plugs in as a front-end + loyalty layer." },
+      { objection: "We're locked into a POS", reply: "Keep your POS; this plugs in as a front-end + loyalty layer." },
       { objection: "Too busy to switch", reply: "Start with a single location, keep menu in sync; go live in days." },
       { objection: "Customers already use delivery apps", reply: "Run direct-order incentives; show A/B uplift on take-home margins." },
     ],
     metrics: [
-      "+8–12% average order value via direct + loyalty offers",
+      "+8-12% average order value via direct + loyalty offers",
       "+10% direct orders vs delivery apps within 30 days",
       "<14 days to go-live alongside your existing POS",
     ],
@@ -189,26 +189,26 @@ export const pitchKitDetails: Record<string, PitchKitDetail> = {
         type: "features",
         title: "Why this beats the status quo",
         bullets: [
-          "Menu editor & modifiers — live in minutes, no dev calls.",
-          "Loyalty & promos — stamps, bundles, midweek boosters.",
-          "Reviews & tips — capture after checkout to boost rank.",
-          "POS passthrough — keep your POS; we add the revenue layer.",
+          "Menu editor & modifiers - live in minutes, no dev calls.",
+          "Loyalty & promos - stamps, bundles, midweek boosters.",
+          "Reviews & tips - capture after checkout to boost rank.",
+          "POS passthrough - keep your POS; we add the revenue layer.",
         ],
       },
       {
         type: "process",
         title: "Go-live in under 14 days",
         bullets: [
-          "Day 1–2: Import menu, connect payments/POS.",
-          "Day 3–5: Launch direct ordering + starter offers.",
-          "Day 6–14: Reactivation campaigns + A/B promos; measure uplift.",
+          "Day 1-2: Import menu, connect payments/POS.",
+          "Day 3-5: Launch direct ordering + starter offers.",
+          "Day 6-14: Reactivation campaigns + A/B promos; measure uplift.",
         ],
       },
       {
         type: "roi",
         title: "Pilot targets (30 days)",
         stats: [
-          { label: "AOV lift", value: "+8–12%" },
+          { label: "AOV lift", value: "+8-12%" },
           { label: "Direct orders", value: "+10%" },
           { label: "Time to live", value: "<14 days" },
         ],
@@ -219,10 +219,10 @@ export const pitchKitDetails: Record<string, PitchKitDetail> = {
         table: {
           columns: ["", "This kit", "Delivery apps", "DIY site"],
           rows: [
-            ["Per-order fee", "0%", "15–30%", "0% but dev time"],
+            ["Per-order fee", "0%", "15-30%", "0% but dev time"],
             ["Hosting year 1", "Covered by SISO", "N/A", "$/mo + maintenance"],
             ["Loyalty/promos", "Included", "Limited / extra", "Custom build"],
-            ["Go-live speed", "<14 days", "Immediate", "4–8 weeks+"],
+            ["Go-live speed", "<14 days", "Immediate", "4-8 weeks+"],
           ],
         },
       },
@@ -240,9 +240,9 @@ export const pitchKitDetails: Record<string, PitchKitDetail> = {
         type: "objections",
         title: "Answer the common pushbacks",
         bullets: [
-          "“We’re locked into a POS” → Keep POS; this is the front-end/loyalty layer.",
-          "“Too busy to switch” → Start with one location; menu stays in sync.",
-          "“Delivery apps already cover us” → Direct saves 15–30% fees; run A/B incentive.",
+          ""We're locked into a POS" → Keep POS; this is the front-end/loyalty layer.",
+          ""Too busy to switch" → Start with one location; menu stays in sync.",
+          ""Delivery apps already cover us" → Direct saves 15-30% fees; run A/B incentive.",
         ],
       },
       {
@@ -274,7 +274,7 @@ export const pitchKitDetails: Record<string, PitchKitDetail> = {
     objections: [
       { objection: "We already take bookings", reply: "Layer on holds, addons, and automated reminders without replacing POS." },
       { objection: "Chargebacks worry us", reply: "Pre-auth + photo check-in; show that workflow slide." },
-      { objection: "Seasonal cash flow", reply: "Memberships + bundles stabilize off-peak; we’ll template two offers." },
+      { objection: "Seasonal cash flow", reply: "Memberships + bundles stabilize off-peak; we'll template two offers." },
     ],
   },
   "decks/tour-guides": {
@@ -284,7 +284,7 @@ export const pitchKitDetails: Record<string, PitchKitDetail> = {
       "Tips and upsells (private tour, add-ons) boost margin per booking.",
       "Automated review capture after tours meaningfully lifts ranking.",
     ],
-    talkTrack: "Lead with filling empty slots, show booking + review capture, finish with ‘try this on one route’ ask.",
+    talkTrack: "Lead with filling empty slots, show booking + review capture, finish with 'try this on one route' ask.",
     followUps: ["Which days have the lowest fill?", "Do you segment private vs group tours?", "How do you collect tips/reviews today?"],
     objections: [
       { objection: "We list on big marketplaces", reply: "Keep them; add direct bookings and review capture to lift rank and margin." },

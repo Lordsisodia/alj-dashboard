@@ -14,7 +14,7 @@ const faqs = [
   },
   {
     q: 'What deal sizes do you take?',
-    a: 'Typical builds range from $25k–$150k. Smaller landing pages are fine if part of a roadmap; larger multi-phase programs work too.'
+    a: 'Typical builds range from $25k-$150k. Smaller landing pages are fine if part of a roadmap; larger multi-phase programs work too.'
   },
   {
     q: 'How fast are payouts?',

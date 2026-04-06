@@ -11,6 +11,7 @@ const SECTION_ROUTES: Record<string, string[]> = {
   briefs:       ['/isso/ideas', '/isso/content', '/isso/models'],
   intelligence: ['/isso/intelligence'],
   recon:        ['/isso/recon'],
+  'content-gen':['/isso/content-gen'],
   agents:       ['/isso/agents'],
   team:         ['/isso/team', '/isso/settings'],
 };

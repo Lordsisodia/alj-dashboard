@@ -1,5 +1,5 @@
 /**
- * Blog static data — extracted from HTML source www_foreplay_co (22).html
+ * Blog static data - extracted from HTML source www_foreplay_co (22).html
  * Images are served from Foreplay's Webflow CDN.
  */
 

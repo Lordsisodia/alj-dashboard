@@ -133,7 +133,7 @@ export const goldenSpoonRestaurant: PortfolioClient = {
   // Testimonial
   testimonial: {
     text:
-      'SISO transformed our online presence in just 10 days. The online ordering system alone has increased our takeaway sales by 40%. Worth every penny!',
+      'ORACLE transformed our online presence in just 10 days. The online ordering system alone has increased our takeaway sales by 40%. Worth every penny!',
     author: 'James Chen',
     title: 'Owner & Head Chef',
     role: 'Owner & Head Chef',
@@ -163,7 +163,7 @@ export const goldenSpoonRestaurant: PortfolioClient = {
   metadata: {
     featured: true,
     showInPortfolio: false,
-    seoTitle: 'The Golden Spoon - Restaurant Website Case Study | SISO Portfolio',
+    seoTitle: 'The Golden Spoon - Restaurant Website Case Study | ORACLE Portfolio',
     seoDescription:
       'Modern restaurant website with online ordering and reservations. Built in 10 days with AI-powered development.',
     tags: ['restaurant', 'online ordering', 'reservations', 'food', 'dining'],

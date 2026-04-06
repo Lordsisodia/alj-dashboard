@@ -1,4 +1,4 @@
-// BookDemoPage — assembles the book-demo page from modular BookDemo components.
+// BookDemoPage - assembles the book-demo page from modular BookDemo components.
 
 'use client';
 

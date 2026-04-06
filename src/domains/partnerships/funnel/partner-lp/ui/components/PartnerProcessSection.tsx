@@ -7,27 +7,27 @@ const steps = [
     day: 'Day 0',
     title: 'Onboard & toolkit',
     description: 'Sign the partner terms, get your referral links, and sync on commission plan.',
-    duration: '15–20 min',
+    duration: '15-20 min',
     color: 'from-siso-orange to-siso-red'
   },
   {
     day: 'Day 0',
     title: 'Watch the playbook',
     description: 'Short course: product tour, offer script, pricing guardrails, objection handling.',
-    duration: '30–45 min',
+    duration: '30-45 min',
     color: 'from-blue-500 to-cyan-500'
   },
   {
     day: 'Day 1',
     title: 'Product demo & pipeline setup',
     description: 'Load your first targets, customize decks, and line up co-sell demos with SISO.',
-    duration: '2–4 hrs',
+    duration: '2-4 hrs',
     color: 'from-purple-500 to-pink-500'
   },
   {
     day: 'Day 2',
     title: 'Outreach & first closes',
-    description: 'Run outreach sequences, book calls, and close with our squad on the line—earn on every win.',
+    description: 'Run outreach sequences, book calls, and close with our squad on the line-earn on every win.',
     duration: 'Live ongoing',
     color: 'from-green-500 to-emerald-500'
   }
@@ -54,7 +54,7 @@ export const PartnerProcessSection = () => (
           From signup to first commission in 48 hours
         </GradientHeading>
         <p className="text-sm sm:text-base text-siso-text-muted max-w-2xl mx-auto">
-          Onboard, learn the playbook, line up demos with us, then outreach and close—earn faster with our co-sell squad.
+          Onboard, learn the playbook, line up demos with us, then outreach and close-earn faster with our co-sell squad.
         </p>
       </motion.div>
 
@@ -110,7 +110,7 @@ export const PartnerProcessSection = () => (
       >
         <div className="inline-block px-6 py-3 bg-black/30 backdrop-blur-sm border border-siso-orange/30 rounded-full">
           <span className="text-sm text-siso-text">
-            ⚡ 48-hour guarantee — we deliver a demo-worthy build or you don’t pay.
+            ⚡ 48-hour guarantee - we deliver a demo-worthy build or you don't pay.
           </span>
         </div>
       </motion.div>

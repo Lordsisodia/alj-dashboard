@@ -6,8 +6,18 @@ import { ChevronRight } from 'lucide-react';
 import { STAGES } from './funnel/funnelData';
 import { StagePill } from './funnel/StagePill';
 
-export function PipelineFunnel() {
+type FunnelCounts = { basket: number; scraped: number; refined: number; generated: number; posted: number };
+
+export function PipelineFunnel({ counts }: { counts?: FunnelCounts }) {
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Merge real counts over static stage definitions
+  const stages = STAGES.map(s => ({
+    ...s,
+    count: counts
+      ? (counts[s.id as keyof FunnelCounts] ?? s.count)
+      : s.count,
+  }));
 
   return (
     <motion.div
@@ -18,15 +28,15 @@ export function PipelineFunnel() {
       style={{ border: '1px solid rgba(0,0,0,0.07)' }}
     >
       <div className="flex items-center">
-        {STAGES.map((stage, i) => (
+        {stages.map((stage, i) => (
           <div key={stage.id} className="flex items-center flex-1 min-w-0">
             <StagePill
               stage={stage}
               isActive={activeId === stage.id}
               onHover={setActiveId}
-              fromCount={i > 0 ? STAGES[i - 1].count : undefined}
+              fromCount={i > 0 ? stages[i - 1].count : undefined}
             />
-            {i < STAGES.length - 1 && (
+            {i < stages.length - 1 && (
               <div className="flex flex-col items-center gap-0.5 px-1 flex-shrink-0">
                 <ChevronRight size={14} className="text-neutral-300" />
               </div>

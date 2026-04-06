@@ -34,10 +34,10 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const ACCOUNTS = [
-  { handle: "@abg.ricebunny", initials: "T", color: "#ff0069", label: "Tyler — Gay Bear Fitness" },
-  { handle: "@onlytylerrex", initials: "T", color: "#fcaf45", label: "Tyler Rex — Fitness" },
-  { handle: "@rhinxrenx", initials: "R", color: "#833ab4", label: "Ren — ABG" },
-  { handle: "@ellamira", initials: "E", color: "#78c257", label: "Ella — Lifestyle" },
+  { handle: "@abg.ricebunny", initials: "T", color: "#ff0069", label: "Tyler - Gay Bear Fitness" },
+  { handle: "@onlytylerrex", initials: "T", color: "#fcaf45", label: "Tyler Rex - Fitness" },
+  { handle: "@rhinxrenx", initials: "R", color: "#833ab4", label: "Ren - ABG" },
+  { handle: "@ellamira", initials: "E", color: "#78c257", label: "Ella - Lifestyle" },
 ];
 
 interface IssoSidebarProps {
@@ -118,7 +118,7 @@ export function IssoSidebar({ showCollapseToggle = true }: IssoSidebarProps) {
           exit={{ opacity: 0 }}
           className="overflow-hidden"
         >
-          <span className="font-bold text-white tracking-tight text-sm whitespace-nowrap">ISSO</span>
+          <span className="font-bold text-white tracking-tight text-sm whitespace-nowrap">ORACLE</span>
         </motion.div>
       </Link>
 
@@ -271,7 +271,7 @@ export function IssoSidebar({ showCollapseToggle = true }: IssoSidebarProps) {
                 border: "1px solid rgba(131,58,180,0.25)",
               }}
             >
-              <p className="text-white text-xs font-semibold mb-0.5">ISSO Pro</p>
+              <p className="text-white text-xs font-semibold mb-0.5">ORACLE Pro</p>
               <p className="text-[10px] mb-2" style={{ color: "var(--muted-foreground)" }}>
                 Unlimited clips, AI enhance, Drive sync
               </p>

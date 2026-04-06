@@ -12,7 +12,7 @@ const testimonials: Testimonial[] = [
     avatarSrc: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face',
     name: 'Sarah Chen',
     handle: '@sarahcreates',
-    text: 'ISSO has completely transformed how we manage content for our models. 10× faster.'
+    text: 'ORACLE has completely transformed how we manage content for our models. 10× faster.'
   },
   {
     avatarSrc: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
@@ -24,7 +24,7 @@ const testimonials: Testimonial[] = [
     avatarSrc: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&crop=face',
     name: 'Alicia Rivera',
     handle: '@alicia_mgmt',
-    text: 'Recon alone is worth it — we track every competitor automatically.'
+    text: 'Recon alone is worth it - we track every competitor automatically.'
   },
 ];
 
@@ -36,7 +36,7 @@ export default function SignInRoute() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Already signed in — go straight to dashboard
+  // Already signed in - go straight to dashboard
   useEffect(() => {
     if (isSignedIn) router.replace('/isso');
   }, [isSignedIn, router]);
@@ -80,7 +80,7 @@ export default function SignInRoute() {
   return (
     <SignInPage
       title={<span className="font-light text-white tracking-tighter">Welcome back</span>}
-      description="Sign in to your ISSO account to continue."
+      description="Sign in to your ORACLE account to continue."
       heroImageSrc="https://images.unsplash.com/photo-1642615835477-d303d7dc9ee9?w=2160&q=80"
       testimonials={testimonials}
       onSignIn={handleSignIn}

@@ -21,7 +21,7 @@ function stripShell(html: string): string {
     c = c.replace(/\s*<\/div>\s*$/, '');
   }
 
-  // Remove the Webflow nav — it's a <div class="navigation w-nav"> containing the
+  // Remove the Webflow nav - it's a <div class="navigation w-nav"> containing the
   // code-sprite SVG and navbar-container. Find navStart, then count depth from 0:
   // the first </div> that makes depth=-1 is the closing of the nav div wrapper.
   const navStart = c.indexOf('class="navigation w-nav"');

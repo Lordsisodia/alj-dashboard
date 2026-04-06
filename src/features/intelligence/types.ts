@@ -1,6 +1,6 @@
 import type { Id } from '../../../convex/_generated/dataModel';
 
-export type Tab = 'trends' | 'analysis' | 'insights';
+export type Tab = 'dashboard' | 'qualify' | 'analysis' | 'insights';
 
 export type SortId =
   | 'newest'
@@ -66,6 +66,15 @@ export interface DrawerPost {
   postedAt:        number;
   scrapedAt?:      number;
   saved:           boolean;
+  aiAnalysis?: {
+    transcript?:  string;
+    hookScore:    number;
+    hookLine:     string;
+    emotions:     string[];
+    breakdown:    string;
+    suggestions:  string[];
+    analyzedAt:   number;
+  };
 }
 
 // Re-export domain-specific types

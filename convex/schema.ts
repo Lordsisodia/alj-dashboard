@@ -232,6 +232,21 @@ export default defineSchema({
     postsScraped: v.number(),
     avgEngagementRate: v.number(),
     isOwn: v.boolean(),           // true = one of our models, false = competitor
+    // enrichment fields (populated by /api/enrich-profile)
+    bio:          v.optional(v.string()),
+    postsCount:   v.optional(v.number()),
+    verified:     v.optional(v.boolean()),
+    enrichStatus: v.optional(v.union(v.literal("idle"), v.literal("enriching"), v.literal("done"), v.literal("error"))),
+    enrichedAt:   v.optional(v.number()),
+    followsCount:          v.optional(v.number()),
+    externalUrl:           v.optional(v.string()),
+    isBusinessAccount:     v.optional(v.boolean()),
+    isProfessionalAccount: v.optional(v.boolean()),
+    businessCategoryName:  v.optional(v.string()),
+    businessEmail:         v.optional(v.string()),
+    isPrivate:             v.optional(v.boolean()),
+    igtvVideoCount:        v.optional(v.number()),
+    instagramId:           v.optional(v.string()),
   }).index("by_handle", ["handle"])
     .index("by_status", ["status"])
     .index("by_niche", ["niche"]),
@@ -249,7 +264,7 @@ export default defineSchema({
       v.literal("story")
     ),
     niche: v.string(),
-    thumbnailUrl: v.string(),     // CDN url — no video stored
+    thumbnailUrl: v.string(),     // CDN url - no video stored
     caption: v.string(),
     hashtags: v.array(v.string()),
     likes: v.number(),
@@ -260,11 +275,20 @@ export default defineSchema({
     engagementRate: v.number(),   // (likes+comments+saves) / reach
     postedAt: v.number(),
     scrapedAt: v.number(),
-    firstComment: v.optional(v.string()), // top comment — sentiment signal
-    outlierRatio: v.optional(v.number()), // views / followerCount — virality signal
+    firstComment: v.optional(v.string()), // top comment - sentiment signal
+    outlierRatio: v.optional(v.number()), // views / followerCount - virality signal
     videoUrl: v.optional(v.string()),     // R2 permanent video URL (mp4)
     saved: v.boolean(),           // user saved to swipe file
     boardIds: v.array(v.string()), // which boards it's saved to
+    aiAnalysis: v.optional(v.object({
+      transcript:  v.optional(v.string()),
+      hookScore:   v.number(),
+      hookLine:    v.string(),
+      emotions:    v.array(v.string()),
+      breakdown:   v.string(),
+      suggestions: v.array(v.string()),
+      analyzedAt:  v.number(),
+    })),
   }).index("by_account", ["accountId"])
     .index("by_niche", ["niche"])
     .index("by_content_type", ["contentType"])
@@ -319,7 +343,7 @@ export default defineSchema({
       v.literal("Done"),
       v.literal("Failed")
     ),
-    progress:       v.optional(v.number()),   // 0–100, only when Generating
+    progress:       v.optional(v.number()),   // 0-100, only when Generating
     etaSeconds:     v.optional(v.number()),   // remaining seconds
     outcome: v.optional(v.union(
       v.literal("Approved"),
@@ -362,10 +386,162 @@ export default defineSchema({
     status: v.union(v.literal('running'), v.literal('completed'), v.literal('failed')),
     startedAt: v.number(),      // Unix ms timestamp
     duration: v.string(),
-    progress: v.number(),       // 0–100
+    progress: v.number(),       // 0-100
     outputPreview: v.string(),
   }).index('by_status', ['status'])
     .index('by_started_at', ['startedAt']),
+
+  // ── Creator candidates (Recon discovery pipeline) ────────────────
+  creatorCandidates: defineTable({
+    handle:            v.string(),
+    displayName:       v.string(),
+    niche:             v.optional(v.string()),
+    followerCount:     v.optional(v.number()),
+    followsCount:      v.optional(v.number()),
+    postsCount:        v.optional(v.number()),
+    bio:               v.optional(v.string()),
+    avatarUrl:         v.optional(v.string()),
+    avgEngagementRate: v.optional(v.number()),
+    avgViews:          v.optional(v.number()),
+    outlierRatio:      v.optional(v.number()),
+    postsPerWeek:      v.optional(v.number()),
+    verified:          v.optional(v.boolean()),
+    isPrivate:         v.optional(v.boolean()),
+    instagramId:       v.optional(v.string()),
+    // Pipeline status
+    status:            v.union(v.literal('pending'), v.literal('approved'), v.literal('rejected')),
+    source:            v.union(v.literal('pre_approved'), v.literal('scraper'), v.literal('manual')),
+    suggestedBy:       v.optional(v.string()),  // handle that referred them
+    addedAt:           v.number(),
+    // AI scoring
+    aiScore:           v.optional(v.number()),
+    aiVerdict:         v.optional(v.union(v.literal('HIRE'), v.literal('WATCH'), v.literal('PASS'))),
+    aiReason:          v.optional(v.string()),
+    // Enrichment
+    enrichStatus:      v.optional(v.union(v.literal('idle'), v.literal('enriching'), v.literal('done'), v.literal('error'))),
+    enrichedAt:        v.optional(v.number()),
+  }).index('by_handle', ['handle'])
+    .index('by_status', ['status'])
+    .index('by_added_at', ['addedAt']),
+
+  // ── Tool analyses (Video Analyser runs) ──────────────────────────────────
+  toolAnalyses: defineTable({
+    label:        v.optional(v.string()),   // user-provided name/label
+    videoUrl:     v.string(),
+    systemPrompt: v.string(),
+    model:        v.string(),
+    transcript:   v.optional(v.string()),
+    hookScore:    v.number(),
+    hookLine:     v.string(),
+    emotions:     v.array(v.string()),
+    breakdown:    v.string(),
+    suggestions:  v.array(v.string()),
+    analyzedAt:     v.number(),
+    lastActivityAt: v.optional(v.number()),
+    chatHistory:    v.optional(v.array(v.object({
+      role:    v.union(v.literal('user'), v.literal('assistant')),
+      content: v.string(),
+      ts:      v.number(),
+    }))),
+  }).index('by_analyzed_at',   ['analyzedAt'])
+    .index('by_last_activity', ['lastActivityAt']),
+
+  // ── Routines (recurring agent tasks) ──────────────────────────────────────
+  routines: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    assigneeAgent: v.optional(v.string()),
+    status: v.union(v.literal("active"), v.literal("paused"), v.literal("archived")),
+    concurrencyPolicy: v.union(
+      v.literal("coalesce_if_active"),
+      v.literal("always_enqueue"),
+      v.literal("skip_if_active")
+    ),
+    catchUpPolicy: v.union(v.literal("skip_missed"), v.literal("enqueue_missed")),
+    lastRunAt: v.optional(v.number()),
+    lastRunStatus: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_status", ["status"])
+    .index("by_created", ["createdAt"]),
+
+  // ── Issues (agent task tracker) ───────────────────────────────────────────
+  issues: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    status: v.union(
+      v.literal("backlog"),
+      v.literal("todo"),
+      v.literal("in_progress"),
+      v.literal("in_review"),
+      v.literal("blocked"),
+      v.literal("done")
+    ),
+    priority: v.union(
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+      v.literal("urgent")
+    ),
+    assigneeAgent: v.optional(v.string()),
+    identifier: v.optional(v.string()),
+    updatedAt: v.number(),
+    createdAt: v.number(),
+  }).index("by_status", ["status"])
+    .index("by_priority", ["priority"])
+    .index("by_updated", ["updatedAt"]),
+
+  // ── Costs (AI model spend tracking) ──────────────────────────────────────
+  costs: defineTable({
+    agentName: v.string(),
+    provider: v.string(),
+    model: v.string(),
+    inputTokens: v.optional(v.number()),
+    outputTokens: v.optional(v.number()),
+    costCents: v.number(),
+    recordedAt: v.number(),
+  }).index("by_agent", ["agentName"])
+    .index("by_recorded", ["recordedAt"]),
+
+  // ── Media uploads (R2 upload history) ────────────────────────────
+  mediaUploads: defineTable({
+    r2Key:      v.string(),
+    url:        v.string(),
+    filename:   v.string(),
+    mimeType:   v.string(),
+    sizeBytes:  v.number(),
+    uploadedAt: v.number(),
+    context:    v.union(
+      v.literal("tool_upload"),
+      v.literal("gen_result"),
+      v.literal("scrape")
+    ),
+    label:      v.optional(v.string()),
+    analysisId: v.optional(v.string()),  // toolAnalyses _id
+  }).index("by_uploaded_at", ["uploadedAt"])
+    .index("by_context",     ["context"]),
+
+  // ── Agent debug logs (AI call tracing) ───────────────────────────
+  agentDebugLogs: defineTable({
+    agentId:   v.string(),               // "analyser" | "scraper" | "minimax" etc
+    stage:     v.string(),               // "api_call" | "parse" | "save" etc
+    input:     v.string(),               // prompt / payload sent (may be truncated)
+    output:    v.string(),               // raw model response (may be truncated)
+    model:     v.string(),
+    provider:  v.string(),               // "openrouter" | "minimax" | "convex"
+    tokens:    v.optional(v.object({
+      input:  v.number(),
+      output: v.number(),
+      total:  v.number(),
+    })),
+    latencyMs: v.number(),
+    status:    v.union(v.literal("ok"), v.literal("error")),
+    error:     v.optional(v.string()),
+    jobId:     v.optional(v.string()),   // contentGenJobs _id
+    runId:     v.optional(v.string()),   // agentRuns _id
+    timestamp: v.number(),
+  }).index("by_timestamp", ["timestamp"])
+    .index("by_agent",     ["agentId"])
+    .index("by_status",    ["status"]),
 
   // ── Settings (single workspace doc) ──────────────────────────────
   settings: defineTable({

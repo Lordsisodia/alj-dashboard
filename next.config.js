@@ -7,9 +7,11 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
   statsFilename: ({ isServer }) =>
     isServer ? "../analyze/server.json" : "analyze/client.json",
 });
-const withPWA = require("@ducanh2912/next-pwa").default({
+const withPWA = process.env.NODE_ENV === "development"
+  ? (config) => config
+  : require("@ducanh2912/next-pwa").default({
   dest: "public",
-  disable: process.env.NODE_ENV === "development",
+  disable: false,
   register: true,
   skipWaiting: true,
   cacheOnFrontEndNav: true,
@@ -41,11 +43,19 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   },
 });
 
+// end ternary (dev passthrough vs PWA)
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
-  webpack(config) {
+  webpack(config, { dev }) {
+    // In dev, use memory cache only — prevents stale module resolution
+    // errors caused by webpack's disk cache getting out of sync with
+    // tsconfig path alias changes or new/moved files.
+    if (dev) {
+      config.cache = { type: 'memory' };
+    }
     return config;
   },
   images: {
@@ -79,10 +89,10 @@ const nextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.instagram.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
               "frame-src 'self' https://www.instagram.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://challenges.cloudflare.com",
               "img-src 'self' data: blob: https://*.cdninstagram.com https://*.fbcdn.net https://www.instagram.com https://images.unsplash.com https://randomuser.me https://*.randomuser.me https://cdn.prod.website-files.com https://*.website-files.com https://img.clerk.com https://*.clerk.com",
-              "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://www.instagram.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://*.clerk.com wss://*.clerk.accounts.dev",
+              "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://www.instagram.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://*.clerk.com wss://*.clerk.accounts.dev https://pub-6c398617211c499ea00c44c3d18564bc.r2.dev",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://cdn.prod.website-files.com https://*.website-files.com",
-              "media-src 'self' blob: https://cdn.prod.website-files.com https://*.website-files.com https://publicassets.foreplay.co",
+              "media-src 'self' blob: https://cdn.prod.website-files.com https://*.website-files.com https://publicassets.foreplay.co https://pub-6c398617211c499ea00c44c3d18564bc.r2.dev",
               "worker-src 'self' blob:",
             ].join('; '),
           },

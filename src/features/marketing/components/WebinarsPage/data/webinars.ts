@@ -1,4 +1,4 @@
-// Webinars page data — extracted from www_foreplay_co (20).html
+// Webinars page data - extracted from www_foreplay_co (20).html
 
 import { CDN, CDN2 } from '@/lib/cdn';
 
@@ -374,7 +374,7 @@ export const webinarsData: WebinarsPageData = {
     imageAlt: 'Two people looking at laptop, ISSO dashboard is displayed.',
   },
   speakerCta: {
-    headline: "The stage is yours — if you've got something worth saying.",
+    headline: "The stage is yours - if you've got something worth saying.",
     paragraph: "We're looking for fresh voices, bold ideas, and real stories that spark something. If that sounds like you, we're listening.",
     ctaText: 'Apply Now',
     ctaHref: '/fireside-application',

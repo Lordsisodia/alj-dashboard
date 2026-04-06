@@ -1,4 +1,4 @@
-// Mobile app page data — extracted from www_foreplay_co (7).html
+// Mobile app page data - extracted from www_foreplay_co (7).html
 
 export interface MobileAppPageData {
   hero: {
@@ -46,7 +46,7 @@ export const mobileAppData: MobileAppPageData = {
     subtitle: 'Mobile App',
     headline: 'Creative inspiration wherever you go',
     paragraph:
-      "Use ISSO wherever creative inspiration strikes – whether you're scrolling instagram or admiring a billboard.",
+      "Use ISSO wherever creative inspiration strikes - whether you're scrolling instagram or admiring a billboard.",
     appStoreHref: 'https://apps.apple.com/ca/app/foreplay-ad-swipe-file/id6466097243',
     appStoreIconSrc: `${CDN}/652560c5b07e1f8795380f3a_app-store.svg`,
     googlePlayHref: 'https://play.google.com/store/apps/details?id=co.foreplay.ISSOMobile',
@@ -60,7 +60,7 @@ export const mobileAppData: MobileAppPageData = {
   features: {
     saveHeadline: 'Save content to ISSO from your Phone',
     saveParagraph:
-      "Use ISSO wherever creative inspiration strikes – whether you're scrolling instagram or admiring a billboard.",
+      "Use ISSO wherever creative inspiration strikes - whether you're scrolling instagram or admiring a billboard.",
     savePhoneImageSrc: `${CDN}/652990b64da0f365aef91633_iphone-sync.png`,
     saveVideoMp4: `${CDN}/653030fda3d7bc4941a03672_Swipe-File-Pic-transcode.mp4`,
     saveVideoWebm: `${CDN}/653030fda3d7bc4941a03672_Swipe-File-Pic-transcode.webm`,

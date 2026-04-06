@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Recruitment Team • SISO Partners",
-  description: "See who’s actively selling, onboarding progress, coverage gaps, and recognition.",
+  description: "See who's actively selling, onboarding progress, coverage gaps, and recognition.",
 };
 
 export default async function PartnersRecruitmentTeamPage() {

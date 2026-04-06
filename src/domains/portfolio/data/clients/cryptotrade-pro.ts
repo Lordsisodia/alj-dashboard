@@ -142,7 +142,7 @@ export const cryptoTradePro: PortfolioClient = {
   // Testimonial
   testimonial: {
     text:
-      'We needed a trading platform fast to capitalize on market opportunities. SISO delivered a production-ready platform in 3 weeks with security that passed our compliance audit. Incredible execution.',
+      'We needed a trading platform fast to capitalize on market opportunities. ORACLE delivered a production-ready platform in 3 weeks with security that passed our compliance audit. Incredible execution.',
     author: 'David Park',
     title: 'CTO',
     role: 'CTO',
@@ -172,7 +172,7 @@ export const cryptoTradePro: PortfolioClient = {
   metadata: {
     featured: true,
     showInPortfolio: false,
-    seoTitle: 'CryptoTrade Pro - Crypto Trading Platform | SISO Portfolio',
+    seoTitle: 'CryptoTrade Pro - Crypto Trading Platform | ORACLE Portfolio',
     seoDescription:
       'Secure cryptocurrency trading platform with real-time data and portfolio tracking. Built in 20 days with AI-powered development.',
     tags: ['crypto', 'trading', 'fintech', 'blockchain', 'SaaS'],

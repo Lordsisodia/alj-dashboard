@@ -1,0 +1,1493 @@
+{
+  "capturedAt": "2025-11-24T15:11:31.294Z",
+  "baseUrl": "http://localhost:3003",
+  "routes": [
+    {
+      "index": 1,
+      "pattern": "/partners",
+      "path": "/partners",
+      "slug": "001-partners"
+    },
+    {
+      "index": 2,
+      "pattern": "/partners/academy",
+      "path": "/partners/academy",
+      "slug": "002-partners-academy"
+    },
+    {
+      "index": 3,
+      "pattern": "/partners/academy/certificates",
+      "path": "/partners/academy/certificates",
+      "slug": "003-partners-academy-certificates"
+    },
+    {
+      "index": 4,
+      "pattern": "/partners/academy/courses",
+      "path": "/partners/academy/courses",
+      "slug": "004-partners-academy-courses"
+    },
+    {
+      "index": 5,
+      "pattern": "/partners/academy/courses/[courseId]",
+      "path": "/partners/academy/courses/siso-essentials-program",
+      "slug": "005-partners-academy-courses-siso-essentials-program"
+    },
+    {
+      "index": 6,
+      "pattern": "/partners/academy/courses/[courseId]/[lessonId]",
+      "path": "/partners/academy/courses/siso-introduction/intro-1",
+      "slug": "006-partners-academy-courses-siso-introduction-intro-1"
+    },
+    {
+      "index": 7,
+      "pattern": "/partners/academy/industry/[slug]",
+      "path": "/partners/academy/industry/commerce",
+      "slug": "007-partners-academy-industry-commerce"
+    },
+    {
+      "index": 8,
+      "pattern": "/partners/academy/my-progress",
+      "path": "/partners/academy/my-progress",
+      "slug": "008-partners-academy-my-progress"
+    },
+    {
+      "index": 9,
+      "pattern": "/partners/academy/my-progress/tiers-and-perks",
+      "path": "/partners/academy/my-progress/tiers-and-perks",
+      "slug": "009-partners-academy-my-progress-tiers-and-perks"
+    },
+    {
+      "index": 10,
+      "pattern": "/partners/academy/pitch-kit",
+      "path": "/partners/academy/pitch-kit",
+      "slug": "010-partners-academy-pitch-kit"
+    },
+    {
+      "index": 11,
+      "pattern": "/partners/academy/pitch-kit/[type]/[slug]",
+      "path": "/partners/academy/pitch-kit/decks/standard",
+      "slug": "011-partners-academy-pitch-kit-decks-standard"
+    },
+    {
+      "index": 12,
+      "pattern": "/partners/academy/portfolio",
+      "path": "/partners/academy/portfolio",
+      "slug": "012-partners-academy-portfolio"
+    },
+    {
+      "index": 13,
+      "pattern": "/partners/academy/saved",
+      "path": "/partners/academy/saved",
+      "slug": "013-partners-academy-saved"
+    },
+    {
+      "index": 14,
+      "pattern": "/partners/academy/training-spotlight",
+      "path": "/partners/academy/training-spotlight",
+      "slug": "014-partners-academy-training-spotlight"
+    },
+    {
+      "index": 15,
+      "pattern": "/partners/academy/xp-breakdown",
+      "path": "/partners/academy/xp-breakdown",
+      "slug": "015-partners-academy-xp-breakdown"
+    },
+    {
+      "index": 16,
+      "pattern": "/partners/campus",
+      "path": "/partners/campus",
+      "slug": "016-partners-campus"
+    },
+    {
+      "index": 17,
+      "pattern": "/partners/checklist",
+      "path": "/partners/checklist",
+      "slug": "017-partners-checklist"
+    },
+    {
+      "index": 18,
+      "pattern": "/partners/community",
+      "path": "/partners/community",
+      "slug": "018-partners-community"
+    },
+    {
+      "index": 19,
+      "pattern": "/partners/community/all-channels",
+      "path": "/partners/community/all-channels",
+      "slug": "019-partners-community-all-channels"
+    },
+    {
+      "index": 20,
+      "pattern": "/partners/community/all-partners",
+      "path": "/partners/community/all-partners",
+      "slug": "020-partners-community-all-partners"
+    },
+    {
+      "index": 21,
+      "pattern": "/partners/community/announcements",
+      "path": "/partners/community/announcements",
+      "slug": "021-partners-community-announcements"
+    },
+    {
+      "index": 22,
+      "pattern": "/partners/community/channels/announcements",
+      "path": "/partners/community/channels/announcements",
+      "slug": "022-partners-community-channels-announcements"
+    },
+    {
+      "index": 23,
+      "pattern": "/partners/community/channels/general-chat",
+      "path": "/partners/community/channels/general-chat",
+      "slug": "023-partners-community-channels-general-chat"
+    },
+    {
+      "index": 24,
+      "pattern": "/partners/community/channels/wins",
+      "path": "/partners/community/channels/wins",
+      "slug": "024-partners-community-channels-wins"
+    },
+    {
+      "index": 25,
+      "pattern": "/partners/community/general",
+      "path": "/partners/community/general",
+      "slug": "025-partners-community-general"
+    },
+    {
+      "index": 26,
+      "pattern": "/partners/community/help",
+      "path": "/partners/community/help",
+      "slug": "026-partners-community-help"
+    },
+    {
+      "index": 27,
+      "pattern": "/partners/community/help/[collection]",
+      "path": "/partners/community/help/academy",
+      "slug": "027-partners-community-help-academy"
+    },
+    {
+      "index": 28,
+      "pattern": "/partners/community/help/[collection]/[article]",
+      "path": "/partners/community/help/academy/academy-dashboard",
+      "slug": "028-partners-community-help-academy-academy-dashboard"
+    },
+    {
+      "index": 29,
+      "pattern": "/partners/community/messages",
+      "path": "/partners/community/messages",
+      "slug": "029-partners-community-messages"
+    },
+    {
+      "index": 30,
+      "pattern": "/partners/community/messages/[threadId]",
+      "path": "/partners/community/messages/general-thread",
+      "slug": "030-partners-community-messages-general-thread"
+    },
+    {
+      "index": 31,
+      "pattern": "/partners/community/profile/[profileId]",
+      "path": "/partners/community/profile/nova-carter",
+      "slug": "031-partners-community-profile-nova-carter"
+    },
+    {
+      "index": 32,
+      "pattern": "/partners/community/wins",
+      "path": "/partners/community/wins",
+      "slug": "032-partners-community-wins"
+    },
+    {
+      "index": 33,
+      "pattern": "/partners/earnings",
+      "path": "/partners/earnings",
+      "slug": "033-partners-earnings"
+    },
+    {
+      "index": 34,
+      "pattern": "/partners/earnings/achievements",
+      "path": "/partners/earnings/achievements",
+      "slug": "034-partners-earnings-achievements"
+    },
+    {
+      "index": 35,
+      "pattern": "/partners/earnings/badges",
+      "path": "/partners/earnings/badges",
+      "slug": "035-partners-earnings-badges"
+    },
+    {
+      "index": 36,
+      "pattern": "/partners/earnings/challenges",
+      "path": "/partners/earnings/challenges",
+      "slug": "036-partners-earnings-challenges"
+    },
+    {
+      "index": 37,
+      "pattern": "/partners/earnings/challenges/[challengeId]",
+      "path": "/partners/earnings/challenges/momentum-sprint",
+      "slug": "037-partners-earnings-challenges-momentum-sprint"
+    },
+    {
+      "index": 38,
+      "pattern": "/partners/earnings/leaderboard",
+      "path": "/partners/earnings/leaderboard",
+      "slug": "038-partners-earnings-leaderboard"
+    },
+    {
+      "index": 39,
+      "pattern": "/partners/earnings/missions",
+      "path": "/partners/earnings/missions",
+      "slug": "039-partners-earnings-missions"
+    },
+    {
+      "index": 40,
+      "pattern": "/partners/earnings/overview",
+      "path": "/partners/earnings/overview",
+      "slug": "040-partners-earnings-overview"
+    },
+    {
+      "index": 41,
+      "pattern": "/partners/earnings/tier-progression",
+      "path": "/partners/earnings/tier-progression",
+      "slug": "041-partners-earnings-tier-progression"
+    },
+    {
+      "index": 42,
+      "pattern": "/partners/earnings/wallet",
+      "path": "/partners/earnings/wallet",
+      "slug": "042-partners-earnings-wallet"
+    },
+    {
+      "index": 43,
+      "pattern": "/partners/inbox",
+      "path": "/partners/inbox",
+      "slug": "043-partners-inbox"
+    },
+    {
+      "index": 44,
+      "pattern": "/partners/learning",
+      "path": "/partners/learning",
+      "slug": "044-partners-learning"
+    },
+    {
+      "index": 45,
+      "pattern": "/partners/messages",
+      "path": "/partners/messages",
+      "slug": "045-partners-messages"
+    },
+    {
+      "index": 46,
+      "pattern": "/partners/messages/[threadId]",
+      "path": "/partners/messages/sample-thread",
+      "slug": "046-partners-messages-sample-thread"
+    },
+    {
+      "index": 47,
+      "pattern": "/partners/mobile",
+      "path": "/partners/mobile",
+      "slug": "047-partners-mobile"
+    },
+    {
+      "index": 48,
+      "pattern": "/partners/pipeline-ops",
+      "path": "/partners/pipeline-ops",
+      "slug": "048-partners-pipeline-ops"
+    },
+    {
+      "index": 49,
+      "pattern": "/partners/pipeline-ops/active-deals",
+      "path": "/partners/pipeline-ops/active-deals",
+      "slug": "049-partners-pipeline-ops-active-deals"
+    },
+    {
+      "index": 50,
+      "pattern": "/partners/pipeline-ops/client-notes",
+      "path": "/partners/pipeline-ops/client-notes",
+      "slug": "050-partners-pipeline-ops-client-notes"
+    },
+    {
+      "index": 51,
+      "pattern": "/partners/pipeline-ops/prospects",
+      "path": "/partners/pipeline-ops/prospects",
+      "slug": "051-partners-pipeline-ops-prospects"
+    },
+    {
+      "index": 52,
+      "pattern": "/partners/pipeline-ops/prospects/[id]",
+      "path": "/partners/pipeline-ops/prospects/prospect_brookstone",
+      "slug": "052-partners-pipeline-ops-prospects-prospect-brookstone"
+    },
+    {
+      "index": 53,
+      "pattern": "/partners/pipeline-ops/recruitment",
+      "path": "/partners/pipeline-ops/recruitment",
+      "slug": "053-partners-pipeline-ops-recruitment"
+    },
+    {
+      "index": 54,
+      "pattern": "/partners/pipeline-ops/submit-client",
+      "path": "/partners/pipeline-ops/submit-client",
+      "slug": "054-partners-pipeline-ops-submit-client"
+    },
+    {
+      "index": 55,
+      "pattern": "/partners/privacy-policy",
+      "path": "/partners/privacy-policy",
+      "slug": "055-partners-privacy-policy"
+    },
+    {
+      "index": 56,
+      "pattern": "/partners/profile",
+      "path": "/partners/profile",
+      "slug": "056-partners-profile"
+    },
+    {
+      "index": 57,
+      "pattern": "/partners/quick",
+      "path": "/partners/quick",
+      "slug": "057-partners-quick"
+    },
+    {
+      "index": 58,
+      "pattern": "/partners/recruitment",
+      "path": "/partners/recruitment",
+      "slug": "058-partners-recruitment"
+    },
+    {
+      "index": 59,
+      "pattern": "/partners/recruitment/dashboard",
+      "path": "/partners/recruitment/dashboard",
+      "slug": "059-partners-recruitment-dashboard"
+    },
+    {
+      "index": 60,
+      "pattern": "/partners/recruitment/performance",
+      "path": "/partners/recruitment/performance",
+      "slug": "060-partners-recruitment-performance"
+    },
+    {
+      "index": 61,
+      "pattern": "/partners/recruitment/prospects",
+      "path": "/partners/recruitment/prospects",
+      "slug": "061-partners-recruitment-prospects"
+    },
+    {
+      "index": 62,
+      "pattern": "/partners/recruitment/prospects/[id]",
+      "path": "/partners/recruitment/prospects/prospect-luca-ramirez",
+      "slug": "062-partners-recruitment-prospects-prospect-luca-ramirez"
+    },
+    {
+      "index": 63,
+      "pattern": "/partners/recruitment/submit-partner",
+      "path": "/partners/recruitment/submit-partner",
+      "slug": "063-partners-recruitment-submit-partner"
+    },
+    {
+      "index": 64,
+      "pattern": "/partners/recruitment/team",
+      "path": "/partners/recruitment/team",
+      "slug": "064-partners-recruitment-team"
+    },
+    {
+      "index": 65,
+      "pattern": "/partners/recruitment/team/[id]",
+      "path": "/partners/recruitment/team/avery-diaz",
+      "slug": "065-partners-recruitment-team-avery-diaz"
+    },
+    {
+      "index": 66,
+      "pattern": "/partners/settings",
+      "path": "/partners/settings",
+      "slug": "066-partners-settings"
+    },
+    {
+      "index": 67,
+      "pattern": "/partners/settings/[...slug]",
+      "path": "/partners/settings/general",
+      "slug": "067-partners-settings-general"
+    },
+    {
+      "index": 68,
+      "pattern": "/partners/settings/appearance",
+      "path": "/partners/settings/appearance",
+      "slug": "068-partners-settings-appearance"
+    },
+    {
+      "index": 69,
+      "pattern": "/partners/settings/general",
+      "path": "/partners/settings/general",
+      "slug": "069-partners-settings-general"
+    },
+    {
+      "index": 70,
+      "pattern": "/partners/settings/integrations",
+      "path": "/partners/settings/integrations",
+      "slug": "070-partners-settings-integrations"
+    },
+    {
+      "index": 71,
+      "pattern": "/partners/settings/language",
+      "path": "/partners/settings/language",
+      "slug": "071-partners-settings-language"
+    },
+    {
+      "index": 72,
+      "pattern": "/partners/settings/legal",
+      "path": "/partners/settings/legal",
+      "slug": "072-partners-settings-legal"
+    },
+    {
+      "index": 73,
+      "pattern": "/partners/settings/legal/commission-terms",
+      "path": "/partners/settings/legal/commission-terms",
+      "slug": "073-partners-settings-legal-commission-terms"
+    },
+    {
+      "index": 74,
+      "pattern": "/partners/settings/legal/compliance-regulatory",
+      "path": "/partners/settings/legal/compliance-regulatory",
+      "slug": "074-partners-settings-legal-compliance-regulatory"
+    },
+    {
+      "index": 75,
+      "pattern": "/partners/settings/legal/cookie-tracking-policy",
+      "path": "/partners/settings/legal/cookie-tracking-policy",
+      "slug": "075-partners-settings-legal-cookie-tracking-policy"
+    },
+    {
+      "index": 76,
+      "pattern": "/partners/settings/legal/partner-agreement",
+      "path": "/partners/settings/legal/partner-agreement",
+      "slug": "076-partners-settings-legal-partner-agreement"
+    },
+    {
+      "index": 77,
+      "pattern": "/partners/settings/legal/service-level-agreement",
+      "path": "/partners/settings/legal/service-level-agreement",
+      "slug": "077-partners-settings-legal-service-level-agreement"
+    },
+    {
+      "index": 78,
+      "pattern": "/partners/settings/legal/terms-of-service",
+      "path": "/partners/settings/legal/terms-of-service",
+      "slug": "078-partners-settings-legal-terms-of-service"
+    },
+    {
+      "index": 79,
+      "pattern": "/partners/settings/legal/updates-changes-policy",
+      "path": "/partners/settings/legal/updates-changes-policy",
+      "slug": "079-partners-settings-legal-updates-changes-policy"
+    },
+    {
+      "index": 80,
+      "pattern": "/partners/settings/privacy",
+      "path": "/partners/settings/privacy",
+      "slug": "080-partners-settings-privacy"
+    },
+    {
+      "index": 81,
+      "pattern": "/partners/settings/security",
+      "path": "/partners/settings/security",
+      "slug": "081-partners-settings-security"
+    },
+    {
+      "index": 82,
+      "pattern": "/partners/tools/app-plan-generator",
+      "path": "/partners/tools/app-plan-generator",
+      "slug": "082-partners-tools-app-plan-generator"
+    },
+    {
+      "index": 83,
+      "pattern": "/partners/wallet",
+      "path": "/partners/wallet",
+      "slug": "083-partners-wallet"
+    },
+    {
+      "index": 84,
+      "pattern": "/partners/workspace",
+      "path": "/partners/workspace",
+      "slug": "084-partners-workspace"
+    },
+    {
+      "index": 85,
+      "pattern": "/partners/workspace/calendar",
+      "path": "/partners/workspace/calendar",
+      "slug": "085-partners-workspace-calendar"
+    },
+    {
+      "index": 86,
+      "pattern": "/partners/workspace/files",
+      "path": "/partners/workspace/files",
+      "slug": "086-partners-workspace-files"
+    },
+    {
+      "index": 87,
+      "pattern": "/partners/workspace/notes/my-notes",
+      "path": "/partners/workspace/notes/my-notes",
+      "slug": "087-partners-workspace-notes-my-notes"
+    },
+    {
+      "index": 88,
+      "pattern": "/partners/workspace/tasks",
+      "path": "/partners/workspace/tasks",
+      "slug": "088-partners-workspace-tasks"
+    }
+  ],
+  "metrics": {
+    "001-partners": {
+      "url": "http://localhost:3003/partners",
+      "domContentLoaded": 6510.300000011921,
+      "loadEventEnd": 6879.20000000298,
+      "firstPaint": 6544,
+      "firstContentfulPaint": 6976,
+      "timestamp": "2025-11-24T14:59:21.279Z",
+      "pattern": "/partners",
+      "path": "/partners",
+      "index": 1
+    },
+    "002-partners-academy": {
+      "url": "http://localhost:3003/partners/academy",
+      "domContentLoaded": 1784.2999999970198,
+      "loadEventEnd": 2089.7000000029802,
+      "firstPaint": 1780,
+      "firstContentfulPaint": 2196,
+      "timestamp": "2025-11-24T14:59:26.267Z",
+      "pattern": "/partners/academy",
+      "path": "/partners/academy",
+      "index": 2
+    },
+    "003-partners-academy-certificates": {
+      "url": "http://localhost:3003/partners/academy/certificates",
+      "domContentLoaded": 863.3999999910593,
+      "loadEventEnd": 1185.0999999940395,
+      "firstPaint": 880,
+      "firstContentfulPaint": 1296,
+      "timestamp": "2025-11-24T14:59:29.754Z",
+      "pattern": "/partners/academy/certificates",
+      "path": "/partners/academy/certificates",
+      "index": 3
+    },
+    "004-partners-academy-courses": {
+      "url": "http://localhost:3003/partners/academy/courses",
+      "domContentLoaded": 901.8999999910593,
+      "loadEventEnd": 1226.0999999940395,
+      "firstPaint": 932,
+      "firstContentfulPaint": 1332,
+      "timestamp": "2025-11-24T15:00:17.653Z",
+      "pattern": "/partners/academy/courses",
+      "path": "/partners/academy/courses",
+      "index": 4
+    },
+    "005-partners-academy-courses-siso-essentials-program": {
+      "url": "http://localhost:3003/partners/academy/courses/siso-essentials-program",
+      "domContentLoaded": 1477.6000000089407,
+      "loadEventEnd": 1767.800000011921,
+      "firstPaint": 1440,
+      "firstContentfulPaint": 1840,
+      "timestamp": "2025-11-24T15:00:22.686Z",
+      "pattern": "/partners/academy/courses/[courseId]",
+      "path": "/partners/academy/courses/siso-essentials-program",
+      "index": 5
+    },
+    "006-partners-academy-courses-siso-introduction-intro-1": {
+      "url": "http://localhost:3003/partners/academy/courses/siso-introduction/intro-1",
+      "domContentLoaded": 1152.7000000029802,
+      "loadEventEnd": 1450.5,
+      "firstPaint": 1160,
+      "firstContentfulPaint": 1560,
+      "timestamp": "2025-11-24T15:00:26.676Z",
+      "pattern": "/partners/academy/courses/[courseId]/[lessonId]",
+      "path": "/partners/academy/courses/siso-introduction/intro-1",
+      "index": 6
+    },
+    "007-partners-academy-industry-commerce": {
+      "url": "http://localhost:3003/partners/academy/industry/commerce",
+      "domContentLoaded": 951.4000000059605,
+      "loadEventEnd": 1288,
+      "firstPaint": 980,
+      "firstContentfulPaint": 1396,
+      "timestamp": "2025-11-24T15:00:29.909Z",
+      "pattern": "/partners/academy/industry/[slug]",
+      "path": "/partners/academy/industry/commerce",
+      "index": 7
+    },
+    "008-partners-academy-my-progress": {
+      "url": "http://localhost:3003/partners/academy/my-progress",
+      "domContentLoaded": 1316.4000000059605,
+      "loadEventEnd": 1634,
+      "firstPaint": 1328,
+      "firstContentfulPaint": 1744,
+      "timestamp": "2025-11-24T15:00:34.013Z",
+      "pattern": "/partners/academy/my-progress",
+      "path": "/partners/academy/my-progress",
+      "index": 8
+    },
+    "009-partners-academy-my-progress-tiers-and-perks": {
+      "url": "http://localhost:3003/partners/academy/my-progress/tiers-and-perks",
+      "domContentLoaded": 886.7000000029802,
+      "loadEventEnd": 1197.2000000029802,
+      "firstPaint": 912,
+      "firstContentfulPaint": 1296,
+      "timestamp": "2025-11-24T15:00:37.021Z",
+      "pattern": "/partners/academy/my-progress/tiers-and-perks",
+      "path": "/partners/academy/my-progress/tiers-and-perks",
+      "index": 9
+    },
+    "010-partners-academy-pitch-kit": {
+      "url": "http://localhost:3003/partners/academy/pitch-kit",
+      "domContentLoaded": 1174.5999999940395,
+      "loadEventEnd": 1476.699999988079,
+      "firstPaint": 1160,
+      "firstContentfulPaint": 1560,
+      "timestamp": "2025-11-24T15:00:41.915Z",
+      "pattern": "/partners/academy/pitch-kit",
+      "path": "/partners/academy/pitch-kit",
+      "index": 10
+    },
+    "011-partners-academy-pitch-kit-decks-standard": {
+      "url": "http://localhost:3003/partners/academy/pitch-kit/decks/standard",
+      "domContentLoaded": 1866.199999988079,
+      "loadEventEnd": 2169.199999988079,
+      "firstPaint": 1868,
+      "firstContentfulPaint": 2268,
+      "timestamp": "2025-11-24T15:00:46.735Z",
+      "pattern": "/partners/academy/pitch-kit/[type]/[slug]",
+      "path": "/partners/academy/pitch-kit/decks/standard",
+      "index": 11
+    },
+    "012-partners-academy-portfolio": {
+      "url": "http://localhost:3003/partners/academy/portfolio",
+      "domContentLoaded": 1370.5,
+      "loadEventEnd": 1695.4000000059605,
+      "firstPaint": 1396,
+      "firstContentfulPaint": 1796,
+      "timestamp": "2025-11-24T15:01:22.019Z",
+      "pattern": "/partners/academy/portfolio",
+      "path": "/partners/academy/portfolio",
+      "index": 12
+    },
+    "013-partners-academy-saved": {
+      "url": "http://localhost:3003/partners/academy/saved",
+      "domContentLoaded": 1276.300000011921,
+      "loadEventEnd": 1586.4000000059605,
+      "firstPaint": 1304,
+      "firstContentfulPaint": 1684,
+      "timestamp": "2025-11-24T15:01:26.148Z",
+      "pattern": "/partners/academy/saved",
+      "path": "/partners/academy/saved",
+      "index": 13
+    },
+    "014-partners-academy-training-spotlight": {
+      "url": "http://localhost:3003/partners/academy/training-spotlight",
+      "domContentLoaded": 1106.2999999970198,
+      "loadEventEnd": 1421,
+      "firstPaint": 1100,
+      "firstContentfulPaint": 1532,
+      "timestamp": "2025-11-24T15:01:30.044Z",
+      "pattern": "/partners/academy/training-spotlight",
+      "path": "/partners/academy/training-spotlight",
+      "index": 14
+    },
+    "015-partners-academy-xp-breakdown": {
+      "url": "http://localhost:3003/partners/academy/xp-breakdown",
+      "domContentLoaded": 1106.7999999970198,
+      "loadEventEnd": 1422.0999999940395,
+      "firstPaint": 1120,
+      "firstContentfulPaint": 1520,
+      "timestamp": "2025-11-24T15:01:33.730Z",
+      "pattern": "/partners/academy/xp-breakdown",
+      "path": "/partners/academy/xp-breakdown",
+      "index": 15
+    },
+    "016-partners-campus": {
+      "url": "http://localhost:3003/partners/campus",
+      "domContentLoaded": 918,
+      "loadEventEnd": 1180.2999999970198,
+      "firstPaint": 948,
+      "firstContentfulPaint": 1284,
+      "timestamp": "2025-11-24T15:01:36.940Z",
+      "pattern": "/partners/campus",
+      "path": "/partners/campus",
+      "index": 16
+    },
+    "017-partners-checklist": {
+      "url": "http://localhost:3003/partners/checklist",
+      "domContentLoaded": 998.3000000119209,
+      "loadEventEnd": 1274,
+      "firstPaint": 1012,
+      "firstContentfulPaint": 1380,
+      "timestamp": "2025-11-24T15:01:40.692Z",
+      "pattern": "/partners/checklist",
+      "path": "/partners/checklist",
+      "index": 17
+    },
+    "018-partners-community": {
+      "url": "http://localhost:3003/partners/community",
+      "domContentLoaded": 1560.5,
+      "loadEventEnd": 1842.6000000089407,
+      "firstPaint": 1540,
+      "firstContentfulPaint": 1940,
+      "timestamp": "2025-11-24T15:01:48.582Z",
+      "pattern": "/partners/community",
+      "path": "/partners/community",
+      "index": 18
+    },
+    "019-partners-community-all-channels": {
+      "url": "http://localhost:3003/partners/community/all-channels",
+      "domContentLoaded": 1160,
+      "loadEventEnd": 1455.5999999940395,
+      "firstPaint": 1184,
+      "firstContentfulPaint": 1552,
+      "timestamp": "2025-11-24T15:01:54.883Z",
+      "pattern": "/partners/community/all-channels",
+      "path": "/partners/community/all-channels",
+      "index": 19
+    },
+    "020-partners-community-all-partners": {
+      "url": "http://localhost:3003/partners/community/all-partners",
+      "domContentLoaded": 1418.699999988079,
+      "loadEventEnd": 1687.199999988079,
+      "firstPaint": 1448,
+      "firstContentfulPaint": 1764,
+      "timestamp": "2025-11-24T15:02:43.833Z",
+      "pattern": "/partners/community/all-partners",
+      "path": "/partners/community/all-partners",
+      "index": 20
+    },
+    "021-partners-community-announcements": {
+      "url": "http://localhost:3003/partners/community/announcements",
+      "domContentLoaded": 1778.9000000059605,
+      "loadEventEnd": 2304.2999999970198,
+      "firstPaint": 1808,
+      "firstContentfulPaint": 2440,
+      "timestamp": "2025-11-24T15:02:49.074Z",
+      "pattern": "/partners/community/announcements",
+      "path": "/partners/community/announcements",
+      "index": 21
+    },
+    "022-partners-community-channels-announcements": {
+      "url": "http://localhost:3003/partners/community/channels/announcements",
+      "domContentLoaded": 870,
+      "loadEventEnd": 1334,
+      "firstPaint": 900,
+      "firstContentfulPaint": 1436,
+      "timestamp": "2025-11-24T15:02:53.246Z",
+      "pattern": "/partners/community/channels/announcements",
+      "path": "/partners/community/channels/announcements",
+      "index": 22
+    },
+    "023-partners-community-channels-general-chat": {
+      "url": "http://localhost:3003/partners/community/channels/general-chat",
+      "domContentLoaded": 1033,
+      "loadEventEnd": 1532.4000000059605,
+      "firstPaint": 1056,
+      "firstContentfulPaint": 1624,
+      "timestamp": "2025-11-24T15:02:57.590Z",
+      "pattern": "/partners/community/channels/general-chat",
+      "path": "/partners/community/channels/general-chat",
+      "index": 23
+    },
+    "024-partners-community-channels-wins": {
+      "url": "http://localhost:3003/partners/community/channels/wins",
+      "domContentLoaded": 971.8999999910593,
+      "loadEventEnd": 1454.199999988079,
+      "firstPaint": 1000,
+      "firstContentfulPaint": 1516,
+      "timestamp": "2025-11-24T15:03:02.217Z",
+      "pattern": "/partners/community/channels/wins",
+      "path": "/partners/community/channels/wins",
+      "index": 24
+    },
+    "025-partners-community-general": {
+      "url": "http://localhost:3003/partners/community/channels/general-chat",
+      "domContentLoaded": 1885,
+      "loadEventEnd": 2325.2999999970198,
+      "firstPaint": 1916,
+      "firstContentfulPaint": 2384,
+      "timestamp": "2025-11-24T15:03:07.509Z",
+      "pattern": "/partners/community/general",
+      "path": "/partners/community/general",
+      "index": 25
+    },
+    "026-partners-community-help": {
+      "url": "http://localhost:3003/partners/community/help",
+      "domContentLoaded": 2024.8999999910593,
+      "loadEventEnd": 2553.5999999940395,
+      "firstPaint": 2060,
+      "firstContentfulPaint": 2644,
+      "timestamp": "2025-11-24T15:03:13.412Z",
+      "pattern": "/partners/community/help",
+      "path": "/partners/community/help",
+      "index": 26
+    },
+    "027-partners-community-help-academy": {
+      "url": "http://localhost:3003/partners/community/help/academy",
+      "domContentLoaded": 1486.5999999940395,
+      "loadEventEnd": 1931.699999988079,
+      "firstPaint": 1520,
+      "firstContentfulPaint": 2020,
+      "timestamp": "2025-11-24T15:03:18.261Z",
+      "pattern": "/partners/community/help/[collection]",
+      "path": "/partners/community/help/academy",
+      "index": 27
+    },
+    "028-partners-community-help-academy-academy-dashboard": {
+      "url": "http://localhost:3003/partners/community/help/academy/academy-dashboard",
+      "domContentLoaded": 1834.3999999910593,
+      "loadEventEnd": 2489.5,
+      "firstPaint": 1864,
+      "firstContentfulPaint": 2612,
+      "timestamp": "2025-11-24T15:03:24.214Z",
+      "pattern": "/partners/community/help/[collection]/[article]",
+      "path": "/partners/community/help/academy/academy-dashboard",
+      "index": 28
+    },
+    "029-partners-community-messages": {
+      "url": "http://localhost:3003/partners/community/messages",
+      "domContentLoaded": 12386.79999999702,
+      "loadEventEnd": 13707.59999999404,
+      "firstPaint": 9816,
+      "firstContentfulPaint": 13780,
+      "timestamp": "2025-11-24T15:03:43.972Z",
+      "pattern": "/partners/community/messages",
+      "path": "/partners/community/messages",
+      "index": 29
+    },
+    "030-partners-community-messages-general-thread": {
+      "url": "http://localhost:3003/partners/community/messages/general-thread",
+      "domContentLoaded": 3793.7999999970198,
+      "loadEventEnd": 4135.5,
+      "firstPaint": 3824,
+      "firstContentfulPaint": 4224,
+      "timestamp": "2025-11-24T15:03:50.760Z",
+      "pattern": "/partners/community/messages/[threadId]",
+      "path": "/partners/community/messages/general-thread",
+      "index": 30
+    },
+    "031-partners-community-profile-nova-carter": {
+      "url": "http://localhost:3003/partners/community/profile/nova-carter",
+      "domContentLoaded": 4274.9000000059605,
+      "loadEventEnd": 4591.5,
+      "firstPaint": 4308,
+      "firstContentfulPaint": 4676,
+      "timestamp": "2025-11-24T15:03:56.835Z",
+      "pattern": "/partners/community/profile/[profileId]",
+      "path": "/partners/community/profile/nova-carter",
+      "index": 31
+    },
+    "032-partners-community-wins": {
+      "url": "http://localhost:3003/partners/community/channels/wins",
+      "domContentLoaded": 937,
+      "loadEventEnd": 1342.8999999910593,
+      "firstPaint": 964,
+      "firstContentfulPaint": 1428,
+      "timestamp": "2025-11-24T15:04:00.855Z",
+      "pattern": "/partners/community/wins",
+      "path": "/partners/community/wins",
+      "index": 32
+    },
+    "033-partners-earnings": {
+      "url": "http://localhost:3003/partners/earnings",
+      "domContentLoaded": 12124.89999999106,
+      "loadEventEnd": 12125.09999999404,
+      "firstPaint": 13312,
+      "firstContentfulPaint": 13312,
+      "timestamp": "2025-11-24T15:04:14.849Z",
+      "pattern": "/partners/earnings",
+      "path": "/partners/earnings",
+      "index": 33
+    },
+    "034-partners-earnings-achievements": {
+      "url": "http://localhost:3003/partners/earnings/achievements",
+      "domContentLoaded": 6535.5,
+      "loadEventEnd": 6535.5999999940395,
+      "firstPaint": 6644,
+      "firstContentfulPaint": 6644,
+      "timestamp": "2025-11-24T15:04:22.856Z",
+      "pattern": "/partners/earnings/achievements",
+      "path": "/partners/earnings/achievements",
+      "index": 34
+    },
+    "035-partners-earnings-badges": {
+      "url": "http://localhost:3003/partners/earnings/badges",
+      "domContentLoaded": 2158.9000000059605,
+      "loadEventEnd": 2159,
+      "firstPaint": 2252,
+      "firstContentfulPaint": 2252,
+      "timestamp": "2025-11-24T15:04:26.497Z",
+      "pattern": "/partners/earnings/badges",
+      "path": "/partners/earnings/badges",
+      "index": 35
+    },
+    "036-partners-earnings-challenges": {
+      "url": "http://localhost:3003/partners/earnings/challenges",
+      "domContentLoaded": 2085.199999988079,
+      "loadEventEnd": 2085.2999999970198,
+      "firstPaint": 2200,
+      "firstContentfulPaint": 2200,
+      "timestamp": "2025-11-24T15:04:30.018Z",
+      "pattern": "/partners/earnings/challenges",
+      "path": "/partners/earnings/challenges",
+      "index": 36
+    },
+    "037-partners-earnings-challenges-momentum-sprint": {
+      "url": "http://localhost:3003/partners/earnings/challenges/momentum-sprint",
+      "domContentLoaded": 1037.8999999910593,
+      "loadEventEnd": 1038.0999999940395,
+      "firstPaint": 1132,
+      "firstContentfulPaint": 1132,
+      "timestamp": "2025-11-24T15:04:32.540Z",
+      "pattern": "/partners/earnings/challenges/[challengeId]",
+      "path": "/partners/earnings/challenges/momentum-sprint",
+      "index": 37
+    },
+    "038-partners-earnings-leaderboard": {
+      "url": "http://localhost:3003/partners/earnings/leaderboard",
+      "domContentLoaded": 1690.2000000029802,
+      "loadEventEnd": 1690.300000011921,
+      "firstPaint": 1788,
+      "firstContentfulPaint": 1788,
+      "timestamp": "2025-11-24T15:04:35.591Z",
+      "pattern": "/partners/earnings/leaderboard",
+      "path": "/partners/earnings/leaderboard",
+      "index": 38
+    },
+    "039-partners-earnings-missions": {
+      "url": "http://localhost:3003/partners/earnings/missions",
+      "domContentLoaded": 1253.2999999970198,
+      "loadEventEnd": 1253.3999999910593,
+      "firstPaint": 1352,
+      "firstContentfulPaint": 1352,
+      "timestamp": "2025-11-24T15:04:38.297Z",
+      "pattern": "/partners/earnings/missions",
+      "path": "/partners/earnings/missions",
+      "index": 39
+    },
+    "040-partners-earnings-overview": {
+      "url": "http://localhost:3003/partners/earnings/overview",
+      "domContentLoaded": 1231.199999988079,
+      "loadEventEnd": 1231.3999999910593,
+      "firstPaint": 1332,
+      "firstContentfulPaint": 1332,
+      "timestamp": "2025-11-24T15:04:41.000Z",
+      "pattern": "/partners/earnings/overview",
+      "path": "/partners/earnings/overview",
+      "index": 40
+    },
+    "041-partners-earnings-tier-progression": {
+      "url": "http://localhost:3003/partners/earnings/tier-progression",
+      "domContentLoaded": 2209.800000011921,
+      "loadEventEnd": 2209.9000000059605,
+      "firstPaint": 2312,
+      "firstContentfulPaint": 2312,
+      "timestamp": "2025-11-24T15:04:44.700Z",
+      "pattern": "/partners/earnings/tier-progression",
+      "path": "/partners/earnings/tier-progression",
+      "index": 41
+    },
+    "042-partners-earnings-wallet": {
+      "url": "http://localhost:3003/partners/earnings/wallet",
+      "domContentLoaded": 2617.9000000059605,
+      "loadEventEnd": 2618,
+      "firstPaint": 2728,
+      "firstContentfulPaint": 2728,
+      "timestamp": "2025-11-24T15:04:48.857Z",
+      "pattern": "/partners/earnings/wallet",
+      "path": "/partners/earnings/wallet",
+      "index": 42
+    },
+    "043-partners-inbox": {
+      "url": "http://localhost:3003/partners/inbox",
+      "domContentLoaded": 2069.1000000089407,
+      "loadEventEnd": 2069.2999999970198,
+      "firstPaint": 2164,
+      "firstContentfulPaint": 2164,
+      "timestamp": "2025-11-24T15:04:52.502Z",
+      "pattern": "/partners/inbox",
+      "path": "/partners/inbox",
+      "index": 43
+    },
+    "044-partners-learning": {
+      "url": "http://localhost:3003/partners/learning",
+      "domContentLoaded": 2544.1000000089407,
+      "loadEventEnd": 2544.2000000029802,
+      "firstPaint": 2652,
+      "firstContentfulPaint": 2652,
+      "timestamp": "2025-11-24T15:04:56.528Z",
+      "pattern": "/partners/learning",
+      "path": "/partners/learning",
+      "index": 44
+    },
+    "045-partners-messages": {
+      "url": "http://localhost:3003/partners/messages",
+      "domContentLoaded": 1339.0999999940395,
+      "loadEventEnd": 1339.0999999940395,
+      "firstPaint": 1432,
+      "firstContentfulPaint": 1432,
+      "timestamp": "2025-11-24T15:04:59.230Z",
+      "pattern": "/partners/messages",
+      "path": "/partners/messages",
+      "index": 45
+    },
+    "046-partners-messages-sample-thread": {
+      "url": "http://localhost:3003/partners/messages/sample-thread",
+      "domContentLoaded": 3995.0999999940395,
+      "loadEventEnd": 3995.199999988079,
+      "firstPaint": 4100,
+      "firstContentfulPaint": 4100,
+      "timestamp": "2025-11-24T15:05:04.653Z",
+      "pattern": "/partners/messages/[threadId]",
+      "path": "/partners/messages/sample-thread",
+      "index": 46
+    },
+    "047-partners-mobile": {
+      "url": "http://localhost:3003/partners",
+      "domContentLoaded": 1932.7000000029802,
+      "loadEventEnd": 2248.5,
+      "firstPaint": 1956,
+      "firstContentfulPaint": 2340,
+      "timestamp": "2025-11-24T15:05:11.614Z",
+      "pattern": "/partners/mobile",
+      "path": "/partners/mobile",
+      "index": 47
+    },
+    "048-partners-pipeline-ops": {
+      "url": "http://localhost:3003/partners/pipeline-ops",
+      "domContentLoaded": 3345.2000000029802,
+      "loadEventEnd": 3613.5,
+      "firstPaint": 3344,
+      "firstContentfulPaint": 3712,
+      "timestamp": "2025-11-24T15:05:18.256Z",
+      "pattern": "/partners/pipeline-ops",
+      "path": "/partners/pipeline-ops",
+      "index": 48
+    },
+    "049-partners-pipeline-ops-active-deals": {
+      "url": "http://localhost:3003/partners/pipeline-ops/active-deals",
+      "domContentLoaded": 3536.4000000059605,
+      "loadEventEnd": 3832.2000000029802,
+      "firstPaint": 3552,
+      "firstContentfulPaint": 3936,
+      "timestamp": "2025-11-24T15:05:25.009Z",
+      "pattern": "/partners/pipeline-ops/active-deals",
+      "path": "/partners/pipeline-ops/active-deals",
+      "index": 49
+    },
+    "050-partners-pipeline-ops-client-notes": {
+      "url": "http://localhost:3003/partners/pipeline-ops/client-notes",
+      "domContentLoaded": 3819.0999999940395,
+      "loadEventEnd": 4203.5999999940395,
+      "firstPaint": 3852,
+      "firstContentfulPaint": 4320,
+      "timestamp": "2025-11-24T15:05:31.690Z",
+      "pattern": "/partners/pipeline-ops/client-notes",
+      "path": "/partners/pipeline-ops/client-notes",
+      "index": 50
+    },
+    "051-partners-pipeline-ops-prospects": {
+      "url": "http://localhost:3003/partners/pipeline-ops/prospects",
+      "domContentLoaded": 3595.7999999970198,
+      "loadEventEnd": 3885.8999999910593,
+      "firstPaint": 3600,
+      "firstContentfulPaint": 4000,
+      "timestamp": "2025-11-24T15:05:38.841Z",
+      "pattern": "/partners/pipeline-ops/prospects",
+      "path": "/partners/pipeline-ops/prospects",
+      "index": 51
+    },
+    "052-partners-pipeline-ops-prospects-prospect-brookstone": {
+      "url": "http://localhost:3003/partners/pipeline-ops/prospects/prospect_brookstone",
+      "domContentLoaded": 3525.5999999940395,
+      "loadEventEnd": 3816.5,
+      "firstPaint": 3528,
+      "firstContentfulPaint": 3912,
+      "timestamp": "2025-11-24T15:05:50.852Z",
+      "pattern": "/partners/pipeline-ops/prospects/[id]",
+      "path": "/partners/pipeline-ops/prospects/prospect_brookstone",
+      "index": 52
+    },
+    "053-partners-pipeline-ops-recruitment": {
+      "url": "http://localhost:3003/partners/recruitment",
+      "domContentLoaded": 1300.9000000059605,
+      "loadEventEnd": 1623.7000000029802,
+      "firstPaint": 1324,
+      "firstContentfulPaint": 1708,
+      "timestamp": "2025-11-24T15:05:59.139Z",
+      "pattern": "/partners/pipeline-ops/recruitment",
+      "path": "/partners/pipeline-ops/recruitment",
+      "index": 53
+    },
+    "054-partners-pipeline-ops-submit-client": {
+      "url": "http://localhost:3003/partners/pipeline-ops/submit-client",
+      "domContentLoaded": 45025.39999999106,
+      "loadEventEnd": 0,
+      "firstPaint": 41820,
+      "firstContentfulPaint": null,
+      "timestamp": "2025-11-24T15:06:44.747Z",
+      "pattern": "/partners/pipeline-ops/submit-client",
+      "path": "/partners/pipeline-ops/submit-client",
+      "index": 54
+    },
+    "056-partners-profile": {
+      "url": "http://localhost:3003/partners/profile",
+      "domContentLoaded": 2912.0999999940395,
+      "loadEventEnd": 3380.7999999970198,
+      "firstPaint": 2944,
+      "firstContentfulPaint": 3476,
+      "timestamp": "2025-11-24T15:07:53.506Z",
+      "pattern": "/partners/profile",
+      "path": "/partners/profile",
+      "index": 56
+    },
+    "057-partners-quick": {
+      "url": "http://localhost:3003/partners/quick",
+      "domContentLoaded": 2932.7999999970198,
+      "loadEventEnd": 3329.9000000059605,
+      "firstPaint": 2960,
+      "firstContentfulPaint": 3412,
+      "timestamp": "2025-11-24T15:07:59.585Z",
+      "pattern": "/partners/quick",
+      "path": "/partners/quick",
+      "index": 57
+    },
+    "058-partners-recruitment": {
+      "url": "http://localhost:3003/partners/recruitment",
+      "domContentLoaded": 358,
+      "loadEventEnd": 691.5999999940395,
+      "firstPaint": 336,
+      "firstContentfulPaint": 804,
+      "timestamp": "2025-11-24T15:08:03.606Z",
+      "pattern": "/partners/recruitment",
+      "path": "/partners/recruitment",
+      "index": 58
+    },
+    "059-partners-recruitment-dashboard": {
+      "url": "http://localhost:3003/partners/recruitment",
+      "domContentLoaded": 4272.5,
+      "loadEventEnd": 4668.20000000298,
+      "firstPaint": 4268,
+      "firstContentfulPaint": 4752,
+      "timestamp": "2025-11-24T15:08:11.675Z",
+      "pattern": "/partners/recruitment/dashboard",
+      "path": "/partners/recruitment/dashboard",
+      "index": 59
+    },
+    "060-partners-recruitment-performance": {
+      "url": "http://localhost:3003/partners/recruitment/performance",
+      "domContentLoaded": 5637.20000000298,
+      "loadEventEnd": 5995.70000000298,
+      "firstPaint": 4900,
+      "firstContentfulPaint": 6080,
+      "timestamp": "2025-11-24T15:08:22.640Z",
+      "pattern": "/partners/recruitment/performance",
+      "path": "/partners/recruitment/performance",
+      "index": 60
+    },
+    "061-partners-recruitment-prospects": {
+      "url": "http://localhost:3003/partners/recruitment/prospects",
+      "domContentLoaded": 5638.199999988079,
+      "loadEventEnd": 6174.79999999702,
+      "firstPaint": 5672,
+      "firstContentfulPaint": 6288,
+      "timestamp": "2025-11-24T15:08:36.941Z",
+      "pattern": "/partners/recruitment/prospects",
+      "path": "/partners/recruitment/prospects",
+      "index": 61
+    },
+    "062-partners-recruitment-prospects-prospect-luca-ramirez": {
+      "url": "http://localhost:3003/partners/recruitment/prospects/prospect-luca-ramirez",
+      "domContentLoaded": 8193.40000000596,
+      "loadEventEnd": 8556.60000000894,
+      "firstPaint": 8204,
+      "firstContentfulPaint": 8656,
+      "timestamp": "2025-11-24T15:08:49.421Z",
+      "pattern": "/partners/recruitment/prospects/[id]",
+      "path": "/partners/recruitment/prospects/prospect-luca-ramirez",
+      "index": 62
+    },
+    "063-partners-recruitment-submit-partner": {
+      "url": "http://localhost:3003/partners/recruitment/submit-partner",
+      "domContentLoaded": 10307,
+      "loadEventEnd": 10651.39999999106,
+      "firstPaint": 10264,
+      "firstContentfulPaint": 10764,
+      "timestamp": "2025-11-24T15:09:02.767Z",
+      "pattern": "/partners/recruitment/submit-partner",
+      "path": "/partners/recruitment/submit-partner",
+      "index": 63
+    },
+    "064-partners-recruitment-team": {
+      "url": "http://localhost:3003/partners/recruitment/team",
+      "domContentLoaded": 2324.1000000089407,
+      "loadEventEnd": 2593.7000000029802,
+      "firstPaint": 2324,
+      "firstContentfulPaint": 2692,
+      "timestamp": "2025-11-24T15:09:09.520Z",
+      "pattern": "/partners/recruitment/team",
+      "path": "/partners/recruitment/team",
+      "index": 64
+    },
+    "065-partners-recruitment-team-avery-diaz": {
+      "url": "http://localhost:3003/partners/recruitment/team/avery-diaz",
+      "domContentLoaded": 2357.2000000029802,
+      "loadEventEnd": 2645.5,
+      "firstPaint": 2388,
+      "firstContentfulPaint": 2704,
+      "timestamp": "2025-11-24T15:09:15.550Z",
+      "pattern": "/partners/recruitment/team/[id]",
+      "path": "/partners/recruitment/team/avery-diaz",
+      "index": 65
+    },
+    "066-partners-settings": {
+      "url": "http://localhost:3003/partners/settings",
+      "domContentLoaded": 4389.70000000298,
+      "loadEventEnd": 4715.300000011921,
+      "firstPaint": 4416,
+      "firstContentfulPaint": 4816,
+      "timestamp": "2025-11-24T15:09:22.931Z",
+      "pattern": "/partners/settings",
+      "path": "/partners/settings",
+      "index": 66
+    },
+    "067-partners-settings-general": {
+      "url": "http://localhost:3003/partners/settings/general",
+      "domContentLoaded": 1125.300000011921,
+      "loadEventEnd": 5299.100000008941,
+      "firstPaint": 1160,
+      "firstContentfulPaint": 5480,
+      "timestamp": "2025-11-24T15:09:33.202Z",
+      "pattern": "/partners/settings/[...slug]",
+      "path": "/partners/settings/general",
+      "index": 67
+    },
+    "068-partners-settings-appearance": {
+      "url": "http://localhost:3003/partners/settings/appearance",
+      "domContentLoaded": 1042.4000000059605,
+      "loadEventEnd": 1322.2000000029802,
+      "firstPaint": 1072,
+      "firstContentfulPaint": 1424,
+      "timestamp": "2025-11-24T15:09:35.947Z",
+      "pattern": "/partners/settings/appearance",
+      "path": "/partners/settings/appearance",
+      "index": 68
+    },
+    "069-partners-settings-general": {
+      "url": "http://localhost:3003/partners/settings/general",
+      "domContentLoaded": 114,
+      "loadEventEnd": 448,
+      "firstPaint": 140,
+      "firstContentfulPaint": 524,
+      "timestamp": "2025-11-24T15:09:42.703Z",
+      "pattern": "/partners/settings/general",
+      "path": "/partners/settings/general",
+      "index": 69
+    },
+    "070-partners-settings-integrations": {
+      "url": "http://localhost:3003/partners/settings/integrations",
+      "domContentLoaded": 2719.0999999940395,
+      "loadEventEnd": 3081.5,
+      "firstPaint": 2756,
+      "firstContentfulPaint": 3156,
+      "timestamp": "2025-11-24T15:09:49.384Z",
+      "pattern": "/partners/settings/integrations",
+      "path": "/partners/settings/integrations",
+      "index": 70
+    },
+    "071-partners-settings-language": {
+      "url": "http://localhost:3003/partners/settings/language",
+      "domContentLoaded": 1165.7999999970198,
+      "loadEventEnd": 1452.7000000029802,
+      "firstPaint": 1188,
+      "firstContentfulPaint": 1556,
+      "timestamp": "2025-11-24T15:09:52.254Z",
+      "pattern": "/partners/settings/language",
+      "path": "/partners/settings/language",
+      "index": 71
+    },
+    "072-partners-settings-legal": {
+      "url": "http://localhost:3003/partners/settings/legal",
+      "domContentLoaded": 1002.6000000089407,
+      "loadEventEnd": 2764.4000000059605,
+      "firstPaint": 1032,
+      "firstContentfulPaint": 2848,
+      "timestamp": "2025-11-24T15:09:57.764Z",
+      "pattern": "/partners/settings/legal",
+      "path": "/partners/settings/legal",
+      "index": 72
+    },
+    "073-partners-settings-legal-commission-terms": {
+      "url": "http://localhost:3003/partners/settings/legal/commission-terms",
+      "domContentLoaded": 1067.2999999970198,
+      "loadEventEnd": 1537.4000000059605,
+      "firstPaint": 1096,
+      "firstContentfulPaint": 1612,
+      "timestamp": "2025-11-24T15:10:01.582Z",
+      "pattern": "/partners/settings/legal/commission-terms",
+      "path": "/partners/settings/legal/commission-terms",
+      "index": 73
+    },
+    "074-partners-settings-legal-compliance-regulatory": {
+      "url": "http://localhost:3003/partners/settings/legal/compliance-regulatory",
+      "domContentLoaded": 987.1000000089407,
+      "loadEventEnd": 1290.4000000059605,
+      "firstPaint": 1016,
+      "firstContentfulPaint": 1368,
+      "timestamp": "2025-11-24T15:10:04.306Z",
+      "pattern": "/partners/settings/legal/compliance-regulatory",
+      "path": "/partners/settings/legal/compliance-regulatory",
+      "index": 74
+    },
+    "075-partners-settings-legal-cookie-tracking-policy": {
+      "url": "http://localhost:3003/partners/settings/legal/cookie-tracking-policy",
+      "domContentLoaded": 1059.5,
+      "loadEventEnd": 1336,
+      "firstPaint": 1096,
+      "firstContentfulPaint": 1396,
+      "timestamp": "2025-11-24T15:10:07.054Z",
+      "pattern": "/partners/settings/legal/cookie-tracking-policy",
+      "path": "/partners/settings/legal/cookie-tracking-policy",
+      "index": 75
+    },
+    "076-partners-settings-legal-partner-agreement": {
+      "url": "http://localhost:3003/partners/settings/legal/partner-agreement",
+      "domContentLoaded": 1147.5,
+      "loadEventEnd": 3422.5,
+      "firstPaint": 1180,
+      "firstContentfulPaint": 3528,
+      "timestamp": "2025-11-24T15:10:12.263Z",
+      "pattern": "/partners/settings/legal/partner-agreement",
+      "path": "/partners/settings/legal/partner-agreement",
+      "index": 76
+    },
+    "077-partners-settings-legal-service-level-agreement": {
+      "url": "http://localhost:3003/partners/settings/legal/service-level-agreement",
+      "domContentLoaded": 2033.5,
+      "loadEventEnd": 2339.300000011921,
+      "firstPaint": 2056,
+      "firstContentfulPaint": 2408,
+      "timestamp": "2025-11-24T15:10:16.236Z",
+      "pattern": "/partners/settings/legal/service-level-agreement",
+      "path": "/partners/settings/legal/service-level-agreement",
+      "index": 77
+    },
+    "078-partners-settings-legal-terms-of-service": {
+      "url": "http://localhost:3003/partners/settings/legal/terms-of-service",
+      "domContentLoaded": 1169.2000000029802,
+      "loadEventEnd": 1537.0999999940395,
+      "firstPaint": 1196,
+      "firstContentfulPaint": 1612,
+      "timestamp": "2025-11-24T15:10:20.125Z",
+      "pattern": "/partners/settings/legal/terms-of-service",
+      "path": "/partners/settings/legal/terms-of-service",
+      "index": 78
+    },
+    "079-partners-settings-legal-updates-changes-policy": {
+      "url": "http://localhost:3003/partners/settings/legal/updates-changes-policy",
+      "domContentLoaded": 1230.800000011921,
+      "loadEventEnd": 1516.5,
+      "firstPaint": 1264,
+      "firstContentfulPaint": 1580,
+      "timestamp": "2025-11-24T15:10:23.039Z",
+      "pattern": "/partners/settings/legal/updates-changes-policy",
+      "path": "/partners/settings/legal/updates-changes-policy",
+      "index": 79
+    },
+    "080-partners-settings-privacy": {
+      "url": "http://localhost:3003/partners/settings/privacy",
+      "domContentLoaded": 1209.1000000089407,
+      "loadEventEnd": 1574.7000000029802,
+      "firstPaint": 1240,
+      "firstContentfulPaint": 1660,
+      "timestamp": "2025-11-24T15:10:29.069Z",
+      "pattern": "/partners/settings/privacy",
+      "path": "/partners/settings/privacy",
+      "index": 80
+    },
+    "081-partners-settings-security": {
+      "url": "http://localhost:3003/partners/settings/security",
+      "domContentLoaded": 2115,
+      "loadEventEnd": 3374.5,
+      "firstPaint": 2148,
+      "firstContentfulPaint": 3464,
+      "timestamp": "2025-11-24T15:10:35.867Z",
+      "pattern": "/partners/settings/security",
+      "path": "/partners/settings/security",
+      "index": 81
+    },
+    "082-partners-tools-app-plan-generator": {
+      "url": "http://localhost:3003/partners/tools/app-plan-generator",
+      "domContentLoaded": 6454.5999999940395,
+      "loadEventEnd": 6771.79999999702,
+      "firstPaint": 6472,
+      "firstContentfulPaint": 6872,
+      "timestamp": "2025-11-24T15:10:45.129Z",
+      "pattern": "/partners/tools/app-plan-generator",
+      "path": "/partners/tools/app-plan-generator",
+      "index": 82
+    },
+    "083-partners-wallet": {
+      "url": "http://localhost:3003/partners/settings/wallet",
+      "domContentLoaded": 5164.699999988079,
+      "loadEventEnd": 5444.0999999940395,
+      "firstPaint": 5192,
+      "firstContentfulPaint": 5540,
+      "timestamp": "2025-11-24T15:10:58.719Z",
+      "pattern": "/partners/wallet",
+      "path": "/partners/wallet",
+      "index": 83
+    },
+    "084-partners-workspace": {
+      "url": "http://localhost:3003/partners/workspace",
+      "domContentLoaded": 7059.100000008941,
+      "loadEventEnd": 7361.4000000059605,
+      "firstPaint": 7072,
+      "firstContentfulPaint": 7440,
+      "timestamp": "2025-11-24T15:11:08.609Z",
+      "pattern": "/partners/workspace",
+      "path": "/partners/workspace",
+      "index": 84
+    },
+    "085-partners-workspace-calendar": {
+      "url": "http://localhost:3003/partners/workspace/calendar",
+      "domContentLoaded": 4793.70000000298,
+      "loadEventEnd": 5071.5,
+      "firstPaint": 4820,
+      "firstContentfulPaint": 5188,
+      "timestamp": "2025-11-24T15:11:16.304Z",
+      "pattern": "/partners/workspace/calendar",
+      "path": "/partners/workspace/calendar",
+      "index": 85
+    },
+    "086-partners-workspace-files": {
+      "url": "http://localhost:3003/partners/workspace/files",
+      "domContentLoaded": 1436.0999999940395,
+      "loadEventEnd": 1874.7000000029802,
+      "firstPaint": 1428,
+      "firstContentfulPaint": 1944,
+      "timestamp": "2025-11-24T15:11:20.545Z",
+      "pattern": "/partners/workspace/files",
+      "path": "/partners/workspace/files",
+      "index": 86
+    },
+    "087-partners-workspace-notes-my-notes": {
+      "url": "http://localhost:3003/partners/workspace/notes/my-notes",
+      "domContentLoaded": 1124.2000000029802,
+      "loadEventEnd": 1583.9000000059605,
+      "firstPaint": 1152,
+      "firstContentfulPaint": 1668,
+      "timestamp": "2025-11-24T15:11:25.570Z",
+      "pattern": "/partners/workspace/notes/my-notes",
+      "path": "/partners/workspace/notes/my-notes",
+      "index": 87
+    },
+    "088-partners-workspace-tasks": {
+      "url": "http://localhost:3003/partners/workspace/tasks",
+      "domContentLoaded": 2719,
+      "loadEventEnd": 3006,
+      "firstPaint": 2700,
+      "firstContentfulPaint": 3116,
+      "timestamp": "2025-11-24T15:11:31.126Z",
+      "pattern": "/partners/workspace/tasks",
+      "path": "/partners/workspace/tasks",
+      "index": 88
+    }
+  }
+}

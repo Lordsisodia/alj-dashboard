@@ -1,4 +1,4 @@
-// WorkWithBrands page data — extracted from www_foreplay_co (25).html
+// WorkWithBrands page data - extracted from www_foreplay_co (25).html
 
 const CDN = 'https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4';
 

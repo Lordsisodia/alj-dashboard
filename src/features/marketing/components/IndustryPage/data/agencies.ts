@@ -1,4 +1,4 @@
-// Agencies industry page data — extracted from www_foreplay_co (11).html
+// Agencies industry page data - extracted from www_foreplay_co (11).html
 
 import type { IndustryPageData } from '../types';
 

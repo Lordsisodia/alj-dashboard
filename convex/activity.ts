@@ -1,1 +1,1 @@
-// Activity queries and mutations — TODO
+// Activity queries and mutations - TODO

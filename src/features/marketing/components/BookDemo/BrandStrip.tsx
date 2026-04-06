@@ -1,4 +1,4 @@
-// BrandStrip — "Powering +10,000 Social Ad Teams & Agencies" logo strip.
+// BrandStrip - "Powering +10,000 Social Ad Teams & Agencies" logo strip.
 // Contains the same brand logos used on the book-demo page.
 
 function HexcladLogo() {

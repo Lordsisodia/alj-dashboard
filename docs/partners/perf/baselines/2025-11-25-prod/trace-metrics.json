@@ -1,0 +1,646 @@
+{
+  "capturedAt": "2025-11-25T10:34:39.111Z",
+  "baseUrl": "http://localhost:3003",
+  "routes": [
+    {
+      "index": 1,
+      "pattern": "/partners",
+      "path": "/partners",
+      "slug": "001-partners"
+    },
+    {
+      "index": 2,
+      "pattern": "/partners/academy",
+      "path": "/partners/academy",
+      "slug": "002-partners-academy"
+    },
+    {
+      "index": 3,
+      "pattern": "/partners/academy/certificates",
+      "path": "/partners/academy/certificates",
+      "slug": "003-partners-academy-certificates"
+    },
+    {
+      "index": 4,
+      "pattern": "/partners/academy/courses",
+      "path": "/partners/academy/courses",
+      "slug": "004-partners-academy-courses"
+    },
+    {
+      "index": 5,
+      "pattern": "/partners/academy/courses/[courseId]",
+      "path": "/partners/academy/courses/siso-essentials-program",
+      "slug": "005-partners-academy-courses-siso-essentials-program"
+    },
+    {
+      "index": 6,
+      "pattern": "/partners/academy/courses/[courseId]/[lessonId]",
+      "path": "/partners/academy/courses/siso-introduction/intro-1",
+      "slug": "006-partners-academy-courses-siso-introduction-intro-1"
+    },
+    {
+      "index": 7,
+      "pattern": "/partners/academy/industry/[slug]",
+      "path": "/partners/academy/industry/commerce",
+      "slug": "007-partners-academy-industry-commerce"
+    },
+    {
+      "index": 8,
+      "pattern": "/partners/academy/my-progress",
+      "path": "/partners/academy/my-progress",
+      "slug": "008-partners-academy-my-progress"
+    },
+    {
+      "index": 9,
+      "pattern": "/partners/academy/my-progress/tiers-and-perks",
+      "path": "/partners/academy/my-progress/tiers-and-perks",
+      "slug": "009-partners-academy-my-progress-tiers-and-perks"
+    },
+    {
+      "index": 10,
+      "pattern": "/partners/academy/pitch-kit",
+      "path": "/partners/academy/pitch-kit",
+      "slug": "010-partners-academy-pitch-kit"
+    },
+    {
+      "index": 11,
+      "pattern": "/partners/academy/pitch-kit/[type]/[slug]",
+      "path": "/partners/academy/pitch-kit/decks/standard",
+      "slug": "011-partners-academy-pitch-kit-decks-standard"
+    },
+    {
+      "index": 12,
+      "pattern": "/partners/academy/portfolio",
+      "path": "/partners/academy/portfolio",
+      "slug": "012-partners-academy-portfolio"
+    },
+    {
+      "index": 13,
+      "pattern": "/partners/academy/saved",
+      "path": "/partners/academy/saved",
+      "slug": "013-partners-academy-saved"
+    },
+    {
+      "index": 14,
+      "pattern": "/partners/academy/training-spotlight",
+      "path": "/partners/academy/training-spotlight",
+      "slug": "014-partners-academy-training-spotlight"
+    },
+    {
+      "index": 15,
+      "pattern": "/partners/academy/xp-breakdown",
+      "path": "/partners/academy/xp-breakdown",
+      "slug": "015-partners-academy-xp-breakdown"
+    },
+    {
+      "index": 16,
+      "pattern": "/partners/campus",
+      "path": "/partners/campus",
+      "slug": "016-partners-campus"
+    },
+    {
+      "index": 17,
+      "pattern": "/partners/checklist",
+      "path": "/partners/checklist",
+      "slug": "017-partners-checklist"
+    },
+    {
+      "index": 18,
+      "pattern": "/partners/community",
+      "path": "/partners/community",
+      "slug": "018-partners-community"
+    },
+    {
+      "index": 19,
+      "pattern": "/partners/community/all-channels",
+      "path": "/partners/community/all-channels",
+      "slug": "019-partners-community-all-channels"
+    },
+    {
+      "index": 20,
+      "pattern": "/partners/community/all-partners",
+      "path": "/partners/community/all-partners",
+      "slug": "020-partners-community-all-partners"
+    },
+    {
+      "index": 21,
+      "pattern": "/partners/community/announcements",
+      "path": "/partners/community/announcements",
+      "slug": "021-partners-community-announcements"
+    },
+    {
+      "index": 22,
+      "pattern": "/partners/community/channels/announcements",
+      "path": "/partners/community/channels/announcements",
+      "slug": "022-partners-community-channels-announcements"
+    },
+    {
+      "index": 23,
+      "pattern": "/partners/community/channels/general-chat",
+      "path": "/partners/community/channels/general-chat",
+      "slug": "023-partners-community-channels-general-chat"
+    },
+    {
+      "index": 24,
+      "pattern": "/partners/community/channels/wins",
+      "path": "/partners/community/channels/wins",
+      "slug": "024-partners-community-channels-wins"
+    },
+    {
+      "index": 25,
+      "pattern": "/partners/community/general",
+      "path": "/partners/community/general",
+      "slug": "025-partners-community-general"
+    },
+    {
+      "index": 26,
+      "pattern": "/partners/community/help",
+      "path": "/partners/community/help",
+      "slug": "026-partners-community-help"
+    },
+    {
+      "index": 27,
+      "pattern": "/partners/community/help/[collection]",
+      "path": "/partners/community/help/academy",
+      "slug": "027-partners-community-help-academy"
+    },
+    {
+      "index": 28,
+      "pattern": "/partners/community/help/[collection]/[article]",
+      "path": "/partners/community/help/academy/academy-dashboard",
+      "slug": "028-partners-community-help-academy-academy-dashboard"
+    },
+    {
+      "index": 29,
+      "pattern": "/partners/community/messages",
+      "path": "/partners/community/messages",
+      "slug": "029-partners-community-messages"
+    },
+    {
+      "index": 30,
+      "pattern": "/partners/community/messages/[threadId]",
+      "path": "/partners/community/messages/general-thread",
+      "slug": "030-partners-community-messages-general-thread"
+    },
+    {
+      "index": 31,
+      "pattern": "/partners/community/profile/[profileId]",
+      "path": "/partners/community/profile/nova-carter",
+      "slug": "031-partners-community-profile-nova-carter"
+    },
+    {
+      "index": 32,
+      "pattern": "/partners/community/wins",
+      "path": "/partners/community/wins",
+      "slug": "032-partners-community-wins"
+    },
+    {
+      "index": 33,
+      "pattern": "/partners/earnings",
+      "path": "/partners/earnings",
+      "slug": "033-partners-earnings"
+    },
+    {
+      "index": 34,
+      "pattern": "/partners/earnings/achievements",
+      "path": "/partners/earnings/achievements",
+      "slug": "034-partners-earnings-achievements"
+    },
+    {
+      "index": 35,
+      "pattern": "/partners/earnings/badges",
+      "path": "/partners/earnings/badges",
+      "slug": "035-partners-earnings-badges"
+    },
+    {
+      "index": 36,
+      "pattern": "/partners/earnings/challenges",
+      "path": "/partners/earnings/challenges",
+      "slug": "036-partners-earnings-challenges"
+    },
+    {
+      "index": 37,
+      "pattern": "/partners/earnings/challenges/[challengeId]",
+      "path": "/partners/earnings/challenges/momentum-sprint",
+      "slug": "037-partners-earnings-challenges-momentum-sprint"
+    },
+    {
+      "index": 38,
+      "pattern": "/partners/earnings/leaderboard",
+      "path": "/partners/earnings/leaderboard",
+      "slug": "038-partners-earnings-leaderboard"
+    },
+    {
+      "index": 39,
+      "pattern": "/partners/earnings/missions",
+      "path": "/partners/earnings/missions",
+      "slug": "039-partners-earnings-missions"
+    },
+    {
+      "index": 40,
+      "pattern": "/partners/earnings/overview",
+      "path": "/partners/earnings/overview",
+      "slug": "040-partners-earnings-overview"
+    },
+    {
+      "index": 41,
+      "pattern": "/partners/earnings/tier-progression",
+      "path": "/partners/earnings/tier-progression",
+      "slug": "041-partners-earnings-tier-progression"
+    },
+    {
+      "index": 42,
+      "pattern": "/partners/earnings/wallet",
+      "path": "/partners/earnings/wallet",
+      "slug": "042-partners-earnings-wallet"
+    },
+    {
+      "index": 43,
+      "pattern": "/partners/inbox",
+      "path": "/partners/inbox",
+      "slug": "043-partners-inbox"
+    },
+    {
+      "index": 44,
+      "pattern": "/partners/learning",
+      "path": "/partners/learning",
+      "slug": "044-partners-learning"
+    },
+    {
+      "index": 45,
+      "pattern": "/partners/messages",
+      "path": "/partners/messages",
+      "slug": "045-partners-messages"
+    },
+    {
+      "index": 46,
+      "pattern": "/partners/messages/[threadId]",
+      "path": "/partners/messages/sample-thread",
+      "slug": "046-partners-messages-sample-thread"
+    },
+    {
+      "index": 47,
+      "pattern": "/partners/mobile",
+      "path": "/partners/mobile",
+      "slug": "047-partners-mobile"
+    },
+    {
+      "index": 48,
+      "pattern": "/partners/pipeline-ops",
+      "path": "/partners/pipeline-ops",
+      "slug": "048-partners-pipeline-ops"
+    },
+    {
+      "index": 49,
+      "pattern": "/partners/pipeline-ops/active-deals",
+      "path": "/partners/pipeline-ops/active-deals",
+      "slug": "049-partners-pipeline-ops-active-deals"
+    },
+    {
+      "index": 50,
+      "pattern": "/partners/pipeline-ops/client-notes",
+      "path": "/partners/pipeline-ops/client-notes",
+      "slug": "050-partners-pipeline-ops-client-notes"
+    },
+    {
+      "index": 51,
+      "pattern": "/partners/pipeline-ops/prospects",
+      "path": "/partners/pipeline-ops/prospects",
+      "slug": "051-partners-pipeline-ops-prospects"
+    },
+    {
+      "index": 52,
+      "pattern": "/partners/pipeline-ops/prospects/[id]",
+      "path": "/partners/pipeline-ops/prospects/prospect_brookstone",
+      "slug": "052-partners-pipeline-ops-prospects-prospect-brookstone"
+    },
+    {
+      "index": 53,
+      "pattern": "/partners/pipeline-ops/recruitment",
+      "path": "/partners/pipeline-ops/recruitment",
+      "slug": "053-partners-pipeline-ops-recruitment"
+    },
+    {
+      "index": 54,
+      "pattern": "/partners/pipeline-ops/submit-client",
+      "path": "/partners/pipeline-ops/submit-client",
+      "slug": "054-partners-pipeline-ops-submit-client"
+    },
+    {
+      "index": 55,
+      "pattern": "/partners/privacy-policy",
+      "path": "/partners/privacy-policy",
+      "slug": "055-partners-privacy-policy"
+    },
+    {
+      "index": 56,
+      "pattern": "/partners/profile",
+      "path": "/partners/profile",
+      "slug": "056-partners-profile"
+    },
+    {
+      "index": 57,
+      "pattern": "/partners/quick",
+      "path": "/partners/quick",
+      "slug": "057-partners-quick"
+    },
+    {
+      "index": 58,
+      "pattern": "/partners/recruitment",
+      "path": "/partners/recruitment",
+      "slug": "058-partners-recruitment"
+    },
+    {
+      "index": 59,
+      "pattern": "/partners/recruitment/dashboard",
+      "path": "/partners/recruitment/dashboard",
+      "slug": "059-partners-recruitment-dashboard"
+    },
+    {
+      "index": 60,
+      "pattern": "/partners/recruitment/performance",
+      "path": "/partners/recruitment/performance",
+      "slug": "060-partners-recruitment-performance"
+    },
+    {
+      "index": 61,
+      "pattern": "/partners/recruitment/prospects",
+      "path": "/partners/recruitment/prospects",
+      "slug": "061-partners-recruitment-prospects"
+    },
+    {
+      "index": 62,
+      "pattern": "/partners/recruitment/prospects/[id]",
+      "path": "/partners/recruitment/prospects/prospect-luca-ramirez",
+      "slug": "062-partners-recruitment-prospects-prospect-luca-ramirez"
+    },
+    {
+      "index": 63,
+      "pattern": "/partners/recruitment/submit-partner",
+      "path": "/partners/recruitment/submit-partner",
+      "slug": "063-partners-recruitment-submit-partner"
+    },
+    {
+      "index": 64,
+      "pattern": "/partners/recruitment/team",
+      "path": "/partners/recruitment/team",
+      "slug": "064-partners-recruitment-team"
+    },
+    {
+      "index": 65,
+      "pattern": "/partners/recruitment/team/[id]",
+      "path": "/partners/recruitment/team/avery-diaz",
+      "slug": "065-partners-recruitment-team-avery-diaz"
+    },
+    {
+      "index": 66,
+      "pattern": "/partners/settings",
+      "path": "/partners/settings",
+      "slug": "066-partners-settings"
+    },
+    {
+      "index": 67,
+      "pattern": "/partners/settings/[...slug]",
+      "path": "/partners/settings/general",
+      "slug": "067-partners-settings-general"
+    },
+    {
+      "index": 68,
+      "pattern": "/partners/settings/appearance",
+      "path": "/partners/settings/appearance",
+      "slug": "068-partners-settings-appearance"
+    },
+    {
+      "index": 69,
+      "pattern": "/partners/settings/general",
+      "path": "/partners/settings/general",
+      "slug": "069-partners-settings-general"
+    },
+    {
+      "index": 70,
+      "pattern": "/partners/settings/integrations",
+      "path": "/partners/settings/integrations",
+      "slug": "070-partners-settings-integrations"
+    },
+    {
+      "index": 71,
+      "pattern": "/partners/settings/language",
+      "path": "/partners/settings/language",
+      "slug": "071-partners-settings-language"
+    },
+    {
+      "index": 72,
+      "pattern": "/partners/settings/legal",
+      "path": "/partners/settings/legal",
+      "slug": "072-partners-settings-legal"
+    },
+    {
+      "index": 73,
+      "pattern": "/partners/settings/legal/commission-terms",
+      "path": "/partners/settings/legal/commission-terms",
+      "slug": "073-partners-settings-legal-commission-terms"
+    },
+    {
+      "index": 74,
+      "pattern": "/partners/settings/legal/compliance-regulatory",
+      "path": "/partners/settings/legal/compliance-regulatory",
+      "slug": "074-partners-settings-legal-compliance-regulatory"
+    },
+    {
+      "index": 75,
+      "pattern": "/partners/settings/legal/cookie-tracking-policy",
+      "path": "/partners/settings/legal/cookie-tracking-policy",
+      "slug": "075-partners-settings-legal-cookie-tracking-policy"
+    },
+    {
+      "index": 76,
+      "pattern": "/partners/settings/legal/partner-agreement",
+      "path": "/partners/settings/legal/partner-agreement",
+      "slug": "076-partners-settings-legal-partner-agreement"
+    },
+    {
+      "index": 77,
+      "pattern": "/partners/settings/legal/service-level-agreement",
+      "path": "/partners/settings/legal/service-level-agreement",
+      "slug": "077-partners-settings-legal-service-level-agreement"
+    },
+    {
+      "index": 78,
+      "pattern": "/partners/settings/legal/terms-of-service",
+      "path": "/partners/settings/legal/terms-of-service",
+      "slug": "078-partners-settings-legal-terms-of-service"
+    },
+    {
+      "index": 79,
+      "pattern": "/partners/settings/legal/updates-changes-policy",
+      "path": "/partners/settings/legal/updates-changes-policy",
+      "slug": "079-partners-settings-legal-updates-changes-policy"
+    },
+    {
+      "index": 80,
+      "pattern": "/partners/settings/privacy",
+      "path": "/partners/settings/privacy",
+      "slug": "080-partners-settings-privacy"
+    },
+    {
+      "index": 81,
+      "pattern": "/partners/settings/security",
+      "path": "/partners/settings/security",
+      "slug": "081-partners-settings-security"
+    },
+    {
+      "index": 82,
+      "pattern": "/partners/tools/app-plan-generator",
+      "path": "/partners/tools/app-plan-generator",
+      "slug": "082-partners-tools-app-plan-generator"
+    },
+    {
+      "index": 83,
+      "pattern": "/partners/wallet",
+      "path": "/partners/wallet",
+      "slug": "083-partners-wallet"
+    },
+    {
+      "index": 84,
+      "pattern": "/partners/workspace",
+      "path": "/partners/workspace",
+      "slug": "084-partners-workspace"
+    },
+    {
+      "index": 85,
+      "pattern": "/partners/workspace/calendar",
+      "path": "/partners/workspace/calendar",
+      "slug": "085-partners-workspace-calendar"
+    },
+    {
+      "index": 86,
+      "pattern": "/partners/workspace/files",
+      "path": "/partners/workspace/files",
+      "slug": "086-partners-workspace-files"
+    },
+    {
+      "index": 87,
+      "pattern": "/partners/workspace/notes/my-notes",
+      "path": "/partners/workspace/notes/my-notes",
+      "slug": "087-partners-workspace-notes-my-notes"
+    },
+    {
+      "index": 88,
+      "pattern": "/partners/workspace/tasks",
+      "path": "/partners/workspace/tasks",
+      "slug": "088-partners-workspace-tasks"
+    }
+  ],
+  "metrics": {
+    "001-partners": {
+      "url": "http://localhost:3003/partners",
+      "domContentLoaded": 76.40000000037253,
+      "loadEventEnd": 108.5,
+      "firstPaint": 120,
+      "firstContentfulPaint": 356,
+      "timestamp": "2025-11-25T10:33:42.096Z",
+      "pattern": "/partners",
+      "path": "/partners",
+      "index": 1
+    },
+    "002-partners-academy": {
+      "url": "http://localhost:3003/partners/academy",
+      "domContentLoaded": 19.300000000745058,
+      "loadEventEnd": 47.90000000037253,
+      "firstPaint": 76,
+      "firstContentfulPaint": 376,
+      "timestamp": "2025-11-25T10:33:44.808Z",
+      "pattern": "/partners/academy",
+      "path": "/partners/academy",
+      "index": 2
+    },
+    "003-partners-academy-certificates": {
+      "url": "http://localhost:3003/partners/academy/certificates",
+      "domContentLoaded": 18.40000000037253,
+      "loadEventEnd": 40.19999999925494,
+      "firstPaint": 132,
+      "firstContentfulPaint": 364,
+      "timestamp": "2025-11-25T10:33:47.509Z",
+      "pattern": "/partners/academy/certificates",
+      "path": "/partners/academy/certificates",
+      "index": 3
+    },
+    "004-partners-academy-courses": {
+      "url": "http://localhost:3003/partners/academy/courses",
+      "domContentLoaded": 52.29999999888241,
+      "loadEventEnd": 59.5,
+      "firstPaint": 80,
+      "firstContentfulPaint": 348,
+      "timestamp": "2025-11-25T10:33:53.028Z",
+      "pattern": "/partners/academy/courses",
+      "path": "/partners/academy/courses",
+      "index": 4
+    },
+    "005-partners-academy-courses-siso-essentials-program": {
+      "url": "http://localhost:3003/partners/academy/courses/siso-essentials-program",
+      "domContentLoaded": 25.699999999254942,
+      "loadEventEnd": 44.899999998509884,
+      "firstPaint": 72,
+      "firstContentfulPaint": 340,
+      "timestamp": "2025-11-25T10:33:55.737Z",
+      "pattern": "/partners/academy/courses/[courseId]",
+      "path": "/partners/academy/courses/siso-essentials-program",
+      "index": 5
+    },
+    "006-partners-academy-courses-siso-introduction-intro-1": {
+      "url": "http://localhost:3003/partners/academy/courses/siso-introduction/intro-1",
+      "domContentLoaded": 20.600000001490116,
+      "loadEventEnd": 40.30000000074506,
+      "firstPaint": 116,
+      "firstContentfulPaint": 416,
+      "timestamp": "2025-11-25T10:34:16.933Z",
+      "pattern": "/partners/academy/courses/[courseId]/[lessonId]",
+      "path": "/partners/academy/courses/siso-introduction/intro-1",
+      "index": 6
+    },
+    "007-partners-academy-industry-commerce": {
+      "url": "http://localhost:3003/partners/academy/industry/commerce",
+      "domContentLoaded": 29.700000001117587,
+      "loadEventEnd": 42.09999999962747,
+      "firstPaint": 72,
+      "firstContentfulPaint": 340,
+      "timestamp": "2025-11-25T10:34:20.096Z",
+      "pattern": "/partners/academy/industry/[slug]",
+      "path": "/partners/academy/industry/commerce",
+      "index": 7
+    },
+    "008-partners-academy-my-progress": {
+      "url": "http://localhost:3003/partners/academy/my-progress",
+      "domContentLoaded": 37,
+      "loadEventEnd": 57.5,
+      "firstPaint": 56,
+      "firstContentfulPaint": 356,
+      "timestamp": "2025-11-25T10:34:25.521Z",
+      "pattern": "/partners/academy/my-progress",
+      "path": "/partners/academy/my-progress",
+      "index": 8
+    },
+    "009-partners-academy-my-progress-tiers-and-perks": {
+      "url": "http://localhost:3003/partners/academy/my-progress/tiers-and-perks",
+      "domContentLoaded": 18.300000000745058,
+      "loadEventEnd": 38,
+      "firstPaint": 116,
+      "firstContentfulPaint": 368,
+      "timestamp": "2025-11-25T10:34:28.261Z",
+      "pattern": "/partners/academy/my-progress/tiers-and-perks",
+      "path": "/partners/academy/my-progress/tiers-and-perks",
+      "index": 9
+    },
+    "010-partners-academy-pitch-kit": {
+      "url": "http://localhost:3003/partners/academy/pitch-kit",
+      "domContentLoaded": 18.5,
+      "loadEventEnd": 38.59999999962747,
+      "firstPaint": 76,
+      "firstContentfulPaint": 344,
+      "timestamp": "2025-11-25T10:34:39.031Z",
+      "pattern": "/partners/academy/pitch-kit",
+      "path": "/partners/academy/pitch-kit",
+      "index": 10
+    }
+  }
+}

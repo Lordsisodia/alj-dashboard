@@ -1,4 +1,4 @@
-// B2B SaaS industry page data — extracted from www_foreplay_co (13).html
+// B2B SaaS industry page data - extracted from www_foreplay_co (13).html
 
 import type { IndustryPageData } from '../types';
 

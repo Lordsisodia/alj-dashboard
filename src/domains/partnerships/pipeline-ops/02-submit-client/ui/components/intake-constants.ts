@@ -10,7 +10,7 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
 export const formatNow = () => timeFormatter.format(new Date());
 
 export const DEFAULT_ASSISTANT_MESSAGE =
-  "Hey—I'm the SISO intake assistant. Answer a few quick questions and type NA or Skip anytime if you don't have the info.";
+  "Hey-I'm the SISO intake assistant. Answer a few quick questions and type NA or Skip anytime if you don't have the info.";
 
 export const DEFAULT_SERVICE_OPTIONS = ["Website", "Web App", "SEO", "Automation", "AI Builder", "Integrations"] as const;
 

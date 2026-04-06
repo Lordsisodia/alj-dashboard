@@ -1,4 +1,4 @@
-// CalendarPopup — Floating CTA popup with Cal.com integration and date pills.
+// CalendarPopup - Floating CTA popup with Cal.com integration and date pills.
 // Includes the Cal.com embed initialization and a mini calendar widget.
 
 'use client';

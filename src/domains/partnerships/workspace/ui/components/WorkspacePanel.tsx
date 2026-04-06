@@ -17,7 +17,7 @@ export function WorkspacePanel({ title, state, children, description, errorMessa
         <h2 className="text-sm uppercase tracking-[0.3em] text-white/70">{title}</h2>
         {description ? <p className="text-xs text-siso-text-muted">{description}</p> : null}
       </div>
-      {state === "loading" && <p className="text-sm text-white/60">Loading…</p>}
+      {state === "loading" && <p className="text-sm text-white/60">Loading...</p>}
       {state === "error" && <p className="text-sm text-red-300">{errorMessage ?? "Something went wrong."}</p>}
       {state === "empty" && <p className="text-sm text-white/60">Nothing here yet.</p>}
       {state === "ready" ? children : null}

@@ -13,7 +13,7 @@ import { ChromeExtensionCard } from '../ChromeExtensionSection/ui/ChromeExtensio
 
 const CDN = 'https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4';
 
-/** Section sub-heading label — no pill, just styled text. */
+/** Section sub-heading label - no pill, just styled text. */
 function SectionPill({ children }: { children: React.ReactNode }) {
   return (
     <span
@@ -117,7 +117,7 @@ export default function ProductSection() {
         <SectionHeader
           pill="Your AI Production Layer"
           title="From insight to published reel, on autopilot."
-          subtitle="Your agents handle the creative work — generating reels, iterating scripts, and improving output with every batch."
+          subtitle="Your agents handle the creative work - generating reels, iterating scripts, and improving output with every batch."
         />
         <div className="product-section-section-padding" style={{ paddingTop: '80px', marginBottom: '80px' }}>
           <ProductCard label="Agents" title="Your dedicated agent team, transparent and always working" ctaText="Meet Your Agents" tabs={LENS_TABS} images={LENS_IMAGES} bgImage={`${CDN}/6818f491db7df5646bba2c71_lens-product-bg.webp`} videoSrc="https://publicassets.foreplay.co/cta-lens.mp4" isometricSrc={`${CDN}/682f93b43a94db00dbc45367_iso-lens.webp`} poster={`${CDN}/682f93b43a94db00dbc45367_iso-lens.webp`} activeTab={lensTab} onTabChange={setLensTab} learnMoreHref="/lens-creative-analytics" productName="lens" />

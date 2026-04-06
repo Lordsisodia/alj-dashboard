@@ -1,4 +1,4 @@
-// DirectoryFeed — agency card list with pagination stub.
+// DirectoryFeed - agency card list with pagination stub.
 
 import type { AgencyCard } from './types';
 import DirectoryCard from './DirectoryCard';
@@ -25,7 +25,7 @@ export default function DirectoryFeed({ agencies }: Props) {
         </div>
       </div>
 
-      {/* Pagination stub — matches HTML structure */}
+      {/* Pagination stub - matches HTML structure */}
       <div role="navigation" aria-label="List" className="w-pagination-wrapper pagination">
         <div aria-label="Page 1 of 2" role="heading" className="w-page-count page-count-2">
           1 / 2

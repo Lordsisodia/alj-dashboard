@@ -66,7 +66,7 @@ export default function SubmitClientExperience({ config, experience }: SubmitCli
     threadAvatarLabel: "SC",
     headerTitle: "Submit Client Intake",
     headerSubtitle: "Chat-first submission with Instant review SLA",
-    helperText: "Share whatever you know—company name, WhatsApp, needs, and optional budget. We'll keep score as you go.",
+    helperText: "Share whatever you know-company name, WhatsApp, needs, and optional budget. We'll keep score as you go.",
     submitVariant: "client" as const,
     statusIdleLabel: "Instant review SLA",
     statusSubmittedLabel: "Submitted · Instant review",

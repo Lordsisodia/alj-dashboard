@@ -1,4 +1,4 @@
-// MobileAppFeatures — three feature sections: save, snap, browse.
+// MobileAppFeatures - three feature sections: save, snap, browse.
 
 import Image from 'next/image';
 import LazyVideo from '@/features/marketing/components/ProductSection/LazyVideo';

@@ -92,7 +92,61 @@ export const getStats = query({
   args: {},
   handler: async (ctx) => {
     const posts = await ctx.db.query("scrapedPosts").collect();
-    return { totalIndexed: posts.length };
+
+    const now           = Date.now();
+    const weekMs        = 7 * 24 * 60 * 60 * 1000;
+    const thisWeekStart = now - weekMs;
+    const lastWeekStart = now - weekMs * 2;
+
+    const postsThisWeek = posts.filter(p => (p.scrapedAt ?? p.postedAt ?? 0) > thisWeekStart).length;
+    const postsLastWeek = posts.filter(p => {
+      const t = p.scrapedAt ?? p.postedAt ?? 0;
+      return t > lastWeekStart && t <= thisWeekStart;
+    }).length;
+
+    const unanalysedCount = posts.filter(p =>
+      !p.externalId?.startsWith('seed_') &&
+      p.aiAnalysis == null &&
+      (p.outlierRatio != null ? p.outlierRatio >= 1.5 : (p.engagementRate ?? 0) >= 0.05)
+    ).length;
+
+    // Latest scrape time across all posts
+    const latestScrape = posts.reduce((max, p) => Math.max(max, p.scrapedAt ?? 0), 0);
+
+    return {
+      totalIndexed:    posts.length,
+      postsThisWeek,
+      postsLastWeek,
+      unanalysedCount,
+      latestScrapeAt:  latestScrape,
+    };
+  },
+});
+
+// ── Patch AI analysis onto a post ────────────────────────────────────────────
+
+export const patchAnalysis = mutation({
+  args: {
+    postId:     v.id("scrapedPosts"),
+    transcript: v.optional(v.string()),
+    hookScore:  v.number(),
+    hookLine:   v.string(),
+    emotions:   v.array(v.string()),
+    breakdown:  v.string(),
+    suggestions: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.postId, {
+      aiAnalysis: {
+        transcript:  args.transcript,
+        hookScore:   args.hookScore,
+        hookLine:    args.hookLine,
+        emotions:    args.emotions,
+        breakdown:   args.breakdown,
+        suggestions: args.suggestions,
+        analyzedAt:  Date.now(),
+      },
+    });
   },
 });
 
@@ -434,6 +488,57 @@ export const getPatterns = query({
   },
 });
 
+// ── Hashtag correlation  -  which hashtags appear most in top-10% ER posts ────
+
+export const getHashtagCorrelation = query({
+  args: {
+    days:  v.optional(v.number()),
+    niche: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let posts = await ctx.db.query("scrapedPosts").collect();
+    posts = posts.filter(p => !p.externalId?.startsWith('seed_'));
+
+    const days   = args.days ?? 30;
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    posts = posts.filter(p => (p.postedAt ?? 0) > cutoff && (p.hashtags ?? []).length > 0);
+    if (args.niche && args.niche !== 'all') posts = posts.filter(p => p.niche === args.niche);
+
+    if (posts.length < 3) return [];
+
+    // Determine top-10% ER threshold
+    const sorted    = [...posts].sort((a, b) => (b.engagementRate ?? 0) - (a.engagementRate ?? 0));
+    const topCount  = Math.max(1, Math.ceil(sorted.length * 0.1));
+    const topIds    = new Set(sorted.slice(0, topCount).map(p => p._id));
+
+    // Count each hashtag across top-tier and all posts
+    const map: Record<string, { top: number; total: number; erSum: number; topErSum: number }> = {};
+    for (const p of posts) {
+      const inTop = topIds.has(p._id);
+      for (const tag of p.hashtags ?? []) {
+        const key = tag.toLowerCase().replace(/^#/, '');
+        if (!map[key]) map[key] = { top: 0, total: 0, erSum: 0, topErSum: 0 };
+        map[key].total++;
+        map[key].erSum += p.engagementRate ?? 0;
+        if (inTop) { map[key].top++; map[key].topErSum += p.engagementRate ?? 0; }
+      }
+    }
+
+    return Object.entries(map)
+      .filter(([, d]) => d.total >= 2)
+      .map(([hashtag, d]) => ({
+        hashtag,
+        topCount:       d.top,
+        totalCount:     d.total,
+        correlationPct: parseFloat(((d.top / d.total) * 100).toFixed(1)),
+        avgER:          parseFloat((d.erSum / d.total).toFixed(4)),
+        topAvgER:       d.top > 0 ? parseFloat((d.topErSum / d.top).toFixed(4)) : 0,
+      }))
+      .sort((a, b) => b.correlationPct - a.correlationPct || b.topCount - a.topCount)
+      .slice(0, 20);
+  },
+});
+
 // ── Bulk import real scraped posts ────────────────────────────────────────────
 
 export const importScrapedPost = mutation({
@@ -559,11 +664,11 @@ export const getCreatorStats = query({
         : null;
 
       return {
-        handle:         acc.handle,
-        displayName:    acc.displayName ?? acc.handle,
-        niche:          acc.niche,
-        followerCount:  acc.followerCount,
-        avatarColor:    acc.avatarColor,
+        handle:                acc.handle,
+        displayName:           acc.displayName ?? acc.handle,
+        niche:                 acc.niche,
+        followerCount:         acc.followerCount,
+        avatarColor:           acc.avatarColor,
         totalPosts,
         totalLikes,
         totalViews,
@@ -571,10 +676,280 @@ export const getCreatorStats = query({
         avgEngagement,
         postsThisWeek,
         trendBuckets,
-        lastScrapedAt:  acc.lastScrapedAt ?? null,
-        lastPostAt:     lastPost,
-        status:         acc.status,
+        lastScrapedAt:         acc.lastScrapedAt ?? null,
+        lastPostAt:            lastPost,
+        status:                acc.status,
+        // enrichment fields
+        bio:                   acc.bio                   ?? null,
+        avatarUrl:             acc.avatarUrl             ?? null,
+        postsCount:            acc.postsCount            ?? null,
+        verified:              acc.verified              ?? null,
+        enrichStatus:          acc.enrichStatus          ?? null,
+        enrichedAt:            acc.enrichedAt            ?? null,
+        followsCount:          acc.followsCount          ?? null,
+        externalUrl:           acc.externalUrl           ?? null,
+        isBusinessAccount:     acc.isBusinessAccount     ?? null,
+        isProfessionalAccount: acc.isProfessionalAccount ?? null,
+        businessCategoryName:  acc.businessCategoryName  ?? null,
+        businessEmail:         acc.businessEmail         ?? null,
+        isPrivate:             acc.isPrivate             ?? null,
+        igtvVideoCount:        acc.igtvVideoCount        ?? null,
+        instagramId:           acc.instagramId           ?? null,
       };
     });
+  },
+});
+
+// ── Dashboard stats - stat strip + funnel counts ─────────────────────────────
+
+export const getReconDashboardStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const weekStart  = now - 7 * 24 * 60 * 60 * 1000;
+
+    const [accounts, allPosts] = await Promise.all([
+      ctx.db.query("trackedAccounts").collect(),
+      ctx.db.query("scrapedPosts").collect(),
+    ]);
+
+    const real    = allPosts.filter(p => !p.externalId?.startsWith('seed_'));
+    const active  = accounts.filter(a => a.status === 'active');
+    const lastRun = accounts.reduce((m, a) => Math.max(m, a.lastScrapedAt ?? 0), 0);
+
+    const postsToday = real.filter(p => p.scrapedAt >= todayStart.getTime()).length;
+    const refined    = real.filter(p => p.saved).length;
+    const generated  = real.filter(p => !!p.aiAnalysis).length;
+
+    let posted = 0;
+    try {
+      const content = await ctx.db.query("content").collect();
+      posted = content.filter(c => (c.sentToPipelineAt ?? 0) >= weekStart).length;
+    } catch { /* content table may be empty */ }
+
+    return {
+      postsToday,
+      activeCreators:  active.length,
+      totalCreators:   accounts.length,
+      totalInLibrary:  real.length,
+      lastRunAt:       lastRun || null,
+      funnel: {
+        basket:    active.length,
+        scraped:   postsToday,
+        refined,
+        generated,
+        posted,
+      },
+    };
+  },
+});
+
+// ── Recent activity - live activity feed ──────────────────────────────────────
+
+export const getRecentActivity = query({
+  args: {},
+  handler: async (ctx) => {
+    const posts = await ctx.db.query("scrapedPosts").collect();
+    const real  = posts
+      .filter(p => !p.externalId?.startsWith('seed_'))
+      .sort((a, b) => b.scrapedAt - a.scrapedAt)
+      .slice(0, 100);
+
+    // Group posts into scrape "events": same handle within a 2-hour window
+    const events: { handle: string; count: number; contentType: string; ts: number }[] = [];
+    for (const post of real) {
+      const bucket = Math.floor(post.scrapedAt / (2 * 60 * 60 * 1000));
+      const hit    = events.find(e =>
+        e.handle === post.handle &&
+        Math.floor(e.ts / (2 * 60 * 60 * 1000)) === bucket
+      );
+      if (hit) { hit.count++; }
+      else events.push({ handle: post.handle, count: 1, contentType: post.contentType, ts: post.scrapedAt });
+    }
+
+    return events.slice(0, 12).map((e, id) => ({
+      id,
+      handle:      `@${e.handle}`,
+      count:       e.count,
+      contentType: e.contentType,
+      ts:          e.ts,
+      status:      'success' as const,
+    }));
+  },
+});
+
+// ── Daily scraped volume  -  powers the Posts Scraped chart ──────────────────
+
+export const getDailyScrapedVolume = query({
+  args: { days: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const days   = args.days ?? 14;
+    const now    = Date.now();
+    const cutoff = now - days * 24 * 60 * 60 * 1000;
+
+    const posts = await ctx.db.query("scrapedPosts").collect();
+    const real  = posts.filter(p =>
+      (p.scrapedAt ?? 0) >= cutoff && !p.externalId?.startsWith('seed_')
+    );
+
+    // Build ordered day buckets (oldest → newest)
+    const buckets: { label: string; total: number }[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d     = new Date(now - i * 24 * 60 * 60 * 1000);
+      const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      buckets.push({ label, total: 0 });
+    }
+
+    for (const post of real) {
+      const label = new Date(post.scrapedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const b = buckets.find(x => x.label === label);
+      if (b) b.total++;
+    }
+
+    return buckets;
+  },
+});
+
+// ── Analysis queue  -  outlier posts not yet AI-analysed ─────────────────────
+
+export const getAnalysisQueue = query({
+  args: {
+    days:  v.optional(v.number()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    let posts = await ctx.db.query("scrapedPosts").collect();
+    posts = posts.filter(p => !p.externalId?.startsWith('seed_'));
+
+    const days   = args.days ?? 90;
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    posts = posts.filter(p =>
+      (p.postedAt ?? 0) > cutoff &&
+      p.aiAnalysis == null &&
+      (p.outlierRatio != null ? p.outlierRatio >= 1.5 : (p.engagementRate ?? 0) >= 0.05)
+    );
+
+    posts.sort((a, b) => {
+      const ar = a.outlierRatio ?? (a.engagementRate ?? 0) * 10;
+      const br = b.outlierRatio ?? (b.engagementRate ?? 0) * 10;
+      return br - ar;
+    });
+
+    return posts.slice(0, args.limit ?? 20).map(p => ({
+      _id:            p._id,
+      handle:         p.handle,
+      niche:          p.niche,
+      contentType:    p.contentType,
+      thumbnailUrl:   p.thumbnailUrl,
+      caption:        p.caption ?? '',
+      engagementRate: p.engagementRate ?? 0,
+      outlierRatio:   p.outlierRatio ?? parseFloat(((p.engagementRate ?? 0) * 10).toFixed(2)),
+      videoUrl:       p.videoUrl,
+    }));
+  },
+});
+
+// ── Analysed posts  -  posts with completed aiAnalysis ───────────────────────
+
+export const getAnalysedPosts = query({
+  args: {
+    days:  v.optional(v.number()),
+    niche: v.optional(v.string()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    let posts = await ctx.db.query("scrapedPosts").collect();
+    posts = posts.filter(p => !p.externalId?.startsWith('seed_') && p.aiAnalysis != null);
+
+    const days   = args.days ?? 90;
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    posts = posts.filter(p => (p.postedAt ?? 0) > cutoff);
+    if (args.niche && args.niche !== 'all') posts = posts.filter(p => p.niche === args.niche);
+
+    posts.sort((a, b) => (b.aiAnalysis!.hookScore) - (a.aiAnalysis!.hookScore));
+
+    return posts.slice(0, args.limit ?? 40).map(p => ({
+      // Full DrawerPost-compatible shape
+      _id:            p._id,
+      externalId:     p.externalId,
+      handle:         p.handle,
+      platform:       p.platform ?? 'instagram',
+      niche:          p.niche,
+      contentType:    p.contentType,
+      thumbnailUrl:   p.thumbnailUrl,
+      videoUrl:       p.videoUrl,
+      caption:        p.caption,
+      hashtags:       p.hashtags,
+      likes:          p.likes ?? 0,
+      views:          p.views ?? 0,
+      saves:          p.saves ?? 0,
+      engagementRate: p.engagementRate ?? 0,
+      outlierRatio:   p.outlierRatio,
+      postedAt:       p.postedAt ?? 0,
+      scrapedAt:      p.scrapedAt,
+      saved:          p.saved ?? false,
+      aiAnalysis:     p.aiAnalysis!,
+    }));
+  },
+});
+
+// ── Hook stats  -  aggregate hookScore distribution + emotion frequency ───────
+
+export const getHookStats = query({
+  args: { days: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    let posts = await ctx.db.query("scrapedPosts").collect();
+    posts = posts.filter(p => !p.externalId?.startsWith('seed_') && p.aiAnalysis != null);
+
+    const days   = args.days ?? 90;
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    posts = posts.filter(p => (p.postedAt ?? 0) > cutoff);
+
+    if (posts.length === 0) return { scoreDistribution: [], emotionFrequency: [], hookLines: [] };
+
+    // Score distribution: bucket into 0-2, 2-4, 4-6, 6-8, 8-10
+    const buckets = [0, 0, 0, 0, 0];
+    const emotionMap: Record<string, { count: number; erSum: number }> = {};
+
+    for (const p of posts) {
+      const score = p.aiAnalysis!.hookScore;
+      const idx   = Math.min(4, Math.floor(score / 2));
+      buckets[idx]++;
+
+      for (const e of p.aiAnalysis!.emotions) {
+        const key = e.toLowerCase();
+        if (!emotionMap[key]) emotionMap[key] = { count: 0, erSum: 0 };
+        emotionMap[key].count++;
+        emotionMap[key].erSum += p.engagementRate ?? 0;
+      }
+    }
+
+    const scoreDistribution = buckets.map((count, i) => ({
+      label: `${i * 2}-${i * 2 + 2}`,
+      count,
+    }));
+
+    const emotionFrequency = Object.entries(emotionMap)
+      .map(([emotion, d]) => ({
+        emotion,
+        count:  d.count,
+        avgER:  parseFloat((d.erSum / d.count).toFixed(4)),
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    const hookLines = posts
+      .sort((a, b) => b.aiAnalysis!.hookScore - a.aiAnalysis!.hookScore)
+      .slice(0, 12)
+      .map(p => ({
+        hookLine:       p.aiAnalysis!.hookLine,
+        hookScore:      p.aiAnalysis!.hookScore,
+        handle:         p.handle,
+        niche:          p.niche,
+        engagementRate: p.engagementRate ?? 0,
+      }));
+
+    return { scoreDistribution, emotionFrequency, hookLines };
   },
 });

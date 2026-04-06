@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * BlogPostSidebar — sticky table-of-contents that mirrors the blog-toc aside
+ * BlogPostSidebar - sticky table-of-contents that mirrors the blog-toc aside
  * from the Foreplay HTML. Headings are extracted from the bodyHtml on mount
  * and tracked via IntersectionObserver for the active-highlight effect.
  */

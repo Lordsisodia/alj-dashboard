@@ -1,5 +1,5 @@
 /**
- * BlogPostContent — renders the article body using Foreplay's .blog-rtb rich-text styles.
+ * BlogPostContent - renders the article body using Foreplay's .blog-rtb rich-text styles.
  * Content is injected via dangerouslySetInnerHTML (same pattern as Webflow's w-richtext).
  */
 

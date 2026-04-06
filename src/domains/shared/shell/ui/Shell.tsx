@@ -298,7 +298,7 @@ function NotificationsFallback() {
 function LearningTabFallback() {
   return (
     <div className="min-h-[60vh] rounded-3xl border border-white/10 bg-white/5 p-6 text-white/70">
-      Loading learning hub…
+      Loading learning hub...
     </div>
   );
 }

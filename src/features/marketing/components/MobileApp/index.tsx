@@ -1,5 +1,5 @@
 'use client';
-// MobileAppPage — assembles all mobile-app page sections.
+// MobileAppPage - assembles all mobile-app page sections.
 
 import NavBar from '@/features/marketing/components/layout/navbar/NavBar';
 import MobileAppHero from './MobileAppHero';

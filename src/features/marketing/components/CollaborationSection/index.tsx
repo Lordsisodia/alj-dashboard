@@ -43,7 +43,7 @@ export default function CollaborationSection() {
                 color: 'rgba(0,0,0,0.6)',
                 margin: 0,
               }}>
-                Models, managers, and AI agents — all on the same page. ISSO connects your creative vision to scalable content output.
+                Models, managers, and AI agents - all on the same page. ISSO connects your creative vision to scalable content output.
               </p>
             </div>
           </div>

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// Dropdown Theme — single source of truth for all dropdown styling
+// Dropdown Theme - single source of truth for all dropdown styling
 // Change one value here → updates all dropdowns automatically
 // ═══════════════════════════════════════════════════════════════════════════════
 

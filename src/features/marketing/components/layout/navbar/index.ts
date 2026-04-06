@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// Navbar module — clean public API
+// Navbar module - clean public API
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export { default as NavBar } from './NavBar';

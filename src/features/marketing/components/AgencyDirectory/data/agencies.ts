@@ -1,4 +1,4 @@
-// Agency Directory page data — extracted from www_foreplay_co (26).html
+// Agency Directory page data - extracted from www_foreplay_co (26).html
 
 import type { AgencyDirectoryData } from '../types';
 import { CDN, CDN2 as FLAGS } from '@/lib/cdn';

@@ -1,17 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Database, Radar, Library, Clock } from 'lucide-react';
-import { COMPETITORS, DAILY_VOLUME, containerVariants } from '../../constants';
+import { Database, Radar, Library, Clock, FileStack, Users, Zap } from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../../convex/_generated/api';
+import { COMPETITORS, DAILY_VOLUME } from '../../constants'; // COMPETITORS seeds initial state
 import type { Competitor } from '../../types';
-import { StatCard }            from './StatCard';
-import { VolumeChart }         from './VolumeChart';
-import { PipelineFunnel }      from './PipelineFunnel';
-import { ActivityFeed }        from './ActivityFeed';
-import { CreatorPipelineRow }  from './CreatorPipelineRow';
+import { PostsScrapedChart } from './PostsScrapedChart';
+import { PipelineFunnel }    from './PipelineFunnel';
+import { ActivityFeed }      from './ActivityFeed';
+import { WeeklyDigestCard }  from './WeeklyDigestCard';
+import { ScrapingReport }    from '@/components/ui/scraping-report';
+import { DashboardMetricCard } from '@/components/ui/dashboard-overview';
 
 const TOTAL_IN_LIBRARY = DAILY_VOLUME.reduce((s, d) => s + d.total, 0);
+
+const STATS = (postsToday: number, activeCount: number, total: number, totalCreators: number, lastRun: string) => [
+  { label: 'Posts today',      value: String(postsToday),                  sub: 'across all active creators',         icon: <Database size={14} />, color: '#4a9eff' },
+  { label: 'Active creators',  value: `${activeCount} / ${totalCreators}`, sub: `${totalCreators - activeCount} paused`, icon: <Radar size={14} />, color: '#833ab4' },
+  { label: 'Total in library', value: total.toLocaleString(),              sub: 'posts scraped all-time',             icon: <Library size={14} />,  color: '#ff0069' },
+  { label: 'Last run',         value: lastRun,                             sub: 'Next: ~6:00 PM · every 3h',          icon: <Clock size={14} />,    color: '#78c257' },
+];
 
 export function LogDashboard({
   extraCreators = [],
@@ -25,8 +34,8 @@ export function LogDashboard({
   useEffect(() => {
     if (extraCreators.length > 0) {
       setCompetitors(prev => {
-        const existingIds = new Set(prev.map(c => c.id));
-        const fresh = extraCreators.filter(c => !existingIds.has(c.id));
+        const ids = new Set(prev.map(c => c.id));
+        const fresh = extraCreators.filter(c => !ids.has(c.id));
         return fresh.length > 0 ? [...fresh, ...prev] : prev;
       });
     }
@@ -36,81 +45,101 @@ export function LogDashboard({
   useEffect(() => {
     if (runAllTrigger === 0) return;
     setCompetitors(prev => prev.map(c => c.status === 'active' ? { ...c, jobStatus: 'running' } : c));
-    const timer = setTimeout(() => {
+    const t = setTimeout(() => {
       setCompetitors(prev => prev.map(c =>
         c.jobStatus === 'running'
           ? { ...c, jobStatus: 'idle', postsToday: c.postsToday + Math.floor(Math.random() * 8) + 3 }
           : c
       ));
     }, 3000);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [runAllTrigger]);
 
-  function toggleStatus(id: number) {
-    setCompetitors(prev => prev.map(c => c.id === id ? { ...c, status: c.status === 'active' ? 'paused' : 'active' } : c));
+  const dbStats = useQuery(api.intelligence.getReconDashboardStats);
+
+  // Use real DB stats when available, fall back to mock COMPETITORS data
+  const postsToday  = dbStats?.postsToday  ?? competitors.filter(c => c.status === 'active').reduce((s, c) => s + c.postsToday, 0);
+  const activeCount = dbStats?.activeCreators ?? competitors.filter(c => c.status === 'active').length;
+  const totalCount  = dbStats?.totalCreators  ?? competitors.length;
+  const library     = dbStats?.totalInLibrary ?? TOTAL_IN_LIBRARY;
+  const lastRunAt   = dbStats?.lastRunAt      ?? null;
+
+  function fmtLastRun(ts: number | null) {
+    if (!ts) return '-';
+    return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
 
-  function retryCreator(id: number) {
-    setCompetitors(prev => prev.map(c => c.id === id ? { ...c, jobStatus: 'running' } : c));
-    setTimeout(() => {
-      setCompetitors(prev => prev.map(c =>
-        c.id === id && c.jobStatus === 'running'
-          ? { ...c, jobStatus: 'idle', postsToday: c.postsToday + Math.floor(Math.random() * 5) + 1 }
-          : c
-      ));
-    }, 2500);
-  }
-
-  const postsToday  = competitors.filter(c => c.status === 'active').reduce((s, c) => s + c.postsToday, 0);
-  const activeCount = competitors.filter(c => c.status === 'active').length;
-  const sorted = [...competitors].sort((a, b) => {
-    if (a.status === 'active' && b.status !== 'active') return -1;
-    if (a.status !== 'active' && b.status === 'active') return 1;
-    return b.postsToday - a.postsToday;
-  });
+  const stats = STATS(postsToday, activeCount, library, totalCount, fmtLastRun(lastRunAt));
 
   return (
-    <div className="px-6 py-6 max-w-6xl mx-auto w-full space-y-4">
-      <PipelineFunnel />
+    <div className="flex items-start w-full">
 
-      <div className="grid grid-cols-4 gap-4">
-        <StatCard label="Posts today"      value={String(postsToday)}                   sub="across all active creators"           icon={<Database size={15} />} iconColor="#4a9eff" delay={0}    />
-        <StatCard label="Active creators"  value={`${activeCount} / ${competitors.length}`} sub={`${competitors.length - activeCount} paused`} icon={<Radar size={15} />}    iconColor="#833ab4" delay={0.05} />
-        <StatCard label="Total in library" value={TOTAL_IN_LIBRARY.toLocaleString()}    sub="posts scraped all-time"               icon={<Library size={15} />}  iconColor="#ff0069" delay={0.10} />
-        <StatCard label="Last run"         value="3:42 PM"                              sub="Next: ~6:00 PM · every 3h"            icon={<Clock size={15} />}    iconColor="#78c257" delay={0.15} />
-      </div>
+      {/* ── Main content column ───────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0">
 
-      <div className="flex gap-4 items-start">
-        <div className="flex-1 min-w-0 space-y-4">
-          <VolumeChart data={DAILY_VOLUME} />
+        {/* ① Weekly digest - compact command bar at top */}
+        <WeeklyDigestCard />
 
-          <div className="rounded-xl bg-white" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
-            <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-              <p className="text-sm font-semibold text-neutral-900">Creator pipeline</p>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2.5 text-[10px] text-neutral-400">
-                  {[['#78c257', '≤7d'], ['#f59e0b', '≤21d'], ['#dc2626', 'stale']].map(([color, label]) => (
-                    <div key={label} className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-                      <span>{label}</span>
-                    </div>
-                  ))}
-                </div>
-                <span className="text-[11px] text-neutral-400">{activeCount} of {competitors.length} scraped today</span>
-              </div>
-            </div>
-            <motion.div variants={containerVariants} initial="hidden" animate="visible" className="p-3 space-y-1.5">
-              {sorted.map(c => (
-                <CreatorPipelineRow key={c.id} c={c} onToggle={toggleStatus} onRetry={retryCreator} />
-              ))}
-            </motion.div>
-          </div>
+        {/* ② Pipeline funnel - inset card */}
+        <div className="px-3 pt-3">
+          <PipelineFunnel counts={dbStats?.funnel} />
         </div>
 
-        <div className="w-72 flex-shrink-0">
-          <ActivityFeed />
+        {/* ③ Metric cards */}
+        <div className="grid grid-cols-4 gap-3 px-3 mt-3">
+          <DashboardMetricCard
+            title="Posts today"
+            value={String(postsToday)}
+            icon={Database}
+            trendChange="+23% vs yesterday"
+            trendType="up"
+          />
+          <DashboardMetricCard
+            title="Active creators"
+            value={`${activeCount} / ${totalCount}`}
+            icon={Users}
+            trendChange={`${totalCount - activeCount} paused`}
+            trendType="neutral"
+          />
+          <DashboardMetricCard
+            title="Total in library"
+            value={library.toLocaleString()}
+            icon={FileStack}
+            trendChange="posts scraped all-time"
+            trendType="up"
+          />
+          <DashboardMetricCard
+            title="Last run"
+            value={fmtLastRun(lastRunAt)}
+            icon={Clock}
+            trendChange="Next: ~6:00 PM · every 3h"
+            trendType="neutral"
+          />
         </div>
+
+        {/* ④ Volume chart + Scraping Report - side by side */}
+        <div className="grid grid-cols-[2fr_1fr] gap-3 px-3 pt-4 pb-2">
+          <PostsScrapedChart data={DAILY_VOLUME} />
+          <ScrapingReport />
+        </div>
+
+        {/* bottom clearance */}
+        <div className="pb-6" />
+
       </div>
+
+      {/* ── Right sidebar: Live Activity ──────────────────────────── */}
+      <div
+        className="w-72 flex-shrink-0 sticky top-0 self-start"
+        style={{
+          borderLeft: '1px solid rgba(0,0,0,0.06)',
+          height: 'calc(100vh - 98px)',
+          overflowY: 'auto',
+        }}
+      >
+        <ActivityFeed />
+      </div>
+
     </div>
   );
 }

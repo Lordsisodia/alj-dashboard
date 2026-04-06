@@ -1,5 +1,5 @@
 /**
- * BlogList — mirrors the "Explore More Blogs" section from the HTML source.
+ * BlogList - mirrors the "Explore More Blogs" section from the HTML source.
  *
  * Sections:
  *   1. Section header ("Explore More Blogs")

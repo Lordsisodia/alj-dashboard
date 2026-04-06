@@ -1,4 +1,4 @@
-// Mobile Apps & Gaming industry page data — extracted from www_foreplay_co (12).html
+// Mobile Apps & Gaming industry page data - extracted from www_foreplay_co (12).html
 
 import type { IndustryPageData } from '../types';
 

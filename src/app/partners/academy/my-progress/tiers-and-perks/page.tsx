@@ -79,7 +79,7 @@ export default function TierPerksPage() {
           <div className="space-y-2 text-sm text-siso-text-muted">
             <p>• Complete courses to earn the bulk of your points.</p>
             <p>• Share assets and engage to pick up small XP boosts.</p>
-            <p>• Certificates typically unlock at higher tiers—keep progressing.</p>
+            <p>• Certificates typically unlock at higher tiers-keep progressing.</p>
             <Button variant="ghost" size="sm" className="border border-white/10 mt-2" asChild>
               <Link href="/partners/academy/xp-breakdown">View XP activity</Link>
             </Button>

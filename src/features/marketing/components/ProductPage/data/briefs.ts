@@ -6,7 +6,7 @@ export const briefsData: ProductPageData = {
   hero: {
     subtitle: 'Content Gen',
     headline: 'Go from insight to published reel in minutes',
-    paragraph: 'Stop building content manually. ISSO Content Gen takes Intelligence data and generates production-ready reels — scripts, storyboards, and batch video — ready to publish.',
+    paragraph: 'Stop building content manually. ISSO Content Gen takes Intelligence data and generates production-ready reels - scripts, storyboards, and batch video - ready to publish.',
     ctaHref: 'https://siso.ai/sign-up',
     animatedIconVideoSrc: `${ASSETS}/animated-icon-briefs.webm`,
     staticIconSrc: `${CDN}/682f9f72dc306ab5bf957aea_pi-briefs-hq.webp`,
@@ -31,7 +31,7 @@ export const briefsData: ProductPageData = {
   useCases: {
     subtitle: 'Use Cases',
     title: 'The production engine for model management agencies',
-    paragraph: 'Content Gen closes the loop — it takes what Intelligence and Recon found, and turns it into reels your models can post today.',
+    paragraph: 'Content Gen closes the loop - it takes what Intelligence and Recon found, and turns it into reels your models can post today.',
     items: [
       {
         title: 'AI Script Generation',
@@ -45,7 +45,7 @@ export const briefsData: ProductPageData = {
       },
       {
         title: 'Batch Reel Generation',
-        description: 'Run Kling, Higgsfield, and Replicate in batch — generate a week of content in one session.',
+        description: 'Run Kling, Higgsfield, and Replicate in batch - generate a week of content in one session.',
         imageSrc: `${CDN}/6474dfaa93a6291dbec99294_upload%20assets-4.webp`,
       },
     ],
@@ -53,7 +53,7 @@ export const briefsData: ProductPageData = {
   coreFeatures: {
     subtitle: 'Core Features',
     title: 'Your AI content pipeline, end to end',
-    paragraph: 'From first script line to final reel export — Content Gen handles the production so your team can focus on strategy and growth.',
+    paragraph: 'From first script line to final reel export - Content Gen handles the production so your team can focus on strategy and growth.',
     tabs: [
       {
         label: 'AI Reel Scripts',
@@ -90,7 +90,7 @@ export const briefsData: ProductPageData = {
       {
         imageSrc: `${CDN}/645405e3fbeb9258c2385d11_modular-editor.webp`,
         title: 'Modular Script Editor',
-        description: 'Build scripts from reusable blocks — hooks, CTAs, scene descriptions.',
+        description: 'Build scripts from reusable blocks - hooks, CTAs, scene descriptions.',
       },
       {
         imageSrc: `${CDN}/645405e354900dd97b639df3_export-brief.webp`,
@@ -100,18 +100,18 @@ export const briefsData: ProductPageData = {
       {
         imageSrc: `${CDN}/645405e32a498148618e56fa_brief-template.webp`,
         title: 'Content Templates',
-        description: 'Build reusable script formats per niche — save and reuse across your roster.',
+        description: 'Build reusable script formats per niche - save and reuse across your roster.',
       },
       {
         imageSrc: `${CDN}/645405e3a367f05e79030230_brief-share.webp`,
         title: 'Share with Models',
-        description: 'Send a link to any model, manager, or creator — no login required.',
+        description: 'Send a link to any model, manager, or creator - no login required.',
       },
     ],
     testimonial1: {
       logoSrc: `${CDN}/6478c6a9d904f44339a39b5f_63cd2aa75c56b2db086ad38b_LOGO%20BLUE-p-500.webp`,
       logoAlt: 'Envu Media logo',
-      quote: '"If you\'re not using ISSO Content Gen you\'re already behind. What used to take our team days — briefing models, coordinating scripts, waiting on edits — now takes an hour. We go from a trending reel to a published video the same day. It\'s the only content pipeline built for how agencies actually operate."',
+      quote: '"If you\'re not using ISSO Content Gen you\'re already behind. What used to take our team days - briefing models, coordinating scripts, waiting on edits - now takes an hour. We go from a trending reel to a published video the same day. It\'s the only content pipeline built for how agencies actually operate."',
       authorName: 'Kevin Sussat',
       authorTitle: 'Founder @ Envu Media',
       authorHeadshot: `${CDN}/6478c6e1810c46a199122313_Dv92wDm3_400x400.webp`,
@@ -120,12 +120,12 @@ export const briefsData: ProductPageData = {
       {
         imageSrc: `${CDN}/64541ad7101e24294205eba5_new-hooks.webp`,
         title: 'Regenerate Hooks',
-        description: 'Generate new opening hooks and CTAs instantly — test more angles, faster.',
+        description: 'Generate new opening hooks and CTAs instantly - test more angles, faster.',
       },
       {
         imageSrc: `${CDN}/64541acd4d56e7cdfc6abaa7_scene-description.webp`,
         title: 'Scene Descriptions',
-        description: 'Shot-level direction for each scene — hand off to Kling or Higgsfield directly.',
+        description: 'Shot-level direction for each scene - hand off to Kling or Higgsfield directly.',
       },
       {
         imageSrc: `${CDN}/64541ade63d9544d60a6e5f3_text-overlay.webp`,
@@ -140,7 +140,7 @@ export const briefsData: ProductPageData = {
       {
         imageSrc: `${CDN}/645420809ed898e0a2e34a9e_multi-language-2.webp`,
         title: 'Multi-Model Output',
-        description: 'Adapt a single script across your full roster — different voice, same strategy.',
+        description: 'Adapt a single script across your full roster - different voice, same strategy.',
       },
       {
         imageSrc: `${CDN}/6474dfaa93a6291dbec99294_upload%20assets-4.webp`,
@@ -151,7 +151,7 @@ export const briefsData: ProductPageData = {
     testimonial2: {
       logoSrc: `${CDN}/6478bf6f2eb8f9e5dd1563d4_Group%2048348.webp`,
       logoAlt: 'Porter Media logo',
-      quote: '"Game changer for any agency managing more than five models. The model profiles alone save us hours every week — no more re-explaining tone and niche every time. The batch generation with Kling turns what used to be a full production day into a 30-minute review session. This is what the pipeline should have looked like all along."',
+      quote: '"Game changer for any agency managing more than five models. The model profiles alone save us hours every week - no more re-explaining tone and niche every time. The batch generation with Kling turns what used to be a full production day into a 30-minute review session. This is what the pipeline should have looked like all along."',
       authorName: 'Allan Porter',
       authorTitle: 'Founder @ Porter Media',
       authorHeadshot: `${CDN}/6478bf7a1f7099006baab519_allan-porter.webp`,
@@ -159,7 +159,7 @@ export const briefsData: ProductPageData = {
   },
   embeddedCta: {
     headline: 'Start generating reels today',
-    paragraph: "Content Gen is part of ISSO's full pipeline — Intelligence finds what works, Recon tracks your competitors, and Content Gen turns it all into published reels.\n\nEverything your agency needs, in one place.",
+    paragraph: "Content Gen is part of ISSO's full pipeline - Intelligence finds what works, Recon tracks your competitors, and Content Gen turns it all into published reels.\n\nEverything your agency needs, in one place.",
     primaryCtaText: 'Start',
     primaryCtaHref: 'https://siso.ai/sign-up',
     showNoCcBadge: true,
@@ -172,19 +172,19 @@ export const briefsData: ProductPageData = {
     items: [
       {
         question: 'Which AI video models does Content Gen use?',
-        answer: 'Content Gen runs on Kling, Higgsfield, and Replicate. You can select the model per generation or run batch jobs across multiple engines simultaneously. Each has different strengths — Kling for motion quality, Higgsfield for character consistency, Replicate for high-volume output.',
+        answer: 'Content Gen runs on Kling, Higgsfield, and Replicate. You can select the model per generation or run batch jobs across multiple engines simultaneously. Each has different strengths - Kling for motion quality, Higgsfield for character consistency, Replicate for high-volume output.',
       },
       {
         question: 'How does the script-to-reel workflow actually work?',
-        answer: 'Start with a brief — pull inspiration from Recon or write your own hook. Content Gen generates a full script with scene descriptions and on-screen text. You review, adjust if needed, then send it to Kling, Higgsfield, or Replicate to generate the video. The whole process from brief to generated reel can happen in under an hour.',
+        answer: 'Start with a brief - pull inspiration from Recon or write your own hook. Content Gen generates a full script with scene descriptions and on-screen text. You review, adjust if needed, then send it to Kling, Higgsfield, or Replicate to generate the video. The whole process from brief to generated reel can happen in under an hour.',
       },
       {
         question: 'How does Content Gen connect to Intelligence and Recon?',
-        answer: 'Content Gen is the production layer that sits on top of Intelligence and Recon. When Intelligence surfaces a trending format or Recon flags a competitor reel, Content Gen lets you turn that insight into a script and storyboard immediately — no copy-pasting or context switching.',
+        answer: 'Content Gen is the production layer that sits on top of Intelligence and Recon. When Intelligence surfaces a trending format or Recon flags a competitor reel, Content Gen lets you turn that insight into a script and storyboard immediately - no copy-pasting or context switching.',
       },
       {
         question: 'Can I use Content Gen for multiple models at the same time?',
-        answer: 'Yes. Model Profiles let you store each creator\'s niche, tone, and style preferences. You can generate a script once and adapt it across your full roster in seconds — same core angle, different voice per model.',
+        answer: 'Yes. Model Profiles let you store each creator\'s niche, tone, and style preferences. You can generate a script once and adapt it across your full roster in seconds - same core angle, different voice per model.',
       },
       {
         question: 'How does batch generation work?',
@@ -192,17 +192,17 @@ export const briefsData: ProductPageData = {
       },
       {
         question: 'Do my models or managers need to log in to review content?',
-        answer: 'No. You can share any script, storyboard, or reel via a direct link — no account required for the recipient. Managers can approve directly in Telegram if your agency uses that workflow.',
+        answer: 'No. You can share any script, storyboard, or reel via a direct link - no account required for the recipient. Managers can approve directly in Telegram if your agency uses that workflow.',
       },
       {
         question: 'How does Content Gen get better over time?',
-        answer: 'Every reel your models post, every swipe in Hub, and every approval feeds back into the pipeline. The data from Hub tells Content Gen what formats and styles your models actually respond to — so each new batch of generated content is more targeted than the last. The more you use ISSO, the smarter the output.',
+        answer: 'Every reel your models post, every swipe in Hub, and every approval feeds back into the pipeline. The data from Hub tells Content Gen what formats and styles your models actually respond to - so each new batch of generated content is more targeted than the last. The more you use ISSO, the smarter the output.',
       },
     ],
   },
   bottomCta: {
     headline: 'Start generating reels today',
-    paragraph: "Content Gen is part of ISSO's full pipeline — Intelligence, Recon, and Content Gen working together so your agency ships more reels with less effort. All in one place.",
+    paragraph: "Content Gen is part of ISSO's full pipeline - Intelligence, Recon, and Content Gen working together so your agency ships more reels with less effort. All in one place.",
     primaryCtaText: 'Start',
     primaryCtaHref: 'https://siso.ai/sign-up',
     secondaryCtaText: 'No credit card required',

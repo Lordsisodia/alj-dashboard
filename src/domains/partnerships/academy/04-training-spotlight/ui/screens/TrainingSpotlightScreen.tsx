@@ -86,7 +86,7 @@ export function TrainingSpotlightScreen() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-white text-base font-semibold">{spotlight.title}</p>
-                  <p className="text-xs">You’re {spotlight.progress}% through this requirement.</p>
+                  <p className="text-xs">You're {spotlight.progress}% through this requirement.</p>
                 </div>
                 <Link
                   href={spotlight.lessonPath}
@@ -114,7 +114,7 @@ export function TrainingSpotlightScreen() {
         <SettingsGroupCallout
           icon={<Star className="h-4 w-4" />}
           title="Why now"
-          subtitle="Tying the lesson to today’s priorities"
+          subtitle="Tying the lesson to today's priorities"
           showChevron={false}
         >
           <div className={cn(stackedPanelClass, "space-y-3 p-4 text-white/85")}>

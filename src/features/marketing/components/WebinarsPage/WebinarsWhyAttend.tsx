@@ -1,4 +1,4 @@
-// WebinarsWhyAttend — "Why should I attend?" section with 3 benefit cards.
+// WebinarsWhyAttend - "Why should I attend?" section with 3 benefit cards.
 
 import type { WebinarsPageData } from './data/webinars';
 

@@ -80,7 +80,7 @@ export default function SignUpRoute() {
           </div>
           <button type="submit" disabled={loading}
             style={{ padding: '14px', borderRadius: 16, background: '#fff', color: '#020308', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: 14, opacity: loading ? 0.6 : 1 }}>
-            {loading ? 'Creating account…' : 'Create account'}
+            {loading ? 'Creating account...' : 'Create account'}
           </button>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, textAlign: 'center', margin: 0 }}>
             Already have an account?{' '}
@@ -101,7 +101,7 @@ export default function SignUpRoute() {
           </div>
           <button type="submit" disabled={loading}
             style={{ padding: '14px', borderRadius: 16, background: '#fff', color: '#020308', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: 14, opacity: loading ? 0.6 : 1 }}>
-            {loading ? 'Verifying…' : 'Verify email'}
+            {loading ? 'Verifying...' : 'Verify email'}
           </button>
         </form>
       )}

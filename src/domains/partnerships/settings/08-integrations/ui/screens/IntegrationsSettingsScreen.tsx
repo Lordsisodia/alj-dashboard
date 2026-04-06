@@ -163,7 +163,7 @@ export function IntegrationsSettingsScreen() {
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-semibold text-siso-text-primary">Connected Services</p>
-                        <InfoButton label="What is connected?" content="Apps you’ve already linked to SISO. Keep them in sync from here." side="bottom" variant="ghost" />
+                        <InfoButton label="What is connected?" content="Apps you've already linked to SISO. Keep them in sync from here." side="bottom" variant="ghost" />
                       </div>
                       <p className="text-xs text-siso-text-muted">Currently active integrations</p>
                     </div>
@@ -385,7 +385,7 @@ export function IntegrationsSettingsScreen() {
                             {selectedIntegration.syncStatus === 'active' ? 'Connected' : 'Connection Issue'}
                           </span>
                         </div>
-                        <span className="text-xs text-siso-text-muted">{selectedIntegration.lastSync || '—'}</span>
+                        <span className="text-xs text-siso-text-muted">{selectedIntegration.lastSync || '-'}</span>
                       </div>
                     </div>
 
@@ -477,14 +477,14 @@ export function IntegrationsSettingsScreen() {
                       <div className="space-y-3">
                         {wizardMethod === 'oauth' && (
                           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                            <p className="text-xs text-siso-text-muted mb-3">Continue to {selectedIntegration.name} to authorize access. You’ll be returned here afterwards.</p>
+                            <p className="text-xs text-siso-text-muted mb-3">Continue to {selectedIntegration.name} to authorize access. You'll be returned here afterwards.</p>
                             <button
                               disabled={wizardBusy}
                               onClick={simulateConnect}
                               className={cn(primaryGradientButtonClass, "inline-flex items-center gap-2 px-4 py-2 text-sm", wizardBusy && "opacity-60")}
                             >
                               {wizardBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                              {wizardBusy ? 'Connecting…' : 'Continue to provider'}
+                              {wizardBusy ? 'Connecting...' : 'Continue to provider'}
                             </button>
                             <button
                               className="ml-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-siso-text-muted hover:bg-white/5"

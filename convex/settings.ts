@@ -1,1 +1,1 @@
-// Settings queries and mutations — TODO
+// Settings queries and mutations - TODO

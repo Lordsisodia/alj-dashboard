@@ -1,5 +1,5 @@
 // Single source of truth for all Intelligence helpers.
-// Import from here — never define these inline in components.
+// Import from here - never define these inline in components.
 
 const AVATAR_PALETTE = ['#ff0069','#833ab4','#4a9eff','#78c257','#fcaf45','#ff6b35','#06b6d4'];
 
@@ -42,7 +42,7 @@ export function truncateId(id: string): string {
  * which spoofs the Instagram referrer header.
  */
 export function igThumb(url: string): string {
-  if (!url || !url.startsWith('http')) return url;           // CSS gradient — return as-is
+  if (!url || !url.startsWith('http')) return url;           // CSS gradient - return as-is
   if (url.includes('localhost') || url.includes('127.0.0.1')) return url; // local
   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
 }

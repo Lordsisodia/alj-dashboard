@@ -1,1 +1,1 @@
-// Ideas queries and mutations — TODO
+// Ideas queries and mutations - TODO

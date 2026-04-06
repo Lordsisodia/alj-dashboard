@@ -1,4 +1,4 @@
-// DirectoryHero — top hero section with overline, headline, paragraph.
+// DirectoryHero - top hero section with overline, headline, paragraph.
 
 import type { DirectoryHero } from './types';
 
@@ -55,7 +55,7 @@ export default function DirectoryHero({ hero }: Props) {
             </div>
           </div>
 
-          {/* Illustration placeholder — matches HTML structure */}
+          {/* Illustration placeholder - matches HTML structure */}
           <div className="agency-directory-illustration" />
         </div>
       </div>

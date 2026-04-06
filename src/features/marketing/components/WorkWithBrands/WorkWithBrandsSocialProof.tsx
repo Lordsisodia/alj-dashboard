@@ -1,4 +1,4 @@
-// WorkWithBrandsSocialProof — "Loved by brands and agencies globally" section.
+// WorkWithBrandsSocialProof - "Loved by brands and agencies globally" section.
 // Shows 3 platform rating badges (G2, Chrome, Capterra) and a Senja reviews embed.
 
 import type { WorkWithBrandsData } from './data/work-with-brands';

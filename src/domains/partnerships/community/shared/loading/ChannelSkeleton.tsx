@@ -14,7 +14,7 @@ export function ChannelSkeleton() {
                 <div className="h-4 w-48 rounded-full bg-white/10" />
                 <div className="h-3 w-64 rounded-full bg-white/5" />
               </div>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/50">Loading…</span>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/50">Loading...</span>
             </div>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               {[0, 1, 2].map((item) => (

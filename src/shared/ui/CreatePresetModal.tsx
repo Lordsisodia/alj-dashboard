@@ -12,7 +12,7 @@ const FILTER_OPTIONS: Record<string, string[]> = {
   platform:        ['Instagram', 'TikTok'],
   language:        ['English', 'Spanish', 'Filipino', 'Portuguese'],
   'content-style': ['Raw', 'Cinematic', 'Tutorial', 'Vlog', 'Media and Press'],
-  'video-length':  ['Under 15s', '15–30s', '30–60s', '1–3 min', '3+ min'],
+  'video-length':  ['Under 15s', '15-30s', '30-60s', '1-3 min', '3+ min'],
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -125,7 +125,7 @@ function FilterPicker({
           autoFocus
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder={step === 'categories' ? 'Search filters…' : `Search ${CATEGORY_LABELS[selectedCategory!]}…`}
+          placeholder={step === 'categories' ? 'Search filters...' : `Search ${CATEGORY_LABELS[selectedCategory!]}...`}
           className="flex-1 text-xs text-neutral-800 placeholder:text-neutral-400 bg-transparent outline-none"
         />
       </div>

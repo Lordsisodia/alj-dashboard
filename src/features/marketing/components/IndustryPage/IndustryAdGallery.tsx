@@ -1,4 +1,4 @@
-// IndustryAdGallery — subtitle, title, grid of ad example cards with brand avatar, duration, and ad image. CTA below the grid.
+// IndustryAdGallery - subtitle, title, grid of ad example cards with brand avatar, duration, and ad image. CTA below the grid.
 
 import Image from 'next/image';
 import type { IndustryPageData, AdGalleryItem } from './types';

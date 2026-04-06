@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "SISO Platform",
-    short_name: "SISO",
+    name: "ORACLE Platform",
+    short_name: "ORACLE",
     start_url: "/",
     scope: "/",
     display: "standalone",

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// SolutionsDropdown — featured OFM + coming-soon verticals
+// SolutionsDropdown - featured OFM + coming-soon verticals
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import { useState, useRef } from 'react';

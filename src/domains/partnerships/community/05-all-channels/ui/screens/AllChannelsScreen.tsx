@@ -56,7 +56,7 @@ const playbookCards = [
   {
     tag: "Wins",
     title: "Win template cheat sheet",
-    description: "Budget, hook, and asset links—the 3 elements that unlock badges fast.",
+    description: "Budget, hook, and asset links-the 3 elements that unlock badges fast.",
   },
   {
     tag: "Announcements",
@@ -176,7 +176,7 @@ function ChannelDirectoryRow({ channelId, href, label }: ChannelDirectoryRowProp
       {firstGuideline ? (
         <p className="mt-3 text-[12px] text-siso-text-muted">
           <span className="text-white/70">Pro tip: </span>
-          {firstGuideline.title} — {firstGuideline.description}
+          {firstGuideline.title} - {firstGuideline.description}
         </p>
       ) : null}
 
@@ -290,7 +290,7 @@ function SuggestChannelPanel() {
         <div className="flex-1">
           <p className="text-[12px] font-semibold uppercase tracking-[0.3em] text-siso-orange">Suggest a channel</p>
           <p className="text-sm text-siso-text-muted">
-            Have an idea for a space we’re missing? Drop it below and the community team will review it every Friday.
+            Have an idea for a space we're missing? Drop it below and the community team will review it every Friday.
           </p>
           <form className="mt-4 space-y-3">
             <input
@@ -325,7 +325,7 @@ function HeroPanel() {
         color="orange"
         className="w-full max-w-none pr-16 pl-12 text-left"
         title="Community Channels"
-        description="Browse every core room in one place and see what’s launching next."
+        description="Browse every core room in one place and see what's launching next."
         hideDivider
         hideFooter
         metricValue=""

@@ -18,7 +18,7 @@ export default function PublicPitchAssetPage(props: { params: Promise<{ slug: st
     <Suspense
       fallback={
         <main className="min-h-screen bg-black text-white p-6">
-          <p className="text-neutral-300">Loading pitch asset…</p>
+          <p className="text-neutral-300">Loading pitch asset...</p>
         </main>
       }
     >

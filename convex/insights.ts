@@ -1,13 +1,13 @@
 import { query } from "./_generated/server";
 
-// ── Insights aggregation — powered by swipeRatings ───────────────────────────
+// ── Insights aggregation - powered by swipeRatings ───────────────────────────
 //
 // Joins all swipeRatings with scrapedPosts to produce:
-//   summary         — total/up/down/save counts
-//   nichePreferences — upRate + saveRate per niche, sorted by signal strength
-//   formatPreferences — same per contentType
-//   topRatedPosts   — top 12 by score (up + save×2)
-//   raterActivity   — per-team-member totals, sorted by volume
+//   summary         - total/up/down/save counts
+//   nichePreferences - upRate + saveRate per niche, sorted by signal strength
+//   formatPreferences - same per contentType
+//   topRatedPosts   - top 12 by score (up + save×2)
+//   raterActivity   - per-team-member totals, sorted by volume
 
 export const getInsights = query({
   args: {},

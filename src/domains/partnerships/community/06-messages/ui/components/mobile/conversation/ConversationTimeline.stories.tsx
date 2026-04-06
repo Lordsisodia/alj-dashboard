@@ -26,7 +26,7 @@ const sample: ConversationMessage[] = [
     authorName: "You",
     authorInitials: "YOU",
     direction: "outgoing",
-    content: "Yes—tried a £1.2k strategy sprint; happy to share template.",
+    content: "Yes-tried a £1.2k strategy sprint; happy to share template.",
     timestamp: "2025-11-26T15:05:00.000Z",
   },
 ];

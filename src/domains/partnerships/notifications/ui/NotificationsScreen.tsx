@@ -69,7 +69,7 @@ export function NotificationsScreen() {
             color="orange"
             className="w-full max-w-none text-left"
             title="Notifications"
-            description="Partner pulse—updates, invites, and shoutouts."
+            description="Partner pulse-updates, invites, and shoutouts."
             hideDivider
             hideFooter
             titleClassName="uppercase tracking-[0.22em] font-semibold text-[20px] leading-tight"

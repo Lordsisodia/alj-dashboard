@@ -127,7 +127,7 @@ export function HubPage() {
           <HighlightCard
             color="orange"
             title="Partnership Hub"
-            description="Jump to every partner surface from one place—mobile-first, ready for home screen."
+            description="Jump to every partner surface from one place-mobile-first, ready for home screen."
             hideDivider
             hideFooter
             titleClassName="uppercase tracking-[0.35em] text-white"
@@ -177,7 +177,7 @@ export function HubPage() {
                   <ol className="space-y-1 list-decimal list-inside text-siso-text-secondary">
                     <li>Tap the <span className="font-semibold">Share</span> icon in Safari.</li>
                     <li>Scroll and tap <span className="font-semibold">Add to Home Screen</span>.</li>
-                    <li>Confirm “SISO” and tap <span className="font-semibold">Add</span>.</li>
+                    <li>Confirm "SISO" and tap <span className="font-semibold">Add</span>.</li>
                   </ol>
                 </div>
                 <div className="space-y-2">
@@ -185,10 +185,10 @@ export function HubPage() {
                   <ol className="space-y-1 list-decimal list-inside text-siso-text-secondary">
                     <li>Tap the <span className="font-semibold">⋮</span> menu (top right).</li>
                     <li>Select <span className="font-semibold">Add to Home screen</span>.</li>
-                    <li>Confirm “SISO” and tap <span className="font-semibold">Add</span>.</li>
+                    <li>Confirm "SISO" and tap <span className="font-semibold">Add</span>.</li>
                   </ol>
                 </div>
-                <p className="text-xs text-siso-text-muted">You’ll get faster launch, offline caching for wallet & tasks, and a full-screen app.</p>
+                <p className="text-xs text-siso-text-muted">You'll get faster launch, offline caching for wallet & tasks, and a full-screen app.</p>
                 <div className="mt-3 flex justify-end">
                   <button
                     type="button"
@@ -331,7 +331,7 @@ export function HubPage() {
               description: "Tasks, notes, files, calendar.",
               href: "/partners/workspace",
               stat: `${stats.tasks} open tasks`,
-              note: "Today’s filter ready",
+              note: "Today's filter ready",
               tag: "Coming soon",
               icon: <ArrowUpRight className="h-4 w-4" />,
               slug: "workspace",
@@ -501,7 +501,7 @@ function CardDetail({
               </span>
             ))}
           </div>
-          <p className="text-xs text-siso-text-muted">Today’s filter bundles tasks, notes, files.</p>
+          <p className="text-xs text-siso-text-muted">Today's filter bundles tasks, notes, files.</p>
         </div>
       );
     case "community":

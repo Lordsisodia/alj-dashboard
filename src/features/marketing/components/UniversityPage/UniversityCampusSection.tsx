@@ -1,4 +1,4 @@
-// UniversityCampusSection — "Welcome to Your Campus" + "Become a Professor" left-right layout.
+// UniversityCampusSection - "Welcome to Your Campus" + "Become a Professor" left-right layout.
 
 import type { UniversityPageData } from './data/university';
 
@@ -28,7 +28,7 @@ export default function UniversityCampusSection({ campus, professor }: Props) {
     <div className="section">
       <div className="container section-container">
         <div className="left-right-section-wrapper">
-          {/* Campus block — text left, image right */}
+          {/* Campus block - text left, image right */}
           <div className="left-right-section">
             <div className="left-right-section-content">
               <div className="section-head is-align-left">
@@ -72,7 +72,7 @@ export default function UniversityCampusSection({ campus, professor }: Props) {
             </div>
           </div>
 
-          {/* Professor block — image left, text right */}
+          {/* Professor block - image left, text right */}
           <div className="left-right-section">
             <div className="left-right-section-image-wrapper">
               <img

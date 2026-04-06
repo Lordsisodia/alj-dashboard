@@ -1,5 +1,5 @@
 'use client';
-// WebinarsHero — hero section with Fireside logo, headline, CTA, and tabbed content.
+// WebinarsHero - hero section with Fireside logo, headline, CTA, and tabbed content.
 
 import { useState } from 'react';
 import Image from 'next/image';

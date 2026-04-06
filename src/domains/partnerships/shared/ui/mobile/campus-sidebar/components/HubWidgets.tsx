@@ -212,7 +212,7 @@ export function PartnershipHubWidgets({ onNavigate }: { onNavigate?: (href: stri
     {
       id: "support",
       title: "Support & Coaching",
-      subtitle: "We’re online",
+      subtitle: "We're online",
       description: "Next office hours · Today 2 PM",
       metricLabel: "Open threads",
       metricValue: "1",
@@ -229,7 +229,7 @@ export function PartnershipHubWidgets({ onNavigate }: { onNavigate?: (href: stri
       id: "leaderboard",
       title: "Leaderboard Snapshot",
       subtitle: "Rank #6 · Performer lane",
-      description: "You’re two deals behind Maya Lee",
+      description: "You're two deals behind Maya Lee",
       metricLabel: "Points",
       metricValue: "1,280",
       icon: <TrophyIcon size={18} className="text-amber-200" />,

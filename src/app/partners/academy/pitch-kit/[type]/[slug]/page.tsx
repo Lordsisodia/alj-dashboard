@@ -135,7 +135,7 @@ export default async function PitchKitDetailPage({ params }: { params: Promise<{
           </SettingsGroupCallout>
         ) : null}
 
-        <SettingsGroupCallout icon={<ArrowRight className="h-4 w-4" />} title="Social proof & portfolio" subtitle="Attach 1–2 items when you send the deck." showChevron={false}>
+        <SettingsGroupCallout icon={<ArrowRight className="h-4 w-4" />} title="Social proof & portfolio" subtitle="Attach 1-2 items when you send the deck." showChevron={false}>
           <div className="rounded-[18px] border border-white/10 bg-white/5 p-4 space-y-3">
             <div className="flex flex-wrap gap-2">
               {kit.relatedProofs.map((proof) => (

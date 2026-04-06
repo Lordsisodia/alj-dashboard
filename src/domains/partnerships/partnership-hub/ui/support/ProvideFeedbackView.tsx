@@ -54,7 +54,7 @@ export function ProvideFeedbackView() {
           showChevron={false}
         >
           <p className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/70">
-            \"Academy streaming cut our load time to 1.1s.\" — Harper
+            \"Academy streaming cut our load time to 1.1s.\" - Harper
           </p>
         </SettingsGroupCallout>
         <SettingsGroupCallout
@@ -88,7 +88,7 @@ export function ProvideFeedbackView() {
             <Input
               value={topic}
               onChange={(event) => setTopic(event.target.value)}
-              placeholder="Wallet latency, Academy UX…"
+              placeholder="Wallet latency, Academy UX..."
               required
               className="bg-white/5 text-white placeholder:text-white/30"
             />

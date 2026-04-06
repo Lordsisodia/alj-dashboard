@@ -74,7 +74,7 @@ export function DetailSidebar({ activeSection, heightClass = "h-[800px]", onNavi
         <Suspense
           fallback={
             <div className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-white/60 animate-pulse">
-              Loading partner hub…
+              Loading partner hub...
             </div>
           }
         >

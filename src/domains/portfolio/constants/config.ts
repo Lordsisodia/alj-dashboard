@@ -12,7 +12,7 @@ export const portfolioConfig = {
   debounceDelay: 300, // ms
 
   // SEO
-  defaultMetaTitle: 'Portfolio | SISO Agency',
+  defaultMetaTitle: 'Portfolio | ORACLE Agency',
   defaultMetaDescription:
     'Explore our portfolio of 13+ apps built across 9 industries. 10x faster development with AI-powered technology.',
 

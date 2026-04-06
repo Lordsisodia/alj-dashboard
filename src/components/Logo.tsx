@@ -30,11 +30,11 @@ export const Logo: React.FC<LogoProps> = ({
         src={logoPath}
         width={dimensions}
         height={dimensions}
-        alt="SISO Logo"
+        alt="ORACLE Logo"
         className="logo-svg block"
       />
       {showText && (
-        <span className="logo-text font-bold text-2xl text-primary-black">SISO</span>
+        <span className="logo-text font-bold text-2xl text-primary-black">ORACLE</span>
       )}
     </div>
   );

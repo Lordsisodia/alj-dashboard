@@ -39,7 +39,7 @@ interface ClientNote {
 const mockNotes: ClientNote[] = [
   {
     id: "note_1",
-    title: "Discovery recap – Brookstone",
+    title: "Discovery recap - Brookstone",
     type: "meeting",
     body: "Discussed pain points around manual onboarding. Need AI quoting flow and Stripe integration.",
     prospect: "Brookstone Bikes",
@@ -51,7 +51,7 @@ const mockNotes: ClientNote[] = [
   },
   {
     id: "note_2",
-    title: "Preferences – BetaOps",
+    title: "Preferences - BetaOps",
     type: "quick",
     body: "Prefers SMS updates, CTO wants SOC2 docs before next step.",
     prospect: "BetaOps Cloud",
@@ -63,7 +63,7 @@ const mockNotes: ClientNote[] = [
   },
   {
     id: "note_3",
-    title: "Industry research – Fintech",
+    title: "Industry research - Fintech",
     type: "research",
     body: "Fintech AI compliance trends, highlight KYB automations.",
     prospect: "Prospect TBD",
@@ -150,7 +150,7 @@ export function ClientNotesBoard() {
               <div>
                 <h1 className="text-3xl font-semibold sm:text-4xl">Client Notes</h1>
                 <p className="mt-3 text-base text-white/70">
-                  Capture meeting recaps, share context with SISO, and keep every prospect’s preferences in one place.
+                  Capture meeting recaps, share context with SISO, and keep every prospect's preferences in one place.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">

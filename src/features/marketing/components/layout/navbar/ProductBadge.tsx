@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// ProductBadge — product icon with label, description, and animated gradient glow
+// ProductBadge - product icon with label, description, and animated gradient glow
 // Used in the Product dropdown mega-menu
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -45,7 +45,7 @@ export function ProductBadge({ label, href, desc, sprite, gradient }: ProductBad
 
       {/* Icon + gradient blob at bottom */}
       <div style={{ position: 'relative', zIndex: 2, marginTop: 16, marginBottom: -20 }}>
-        {/* Gradient glow — hidden until hovered, then animates up */}
+        {/* Gradient glow - hidden until hovered, then animates up */}
         <div
           style={{
             position: 'absolute',

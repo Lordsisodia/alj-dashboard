@@ -1,0 +1,89 @@
+path	cluster	load_budget_ms	fcp_budget_ms	js_budget_kb
+/partners	Shell & Mobile Core	2000	1500	120
+/partners/academy	Academy & Learning	1500	1200	120
+/partners/academy/certificates	Academy & Learning	1500	1200	120
+/partners/academy/courses	Academy & Learning	1500	1200	120
+/partners/academy/courses/[courseId]	Academy & Learning	1500	1200	120
+/partners/academy/courses/[courseId]/[lessonId]	Academy & Learning	1500	1200	120
+/partners/academy/industry/[slug]	Academy & Learning	1500	1200	120
+/partners/academy/my-progress	Academy & Learning	1500	1200	120
+/partners/academy/my-progress/tiers-and-perks	Academy & Learning	1500	1200	120
+/partners/academy/pitch-kit	Academy & Learning	1500	1200	120
+/partners/academy/pitch-kit/[type]/[slug]	Academy & Learning	1500	1200	120
+/partners/academy/portfolio	Academy & Learning	1500	1200	120
+/partners/academy/saved	Academy & Learning	1500	1200	120
+/partners/academy/training-spotlight	Academy & Learning	1500	1200	120
+/partners/academy/xp-breakdown	Academy & Learning	1500	1200	120
+/partners/campus	Shell & Mobile Core	2000	1500	120
+/partners/checklist	Shell & Mobile Core	2000	1500	120
+/partners/community	Community & Messaging	3000	2000	120
+/partners/community/all-channels	Community & Messaging	3000	2000	120
+/partners/community/all-partners	Community & Messaging	3000	2000	120
+/partners/community/announcements	Community & Messaging	3000	2000	120
+/partners/community/channels/announcements	Community & Messaging	3000	2000	120
+/partners/community/channels/general-chat	Community & Messaging	3000	2000	120
+/partners/community/channels/wins	Community & Messaging	3000	2000	120
+/partners/community/general	Community & Messaging	3000	2000	120
+/partners/community/help	Community & Messaging	3000	2000	120
+/partners/community/help/[collection]	Community & Messaging	3000	2000	120
+/partners/community/help/[collection]/[article]	Community & Messaging	3000	2000	120
+/partners/community/messages	Community & Messaging	3000	2000	120
+/partners/community/messages/[threadId]	Community & Messaging	3000	2000	120
+/partners/community/profile/[profileId]	Community & Messaging	3000	2000	120
+/partners/community/wins	Community & Messaging	3000	2000	120
+/partners/earnings	Earnings & PayPal	2000	1200	120
+/partners/earnings/achievements	Earnings & PayPal	2000	1200	120
+/partners/earnings/badges	Earnings & PayPal	2000	1200	120
+/partners/earnings/challenges	Earnings & PayPal	2000	1200	120
+/partners/earnings/challenges/[challengeId]	Earnings & PayPal	2000	1200	120
+/partners/earnings/leaderboard	Earnings & PayPal	2000	1200	120
+/partners/earnings/missions	Earnings & PayPal	2000	1200	120
+/partners/earnings/overview	Earnings & PayPal	2000	1200	120
+/partners/earnings/tier-progression	Earnings & PayPal	2000	1200	120
+/partners/earnings/wallet	Earnings & PayPal	2000	1200	120
+/partners/inbox	Shell & Mobile Core	2000	1500	120
+/partners/learning	Academy & Learning	1500	1200	120
+/partners/messages	Community & Messaging	3000	2000	120
+/partners/messages/[threadId]	Community & Messaging	3000	2000	120
+/partners/mobile	Shell & Mobile Core	2000	1500	120
+/partners/pipeline-ops	Pipeline & Recruitment	1200	1000	120
+/partners/pipeline-ops/active-deals	Pipeline & Recruitment	1200	1000	120
+/partners/pipeline-ops/client-notes	Pipeline & Recruitment	1200	1000	120
+/partners/pipeline-ops/prospects	Pipeline & Recruitment	1200	1000	120
+/partners/pipeline-ops/prospects/[id]	Pipeline & Recruitment	1200	1000	120
+/partners/pipeline-ops/recruitment	Pipeline & Recruitment	1200	1000	120
+/partners/pipeline-ops/submit-client	Pipeline & Recruitment	1200	1000	120
+/partners/privacy-policy	Legal/Privacy & Misc	1000	800	120
+/partners/profile	Shell & Mobile Core	2000	1500	120
+/partners/quick	Shell & Mobile Core	2000	1500	120
+/partners/recruitment	Pipeline & Recruitment	1200	1000	120
+/partners/recruitment/dashboard	Pipeline & Recruitment	1200	1000	120
+/partners/recruitment/performance	Pipeline & Recruitment	1200	1000	120
+/partners/recruitment/prospects	Pipeline & Recruitment	1200	1000	120
+/partners/recruitment/prospects/[id]	Pipeline & Recruitment	1200	1000	120
+/partners/recruitment/submit-partner	Pipeline & Recruitment	1200	1000	120
+/partners/recruitment/team	Pipeline & Recruitment	1200	1000	120
+/partners/recruitment/team/[id]	Pipeline & Recruitment	1200	1000	120
+/partners/settings	Shell & Mobile Core	2000	1500	120
+/partners/settings/[...slug]	Shell & Mobile Core	2000	1500	120
+/partners/settings/appearance	Shell & Mobile Core	2000	1500	120
+/partners/settings/general	Shell & Mobile Core	2000	1500	120
+/partners/settings/integrations	Shell & Mobile Core	2000	1500	120
+/partners/settings/language	Shell & Mobile Core	2000	1500	120
+/partners/settings/legal	Legal/Privacy & Misc	1000	800	120
+/partners/settings/legal/commission-terms	Legal/Privacy & Misc	1000	800	120
+/partners/settings/legal/compliance-regulatory	Legal/Privacy & Misc	1000	800	120
+/partners/settings/legal/cookie-tracking-policy	Legal/Privacy & Misc	1000	800	120
+/partners/settings/legal/partner-agreement	Legal/Privacy & Misc	1000	800	120
+/partners/settings/legal/service-level-agreement	Legal/Privacy & Misc	1000	800	120
+/partners/settings/legal/terms-of-service	Legal/Privacy & Misc	1000	800	120
+/partners/settings/legal/updates-changes-policy	Legal/Privacy & Misc	1000	800	120
+/partners/settings/privacy	Shell & Mobile Core	2000	1500	120
+/partners/settings/security	Shell & Mobile Core	2000	1500	120
+/partners/tools/app-plan-generator	Workspace & Tools	1500	1200	120
+/partners/wallet	Earnings & PayPal	2000	1200	120
+/partners/workspace	Workspace & Tools	1500	1200	120
+/partners/workspace/calendar	Workspace & Tools	1500	1200	120
+/partners/workspace/files	Workspace & Tools	1500	1200	120
+/partners/workspace/notes/my-notes	Workspace & Tools	1500	1200	120
+/partners/workspace/tasks	Workspace & Tools	1500	1200	120

@@ -45,7 +45,7 @@ export default function ComingSoonView({
         </div>
 
         <div className="rounded-[18px] border border-white/10 bg-white/5 p-4 text-sm text-siso-text-muted">
-          We’re putting the finishing touches on this page. Check back soon or explore other settings.
+          We're putting the finishing touches on this page. Check back soon or explore other settings.
         </div>
       </div>
     </SettingsDetailLayout>

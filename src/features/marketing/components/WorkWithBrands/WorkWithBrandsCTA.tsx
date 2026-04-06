@@ -1,4 +1,4 @@
-// WorkWithBrandsCTA — bottom CTA section: headline, paragraph, dual buttons, decorative image.
+// WorkWithBrandsCTA - bottom CTA section: headline, paragraph, dual buttons, decorative image.
 
 import type { WorkWithBrandsData } from './data/work-with-brands';
 

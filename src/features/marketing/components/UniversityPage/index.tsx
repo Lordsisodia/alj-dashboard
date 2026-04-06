@@ -1,5 +1,5 @@
 'use client';
-// UniversityPage — main template assembling all university page sections.
+// UniversityPage - main template assembling all university page sections.
 
 import UniversityHero from './UniversityHero';
 import UniversityCampusSection from './UniversityCampusSection';

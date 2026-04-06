@@ -1,6 +1,6 @@
 'use client';
 // ═══════════════════════════════════════════════════════════════════════════════
-// ResourcesDropdown — flat 3×2 grid of resource items + right video panel
+// ResourcesDropdown - flat 3×2 grid of resource items + right video panel
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import { useState, useRef } from 'react';

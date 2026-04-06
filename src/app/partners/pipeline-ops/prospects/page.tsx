@@ -48,7 +48,7 @@ export default async function PartnerProspectsPage() {
               </div>
             </div>
           </div>
-          <Suspense fallback={<div className="p-10 text-white">Loading prospects…</div>}>
+          <Suspense fallback={<div className="p-10 text-white">Loading prospects...</div>}>
             <ProspectsWorkspace initialProspects={prospects} />
           </Suspense>
         </div>

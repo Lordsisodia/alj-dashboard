@@ -1,5 +1,5 @@
 /**
- * Blog page assembly — composes BlogHero, BlogList, BlogCTA, and Footer.
+ * Blog page assembly - composes BlogHero, BlogList, BlogCTA, and Footer.
  * Import this from app/blog/page.tsx.
  */
 
