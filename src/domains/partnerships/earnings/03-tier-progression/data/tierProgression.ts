@@ -77,7 +77,7 @@ export const tierBenefits: TierBenefit[] = [
   {
     perk: "Payout boost",
     tiers: {
-      Trailblazer: "—",
+      Trailblazer: "-",
       Builder: "+2%",
       Vanguard: "+4%",
       Apex: "+5%",
@@ -87,11 +87,11 @@ export const tierBenefits: TierBenefit[] = [
 ];
 
 export const unlockMissions: UnlockMission[] = [
-  // Trailblazer → Builder (0–1k)
+  // Trailblazer → Builder (0-1k)
   {
     id: "featured-course",
     title: "Finish a featured course",
-    description: "Complete “Discovery Basics” (or any featured course).",
+    description: "Complete "Discovery Basics" (or any featured course).",
     reward: "+250 XP",
     steps: ["Start the featured course", "Finish modules", "Mark complete"],
     tiers: ["Trailblazer"],
@@ -112,7 +112,7 @@ export const unlockMissions: UnlockMission[] = [
     steps: ["Draft case", "Link proof", "Publish to portfolio"],
     tiers: ["Trailblazer"],
   },
-  // Builder → Vanguard (1k–3k)
+  // Builder → Vanguard (1k-3k)
   {
     id: "win-streak-2",
     title: "Win streak",
@@ -137,7 +137,7 @@ export const unlockMissions: UnlockMission[] = [
     steps: ["Launch cadence", "Log replies", "Share summary"],
     tiers: ["Builder"],
   },
-  // Vanguard → Apex (3k–10k)
+  // Vanguard → Apex (3k-10k)
   {
     id: "co-marketing-pack",
     title: "Ship a co-marketing pack",
@@ -162,7 +162,7 @@ export const unlockMissions: UnlockMission[] = [
     steps: ["Claim mentees", "Host sessions", "Submit recaps"],
     tiers: ["Vanguard"],
   },
-  // Apex → Sovereign (10k–25k+)
+  // Apex → Sovereign (10k-25k+)
   {
     id: "lighthouse-win",
     title: "Lighthouse win",

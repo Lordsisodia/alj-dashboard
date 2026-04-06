@@ -17,7 +17,7 @@ const ClientShell = dynamic(() =>
       aria-label="Loading community shell"
     >
       <div className="space-y-3 text-center">
-        <p className="text-xs uppercase tracking-[0.3em] text-white/50">Loading community shell…</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-white/50">Loading community shell...</p>
         <div className="mx-auto h-6 w-32 rounded-full bg-white/10 animate-pulse" />
         <div className="mx-auto h-6 w-48 rounded-full bg-white/5 animate-pulse" />
       </div>

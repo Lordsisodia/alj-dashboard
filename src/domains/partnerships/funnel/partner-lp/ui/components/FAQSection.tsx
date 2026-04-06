@@ -6,11 +6,11 @@ import { useState } from 'react';
 const faqs = [
   {
     q: 'How fast can we launch?',
-    a: 'Most partners get a demo-ready MVP in 48–72 hours, then we iterate together before go-live.'
+    a: 'Most partners get a demo-ready MVP in 48-72 hours, then we iterate together before go-live.'
   },
   {
     q: 'What does it cost to start?',
-    a: 'Zero upfront. You pay when you’re happy with the build and ready to launch.'
+    a: 'Zero upfront. You pay when you're happy with the build and ready to launch.'
   },
   {
     q: 'Do you co-sell with our team?',
@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     q: 'Who handles delivery and support?',
-    a: 'SISO builds, launches, and supports. You focus on selling and relationships.'
+    a: 'ORACLE builds, launches, and supports. You focus on selling and relationships.'
   },
   {
     q: 'Can you work with our stack?',

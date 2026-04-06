@@ -42,7 +42,7 @@ function ComposerBarFallback({ minHeight }: { minHeight: number }) {
       className="rounded-2xl border border-white/10 siso-inner-card p-4 text-xs uppercase tracking-[0.3em] text-white/50"
       style={{ minHeight }}
     >
-      Preparing composer…
+      Preparing composer...
     </div>
   );
 }

@@ -1,4 +1,4 @@
-// AgencyDirectory — assembles hero, sidebar filters, agency feed, and footer.
+// AgencyDirectory - assembles hero, sidebar filters, agency feed, and footer.
 
 import DirectoryHero from './DirectoryHero';
 import DirectoryFilters from './DirectoryFilters';

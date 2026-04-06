@@ -49,7 +49,7 @@ export function ProfileTab() {
           <FieldRow label="Display Name" value="Alex Chen"      />
           <FieldRow label="Email"        value="alex@isso.co"   />
           <FieldRow label="Agency"       value="ALJ OFM Agency" />
-          <FieldRow label="Timezone"     value="GMT+0 — London" />
+          <FieldRow label="Timezone"     value="GMT+0 - London" />
         </div>
         <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
           <button

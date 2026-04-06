@@ -1,4 +1,4 @@
-// SocialProof — "Loved by brands and agencies globally" section with review badges
+// SocialProof - "Loved by brands and agencies globally" section with review badges
 // and the Senja testimonial embed.
 
 import { ReactNode } from 'react';

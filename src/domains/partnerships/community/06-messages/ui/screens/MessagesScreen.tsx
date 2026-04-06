@@ -26,7 +26,7 @@ function ComposerFallback({ minHeight }: { minHeight: number }) {
       className="rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.35em] text-white/50"
       style={{ minHeight }}
     >
-      Preparing composer…
+      Preparing composer...
     </div>
   );
 }

@@ -1,4 +1,4 @@
-// IndustryPage — main template component that assembles all industry page sections.
+// IndustryPage - main template component that assembles all industry page sections.
 // Pass an IndustryPageData object to render a complete industry/solution page.
 
 import IndustryHero from './IndustryHero';

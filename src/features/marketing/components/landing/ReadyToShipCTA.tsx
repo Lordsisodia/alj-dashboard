@@ -45,7 +45,7 @@ export default function ReadyToShipCTA() {
             Ready to automate your content pipeline?
           </h2>
           <p className="home-cta-headline-p" style={PARAGRAPH_STYLE}>
-            Start your 7-day trial. No contracts, no limits — see the pipeline run.
+            Start your 7-day trial. No contracts, no limits - see the pipeline run.
           </p>
         </div>
 

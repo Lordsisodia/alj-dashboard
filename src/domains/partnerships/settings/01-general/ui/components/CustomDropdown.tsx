@@ -237,7 +237,7 @@ export function CustomDropdown({
                     onClick={() => handleSelect(searchQuery.trim())}
                     className="w-full border-t border-siso-border/40 px-3 py-2 text-left text-xs text-siso-orange hover:bg-siso-orange/10"
                   >
-                    Use “{searchQuery.trim()}”
+                    Use "{searchQuery.trim()}"
                   </button>
                 )}
               </div>

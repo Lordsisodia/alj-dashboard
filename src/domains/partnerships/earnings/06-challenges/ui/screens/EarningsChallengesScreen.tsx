@@ -31,7 +31,7 @@ export function EarningsChallengesScreen({ challenges }: EarningsChallengesScree
 
   const seasonRules = [
     "Active tier required; squads auto-enrolled when 3+ verified reps",
-    "Boost applies to verified closes between Nov 15–Dec 20",
+    "Boost applies to verified closes between Nov 15-Dec 20",
     "Stackable with Wallet boosts up to +20% cap",
   ];
 
@@ -115,7 +115,7 @@ export function EarningsChallengesScreen({ challenges }: EarningsChallengesScree
             ))}
           </div>
           {upcoming.length > 2 ? (
-            <p className="mt-3 text-xs text-siso-text-muted">{upcoming.length - 2} more missions coming soon…</p>
+            <p className="mt-3 text-xs text-siso-text-muted">{upcoming.length - 2} more missions coming soon...</p>
           ) : null}
         </SettingsGroupCallout>
         ) : null}

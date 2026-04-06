@@ -1,4 +1,4 @@
-// Info, Education & Community industry page data — extracted from www_foreplay_co (15).html
+// Info, Education & Community industry page data - extracted from www_foreplay_co (15).html
 
 import type { IndustryPageData } from '../types';
 

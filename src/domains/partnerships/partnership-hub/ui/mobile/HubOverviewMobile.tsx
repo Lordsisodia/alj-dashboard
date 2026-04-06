@@ -26,7 +26,7 @@ const WidgetCard = ({ title, href, value, loading }: WidgetCardProps) => (
       ) : null}
     </div>
     <p className="mt-2 text-white/80">
-      {loading ? <Skeleton className="h-5 w-20 bg-white/10" /> : value ?? "—"}
+      {loading ? <Skeleton className="h-5 w-20 bg-white/10" /> : value ?? "-"}
     </p>
   </section>
 );
@@ -62,7 +62,7 @@ export function HubOverviewMobile() {
     return (
       <div className="rounded-3xl border border-amber-500/40 bg-amber-500/10 p-4 text-amber-100">
         <p className="text-sm font-semibold">Hub data is unavailable right now.</p>
-        <p className="text-xs opacity-80">We’ll show cached stats once the service recovers.</p>
+        <p className="text-xs opacity-80">We'll show cached stats once the service recovers.</p>
       </div>
     );
   }

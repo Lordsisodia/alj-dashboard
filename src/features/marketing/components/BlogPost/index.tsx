@@ -1,5 +1,5 @@
 /**
- * BlogPost page assembly — composes all BlogPost sub-components.
+ * BlogPost page assembly - composes all BlogPost sub-components.
  * Import this from app/post/[slug]/page.tsx.
  *
  * Layout mirrors the Foreplay HTML structure:

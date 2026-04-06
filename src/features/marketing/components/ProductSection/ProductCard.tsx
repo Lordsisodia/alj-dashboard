@@ -45,7 +45,7 @@ export default function ProductCard({
 
   return (
     <div className="product-card-root" style={{ display: 'flex', gap: '16px', alignItems: 'stretch', flexDirection: 'row' }}>
-      {/* LEFT: content card — flex: 3 */}
+      {/* LEFT: content card - flex: 3 */}
       <div
         style={{
           background: '#020308',
@@ -158,7 +158,7 @@ export default function ProductCard({
         </div>
       </div>
 
-      {/* RIGHT: screenshot panel — flex: 7 */}
+      {/* RIGHT: screenshot panel - flex: 7 */}
       <div
         className="product-card-figure"
         style={{ backgroundColor: '#ffffff0f', borderRadius: '24px', flex: '7 1 0', display: 'flex', position: 'relative', overflow: 'hidden' }}

@@ -15,7 +15,7 @@ export function IssoDetailSidebar() {
 
   return (
     <div className="flex flex-col w-[196px] flex-shrink-0 h-full overflow-y-auto overflow-x-hidden py-4 px-3">
-      {/* Nav items — no section title here, that lives in the page */}
+      {/* Nav items - no section title here, that lives in the page */}
       <nav className="flex flex-col gap-0.5 flex-1">
         {config.sections.map((section, si) => (
           <div key={si} className="flex flex-col gap-0.5">
@@ -64,14 +64,14 @@ export function IssoDetailSidebar() {
         ))}
       </nav>
 
-      {/* Plan CTA — pinned to bottom */}
+      {/* Plan CTA - pinned to bottom */}
       <div className="mt-auto pt-4">
         <div
           className="rounded-xl border border-white/8 p-3"
           style={{ background: 'rgba(255,0,105,0.05)' }}
         >
           <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-0.5 select-none">Plan</p>
-          <p className="text-sm font-semibold text-white leading-tight">ISSO Agency</p>
+          <p className="text-sm font-semibold text-white leading-tight">ORACLE Agency</p>
           <p className="text-xs text-white/40 mt-0.5">$79 / month</p>
           <button
             className="mt-2.5 w-full rounded-lg py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-80"

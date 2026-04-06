@@ -112,14 +112,14 @@ export function ClientDetail() {
     <>
       {/* SEO Metadata */}
       <Helmet>
-        <title>{project.name} - {industry.name} Case Study | SISO</title>
+        <title>{project.name} - {industry.name} Case Study | ORACLE</title>
         <meta name="description" content={project.description.substring(0, 160)} />
         <meta property="og:title" content={`${project.name} - ${industry.name} Case Study`} />
         <meta property="og:description" content={project.tagline} />
         {project.media?.screenshots?.desktop?.[0] && (
           <meta property="og:image" content={project.media.screenshots.desktop[0]} />
         )}
-        <link rel="canonical" href={`https://siso.com/portfolio/${industrySlug}/${clientId}`} />
+        <link rel="canonical" href={`https://oracle.com/portfolio/${industrySlug}/${clientId}`} />
       </Helmet>
 
       <main className="main-scroll-container min-h-screen bg-siso-bg">
@@ -295,7 +295,7 @@ export function ClientDetail() {
                     Pages & Structure
                   </GradientText>
                   <p className="text-sm text-siso-text-muted mb-3">
-                    Pages: {project.pages?.length ?? '—'}
+                    Pages: {project.pages?.length ?? '-'}
                   </p>
                   <PortfolioSitemapGraph pages={project.pages as any} pageLinks={project.pageLinks as any} />
                 </div>
@@ -385,7 +385,7 @@ export function ClientDetail() {
                     { name: 'Maintenance', description: 'Ongoing support and updates.', duration: 'Ongoing' }
                   ]
                   const normalized = hasPhases
-                    ? phases.map((p:any) => ({ name: p.name, description: p.description, duration: p.duration || '—' }))
+                    ? phases.map((p:any) => ({ name: p.name, description: p.description, duration: p.duration || '-' }))
                     : fallback
                   return <TimelineVisualization timeline={{ phases: normalized }} />
                 })()}
@@ -409,8 +409,8 @@ export function ClientDetail() {
                       <div className="text-white font-medium">{project.results.deliverySpeed}</div>
                       {project.results.performanceMetrics && (
                         <div className="mt-3 text-sm text-siso-text">
-                          <div>Lighthouse: {project.results.performanceMetrics.lighthouseScore ?? '—'}</div>
-                          <div>Uptime: {project.results.performanceMetrics.uptime ?? '—'}</div>
+                          <div>Lighthouse: {project.results.performanceMetrics.lighthouseScore ?? '-'}</div>
+                          <div>Uptime: {project.results.performanceMetrics.uptime ?? '-'}</div>
                         </div>
                       )}
                       {project.results.businessImpact && (

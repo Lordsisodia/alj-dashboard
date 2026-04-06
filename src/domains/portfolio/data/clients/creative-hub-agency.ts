@@ -134,7 +134,7 @@ export const creativeHubAgency: PortfolioClient = {
   // Testimonial
   testimonial: {
     text:
-      'Our new portfolio site has completely transformed our agency. We\'re getting better quality leads and closing deals faster. SISO\'s AI-powered approach delivered exactly what we needed in record time.',
+      'Our new portfolio site has completely transformed our agency. We\'re getting better quality leads and closing deals faster. ORACLE\'s AI-powered approach delivered exactly what we needed in record time.',
     author: 'Sarah Mitchell',
     title: 'Creative Director',
     role: 'Creative Director',
@@ -164,7 +164,7 @@ export const creativeHubAgency: PortfolioClient = {
   metadata: {
     featured: true,
     showInPortfolio: false,
-    seoTitle: 'CreativeHub Agency - Portfolio Platform Case Study | SISO Portfolio',
+    seoTitle: 'CreativeHub Agency - Portfolio Platform Case Study | ORACLE Portfolio',
     seoDescription:
       'Custom portfolio platform for creative agencies with CMS integration. Built in 15 days with AI-powered development.',
     tags: ['agency', 'portfolio', 'CMS', 'creative', 'showcase'],

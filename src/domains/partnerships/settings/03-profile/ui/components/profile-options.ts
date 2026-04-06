@@ -1,5 +1,5 @@
 export const businessTypeOptions = [
-  { value: "", label: "Select business type", description: "Choose “Custom” if not listed" },
+  { value: "", label: "Select business type", description: "Choose "Custom" if not listed" },
   { value: "freelance", label: "Freelance", description: "Independent professional" },
   { value: "agency", label: "Agency", description: "Service-based business" },
   { value: "consulting", label: "Consulting", description: "Professional consulting" },
@@ -9,7 +9,7 @@ export const businessTypeOptions = [
 ];
 
 export const industryOptions = [
-  { value: "", label: "Select industry", description: "Choose “Custom” if not listed" },
+  { value: "", label: "Select industry", description: "Choose "Custom" if not listed" },
   { value: "technology", label: "Technology", description: "Software, IT, tech services" },
   { value: "marketing", label: "Marketing", description: "Digital marketing, advertising" },
   { value: "finance", label: "Finance", description: "Banking, investments, financial services" },
@@ -24,7 +24,7 @@ export const industryOptions = [
 ];
 
 export const companySizeOptions = [
-  { value: "", label: "Select company size", description: "Choose “Custom” if not listed" },
+  { value: "", label: "Select company size", description: "Choose "Custom" if not listed" },
   { value: "1", label: "Just me", description: "Individual freelancer/solo" },
   { value: "2-5", label: "2-5 people", description: "Small team" },
   { value: "6-10", label: "6-10 people", description: "Medium team" },
@@ -34,7 +34,7 @@ export const companySizeOptions = [
 ];
 
 export const geographicOptions = [
-  { value: "", label: "Select region", description: "Choose “Custom” if not listed" },
+  { value: "", label: "Select region", description: "Choose "Custom" if not listed" },
   { value: "north-america", label: "North America", description: "USA, Canada, Mexico" },
   { value: "europe", label: "Europe", description: "UK, EU, European countries" },
   { value: "asia-pacific", label: "Asia Pacific", description: "Asia, Australia, Pacific" },
@@ -46,7 +46,7 @@ export const geographicOptions = [
 ];
 
 export const certificationOptions = [
-  { value: "", label: "Select certification level", description: "Choose “Custom” if not listed" },
+  { value: "", label: "Select certification level", description: "Choose "Custom" if not listed" },
   { value: "basic", label: "Basic", description: "Entry-level SISO certification" },
   { value: "advanced", label: "Advanced", description: "Experienced partner certification" },
   { value: "expert", label: "Expert", description: "Top-tier partner certification" },
@@ -54,7 +54,7 @@ export const certificationOptions = [
 ];
 
 export const languageOptions = [
-  { value: "", label: "Select languages", description: "Choose “Custom” if not listed" },
+  { value: "", label: "Select languages", description: "Choose "Custom" if not listed" },
   { value: "english", label: "English", description: "Native or fluent" },
   { value: "spanish", label: "Spanish", description: "Español" },
   { value: "french", label: "French", description: "Français" },

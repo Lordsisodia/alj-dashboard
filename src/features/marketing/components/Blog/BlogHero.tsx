@@ -1,5 +1,5 @@
 /**
- * BlogHero — mirrors the `fireside-hero` section from the HTML source.
+ * BlogHero - mirrors the `fireside-hero` section from the HTML source.
  *
  * Layout:
  *   - Left (featured-blog-wrapper): large image card linking to the featured post
@@ -33,7 +33,7 @@ export default function BlogHero() {
           <div className="section-content-main">
             <div className="w-layout-grid blog-header-grid">
 
-              {/* Left: featured post — spans 4 of 6 columns */}
+              {/* Left: featured post - spans 4 of 6 columns */}
               <div className="featured-blog-wrapper" style={{ gridColumn: 'span 4' }}>
                 <a href={FEATURED_POST.href} className="featured-blog-link w-inline-block">
                   <div className="featured-blog-cover">
@@ -70,7 +70,7 @@ export default function BlogHero() {
                 </div>
               </div>
 
-              {/* Right: popular blogs sidebar — spans 2 of 6 columns */}
+              {/* Right: popular blogs sidebar - spans 2 of 6 columns */}
               <div className="blog-feed-wrapper" style={{ gridColumn: 'span 2' }}>
                 <div className="text-alpha-100">
                   <h2 className="text-overline">Popular Blogs</h2>

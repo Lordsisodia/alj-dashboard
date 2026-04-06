@@ -66,16 +66,16 @@ export function PortfolioHub() {
     <>
       {/* SEO Metadata */}
       <Helmet>
-        <title>Portfolio - AI-Powered Websites & PWAs | SISO</title>
+        <title>Portfolio - AI-Powered Websites & PWAs | ORACLE</title>
         <meta
           name="description"
           content="See how we've transformed businesses across industries with AI-powered development. Websites and PWAs delivered in 48-72 hours."
         />
         <meta
           name="keywords"
-          content="portfolio, AI development, websites, PWAs, case studies, SISO projects"
+          content="portfolio, AI development, websites, PWAs, case studies, ORACLE projects"
         />
-        <meta property="og:title" content="Portfolio - AI-Powered Websites & PWAs | SISO" />
+        <meta property="og:title" content="Portfolio - AI-Powered Websites & PWAs | ORACLE" />
         <meta
           property="og:description"
           content="Browse our portfolio of AI-powered websites and PWAs across industries."
@@ -319,7 +319,7 @@ export function PortfolioHub() {
                         <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </Button>
                       <p className="text-sm text-siso-text-muted mt-4">
-                        Join 100+ partners already earning with SISO
+                        Join 100+ partners already earning with ORACLE
                       </p>
                     </div>
                   </div>

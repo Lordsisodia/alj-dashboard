@@ -39,7 +39,7 @@ export function ChromeExtensionCard() {
               textTransform: 'uppercase',
               display: 'block',
             }}>
-              Free Chrome Extension — Coming Soon
+              Free Chrome Extension - Coming Soon
             </span>
           </div>
           <div className="text-white">

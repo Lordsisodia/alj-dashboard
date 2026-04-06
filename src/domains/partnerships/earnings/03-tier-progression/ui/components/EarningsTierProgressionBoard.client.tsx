@@ -133,7 +133,7 @@ export function EarningsTierProgressionBoard({ tierMeta, tierHistory, unlockMiss
 
         <div className="rounded-[26px] border border-siso-orange/60 bg-siso-orange/10 px-4 py-5 text-sm text-white/90">
           <p className="font-semibold uppercase tracking-[0.3em]">Need a review?</p>
-          <p className="text-xs text-white/80">If you’ve met the requirements, request a manual tier review and we’ll respond in 48 hours.</p>
+          <p className="text-xs text-white/80">If you've met the requirements, request a manual tier review and we'll respond in 48 hours.</p>
           <Button asChild className={primaryGradientButtonClass} size="sm">
             <Link href="/partners/earnings/review">Ask for review</Link>
           </Button>
@@ -269,7 +269,7 @@ function TierBadges({ tierMeta }: { tierMeta: TierMetaState }) {
       src: "/tiers/Sovereign.svg",
       perks: ["+6% payout boost", "Rev-share pilots", "Concierge"],
       description: "Top-tier privileges with revenue-share pilots and concierge help.",
-      unlockHint: "You’ve reached the summit. Maintain activity to keep the crown.",
+      unlockHint: "You've reached the summit. Maintain activity to keep the crown.",
     },
   ];
 

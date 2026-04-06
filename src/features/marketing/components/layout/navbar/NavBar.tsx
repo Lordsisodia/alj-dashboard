@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// NavBar — main navigation component
+// NavBar - main navigation component
 // Imports and composes: ProductDropdown, SolutionsDropdown, ResourcesDropdown
 // ═══════════════════════════════════════════════════════════════════════════════
 

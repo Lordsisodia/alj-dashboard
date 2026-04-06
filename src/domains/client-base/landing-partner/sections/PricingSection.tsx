@@ -90,7 +90,7 @@ export const PricingSection = () => {
             trustMessage={
               <div className="flex items-center justify-center gap-2">
                 <Award className="w-5 h-5 text-siso-orange" />
-                <span>764/1,000 Free Spots Taken – Claim yours now!</span>
+                <span>764/1,000 Free Spots Taken - Claim yours now!</span>
               </div>
             }
           />

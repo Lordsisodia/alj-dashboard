@@ -12,7 +12,7 @@ const TABS = [
       </svg>
     ),
     ctaLabel: 'Curate and share the best-performing content',
-    ctaText: 'A visual library for your top reels. Organize by model, niche, or trend — share instantly with your team.',
+    ctaText: 'A visual library for your top reels. Organize by model, niche, or trend - share instantly with your team.',
     image: 'https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/680c3ed43df5ea8859a6ac18_home-mockup-1.webp',
     messageImage: 'https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/681926627347f25bbe9bb302_moodboard-message.webp',
     messagePosition: { top: '25%', left: '5%' },
@@ -26,7 +26,7 @@ const TABS = [
       </svg>
     ),
     ctaLabel: 'Highlight trends. Back it with proof.',
-    ctaText: "Turn creative data into deck-worthy insights. Share visual reports that break down what's driving performance — and what's just taking up space.",
+    ctaText: "Turn creative data into deck-worthy insights. Share visual reports that break down what's driving performance - and what's just taking up space.",
     image: 'https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/680c3ed4458a2826d337aa28_home-mockup-2.webp',
     messageImage: 'https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/681927286de6a527f591fa12_reports-message.webp',
     messagePosition: { top: '58%', left: '7%' },
@@ -90,7 +90,7 @@ export function SharingPanel() {
           color: '#000000',
           margin: 0,
         }}>
-          Share results, briefs, and inspiration — beautifully
+          Share results, briefs, and inspiration - beautifully
         </h2>
         <p style={{
           fontFamily: 'Inter, sans-serif',
@@ -99,7 +99,7 @@ export function SharingPanel() {
           color: 'rgba(0,0,0,0.6)',
           margin: 0,
         }}>
-          Show models what&apos;s working, share briefs with your team, and keep everyone aligned — all from one dashboard.
+          Show models what&apos;s working, share briefs with your team, and keep everyone aligned - all from one dashboard.
         </p>
         <div style={{ height: '1px', background: '#e9eaef', marginTop: '32px' }} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridColumnGap: '12px', gridRowGap: '12px' }}>

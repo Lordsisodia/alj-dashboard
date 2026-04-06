@@ -84,7 +84,7 @@ const quickSettingsCards = [
   }
 ];
 
-// (Removed quickToggles — per request, not needed anymore)
+// (Removed quickToggles - per request, not needed anymore)
 
 // Use main Settings callout styling consistently
 

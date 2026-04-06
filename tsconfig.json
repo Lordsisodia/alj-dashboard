@@ -21,6 +21,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@/convex/*": [
+        "./convex/*"
+      ],
       "@/app/*": [
         "./src/app/*"
       ],
@@ -61,6 +64,7 @@
         "./src/config/*"
       ],
       "@/components/*": [
+        "./src/components/*",
         "./components/*"
       ],
       "@/hooks/*": [

@@ -32,7 +32,7 @@ export function ScoreColumnHeader() {
             style={{ backgroundColor: '#1c1c1e', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 12px 32px rgba(0,0,0,0.3)' }}
           >
             <p className="text-xs font-semibold text-white mb-1.5">Leaderboard Score</p>
-            <p className="text-[11px] text-neutral-400 leading-relaxed mb-3">Weighted 0–100 signal indicating how valuable this creator is to study.</p>
+            <p className="text-[11px] text-neutral-400 leading-relaxed mb-3">Weighted 0-100 signal indicating how valuable this creator is to study.</p>
             <div className="space-y-1.5">
               {SCORE_WEIGHTS.map(row => (
                 <div key={row.label} className="flex items-center justify-between">

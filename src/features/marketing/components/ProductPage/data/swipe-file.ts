@@ -16,7 +16,7 @@ export const swipeFileData: ProductPageData = {
   },
   beforeAfter: {
     sectionTitle: 'Why does your agency need Hub?',
-    sectionParagraph: 'Top OFM agencies already track reels, approvals, and analytics — just manually, across five different tools. Hub replaces all of it with one clean dashboard your whole team can use.',
+    sectionParagraph: 'Top OFM agencies already track reels, approvals, and analytics - just manually, across five different tools. Hub replaces all of it with one clean dashboard your whole team can use.',
     before: {
       label: 'Before ...',
       description: 'Telegram threads, Airtable rows, and scattered DMs to models.',
@@ -24,14 +24,14 @@ export const swipeFileData: ProductPageData = {
     },
     after: {
       label: 'After ISSO',
-      description: 'Browse reels, send approvals, and track performance — all in Hub.',
+      description: 'Browse reels, send approvals, and track performance - all in Hub.',
       imageSrc: `${CDN}/682dfe3a5956e63970743aa1_after-swipefile.webp`,
     },
   },
   useCases: {
     subtitle: 'Use Cases',
     title: 'Built for every role in your agency',
-    paragraph: 'Hub serves three audiences simultaneously — models browsing inspiration, managers running approvals, and agency owners tracking performance — all from one dashboard.',
+    paragraph: 'Hub serves three audiences simultaneously - models browsing inspiration, managers running approvals, and agency owners tracking performance - all from one dashboard.',
     items: [
       {
         title: 'Models: Browse & Swipe',
@@ -53,7 +53,7 @@ export const swipeFileData: ProductPageData = {
   coreFeatures: {
     subtitle: 'Core Features',
     title: 'How Hub fits into your content pipeline',
-    paragraph: 'Hub connects directly to ISSO\'s scraped reels database — 100K+ reels from top-performing accounts in your niche. Models swipe, managers approve, and every action updates the pipeline automatically.',
+    paragraph: 'Hub connects directly to ISSO\'s scraped reels database - 100K+ reels from top-performing accounts in your niche. Models swipe, managers approve, and every action updates the pipeline automatically.',
     tabs: [
       {
         label: 'Swipe Reel Inspiration',
@@ -111,7 +111,7 @@ export const swipeFileData: ProductPageData = {
     testimonial1: {
       logoSrc: `${CDN}/6478be2ffe695cac2f9d4a34_290-2904512_awe-logo-gold-affiliate-world-conferences-logo.webp`,
       logoAlt: 'Affiliate World logo',
-      quote: '"Hub is now the first thing my models open every morning. The swipe interface is exactly right — fast, visual, no friction. Our content ideation process went from 2 hours of back-and-forth to 15 minutes."',
+      quote: '"Hub is now the first thing my models open every morning. The swipe interface is exactly right - fast, visual, no friction. Our content ideation process went from 2 hours of back-and-forth to 15 minutes."',
       authorName: 'Matthew Williams',
       authorTitle: 'Agency Director @ iStack',
       authorHeadshot: `${CDN}/6478bd8550054135284b7d7f_matt-williams.webp`,
@@ -120,7 +120,7 @@ export const swipeFileData: ProductPageData = {
       {
         imageSrc: `${CDN}/644186758b63b0137bd005d0_Real-Time%20Activity-5.png`,
         title: 'Real-Time Approval Status',
-        description: 'See which reels your managers have approved and which models have received them — live.',
+        description: 'See which reels your managers have approved and which models have received them - live.',
       },
       {
         imageSrc: `${CDN}/6441d1e93e756110132e66ad_Team%20Commenting.webp`,
@@ -159,7 +159,7 @@ export const swipeFileData: ProductPageData = {
   },
   embeddedCta: {
     headline: 'Start running Hub today',
-    paragraph: "Hub comes with ISSO's full content pipeline — reel scraping, approval workflows, analytics, and AI content generation.\n\nEverything your agency needs in one place.",
+    paragraph: "Hub comes with ISSO's full content pipeline - reel scraping, approval workflows, analytics, and AI content generation.\n\nEverything your agency needs in one place.",
     primaryCtaText: 'Start',
     primaryCtaHref: 'https://app.isso.io/sign-up',
     showNoCcBadge: true,
@@ -172,15 +172,15 @@ export const swipeFileData: ProductPageData = {
     items: [
       {
         question: 'Can I share approved reels directly with my models?',
-        answer: "Yes. Managers can push approved reels to specific models with one click. Models receive them inside Hub and can also get notified via Telegram. No forwarding links manually — Hub handles the handoff.",
+        answer: "Yes. Managers can push approved reels to specific models with one click. Models receive them inside Hub and can also get notified via Telegram. No forwarding links manually - Hub handles the handoff.",
       },
       {
         question: 'Does Hub replace our current Airtable approval workflow?',
-        answer: "Hub is designed to replace manual Airtable workflows — but it also integrates with Airtable if you want to transition gradually. Most agencies switch fully within the first month because Hub handles approvals, tracking, and analytics in one place.",
+        answer: "Hub is designed to replace manual Airtable workflows - but it also integrates with Airtable if you want to transition gradually. Most agencies switch fully within the first month because Hub handles approvals, tracking, and analytics in one place.",
       },
       {
         question: 'Where do the reels in Hub come from?',
-        answer: "ISSO's Recon tool scrapes 100K–1M reels from top-performing accounts in your niche on a continuous basis. We curate a set of high performers for Hub. The library refreshes automatically so your models always have fresh inspiration.",
+        answer: "ISSO's Recon tool scrapes 100K-1M reels from top-performing accounts in your niche on a continuous basis. We curate a set of high performers for Hub. The library refreshes automatically so your models always have fresh inspiration.",
       },
       {
         question: 'How does the swipe interface work for models?',
@@ -188,7 +188,7 @@ export const swipeFileData: ProductPageData = {
       },
       {
         question: 'Can managers approve reels without opening the app?',
-        answer: "Yes. ISSO supports Telegram-based approvals for managers who prefer to work on mobile. Approval notifications come through Telegram and managers can approve directly from the chat — no separate app needed.",
+        answer: "Yes. ISSO supports Telegram-based approvals for managers who prefer to work on mobile. Approval notifications come through Telegram and managers can approve directly from the chat - no separate app needed.",
       },
       {
         question: 'How does Hub feed the content generation pipeline?',
@@ -196,11 +196,11 @@ export const swipeFileData: ProductPageData = {
       },
       {
         question: 'What is Hub exactly?',
-        answer: "Hub is ISSO's central dashboard for the content pipeline. It's where models browse reel inspiration, managers run approvals, and agencies track performance data — all in one place. Think of it as the command center your Airtable sheet was trying to be.",
+        answer: "Hub is ISSO's central dashboard for the content pipeline. It's where models browse reel inspiration, managers run approvals, and agencies track performance data - all in one place. Think of it as the command center your Airtable sheet was trying to be.",
       },
       {
         question: 'What other ISSO tools does Hub connect to?',
-        answer: "Hub connects to Intelligence (trend analysis and reel scoring), Recon (competitor scraping), and Content Gen (AI video generation). The data flows automatically — you don't need to export or import anything between tools.",
+        answer: "Hub connects to Intelligence (trend analysis and reel scoring), Recon (competitor scraping), and Content Gen (AI video generation). The data flows automatically - you don't need to export or import anything between tools.",
       },
     ],
   },

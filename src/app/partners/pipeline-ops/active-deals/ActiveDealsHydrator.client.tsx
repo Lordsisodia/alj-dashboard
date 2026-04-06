@@ -38,7 +38,7 @@ function ActiveDealsFallback() {
         "animate-pulse",
       )}
     >
-      Streaming active deals…
+      Streaming active deals...
     </div>
   );
 }

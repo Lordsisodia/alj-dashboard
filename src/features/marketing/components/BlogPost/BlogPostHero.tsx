@@ -1,5 +1,5 @@
 /**
- * BlogPostHero — breadcrumb, post title, description, author row, and featured image.
+ * BlogPostHero - breadcrumb, post title, description, author row, and featured image.
  * Mirrors the blog-breadcrumb + blog-top + blog-head sections from the Foreplay HTML.
  */
 
@@ -57,7 +57,7 @@ export default function BlogPostHero({ post }: Props) {
   );
 }
 
-/** BlogPostHead — cover image + author row, rendered inside blog-main */
+/** BlogPostHead - cover image + author row, rendered inside blog-main */
 export function BlogPostHead({ post }: Props) {
   return (
     <div className="blog-head">

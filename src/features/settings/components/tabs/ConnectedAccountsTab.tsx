@@ -10,7 +10,7 @@ const ACCOUNTS = [
   { handle: '@abg.ricebunny', name: 'Tyler Rex',  subscribers: '12.4k', connected: true  },
   { handle: '@rhinxrenx',     name: 'Ren Rhinx',  subscribers: '8.7k',  connected: true  },
   { handle: '@ellamira',      name: 'Ella Mira',  subscribers: '5.2k',  connected: true  },
-  { handle: '@samchase',      name: 'Sam Chase',  subscribers: '—',     connected: false },
+  { handle: '@samchase',      name: 'Sam Chase',  subscribers: '-',     connected: false },
 ];
 
 export function ConnectedAccountsTab() {
@@ -35,7 +35,7 @@ export function ConnectedAccountsTab() {
             </div>
             <div>
               <p className="text-sm font-semibold text-neutral-900">Google Drive</p>
-              <p className="text-xs text-neutral-400">{driveConnected ? 'Connected — ALJ_OFM_Content' : 'Not connected'}</p>
+              <p className="text-xs text-neutral-400">{driveConnected ? 'Connected - ALJ_OFM_Content' : 'Not connected'}</p>
             </div>
           </div>
           <button

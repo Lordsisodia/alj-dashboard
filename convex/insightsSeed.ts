@@ -1,6 +1,6 @@
 import { mutation } from "./_generated/server";
 
-// ── Seed swipe ratings — realistic fake data for dev/demo ─────────────────────
+// ── Seed swipe ratings - realistic fake data for dev/demo ─────────────────────
 //
 // Seeds ~80 ratings from 4 team members across existing scrapedPosts.
 // Niche biases are baked in so preference charts show clear signal.

@@ -1,5 +1,5 @@
 'use client';
-// AffiliatesPage — top-level component for the /affiliates route.
+// AffiliatesPage - top-level component for the /affiliates route.
 // Assembles: hero (canvas + content), 3-step how-it-works grid, FAQ accordion, FAQ buttons, footer.
 
 import { useState } from 'react';
@@ -19,7 +19,7 @@ function ChevronIcon({ className = '' }: { className?: string }) {
 function AffiliatesHero({ hero }: { hero: AffiliatesPageData['hero'] }) {
   return (
     <section id="product-hero-section" className="section relative">
-      {/* Canvas background — same class as HTML source */}
+      {/* Canvas background - same class as HTML source */}
       <canvas id="product-hero-canvas" className="product-hero-canvas" />
       <div className="container">
         <div className="fireside-hero">

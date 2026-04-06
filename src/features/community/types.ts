@@ -1,5 +1,6 @@
-export type Tab = 'feed' | 'trending' | 'saved';
+export type Tab = 'dashboard' | 'vault' | 'approve' | 'saved';
 export type ContentType = 'Reel' | 'Post' | 'Carousel';
+export type Niche = 'fitness' | 'lifestyle' | 'fashion' | 'wellness';
 
 export interface Creator {
   handle: string;
@@ -12,6 +13,7 @@ export interface Creator {
 export interface Post {
   id: string;
   type: ContentType;
+  niche: Niche;
   creator: Creator;
   gradient: string;
   caption: string;
@@ -23,4 +25,5 @@ export interface Post {
   postedAt: string;
   isVideo: boolean;
   saved?: boolean;
+  approved?: boolean;
 }

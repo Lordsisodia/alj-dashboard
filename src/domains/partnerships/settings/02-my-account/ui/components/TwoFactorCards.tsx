@@ -22,7 +22,7 @@ export function TwoFactorCards({ showBackup = false }: { showBackup?: boolean })
 
         <div className="px-4 pb-4 space-y-3">
           <div className="rounded-[18px] border border-white/10 bg-white/5 p-3">
-            <p className="text-[11px] text-siso-text-muted">When enabled, you’ll scan a QR code and enter a 6‑digit code to finish setup.</p>
+            <p className="text-[11px] text-siso-text-muted">When enabled, you'll scan a QR code and enter a 6‑digit code to finish setup.</p>
           </div>
           <div className="flex items-center gap-2">
             <button type="button" className="rounded-full bg-siso-orange/90 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#0d0d10]">Set up</button>
@@ -72,7 +72,7 @@ export function TwoFactorCards({ showBackup = false }: { showBackup?: boolean })
               </span>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-siso-text-primary">Backup codes</p>
-                <p className="text-xs text-siso-text-muted leading-snug max-w-[60ch]">Use a backup code if you lose access to your device. Codes are shown only once—store them securely.</p>
+                <p className="text-xs text-siso-text-muted leading-snug max-w-[60ch]">Use a backup code if you lose access to your device. Codes are shown only once-store them securely.</p>
               </div>
             </div>
             <span className="rounded-full px-2 py-0.5 text-[11px] border border-siso-border/60 text-siso-text-muted">0/10</span>

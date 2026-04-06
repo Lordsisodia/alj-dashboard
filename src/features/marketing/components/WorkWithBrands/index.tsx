@@ -1,4 +1,4 @@
-// WorkWithBrands — barrel export.
+// WorkWithBrands - barrel export.
 
 export { default as WorkWithBrandsHero } from './WorkWithBrandsHero';
 export { default as WorkWithBrandsBest } from './WorkWithBrandsBest';

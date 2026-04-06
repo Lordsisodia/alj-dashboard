@@ -14,11 +14,11 @@ const faqData: FAQItem[] = [
   },
   {
     question: 'How does Per Model pricing work?',
-    answer: 'Choose how many videos per day you want generated per model — from 1 to 10. The price per video drops as volume increases, from $2.49 at 1/day down to $1.25 at 10/day.',
+    answer: 'Choose how many videos per day you want generated per model - from 1 to 10. The price per video drops as volume increases, from $2.49 at 1/day down to $1.25 at 10/day.',
   },
   {
     question: 'What does \'you cover API costs\' mean on Unlimited?',
-    answer: 'The $129/model/month covers the full ISSO platform. Video generation uses AI models (Kling, Higgsfield) which cost approximately $1 per video. You pay the generation cost directly — no markup.',
+    answer: 'The $129/model/month covers the full ISSO platform. Video generation uses AI models (Kling, Higgsfield) which cost approximately $1 per video. You pay the generation cost directly - no markup.',
   },
   {
     question: 'Can I cancel anytime?',

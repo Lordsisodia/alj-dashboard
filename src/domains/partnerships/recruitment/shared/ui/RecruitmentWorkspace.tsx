@@ -121,7 +121,7 @@ export function RecruitmentWorkspace({ invites }: RecruitmentWorkspaceProps) {
 
   const handleSendInvite = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setInviteSuccess(`Invite sent to ${newInvite.email}. They’ll receive ${newInvite.share} bps overrides.`);
+    setInviteSuccess(`Invite sent to ${newInvite.email}. They'll receive ${newInvite.share} bps overrides.`);
     setNewInvite((prev) => ({ ...prev, name: "", email: "" }));
   };
 

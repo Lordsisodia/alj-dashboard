@@ -1,4 +1,4 @@
-// WebinarsBottomCTA — bottom CTA section with dual buttons and decorative image.
+// WebinarsBottomCTA - bottom CTA section with dual buttons and decorative image.
 
 import type { WebinarsPageData } from './data/webinars';
 

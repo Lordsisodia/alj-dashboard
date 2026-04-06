@@ -30,7 +30,7 @@ export const getAll = query({
   },
 });
 
-// ── Idea count per model — drives stat pills on cards ─────────────────────────
+// ── Idea count per model - drives stat pills on cards ─────────────────────────
 
 export const ideaCountByModel = query({
   args: {},
@@ -45,7 +45,7 @@ export const ideaCountByModel = query({
   },
 });
 
-// ── Clip count per model — drives stat pills on cards ─────────────────────────
+// ── Clip count per model - drives stat pills on cards ─────────────────────────
 
 export const clipCountByModel = query({
   args: {},

@@ -1,4 +1,4 @@
-// UniversityBottomCTA — large headline, paragraph, and dual CTA buttons.
+// UniversityBottomCTA - large headline, paragraph, and dual CTA buttons.
 
 import type { UniversityPageData } from './data/university';
 

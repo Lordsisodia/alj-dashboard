@@ -1,5 +1,5 @@
 /**
- * BlogPostRelated — "Related Articles" carousel at the bottom of a post.
+ * BlogPostRelated - "Related Articles" carousel at the bottom of a post.
  * Mirrors the blog-related + product-carousel section from the Foreplay HTML.
  */
 

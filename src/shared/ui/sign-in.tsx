@@ -58,7 +58,7 @@ const TestimonialCard = ({ testimonial, delay }: { testimonial: Testimonial; del
 
 export const SignInPage: React.FC<SignInPageProps> = ({
   title = <span className="font-light text-white tracking-tighter">Welcome back</span>,
-  description = 'Sign in to your ISSO account to continue.',
+  description = 'Sign in to your ORACLE account to continue.',
   heroImageSrc,
   testimonials = [],
   onSignIn,
@@ -121,7 +121,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
               <button type="submit" disabled={loading}
                 className="animate-element animate-delay-600 w-full rounded-2xl py-4 font-medium transition-colors disabled:opacity-50"
                 style={{ background: '#fff', color: '#020308' }}>
-                {loading ? 'Signing in…' : 'Sign in'}
+                {loading ? 'Signing in...' : 'Sign in'}
               </button>
             </form>
 

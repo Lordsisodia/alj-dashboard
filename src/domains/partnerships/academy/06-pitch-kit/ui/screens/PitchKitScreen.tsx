@@ -105,7 +105,7 @@ export function PitchKitScreen() {
               </span>
             </label>
             <p className="text-xs text-siso-text-muted">
-              Showing {filtered.length} of {pitchAssets.length} pitch kits{search ? ` for “${search}”` : ""}.
+              Showing {filtered.length} of {pitchAssets.length} pitch kits{search ? ` for "${search}"` : ""}.
             </p>
           </div>
         </SettingsGroupCallout>

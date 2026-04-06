@@ -13,7 +13,7 @@ export async function HubOverview() {
       <WidgetCard
         title="Wallet"
         href={HUB_WIDGET_CONFIGS.find((c) => c.id === "earnings")?.href}
-        value={widgets?.earnings.walletSummary.balance.toLocaleString("en-US", { style: "currency", currency: "USD" }) ?? "—"}
+        value={widgets?.earnings.walletSummary.balance.toLocaleString("en-US", { style: "currency", currency: "USD" }) ?? "-"}
         loading={!widgets}
       />
 
@@ -48,7 +48,7 @@ function WidgetCard({
   loading?: boolean;
   fallback?: React.ReactNode;
 }) {
-  const content = loading ? fallback ?? <Skeleton className="h-5 w-20 bg-white/10" /> : value ?? "—";
+  const content = loading ? fallback ?? <Skeleton className="h-5 w-20 bg-white/10" /> : value ?? "-";
   return (
     <section className="rounded-3xl border border-white/10 p-4">
       <div className="flex items-center justify-between gap-2">

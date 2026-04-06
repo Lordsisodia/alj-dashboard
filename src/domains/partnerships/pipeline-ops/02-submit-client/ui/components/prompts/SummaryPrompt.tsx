@@ -24,8 +24,8 @@ export function SummaryPrompt({ prompt, formState, onShareChange, onSubmit, isPe
       <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-white/80">{prompt.prompt}</p>
       <p className="text-xs text-white/60">Review the intake before submitting.</p>
       <div className={cn(nestedCardClass, "space-y-3 p-3 text-white/80")}> 
-        <SummaryRow label="Company" value={formState.companyName || "—"} helper={formState.companySize || "Size unknown"} />
-        <SummaryRow label="Primary contact" value={formState.contactName || "—"} helper={formState.contactEmail || formState.contactPhone || ""} />
+        <SummaryRow label="Company" value={formState.companyName || "-"} helper={formState.companySize || "Size unknown"} />
+        <SummaryRow label="Primary contact" value={formState.contactName || "-"} helper={formState.contactEmail || formState.contactPhone || ""} />
         <SummaryRow label="Services" value={formState.servicesRequested.join(", ") || "No services selected"} helper={formState.website || formState.socialLink || ""} />
         <SummaryRow
           label="Value"
@@ -68,7 +68,7 @@ export function SummaryPrompt({ prompt, formState, onShareChange, onSubmit, isPe
         className="w-full rounded-full bg-gradient-to-r from-[#FF5722] to-[#FFA726] py-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-siso-bg-primary shadow-[0_18px_40px_rgba(0,0,0,0.45)] hover:from-[#ff6a33] hover:to-[#ffb347]"
         onClick={onSubmit}
       >
-        {isPending ? "Submitting…" : "Submit to SISO"}
+        {isPending ? "Submitting..." : "Submit to SISO"}
       </Button>
     </>
   );

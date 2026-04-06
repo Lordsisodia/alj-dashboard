@@ -1,1 +1,1 @@
-// Schedule queries and mutations — TODO
+// Schedule queries and mutations - TODO

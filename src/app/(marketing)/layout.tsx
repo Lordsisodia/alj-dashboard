@@ -14,7 +14,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   return (
     // Solid black background + z-index blocks the root layout's wave animation from bleeding through
     <div style={{ background: '#000', position: 'relative', zIndex: 1, minHeight: '100vh' }}>
-      {/* Load Webflow-generated foreplay.css — contains sprite, button, and layout classes used by pricing/FAQ/navbar */}
+      {/* Load Webflow-generated foreplay.css - contains sprite, button, and layout classes used by pricing/FAQ/navbar */}
       <link rel="stylesheet" href="/marketing-css/foreplay.css" />
       <MarketingNavBar />
       <main>{children}</main>

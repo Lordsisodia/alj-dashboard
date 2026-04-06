@@ -261,7 +261,7 @@ export function PublicPortfolioHub({
             Browse Projects
           </GradientText>
           <p className="text-lg text-siso-text-muted max-w-2xl mx-auto">
-            Explore what we can launch for you—starting with a flagship build.
+            Explore what we can launch for you-starting with a flagship build.
           </p>
         </motion.div>
 
@@ -484,7 +484,7 @@ export function PublicPortfolioHub({
                     See program details
                   </Button>
                   <p className="text-xs sm:text-sm text-siso-text-muted text-center sm:text-left w-full sm:w-auto">
-                    Join 100+ partners already earning with SISO
+                    Join 100+ partners already earning with ORACLE
                   </p>
                 </div>
               </CardContent>

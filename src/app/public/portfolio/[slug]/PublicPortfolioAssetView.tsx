@@ -104,10 +104,10 @@ function Overview({ client }: { client: PortfolioClient }) {
     <div className="space-y-1">
       <p>{client.description}</p>
       <div className="grid gap-2 sm:grid-cols-2 text-xs">
-        <InfoTile label="Timeline" value={`${client.timeline?.durationDays ?? "—"} days`} />
-        <InfoTile label="Delivery" value={client.pricing?.deliveryTime ?? "—"} />
-        <InfoTile label="Value" value={client.pricing?.sisoPrice ? `£${client.pricing.sisoPrice}` : "—"} />
-        <InfoTile label="Team" value={client.techStack?.tools?.slice(0, 2)?.join(", ") ?? "—"} />
+        <InfoTile label="Timeline" value={`${client.timeline?.durationDays ?? "-"} days`} />
+        <InfoTile label="Delivery" value={client.pricing?.deliveryTime ?? "-"} />
+        <InfoTile label="Value" value={client.pricing?.sisoPrice ? `£${client.pricing.sisoPrice}` : "-"} />
+        <InfoTile label="Team" value={client.techStack?.tools?.slice(0, 2)?.join(", ") ?? "-"} />
       </div>
     </div>
   );
@@ -154,7 +154,7 @@ function TechList({ client }: { client: PortfolioClient }) {
           <div className="flex flex-wrap gap-2">
             {row.items?.length ? row.items.map((i) => (
               <span key={i} className="rounded-full bg-white/10 px-2 py-1 text-white">{i}</span>
-            )) : <span className="text-siso-text-muted">—</span>}
+            )) : <span className="text-siso-text-muted">-</span>}
           </div>
         </div>
       ))}
@@ -167,13 +167,13 @@ function Results({ client }: { client: PortfolioClient }) {
   if (!res) return <p>No results provided.</p>;
   return (
     <div className="space-y-2 text-sm">
-      <InfoTile label="Delivery speed" value={res.deliverySpeed ?? "—"} />
+      <InfoTile label="Delivery speed" value={res.deliverySpeed ?? "-"} />
       {res.performanceMetrics ? (
         <div className="grid gap-2 sm:grid-cols-2 text-xs">
-          <InfoTile label="Page load" value={res.performanceMetrics.pageLoadTime ?? "—"} />
-          <InfoTile label="Lighthouse" value={res.performanceMetrics.lighthouseScore?.toString() ?? "—"} />
-          <InfoTile label="Uptime" value={res.performanceMetrics.uptime ?? "—"} />
-          <InfoTile label="Satisfaction" value={res.clientSatisfaction ? `${res.clientSatisfaction}/5` : "—"} />
+          <InfoTile label="Page load" value={res.performanceMetrics.pageLoadTime ?? "-"} />
+          <InfoTile label="Lighthouse" value={res.performanceMetrics.lighthouseScore?.toString() ?? "-"} />
+          <InfoTile label="Uptime" value={res.performanceMetrics.uptime ?? "-"} />
+          <InfoTile label="Satisfaction" value={res.clientSatisfaction ? `${res.clientSatisfaction}/5` : "-"} />
         </div>
       ) : null}
       {res.businessImpact ? <p className="text-siso-text-muted">Impact: {res.businessImpact}</p> : null}

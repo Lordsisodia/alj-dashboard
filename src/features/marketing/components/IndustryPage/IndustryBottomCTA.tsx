@@ -1,4 +1,4 @@
-// IndustryBottomCTA — large headline, paragraph, and dual CTA buttons with a decorative background image.
+// IndustryBottomCTA - large headline, paragraph, and dual CTA buttons with a decorative background image.
 
 import type { IndustryPageData } from './types';
 

@@ -397,6 +397,9 @@ export interface ContentPageShellProps {
   activeFilter?: string;
   onFilterChange?: (id: string) => void;
   filterRightSlot?: ReactNode;           // custom element on the right (e.g. DateRangePill)
+  // Search bar - controlled
+  searchValue?: string;
+  onSearch?: (q: string) => void;
   // View toggle (grid / list)  -  controlled
   showViewToggle?: boolean;
   viewMode?: 'grid' | 'list';
@@ -427,6 +430,8 @@ export function ContentPageShell({
   activeFilter,
   onFilterChange,
   filterRightSlot,
+  searchValue,
+  onSearch,
   showViewToggle = false,
   viewMode: viewModeProp,
   onViewModeChange,
@@ -476,6 +481,8 @@ export function ContentPageShell({
             <input
               className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 bg-transparent outline-none min-w-0"
               placeholder={searchPlaceholder}
+              value={searchValue ?? ''}
+              onChange={e => onSearch?.(e.target.value)}
             />
             <kbd
               className="text-[10px] text-neutral-400 px-1.5 py-0.5 rounded flex-shrink-0"
@@ -541,14 +548,15 @@ export function ContentPageShell({
         </div>
       </div>
 
-      {/* ── Sub-nav tabs ───────────────────────────────────────────── */}
-      {tabs && tabs.length > 0 && (
+      {/* ── Sub-nav tabs + filter controls (single row) ────────────── */}
+      {(tabs && tabs.length > 0 || showFilterBar) && (
         <div
-          className="px-3 py-2 w-full flex-shrink-0"
+          className="flex items-center justify-between px-3 py-2 w-full flex-shrink-0"
           style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}
         >
+          {/* Left: tabs */}
           <div className="inline-flex items-center gap-1.5">
-            {tabs.map(tab => (
+            {tabs?.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => onTabChange?.(tab.id)}
@@ -584,67 +592,58 @@ export function ContentPageShell({
               </>
             )}
           </div>
-        </div>
-      )}
 
-      {/* ── Filter bar ─────────────────────────────────────────────── */}
-      {showFilterBar && (
-        <div
-          className="flex items-center justify-between px-3 py-2 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
-        >
-          {/* Left: Add Filter pill */}
-          {filterCategories ? (
-            <AddFilterPill categories={filterCategories} onFilterSelect={onFilterSelect} />
-          ) : (
-            <div />
+          {/* Right: filter controls */}
+          {showFilterBar && (
+            <div className="flex items-center gap-1.5">
+              {filterChips?.map(chip => (
+                <button
+                  key={chip.id}
+                  onClick={() => onFilterChange?.(chip.id)}
+                  className={cn(
+                    'px-3 py-1 rounded-lg text-xs font-medium transition-colors',
+                    activeFilter === chip.id
+                      ? 'text-neutral-900 bg-black/[0.07]'
+                      : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
+                  )}
+                >
+                  {chip.label}
+                </button>
+              ))}
+
+              {filterRightSlot}
+
+              {filterCategories && (
+                <AddFilterPill categories={filterCategories} onFilterSelect={onFilterSelect} />
+              )}
+
+              {showViewToggle && (
+                <div
+                  className="flex items-center rounded-lg overflow-hidden"
+                  style={{ border: '1px solid rgba(0,0,0,0.09)' }}
+                >
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={cn(
+                      'flex items-center justify-center w-7 h-7 transition-colors',
+                      viewMode === 'grid' ? 'bg-black/[0.06] text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'
+                    )}
+                  >
+                    <LayoutGrid size={13} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={cn(
+                      'flex items-center justify-center w-7 h-7 transition-colors',
+                      viewMode === 'list' ? 'bg-black/[0.06] text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'
+                    )}
+                  >
+                    <List size={13} />
+                  </button>
+                </div>
+              )}
+            </div>
           )}
-
-          {/* Right: sort chips + view toggle + custom slot */}
-          <div className="flex items-center gap-1.5">
-            {filterChips?.map(chip => (
-              <button
-                key={chip.id}
-                onClick={() => onFilterChange?.(chip.id)}
-                className={cn(
-                  'px-3 py-1 rounded-lg text-xs font-medium transition-colors',
-                  activeFilter === chip.id
-                    ? 'text-neutral-900 bg-black/[0.07]'
-                    : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
-                )}
-              >
-                {chip.label}
-              </button>
-            ))}
-
-            {filterRightSlot}
-
-            {showViewToggle && (
-              <div
-                className="flex items-center rounded-lg overflow-hidden"
-                style={{ border: '1px solid rgba(0,0,0,0.09)' }}
-              >
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={cn(
-                    'flex items-center justify-center w-7 h-7 transition-colors',
-                    viewMode === 'grid' ? 'bg-black/[0.06] text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'
-                  )}
-                >
-                  <LayoutGrid size={13} />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={cn(
-                    'flex items-center justify-center w-7 h-7 transition-colors',
-                    viewMode === 'list' ? 'bg-black/[0.06] text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'
-                  )}
-                >
-                  <List size={13} />
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       )}
 

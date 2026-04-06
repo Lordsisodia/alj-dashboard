@@ -26,7 +26,7 @@ export function AffiliateDashboardView() {
           </div>
           <div className="mt-3 flex items-center gap-2 rounded-2xl border border-dashed border-siso-border/70 px-3 py-2 text-xs text-siso-text-muted">
             <Wallet className="h-3.5 w-3.5" />
-            Wallet not set — add a payout address to unlock commissions.
+            Wallet not set - add a payout address to unlock commissions.
           </div>
         </div>
 

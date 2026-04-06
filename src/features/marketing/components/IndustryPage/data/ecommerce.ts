@@ -1,4 +1,4 @@
-// Ecommerce industry page data — extracted from the original ISSO HTML (www_foreplay_co (10).html).
+// Ecommerce industry page data - extracted from the original ISSO HTML (www_foreplay_co (10).html).
 
 import type { IndustryPageData } from '../types';
 

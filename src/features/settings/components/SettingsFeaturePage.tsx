@@ -5,9 +5,9 @@ import dynamic from 'next/dynamic';
 import { AnimatePresence } from 'framer-motion';
 import type { SettingsTab } from '../types';
 import { TABS } from '../constants';
-// ProfileTab is the default tab — keep eager
+// ProfileTab is the default tab - keep eager
 import { ProfileTab } from './tabs';
-// Non-default tabs — lazy load
+// Non-default tabs - lazy load
 const ConnectedAccountsTab = dynamic(() => import('./tabs/ConnectedAccountsTab').then(m => ({ default: m.ConnectedAccountsTab })), { ssr: false });
 const IntegrationsTab      = dynamic(() => import('./tabs/IntegrationsTab').then(m => ({ default: m.IntegrationsTab })),           { ssr: false });
 const ContentDefaultsTab   = dynamic(() => import('./tabs/ContentDefaultsTab').then(m => ({ default: m.ContentDefaultsTab })),     { ssr: false });

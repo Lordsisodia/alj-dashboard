@@ -63,7 +63,7 @@ const industryMetrics: Record<IndustryCategory, IndustryMetrics> = {
     avgValue: 35000,
     rating: 5.0,
     topTech: ["React", "TypeScript", "Supabase"],
-    featuredProject: { name: "SISO Internal Platform", date: "Dec 2024" },
+    featuredProject: { name: "ORACLE Internal Platform", date: "Dec 2024" },
   },
   elearning: {
     projectCount: 1,
@@ -100,7 +100,7 @@ const industryMetrics: Record<IndustryCategory, IndustryMetrics> = {
     avgValue: 45000,
     rating: 5.0,
     topTech: ["React", "TypeScript", "Supabase"],
-    featuredProject: { name: "SISO Internal Platform", date: "Dec 2024" },
+    featuredProject: { name: "ORACLE Internal Platform", date: "Dec 2024" },
   },
 };
 
@@ -187,7 +187,7 @@ export function PublicIndustryCategoryCard({ industry, className, isActive = fal
                 <div className="rounded-lg border border-white/5 bg-black/20 p-3">
                   <p className="text-[11px] uppercase tracking-[0.28em] text-siso-text-muted">Tokens used</p>
                   <p className="text-lg font-semibold text-white flex items-center gap-1">
-                    {metrics.tokensUsed ? `${(metrics.tokensUsed / 1_000_000).toFixed(0)}M` : '—'}
+                    {metrics.tokensUsed ? `${(metrics.tokensUsed / 1_000_000).toFixed(0)}M` : '-'}
                   </p>
                 </div>
               </div>

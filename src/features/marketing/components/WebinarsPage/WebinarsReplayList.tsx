@@ -1,4 +1,4 @@
-// WebinarsReplayList — renders a list of webinar replay items.
+// WebinarsReplayList - renders a list of webinar replay items.
 
 import type { WebinarReplay } from './data/webinars';
 

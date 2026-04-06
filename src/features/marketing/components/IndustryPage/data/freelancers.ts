@@ -1,4 +1,4 @@
-// Freelancers & UGC Creators industry page data — extracted from www_foreplay_co (16).html
+// Freelancers & UGC Creators industry page data - extracted from www_foreplay_co (16).html
 
 import type { IndustryPageData } from '../types';
 

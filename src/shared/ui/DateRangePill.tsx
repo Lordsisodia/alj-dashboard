@@ -38,7 +38,7 @@ function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
 
-/** 0 = Mon … 6 = Sun (matches our header) */
+/** 0 = Mon ... 6 = Sun (matches our header) */
 function getFirstDayOffset(year: number, month: number) {
   const day = new Date(year, month, 1).getDay(); // 0=Sun
   return day === 0 ? 6 : day - 1;

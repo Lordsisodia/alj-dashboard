@@ -1,4 +1,4 @@
-// OnboardingHero — "Start Your Onboarding" heading and subtext, centered above the form.
+// OnboardingHero - "Start Your Onboarding" heading and subtext, centered above the form.
 
 export default function OnboardingHero() {
   return (

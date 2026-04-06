@@ -5,12 +5,12 @@ import { calculatePortfolioStats } from "@/domains/portfolio/lib/calculate-stats
 import { PublicPortfolioHub } from "@/domains/portfolio/public/PublicPortfolioHub";
 
 export const metadata: Metadata = {
-  title: "Portfolio - AI-Powered Websites & PWAs | SISO",
+  title: "Portfolio - AI-Powered Websites & PWAs | ORACLE",
   description:
     "Browse our public showcase of AI-built websites, PWAs, and SaaS products across every industry.",
   openGraph: {
-    title: "SISO Portfolio",
-    description: "Proof you can share now—mobile ready and desktop polished.",
+    title: "ORACLE Portfolio",
+    description: "Proof you can share now-mobile ready and desktop polished.",
     url: "https://www.siso.agency/portfolio",
   },
 };

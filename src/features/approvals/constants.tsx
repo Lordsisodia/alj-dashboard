@@ -85,7 +85,7 @@ export const ITEMS: ApprovalItem[] = [
     contentType: 'Carousel',
     account: '@rhinxrenx',
     accountColor: '#833ab4',
-    caption: 'What I eat in a day as a gym guy. Full transparency — no bullshit, no cheat meals, just real food that fuels real results.',
+    caption: 'What I eat in a day as a gym guy. Full transparency - no bullshit, no cheat meals, just real food that fuels real results.',
     hashtags: ['#whatieat', '#gymfood', '#nutrition', '#bodybuilding'],
     submittedBy: 'VA Mikee',
     submittedAt: 'Apr 1, 2026',

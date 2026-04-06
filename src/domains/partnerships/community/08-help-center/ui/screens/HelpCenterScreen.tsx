@@ -151,7 +151,7 @@ export function HelpArticleScreen({ collection, article }: HelpArticleScreenProp
         <header className={cn(nestedCardClass, "inline-flex w-full flex-wrap items-center justify-between gap-3 border-white/20 px-4 py-3 text-left")}>
           <p className="text-xs uppercase tracking-[0.3em] text-siso-text-muted">Last updated</p>
           <p className="text-sm font-semibold text-white">
-            {updatedLabel ? new Date(updatedLabel).toLocaleDateString() : "—"}
+            {updatedLabel ? new Date(updatedLabel).toLocaleDateString() : "-"}
           </p>
         </header>
         <div className="space-y-4 text-sm text-siso-text-muted">

@@ -1,5 +1,5 @@
 /**
- * BlogCTA — "Ready to ship more winning ads?" section at the bottom of the blog page.
+ * BlogCTA - "Ready to ship more winning ads?" section at the bottom of the blog page.
  * Mirrors the home-cta section from the HTML source.
  */
 

@@ -74,7 +74,7 @@ export function PostDetailDrawer({ posts, initialIndex, onClose }: Props) {
           </div>
         </div>
 
-        {/* Body — key on post._id resets tab state when navigating */}
+        {/* Body - key on post._id resets tab state when navigating */}
         <div className="flex flex-1 overflow-hidden">
           <DrawerMediaPanel post={post} hasPrev={hasPrev} hasNext={hasNext} onPrev={goPrev} onNext={goNext} />
           <DrawerRightPanel key={post._id} post={post} />

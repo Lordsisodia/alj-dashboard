@@ -1,4 +1,4 @@
-// UniversityHero — hero section with FU logo, headline, and course carousel.
+// UniversityHero - hero section with FU logo, headline, and course carousel.
 
 import type { UniversityPageData } from './data/university';
 

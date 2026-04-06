@@ -130,7 +130,7 @@ export const mayorker: PortfolioClient = {
   // Testimonial (optional - fill in if available)
   testimonial: {
     quote:
-      'SISO delivered our complete booking platform in 2 weeks. Traditional agencies quoted 3 months and 3x the price. The AI-powered development was incredible to watch.',
+      'ORACLE delivered our complete booking platform in 2 weeks. Traditional agencies quoted 3 months and 3x the price. The AI-powered development was incredible to watch.',
     author: 'Maria Rodriguez',
     title: 'Owner, We Are Excursions',
     photo: '/portfolio/mayorker/testimonial-maria.jpg',
@@ -165,7 +165,7 @@ export const mayorker: PortfolioClient = {
   metadata: {
     featured: true, // Show in featured section
     showInPortfolio: false,
-    seoTitle: 'Mayorker Activities - Tourism Booking Platform | SISO Portfolio',
+    seoTitle: 'Mayorker Activities - Tourism Booking Platform | ORACLE Portfolio',
     seoDescription:
       'Complete activity booking system for bike rentals, boat trips, and tours in Majorca. Built in 14 days with AI-powered development.',
     tags: ['booking', 'tourism', 'activities', 'rental', 'PWA', 'Majorca'],

@@ -1,5 +1,5 @@
 /**
- * Dynamic blog post route — /post/[slug]
+ * Dynamic blog post route - /post/[slug]
  * Looks up the post by slug from sample data and renders the BlogPost template.
  * Returns a 404-style message if the slug is not found.
  */

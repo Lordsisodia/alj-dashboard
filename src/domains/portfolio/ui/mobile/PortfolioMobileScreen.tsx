@@ -50,7 +50,7 @@ export function PortfolioMobileScreen({ clients, stats }: { clients: PortfolioCl
             <HighlightCard
               color="orange"
               title="Portfolio"
-              description="Proof you can share now—mobile ready."
+              description="Proof you can share now-mobile ready."
               metricValue={`${stats.totalProjects ?? featured.length} projects`}
               metricLabel="live library"
               buttonText="Open portfolio hub"

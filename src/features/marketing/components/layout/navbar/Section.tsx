@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// Section — labeled section wrapper for dropdown content
+// Section - labeled section wrapper for dropdown content
 // Provides consistent header styling with optional divider or full-width layout
 // ═══════════════════════════════════════════════════════════════════════════════
 

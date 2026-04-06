@@ -223,7 +223,7 @@ export function PartnerOnboardingScreen() {
           onChange={(e) => updateField('whatsapp', e.target.value)}
           className="bg-siso-bg-tertiary border-white/10 text-white"
         />
-        <p className="text-xs text-white/60">No OTP yet — just collect digits so we can ping you fast.</p>
+        <p className="text-xs text-white/60">No OTP yet - just collect digits so we can ping you fast.</p>
       </div>
     </div>
   );
@@ -367,10 +367,10 @@ export function PartnerOnboardingScreen() {
       <div className="rounded-[26px] border border-white/10 bg-siso-bg-tertiary p-4 sm:p-6 space-y-3 sm:space-y-4">
         <div>
           <p className="text-sm uppercase tracking-[0.3em] text-white/60">Recap</p>
-          <p className="text-lg font-semibold text-white">Here’s what happens next</p>
+          <p className="text-lg font-semibold text-white">Here's what happens next</p>
         </div>
         <ul className="space-y-2 text-sm text-white/70">
-          <li>• The “Start Here” course unlocks once you hit finish.</li>
+          <li>• The "Start Here" course unlocks once you hit finish.</li>
           <li>• Dashboard features progressively unlock as you work through the intro course.</li>
         </ul>
         <label className="flex items-center gap-2 text-sm text-white/80">
@@ -476,7 +476,7 @@ export function PartnerOnboardingScreen() {
                     <p className="text-[11px] uppercase tracking-[0.25em] text-siso-text-muted">Progress</p>
                     <GradientProgressBar value={completionPercentage} />
                     <p className="text-xs text-siso-text-muted">
-                      Step {currentStep! + 1} of {totalSteps} — lock in how we reach you
+                      Step {currentStep! + 1} of {totalSteps} - lock in how we reach you
                     </p>
                   </div>
                 )}
@@ -487,7 +487,7 @@ export function PartnerOnboardingScreen() {
 
         {/* Secondary panels hidden on mobile to keep each step on-screen */}
         <div className="hidden sm:flex sm:flex-col sm:gap-6">
-          <SettingsCallout icon={<Flag className="h-4 w-4" />} title="Progress" subtitle="Resume anywhere — we remember your place.">
+          <SettingsCallout icon={<Flag className="h-4 w-4" />} title="Progress" subtitle="Resume anywhere - we remember your place.">
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-3">
               <p className="text-4xl font-bold text-white">{Math.round(completionPercentage)}%</p>
               <GradientProgressBar value={completionPercentage} />
@@ -513,10 +513,10 @@ export function PartnerOnboardingScreen() {
           <SettingsCallout
             icon={<Lock className="h-4 w-4" />}
             title="Actions locked until Start Here begins"
-            subtitle="Widgets still show data—actions unlock once the intro course starts."
+            subtitle="Widgets still show data-actions unlock once the intro course starts."
           >
             <div className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-white/80">
-              <p>Your dashboard widgets will show this plan but remain locked until you start the “Start Here” course.</p>
+              <p>Your dashboard widgets will show this plan but remain locked until you start the "Start Here" course.</p>
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href="/partners/academy/getting-started">
                   <Button size="sm" className="w-full sm:w-auto rounded-full bg-white px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-black">
@@ -530,9 +530,9 @@ export function PartnerOnboardingScreen() {
             </div>
           </SettingsCallout>
 
-          <SettingsCallout icon={<HelpCircle className="h-4 w-4" />} title="Need help?" subtitle="Ping us anytime — we’ll collect the answers with you.">
+          <SettingsCallout icon={<HelpCircle className="h-4 w-4" />} title="Need help?" subtitle="Ping us anytime - we'll collect the answers with you.">
             <div className="space-y-3 rounded-2xl border border-white/10 bg-black/20 p-4 text-white/80">
-              <p>DM us or book a call and we’ll walk you through onboarding live.</p>
+              <p>DM us or book a call and we'll walk you through onboarding live.</p>
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Button variant="outline" className="w-full sm:w-auto border-white/20 text-white">
                   <MessageCircle className="mr-2 h-4 w-4" />
@@ -583,7 +583,7 @@ const HeroCard = ({ currentStep, goToStep }: { currentStep: number; goToStep: (s
         <p className="text-xs uppercase tracking-[0.35em] text-white/80">Start strong</p>
         <h2 className="text-3xl md:text-4xl font-bold leading-tight">Activate Your Partner Desk</h2>
         <p className="text-lg text-white/85">
-          Get the playbook, projections, and support before you ever pitch. Complete the wizard once and we’ll take care of closing.
+          Get the playbook, projections, and support before you ever pitch. Complete the wizard once and we'll take care of closing.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Button
@@ -630,13 +630,13 @@ const StartHero = ({ onStart }: { onStart: () => void }) => {
           <div className="flex items-center gap-2">
             <Image
               src="/branding/siso-logo.svg"
-              alt="SISO"
+              alt="ORACLE"
               width={24}
               height={24}
               className="h-6 w-auto"
               priority
             />
-            <span>SISO Partnership</span>
+            <span>ORACLE Partnership</span>
           </div>
           <button
             type="button"
@@ -654,9 +654,9 @@ const StartHero = ({ onStart }: { onStart: () => void }) => {
             Get your playbook, projections, and support before you pitch a single deal.
           </p>
           <div className="space-y-3 text-sm text-siso-text-secondary">
-            <p>You introduce; SISO Partners HQ handles pitch, demos, objections, and follow-ups.</p>
+            <p>You introduce; ORACLE Partners HQ handles pitch, demos, objections, and follow-ups.</p>
             <p>We show exactly how many clients you need to hit your revenue goal.</p>
-            <p>Learn and swap wins inside the SISO Partners HQ community.</p>
+            <p>Learn and swap wins inside the ORACLE Partners HQ community.</p>
           </div>
         </div>
 
@@ -673,7 +673,7 @@ const StartHero = ({ onStart }: { onStart: () => void }) => {
           <p className="text-[11px] uppercase tracking-[0.25em] text-siso-text-muted">Progress</p>
           <GradientProgressBar value={0} />
           <div className="flex items-center gap-3 text-xs text-siso-text-muted">
-            <span>Step 0 of 4 — you’re about to start.</span>
+            <span>Step 0 of 4 - you're about to start.</span>
             <span className="inline-flex items-center gap-1 rounded-full bg-[#FF5722]/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-white border border-white/15">
               2 mins
             </span>
@@ -732,7 +732,7 @@ const JourneySnapshot = ({
         {lastCompleted ? (
           <p className="text-xs text-white/60">Last completed: {lastCompleted}</p>
         ) : (
-          <p className="text-xs text-white/60">Haven’t completed a step yet</p>
+          <p className="text-xs text-white/60">Haven't completed a step yet</p>
         )}
       </div>
       <div className="w-full md:w-1/2 space-y-2">

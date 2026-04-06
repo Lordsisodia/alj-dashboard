@@ -17,7 +17,7 @@ const preferenceMap: Record<PreferenceKey, { label: string; helper: string }> = 
   },
   inApp: {
     label: "In-app alerts",
-    helper: "Banner reminders while you’re inside the mobile workspace.",
+    helper: "Banner reminders while you're inside the mobile workspace.",
   },
 };
 

@@ -243,7 +243,7 @@ export default function SecretWeaponSection() {
                       fontWeight: 400,
                       lineHeight: 1.5,
                     }}>
-                      One pipeline that scrapes, generates, and improves — automatically. Every day it runs, every day it gets smarter.
+                      One pipeline that scrapes, generates, and improves - automatically. Every day it runs, every day it gets smarter.
                     </div>
                   </div>
 

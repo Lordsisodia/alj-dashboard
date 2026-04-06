@@ -64,9 +64,9 @@ export const ledgerEntries: LedgerEntry[] = [
 ];
 
 export const paymentMethods: PaymentMethod[] = [
-  { id: "stripe", label: "Stripe Connect", type: "stripe", ending: "acct_3J9…", status: "active", lastSync: "Today • 9:10 AM" },
+  { id: "stripe", label: "Stripe Connect", type: "stripe", ending: "acct_3J9...", status: "active", lastSync: "Today • 9:10 AM" },
   { id: "bank", label: "Bank • Wells Fargo", type: "bank", ending: "•••4521", status: "needs_sync", lastSync: "Nov 8" },
-  { id: "crypto", label: "USDC Wallet", type: "crypto", ending: "0x94a…e5", status: "active", lastSync: "Nov 10" },
+  { id: "crypto", label: "USDC Wallet", type: "crypto", ending: "0x94a...e5", status: "active", lastSync: "Nov 10" },
 ];
 
 export const payoutSchedule: PayoutSchedule = {

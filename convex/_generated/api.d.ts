@@ -8,15 +8,24 @@
  * @module
  */
 
+import type * as agentDebugLogs from "../agentDebugLogs.js";
 import type * as agentReports from "../agentReports.js";
 import type * as agents from "../agents.js";
+import type * as approvals from "../approvals.js";
+import type * as candidates from "../candidates.js";
 import type * as contentGen from "../contentGen.js";
+import type * as costs from "../costs.js";
 import type * as featureRequests from "../featureRequests.js";
 import type * as insights from "../insights.js";
 import type * as insightsSeed from "../insightsSeed.js";
 import type * as intelligence from "../intelligence.js";
+import type * as issues from "../issues.js";
+import type * as mediaUploads from "../mediaUploads.js";
 import type * as models from "../models.js";
+import type * as routines from "../routines.js";
 import type * as scraperImport from "../scraperImport.js";
+import type * as toolAnalyses from "../toolAnalyses.js";
+import type * as trackedAccounts from "../trackedAccounts.js";
 
 import type {
   ApiFromModules,
@@ -25,15 +34,24 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agentDebugLogs: typeof agentDebugLogs;
   agentReports: typeof agentReports;
   agents: typeof agents;
+  approvals: typeof approvals;
+  candidates: typeof candidates;
   contentGen: typeof contentGen;
+  costs: typeof costs;
   featureRequests: typeof featureRequests;
   insights: typeof insights;
   insightsSeed: typeof insightsSeed;
   intelligence: typeof intelligence;
+  issues: typeof issues;
+  mediaUploads: typeof mediaUploads;
   models: typeof models;
+  routines: typeof routines;
   scraperImport: typeof scraperImport;
+  toolAnalyses: typeof toolAnalyses;
+  trackedAccounts: typeof trackedAccounts;
 }>;
 
 /**

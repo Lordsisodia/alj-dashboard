@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// SpriteIcon — animated product icon (port from MobileSafeSpriteAnimator)
+// SpriteIcon - animated product icon (port from MobileSafeSpriteAnimator)
 // Cycles through sprite sheet frames on hover
 // ═══════════════════════════════════════════════════════════════════════════════
 

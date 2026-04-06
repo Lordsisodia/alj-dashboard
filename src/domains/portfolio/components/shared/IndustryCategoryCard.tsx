@@ -73,7 +73,7 @@ const industryMetrics: Record<IndustryCategory, {
     rating: 5.0,
     topTech: ['React', 'TypeScript', 'Supabase'],
     featuredProject: {
-      name: 'SISO Internal Platform',
+      name: 'ORACLE Internal Platform',
       date: 'Dec 2024'
     }
   },
@@ -123,7 +123,7 @@ const industryMetrics: Record<IndustryCategory, {
     rating: 5.0,
     topTech: ['React', 'TypeScript', 'Supabase'],
     featuredProject: {
-      name: 'SISO Internal Platform',
+      name: 'ORACLE Internal Platform',
       date: 'Dec 2024'
     }
   }

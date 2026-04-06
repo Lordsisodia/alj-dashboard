@@ -56,8 +56,8 @@ const comparisonCategories: ComparisonCategory[] = [
     rows: [
       { title: 'Hub', free: 'Browse only', perModel: 'Full', unlimited: 'Full', enterprise: 'Full' },
       { title: 'Intelligence', free: 'Limited tokens', perModel: 'Full', unlimited: 'Full', enterprise: 'Full' },
-      { title: 'Recon', free: '—', perModel: 'Full', unlimited: 'Full', enterprise: 'Full' },
-      { title: 'Agents', free: '—', perModel: 'Full', unlimited: 'Full', enterprise: 'Full' },
+      { title: 'Recon', free: '-', perModel: 'Full', unlimited: 'Full', enterprise: 'Full' },
+      { title: 'Agents', free: '-', perModel: 'Full', unlimited: 'Full', enterprise: 'Full' },
       { title: 'Content Gen', free: '2 videos/week', perModel: 'Slider (1-10/day)', unlimited: 'Unlimited', enterprise: 'Unlimited' },
     ],
   },
@@ -66,42 +66,42 @@ const comparisonCategories: ComparisonCategory[] = [
     rows: [
       { title: 'AI Video Generation', free: '2/week', perModel: 'Per plan', unlimited: 'Unlimited (+$1 API)', enterprise: 'Unlimited (volume pricing)' },
       { title: 'AI Script Writer', free: true, perModel: true, unlimited: true, enterprise: true },
-      { title: 'Storyboard Generator', free: '—', perModel: true, unlimited: true, enterprise: true },
-      { title: 'Batch Generation', free: '—', perModel: '—', unlimited: true, enterprise: true, crown: true },
+      { title: 'Storyboard Generator', free: '-', perModel: true, unlimited: true, enterprise: true },
+      { title: 'Batch Generation', free: '-', perModel: '-', unlimited: true, enterprise: true, crown: true },
       { title: 'Model Profiles', free: '1', perModel: 'Unlimited', unlimited: 'Unlimited', enterprise: 'Unlimited' },
-      { title: 'Multi-Language Output', free: '—', perModel: true, unlimited: true, enterprise: true },
+      { title: 'Multi-Language Output', free: '-', perModel: true, unlimited: true, enterprise: true },
     ],
   },
   {
     name: 'Intelligence & Tracking',
     rows: [
       { title: 'Trend Detection', free: 'Limited', perModel: 'Full', unlimited: 'Full', enterprise: 'Full' },
-      { title: 'Competitor Tracking', free: '—', perModel: 'Up to 15', unlimited: 'Unlimited', enterprise: 'Unlimited' },
-      { title: 'Performance Reports', free: '—', perModel: true, unlimited: true, enterprise: true },
-      { title: 'Hook Analysis', free: '—', perModel: true, unlimited: true, enterprise: true },
-      { title: 'Automated Transcription', free: '—', perModel: true, unlimited: true, enterprise: true },
-      { title: 'Historical Data', free: '—', perModel: '90 days', unlimited: 'Unlimited', enterprise: 'Unlimited', crown: true },
+      { title: 'Competitor Tracking', free: '-', perModel: 'Up to 15', unlimited: 'Unlimited', enterprise: 'Unlimited' },
+      { title: 'Performance Reports', free: '-', perModel: true, unlimited: true, enterprise: true },
+      { title: 'Hook Analysis', free: '-', perModel: true, unlimited: true, enterprise: true },
+      { title: 'Automated Transcription', free: '-', perModel: true, unlimited: true, enterprise: true },
+      { title: 'Historical Data', free: '-', perModel: '90 days', unlimited: 'Unlimited', enterprise: 'Unlimited', crown: true },
     ],
   },
   {
     name: 'Team & Collaboration',
     rows: [
       { title: 'Users', free: '1', perModel: '3 included', unlimited: 'Unlimited', enterprise: 'Unlimited' },
-      { title: 'Sharing & Collaboration', free: '—', perModel: true, unlimited: true, enterprise: true },
-      { title: 'White-label Reports', free: '—', perModel: '—', unlimited: true, enterprise: true, crown: true },
-      { title: 'Export & Download', free: '—', perModel: true, unlimited: true, enterprise: true },
+      { title: 'Sharing & Collaboration', free: '-', perModel: true, unlimited: true, enterprise: true },
+      { title: 'White-label Reports', free: '-', perModel: '-', unlimited: true, enterprise: true, crown: true },
+      { title: 'Export & Download', free: '-', perModel: true, unlimited: true, enterprise: true },
     ],
   },
   {
     name: 'Support & API',
     rows: [
       { title: 'Community Support', free: true, perModel: true, unlimited: true, enterprise: true },
-      { title: 'Priority Support', free: '—', perModel: '—', unlimited: true, enterprise: true, crown: true },
-      { title: 'API Access', free: '—', perModel: '—', unlimited: true, enterprise: true },
-      { title: 'Custom Agent Builds', free: '—', perModel: '—', unlimited: '72hr turnaround', enterprise: '24hr turnaround', crown: true },
-      { title: 'Dedicated Account Manager', free: '—', perModel: '—', unlimited: '—', enterprise: true, crown: true },
-      { title: 'Custom Integrations', free: '—', perModel: '—', unlimited: '—', enterprise: true, crown: true },
-      { title: 'SLA', free: '—', perModel: '—', unlimited: '—', enterprise: true, crown: true },
+      { title: 'Priority Support', free: '-', perModel: '-', unlimited: true, enterprise: true, crown: true },
+      { title: 'API Access', free: '-', perModel: '-', unlimited: true, enterprise: true },
+      { title: 'Custom Agent Builds', free: '-', perModel: '-', unlimited: '72hr turnaround', enterprise: '24hr turnaround', crown: true },
+      { title: 'Dedicated Account Manager', free: '-', perModel: '-', unlimited: '-', enterprise: true, crown: true },
+      { title: 'Custom Integrations', free: '-', perModel: '-', unlimited: '-', enterprise: true, crown: true },
+      { title: 'SLA', free: '-', perModel: '-', unlimited: '-', enterprise: true, crown: true },
     ],
   },
 ];
@@ -121,7 +121,7 @@ function InfoTooltip({ text }: { text: string }) {
 
 function renderCellValue(value: string | boolean | undefined) {
   if (value === true) return <div className="icon-24"><CheckIcon /></div>;
-  if (value === false || value === '—') return <div className="text-solid-300"><div>—</div></div>;
+  if (value === false || value === '-') return <div className="text-solid-300"><div>-</div></div>;
   return <div className="text-body-m">{value}</div>;
 }
 

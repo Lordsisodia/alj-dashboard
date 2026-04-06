@@ -7,7 +7,7 @@ import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { LayoutDashboard, CheckSquare, Layers, Sparkles, Plus } from 'lucide-react';
 import type { Tab } from '../types';
-// Overview components — all eager (they form the visible hub layout, lazy-loading causes layout shift)
+// Overview components - all eager (they form the visible hub layout, lazy-loading causes layout shift)
 import { KpiCards } from './overview/KpiCards';
 import { ModelPnLCard } from './overview/ModelPnLCard';
 import { QuickActions } from './overview/QuickActions';
@@ -15,7 +15,7 @@ import { ActivityFeed } from './overview/ActivityFeed';
 import { UpcomingPosts } from './overview/UpcomingPosts';
 import { ExpiringSubscriberQueue } from './overview/ExpiringSubscriberQueue';
 import { ModelsOverview } from './overview/ModelsOverview';
-// Non-default tab content — lazy load (only loaded when tab is clicked)
+// Non-default tab content - lazy load (only loaded when tab is clicked)
 const ApprovalsTabContent = dynamic(() => import('@/features/approvals/components/ApprovalsTabContent').then(m => ({ default: m.ApprovalsTabContent })), { ssr: false });
 const SwipeTabContent     = dynamic(() => import('@/features/hub-swipe/components/SwipeTabContent').then(m => ({ default: m.SwipeTabContent })), { ssr: false });
 import { PlaceholderContent } from './placeholders/PlaceholderContent';
@@ -29,7 +29,7 @@ function OverviewContent() {
     <div className="space-y-5">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <h2 className="text-xl font-bold text-neutral-900">Good morning, Alex 👋</h2>
-        <p className="text-sm text-neutral-500 mt-0.5">Here&apos;s what&apos;s happening today — {today}</p>
+        <p className="text-sm text-neutral-500 mt-0.5">Here&apos;s what&apos;s happening today - {today}</p>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.05 }}>

@@ -261,7 +261,7 @@ export function Sidebar() {
         <div className="flex-shrink-0 mt-2">
           <div className="flex flex-col p-1 rounded-xl bg-white/5">
             <p className="text-white/50 px-2 pb-2 pt-1 text-xs font-normal">
-              <span className="font-medium text-white">Pro plan</span> — AI pipeline active
+              <span className="font-medium text-white">Pro plan</span> - AI pipeline active
             </p>
             <button className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 transition-colors">
               <Zap size={16} className="text-white" />

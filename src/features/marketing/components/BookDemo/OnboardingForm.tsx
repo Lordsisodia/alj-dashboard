@@ -1,4 +1,4 @@
-// OnboardingForm — Dark card with form fields (Name, Email, Website, Ad Spend, Help text, Submit).
+// OnboardingForm - Dark card with form fields (Name, Email, Website, Ad Spend, Help text, Submit).
 // Uses React state for all fields and a submit handler.
 
 'use client';

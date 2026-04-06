@@ -1,4 +1,4 @@
-// IndustryHero — top section with icon, subtitle, headline, paragraph, CTA buttons, and scrolling logo carousel.
+// IndustryHero - top section with icon, subtitle, headline, paragraph, CTA buttons, and scrolling logo carousel.
 
 import type { IndustryPageData } from './types';
 

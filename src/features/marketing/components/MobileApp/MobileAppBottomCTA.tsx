@@ -1,4 +1,4 @@
-// MobileAppBottomCTA — large headline, paragraph, and dual CTA buttons.
+// MobileAppBottomCTA - large headline, paragraph, and dual CTA buttons.
 
 import type { MobileAppPageData } from './data/mobile-app';
 

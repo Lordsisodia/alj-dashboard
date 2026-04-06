@@ -9,7 +9,7 @@ const LazyPartnersPageShell = dynamic(() => import("@/domains/partnerships/commu
 export default function PartnersLayout({ children }: { children: ReactNode }) {
   return (
     <Fragment>
-      {/* Wave backdrop scoped to /partners — removed from root layout to avoid wasted rAF on ISSO pages */}
+      {/* Wave backdrop scoped to /partners - removed from root layout to avoid wasted rAF on ISSO pages */}
       <PartnershipsWaveBackdrop
         position="fixed"
         className="-z-10"

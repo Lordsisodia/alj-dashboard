@@ -8,7 +8,7 @@ import { TAB_TRANSITION } from '../../constants';
 const INTEGRATIONS = [
   { name: 'Google Drive',  desc: 'Auto-sync clips and exports',             connected: true,  icon: <FolderOpen size={18} style={{ color: '#4285f4' }} />,  lastSynced: '2h ago',  model: null },
   { name: 'Gemini AI',     desc: 'Brief generation and analysis',           connected: true,  icon: <span className="text-base font-bold" style={{ color: '#4285f4' }}>G</span>, lastSynced: '5m ago',  model: 'gemini-2.0-flash' },
-  { name: 'Telegram Bot',  desc: '@ISSO_bot — team notifications',          connected: true,  icon: <MessageSquare size={18} style={{ color: '#0088cc' }} />, lastSynced: '5m ago',  model: null },
+  { name: 'Telegram Bot',  desc: '@ISSO_bot - team notifications',          connected: true,  icon: <MessageSquare size={18} style={{ color: '#0088cc' }} />, lastSynced: '5m ago',  model: null },
   { name: 'Airtable',      desc: 'Pipeline and content management',         connected: false, icon: <Sliders size={18} style={{ color: '#ff0069' }} />,       lastSynced: null,      model: null },
   { name: 'Zapier',        desc: 'Workflow automation',                     connected: false, icon: <Hash size={18} style={{ color: '#ff4a00' }} />,          lastSynced: null,      model: null },
 ];

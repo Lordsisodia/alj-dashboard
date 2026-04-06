@@ -87,7 +87,7 @@ export const EarningsSection = memo(() => {
           </h2>
           <div className="h-1 w-16 mx-auto mb-3 rounded-full bg-siso-orange" />
           <p className="text-siso-text-muted text-base sm:text-lg md:text-xl max-w-3xl mx-auto">
-            Choose how you engage—refer, co-sell, or lead—and get recurring commissions on every deal.
+            Choose how you engage-refer, co-sell, or lead-and get recurring commissions on every deal.
           </p>
         </motion.div>
 

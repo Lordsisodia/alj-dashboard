@@ -96,7 +96,7 @@ export const deleteJob = mutation({
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-// Queue page — contentGenJobs table
+// Queue page - contentGenJobs table
 // Tracks the FLUX → Kling/Higgsfield video generation pipeline per job.
 // ═════════════════════════════════════════════════════════════════════════════
 

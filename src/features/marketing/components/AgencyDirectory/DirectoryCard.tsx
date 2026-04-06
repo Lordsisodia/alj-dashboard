@@ -1,4 +1,4 @@
-// DirectoryCard — single agency card with logo, name, country, verified badge, services, and industries.
+// DirectoryCard - single agency card with logo, name, country, verified badge, services, and industries.
 
 import type { AgencyCard } from './types';
 

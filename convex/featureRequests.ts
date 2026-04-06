@@ -30,7 +30,7 @@ export const create = mutation({
   },
 });
 
-// Idempotent — only runs if the table is empty
+// Idempotent - only runs if the table is empty
 export const seed = mutation({
   handler: async (ctx) => {
     const existing = await ctx.db.query("featureRequests").first();

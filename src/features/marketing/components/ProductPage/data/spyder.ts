@@ -4,9 +4,9 @@ import { CDN, ASSETS } from '@/lib/cdn';
 export const spyderData: ProductPageData = {
   slug: 'spyder',
   hero: {
-    subtitle: 'Recon — 24/7 Competitor Tracker',
+    subtitle: 'Recon - 24/7 Competitor Tracker',
     headline: 'Know What Every Competitor Is Posting Before Your Team Wakes Up',
-    paragraph: 'Recon scrapes every reel, hook, and content test your competitors publish — automatically, around the clock. No manual checking. No missed moves.',
+    paragraph: 'Recon scrapes every reel, hook, and content test your competitors publish - automatically, around the clock. No manual checking. No missed moves.',
     ctaHref: 'https://siso.ai/sign-up',
     animatedIconVideoSrc: `${ASSETS}/animated-icon-spyder.webm`,
     staticIconSrc: `${CDN}/682f9f72ef4d27826a8d2aa0_pi-spyder-hq.webp`,
@@ -16,7 +16,7 @@ export const spyderData: ProductPageData = {
   },
   beforeAfter: {
     sectionTitle: 'Stop guessing what your competitors are doing',
-    sectionParagraph: 'Most agencies manually browse profiles and take notes. Recon replaces that entirely — automated scraping, scored content, actionable reports.',
+    sectionParagraph: 'Most agencies manually browse profiles and take notes. Recon replaces that entirely - automated scraping, scored content, actionable reports.',
     before: {
       label: 'Before Recon',
       description: 'Manually checking competitor profiles, missing new posts, no record of what they tested.',
@@ -24,7 +24,7 @@ export const spyderData: ProductPageData = {
     },
     after: {
       label: 'After Recon',
-      description: 'Every competitor reel logged, scored, and surfaced — delivered to your dashboard before the morning call.',
+      description: 'Every competitor reel logged, scored, and surfaced - delivered to your dashboard before the morning call.',
       imageSrc: `${CDN}/682e02bbb206d4bd3ae644fe_after-spyder.webp`,
     },
   },
@@ -35,12 +35,12 @@ export const spyderData: ProductPageData = {
     items: [
       {
         title: '24/7 Competitor Scraping',
-        description: 'Recon monitors every account you track around the clock — new reels, format changes, posting cadence. Nothing slips through.',
+        description: 'Recon monitors every account you track around the clock - new reels, format changes, posting cadence. Nothing slips through.',
         imageSrc: `${CDN}/6679734bf7cb3c37f5ebdf64_24-7-scraper.webp`,
       },
       {
         title: 'Automated Intelligence Reports',
-        description: 'Weekly and daily reports generated automatically — what your competitors posted, what performed, what hooks they tested. Sent to your inbox without lifting a finger.',
+        description: 'Weekly and daily reports generated automatically - what your competitors posted, what performed, what hooks they tested. Sent to your inbox without lifting a finger.',
         imageSrc: `${CDN}/667b034872fc6e86638d70fc_share-report-2.webp`,
       },
       {
@@ -53,7 +53,7 @@ export const spyderData: ProductPageData = {
   coreFeatures: {
     subtitle: 'Core Features',
     title: 'Full visibility into your competitor\'s content pipeline',
-    paragraph: "Recon maps every account you track — posting frequency, format mix, hook patterns, and what's gaining engagement. Built for managers and agencies who need signal, not noise.",
+    paragraph: "Recon maps every account you track - posting frequency, format mix, hook patterns, and what's gaining engagement. Built for managers and agencies who need signal, not noise.",
     tabs: [
       {
         label: 'Real-Time Tracking',
@@ -75,7 +75,7 @@ export const spyderData: ProductPageData = {
   smartFeatures: {
     subtitle: 'All Features',
     title: 'Everything Recon tracks for you',
-    paragraph: "No add-ons or feature gating. Every Recon capability is included — competitor scraping, hook analysis, automated reports, and real-time alerts.",
+    paragraph: "No add-ons or feature gating. Every Recon capability is included - competitor scraping, hook analysis, automated reports, and real-time alerts.",
     row1: [
       {
         imageSrc: `${CDN}/6822010b1db333a3279d12f0_realtime-status.webp`,
@@ -85,7 +85,7 @@ export const spyderData: ProductPageData = {
       {
         imageSrc: `${CDN}/682250526cf05f1944daa3f3_creative-tests.webp`,
         title: 'Track Content Tests',
-        description: 'Group and follow reels launched in the same test window — see which hooks and formats a competitor is pushing.',
+        description: 'Group and follow reels launched in the same test window - see which hooks and formats a competitor is pushing.',
       },
       {
         imageSrc: `${CDN}/68220b448aa4cb6939da0c95_landing-page.webp`,
@@ -95,12 +95,12 @@ export const spyderData: ProductPageData = {
       {
         imageSrc: `${CDN}/6823a697a0c46d8ee3c03b18_historical-data.webp`,
         title: 'Full Content History',
-        description: 'Every reel ever posted by a tracked creator — archived from day one. Never lose historical context.',
+        description: 'Every reel ever posted by a tracked creator - archived from day one. Never lose historical context.',
       },
       {
         imageSrc: `${CDN}/68220b4429bdc7d30078e6b7_share-reports.webp`,
         title: 'Share Intelligence Reports',
-        description: 'Generate a competitor snapshot and send it to your team or clients in one click — no manual compiling.',
+        description: 'Generate a competitor snapshot and send it to your team or clients in one click - no manual compiling.',
       },
       {
         imageSrc: `${CDN}/68220b44c6a9b4d97676ea73_notifications.webp`,
@@ -111,7 +111,7 @@ export const spyderData: ProductPageData = {
     testimonial1: {
       logoSrc: `${CDN}/6679ef83dd47e5000aa10cd5_Wiza.svg`,
       logoAlt: 'Agency logo',
-      quote: '"We manage 12 models across three niches. Recon tells us what top creators in each niche are testing every week — our content team uses that directly to brief the next batch of reels. Saves us 10+ hours a week of manual research."',
+      quote: '"We manage 12 models across three niches. Recon tells us what top creators in each niche are testing every week - our content team uses that directly to brief the next batch of reels. Saves us 10+ hours a week of manual research."',
       authorName: 'Agency Manager',
       authorTitle: 'OFM Agency, 12 Models',
       authorHeadshot: `${CDN}/6679ebddfad13bb59b5a8f25_TS2G1MWKZ-US2G1MXHD-eb1db3a0ea43-192.png`,
@@ -128,7 +128,7 @@ export const spyderData: ProductPageData = {
   },
   embeddedCta: {
     headline: 'Start tracking competitors today',
-    paragraph: "Recon is included in ISSO's full suite — alongside Intelligence, Hub, Content Gen, and Agents.",
+    paragraph: "Recon is included in ISSO's full suite - alongside Intelligence, Hub, Content Gen, and Agents.",
     primaryCtaText: 'Start',
     primaryCtaHref: 'https://siso.ai/sign-up',
     showNoCcBadge: true,
@@ -141,41 +141,41 @@ export const spyderData: ProductPageData = {
     items: [
       {
         question: 'What is Recon?',
-        answer: "Recon is ISSO's 24/7 competitor tracking engine. It automatically scrapes every reel, hook, and content test published by the creator accounts you track — then delivers scored intelligence reports to your dashboard. No manual checking, no missed posts.",
+        answer: "Recon is ISSO's 24/7 competitor tracking engine. It automatically scrapes every reel, hook, and content test published by the creator accounts you track - then delivers scored intelligence reports to your dashboard. No manual checking, no missed posts.",
       },
       {
         question: 'Which platforms does Recon scrape?',
-        answer: 'Recon focuses on the platforms that matter for model management and OFM agencies — Instagram Reels and TikTok. New platform support is added as the content pipeline expands.',
+        answer: 'Recon focuses on the platforms that matter for model management and OFM agencies - Instagram Reels and TikTok. New platform support is added as the content pipeline expands.',
       },
       {
         question: 'How often does Recon check for new content?',
-        answer: 'Recon runs continuously around the clock. When a tracked account posts a new reel, it gets scraped, scored, and added to your dashboard within hours — not days. You can also set Slack or email alerts to be notified the moment something goes live.',
+        answer: 'Recon runs continuously around the clock. When a tracked account posts a new reel, it gets scraped, scored, and added to your dashboard within hours - not days. You can also set Slack or email alerts to be notified the moment something goes live.',
       },
       {
         question: 'How does Recon know what content is performing?',
-        answer: "Recon scores every reel it scrapes using engagement signals and trend velocity. High-scoring content gets surfaced automatically — your team sees the winners without manually reviewing hundreds of posts.",
+        answer: "Recon scores every reel it scrapes using engagement signals and trend velocity. High-scoring content gets surfaced automatically - your team sees the winners without manually reviewing hundreds of posts.",
       },
       {
         question: 'How long is competitor data kept?',
-        answer: "Recon archives every reel from the moment you start tracking — indefinitely. You build a permanent intelligence layer on every competitor account, not just a rolling 30-day window. That history is useful for spotting cyclical trends.",
+        answer: "Recon archives every reel from the moment you start tracking - indefinitely. You build a permanent intelligence layer on every competitor account, not just a rolling 30-day window. That history is useful for spotting cyclical trends.",
       },
       {
         question: 'How many competitor accounts can I track?',
-        answer: "Every plan includes a set number of tracked accounts. Additional accounts can be added on any plan — see the pricing page for current limits.",
+        answer: "Every plan includes a set number of tracked accounts. Additional accounts can be added on any plan - see the pricing page for current limits.",
       },
       {
         question: 'Do I need to set anything up for Recon to keep running?',
-        answer: 'No. Once you add an account to track, Recon runs automatically — scraping new content, scoring it, and updating your dashboard. There is nothing to maintain.',
+        answer: 'No. Once you add an account to track, Recon runs automatically - scraping new content, scoring it, and updating your dashboard. There is nothing to maintain.',
       },
       {
         question: 'How is Recon different from Intelligence?',
-        answer: 'Recon watches specific accounts you tell it to track — it gives you a precise, continuous record of what your named competitors are posting. Intelligence is broader — it surfaces trending patterns and top-performing reels across your whole niche, not just the accounts you follow. Most agencies use both together.',
+        answer: 'Recon watches specific accounts you tell it to track - it gives you a precise, continuous record of what your named competitors are posting. Intelligence is broader - it surfaces trending patterns and top-performing reels across your whole niche, not just the accounts you follow. Most agencies use both together.',
       },
     ],
   },
   bottomCta: {
     headline: 'Start tracking competitors today',
-    paragraph: "Recon is included in ISSO's full suite — alongside Intelligence, Hub, Content Gen, and Agents.",
+    paragraph: "Recon is included in ISSO's full suite - alongside Intelligence, Hub, Content Gen, and Agents.",
     primaryCtaText: 'Start',
     primaryCtaHref: 'https://siso.ai/sign-up',
     secondaryCtaText: 'No credit card required',

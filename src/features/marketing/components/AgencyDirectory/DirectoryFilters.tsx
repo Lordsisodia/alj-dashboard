@@ -1,4 +1,4 @@
-// DirectoryFilters — sidebar with search input and filter checkbox groups (services, industries, countries).
+// DirectoryFilters - sidebar with search input and filter checkbox groups (services, industries, countries).
 
 import type { FilterGroup } from './types';
 

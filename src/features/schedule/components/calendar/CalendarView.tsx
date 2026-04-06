@@ -86,7 +86,7 @@ export function CalendarView({ filter }: { filter: FilterType }) {
                         key={pi}
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: TYPE_COLOR[p.type] }}
-                        title={`${p.type} — ${p.handle}`}
+                        title={`${p.type} - ${p.handle}`}
                       />
                     ))}
                     {posts.length > 3 && <span className="text-[9px] text-white/30">+{posts.length - 3}</span>}

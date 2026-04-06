@@ -31,7 +31,7 @@ function WorkspaceDemoFallback() {
   return (
     <div className={stackedPanelClass}>
       <div className={`${nestedCardClass} flex items-center justify-between p-4 text-sm text-white/70`}>
-        <span>Loading workspace demo…</span>
+        <span>Loading workspace demo...</span>
         <div className="h-2 w-24 rounded-full bg-white/10 animate-pulse" />
       </div>
     </div>

@@ -141,7 +141,7 @@ export default function HeroSection() {
             paddingTop: 60,
             paddingBottom: 80,
           }}>
-            {/* .home-hero-content — centered text block */}
+            {/* .home-hero-content - centered text block */}
             <div style={{
               textAlign: 'center',
               maxWidth: 1100,
@@ -190,7 +190,7 @@ export default function HeroSection() {
                 maxWidth: 720,
                 letterSpacing: '-0.0144444em',
               }}>
-                The content infrastructure that never stops. We scrape what's trending, generate AI reels, and continuously improve your pipeline — all running in the background.
+                The content infrastructure that never stops. We scrape what's trending, generate AI reels, and continuously improve your pipeline - all running in the background.
               </p>
             </div>
 
@@ -230,7 +230,7 @@ export default function HeroSection() {
             gap: 24,
           }}>
 
-            {/* Logo Grid — 7 cols x 2 rows */}
+            {/* Logo Grid - 7 cols x 2 rows */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(7, 1fr)',
@@ -250,17 +250,17 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Video mockup — below sticky, overlaps via negative margin */}
+      {/* Video mockup - below sticky, overlaps via negative margin */}
       <div style={{ position: 'relative', marginBottom: -120, zIndex: 1 }}>
         <div className="isso-container">
           <div ref={videoContainerRef} className="hero-video-container">
-            {/* Poster image — always visible */}
+            {/* Poster image - always visible */}
             <img
               src={POSTER_URL}
               alt=""
               className="w-full h-auto block object-cover"
             />
-            {/* Video element — try autoplay */}
+            {/* Video element - try autoplay */}
             <LazyVideo
               src={VIDEO_MP4}
               autoPlay

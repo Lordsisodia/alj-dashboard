@@ -1,4 +1,4 @@
-// AffiliatesPage data — extracted from www_foreplay_co (24).html
+// AffiliatesPage data - extracted from www_foreplay_co (24).html
 
 const CDN = 'https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4';
 
@@ -51,7 +51,7 @@ export const affiliatesData: AffiliatesPageData = {
         imageSrc: `${CDN}/6835eba827d5b7821771ad71_affiliate-1.webp`,
         imageAlt: 'ISSO affiliate signup',
         imageSrcSet: `${CDN}/6835eba827d5b7821771ad71_affiliate-1-p-500.webp 500w, ${CDN}/6835eba827d5b7821771ad71_affiliate-1.webp 768w`,
-        body: "Once approved, we'll give you a unique affiliate link you can share on your website, blog, social media, videos — wherever.",
+        body: "Once approved, we'll give you a unique affiliate link you can share on your website, blog, social media, videos - wherever.",
       },
       {
         title: '2. Share your love of ISSO',

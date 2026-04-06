@@ -26,7 +26,7 @@ interface PricingBreakdownProps {
 const isNum = (v: unknown): v is number => typeof v === 'number' && !isNaN(v);
 
 const formatCurrency = (amount?: number, currency: string = 'USD') => {
-  if (!isNum(amount)) return '—';
+  if (!isNum(amount)) return '-';
   const symbol = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : '$';
   return `${symbol}${amount.toLocaleString()}`;
 };
@@ -58,7 +58,7 @@ export function PricingBreakdown({ pricing }: PricingBreakdownProps) {
         <CardContent className="space-y-4">
           <div>
             <div className="text-3xl font-bold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent">
-              {isNum(min) ? formatCurrency(min, currency) : '—'}
+              {isNum(min) ? formatCurrency(min, currency) : '-'}
               {isNum(min) && isNum(max) ? ' - ' : ''}
               {isNum(max) ? formatCurrency(max, currency) : ''}
             </div>
@@ -69,7 +69,7 @@ export function PricingBreakdown({ pricing }: PricingBreakdownProps) {
 
           <div className="flex items-center gap-2 text-siso-text">
             <Clock className="w-4 h-4 text-siso-orange" />
-            <span className="font-medium">{pricing?.deliveryTime ?? '48–72 hours'}</span>
+            <span className="font-medium">{pricing?.deliveryTime ?? '48-72 hours'}</span>
             <span className="text-siso-text-muted">delivery time</span>
           </div>
 
@@ -125,7 +125,7 @@ export function PricingBreakdown({ pricing }: PricingBreakdownProps) {
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-siso-text-muted">SISO (AI-Powered):</span>
+              <span className="text-sm text-siso-text-muted">ORACLE (AI-Powered):</span>
               <span className="text-sm font-bold text-siso-orange">
                 {formatCurrency(avgPrice, currency)}
               </span>

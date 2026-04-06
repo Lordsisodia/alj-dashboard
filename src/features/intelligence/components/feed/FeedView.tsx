@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { containerVariants } from '../../constants';
 import { useFeed } from '../../hooks/useFeed';
 import { PostCard } from './PostCard';
-import { PostListItem } from './PostListItem';
+import { PostListItem, PostListHeader } from './PostListItem';
 import { SkeletonCard } from './SkeletonCard';
 import type { SortId, VisibilityState, DrawerPost } from '../../types';
 
@@ -36,7 +36,7 @@ export function FeedView({ sortBy, visibility, viewMode, handle, niche, contentT
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
         <Loader2 size={28} className="animate-spin text-neutral-300" />
-        <p className="text-sm text-neutral-400">Seeding feed…</p>
+        <p className="text-sm text-neutral-400">Seeding feed...</p>
       </div>
     );
   }
@@ -45,15 +45,14 @@ export function FeedView({ sortBy, visibility, viewMode, handle, niche, contentT
 
   if (viewMode === 'list') {
     return (
-      <motion.div
-        variants={containerVariants} initial="hidden" animate="visible"
-        className="flex flex-col rounded-xl overflow-hidden"
-        style={{ border: '1px solid rgba(0,0,0,0.07)' }}
-      >
-        {drawerPosts.map((post, i) => (
-          <PostListItem key={post._id} post={post as any} visibility={visibility} onPostClick={() => onPostClick(i, drawerPosts)} />
-        ))}
-      </motion.div>
+      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+        <PostListHeader />
+        <motion.div variants={containerVariants} initial="hidden" animate="visible">
+          {drawerPosts.map((post, i) => (
+            <PostListItem key={post._id} post={post as any} rowIdx={i} visibility={visibility} onPostClick={() => onPostClick(i, drawerPosts)} />
+          ))}
+        </motion.div>
+      </div>
     );
   }
 

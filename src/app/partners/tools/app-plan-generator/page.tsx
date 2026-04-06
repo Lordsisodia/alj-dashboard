@@ -41,7 +41,7 @@ export default function AppPlanGeneratorPage() {
           <SettingsGroupCallout
             icon={<ClipboardList className="h-4 w-4" />}
             title="Workflow preview"
-            subtitle="Here’s what the generator will walk you through once it launches."
+            subtitle="Here's what the generator will walk you through once it launches."
             showChevron={false}
           >
             <div className="grid gap-3 text-sm text-white/80 md:grid-cols-2">
@@ -67,7 +67,7 @@ export default function AppPlanGeneratorPage() {
 
           <SettingsGroupCallout icon={<AlertTriangle className="h-4 w-4" />} title="Coming soon" subtitle="Final wiring + reviews in progress" showChevron={false}>
             <p className="text-sm text-white/80">
-              We’re validating templates with partners before enabling the generator. Leave your email to get the launch note.
+              We're validating templates with partners before enabling the generator. Leave your email to get the launch note.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button size="sm" className={`${primaryGradientButtonClass} opacity-60`} disabled>

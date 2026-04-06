@@ -184,7 +184,7 @@ function SkillsExpertiseDoubleCallout({
         <section className="rounded-2xl border border-white/10 bg-white/5 p-3">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-siso-text-bold">SISO Certifications</h3>
-            <InfoButton label="About certifications" content="Select any SISO certifications you’ve earned. Use NA if none." />
+            <InfoButton label="About certifications" content="Select any SISO certifications you've earned. Use NA if none." />
           </div>
           <CustomDropdown
             options={certificationOptions}
@@ -322,7 +322,7 @@ function RevenueGoalsDoubleCallout({
         <section className="rounded-2xl border border-white/10 bg-white/5 p-3">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-siso-text-bold">Timeline</h3>
-            <InfoButton label="About timeline" content="How long you’re giving yourself to hit the goal (e.g., 3 months)." />
+            <InfoButton label="About timeline" content="How long you're giving yourself to hit the goal (e.g., 3 months)." />
           </div>
           <CustomDropdown
             options={timelineOptions}

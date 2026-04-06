@@ -42,7 +42,7 @@ export default function PublicPortfolioAssetPage(props: { params: Promise<{ slug
     <Suspense
       fallback={
         <main className="min-h-screen bg-black text-white p-6">
-          <p className="text-neutral-300">Loading portfolio asset…</p>
+          <p className="text-neutral-300">Loading portfolio asset...</p>
         </main>
       }
     >

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ISSO_NAV_CONFIG, PERSISTENT_NAV } from './sidebar-config';
+import { ISSO_NAV_CONFIG, PERSISTENT_NAV, PLATFORMS_NAV } from './sidebar-config';
 import { cn } from '@/lib/utils';
 import {
   Search, Plus, Zap, PanelLeftClose, PanelLeftOpen,
@@ -21,12 +21,12 @@ const PRODUCT_SPRITES: Record<string, string> = {
 
 // ── Changelog entries ─────────────────────────────────────────────────────────
 const CHANGELOG = [
-  { date: 'Apr 2026', tag: 'new',     title: 'Intelligence v2 — Trend radar launched' },
-  { date: 'Mar 2026', tag: 'update',  title: 'Schedule — bulk upload & CSV export' },
-  { date: 'Mar 2026', tag: 'new',     title: 'Recon agent — competitor scraping live' },
-  { date: 'Feb 2026', tag: 'fix',     title: 'Approvals — mobile review fixed' },
-  { date: 'Feb 2026', tag: 'new',     title: 'Briefs AI — auto-generate from trends' },
-  { date: 'Jan 2026', tag: 'update',  title: 'Dashboard — new analytics cards' },
+  { date: 'Apr 2026', tag: 'new',     title: 'Intelligence v2 - Trend radar launched' },
+  { date: 'Mar 2026', tag: 'update',  title: 'Schedule - bulk upload & CSV export' },
+  { date: 'Mar 2026', tag: 'new',     title: 'Recon agent - competitor scraping live' },
+  { date: 'Feb 2026', tag: 'fix',     title: 'Approvals - mobile review fixed' },
+  { date: 'Feb 2026', tag: 'new',     title: 'Briefs AI - auto-generate from trends' },
+  { date: 'Jan 2026', tag: 'update',  title: 'Dashboard - new analytics cards' },
 ];
 
 const TAG_STYLE: Record<string, string> = {
@@ -133,7 +133,7 @@ export function IssoSidebarShell() {
           <>
             <div className="flex items-center gap-2.5 px-1">
               <ForeplayLogoIcon size={28} />
-              <span className="text-white font-semibold text-sm tracking-tight select-none">isso</span>
+              <span className="text-white font-semibold text-sm tracking-tight select-none">oracle</span>
             </div>
             <button
               onClick={() => setCollapsed(true)}
@@ -249,6 +249,49 @@ export function IssoSidebarShell() {
             </button>
           </div>
 
+          {/* Platforms */}
+          <div className="px-3 mt-4 flex-shrink-0">
+            <div className="h-px w-full mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />
+            <p className="px-2 pb-1.5 text-[10px] uppercase tracking-[0.2em] text-neutral-600 select-none">Platforms</p>
+            <nav className="flex flex-col gap-0.5">
+              {PLATFORMS_NAV.map((platform) => {
+                const isActive = pathname.startsWith(platform.href);
+                const Icon = platform.icon;
+                return (
+                  <Link
+                    key={platform.id}
+                    href={platform.comingSoon ? '#' : platform.href}
+                    className={cn(
+                      'group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all duration-150',
+                      isActive
+                        ? 'text-white bg-white/[0.08]'
+                        : platform.comingSoon
+                        ? 'text-neutral-700 cursor-default'
+                        : 'text-neutral-500 hover:text-neutral-200 hover:bg-white/5'
+                    )}
+                    onClick={e => { if (platform.comingSoon) e.preventDefault(); }}
+                  >
+                    <span className={cn(
+                      'flex-shrink-0 transition-colors',
+                      isActive ? 'text-[#ff0069]' : platform.comingSoon ? 'text-neutral-700' : 'text-neutral-600 group-hover:text-neutral-400'
+                    )}>
+                      <Icon size={16} />
+                    </span>
+                    <span className="truncate font-normal flex-1">{platform.label}</span>
+                    {platform.comingSoon && (
+                      <span
+                        className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded flex-shrink-0"
+                        style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: '#525252' }}
+                      >
+                        Soon
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
           {/* Spacer */}
           <div className="flex-1" />
 
@@ -267,7 +310,7 @@ export function IssoSidebarShell() {
                 style={{ backgroundColor: '#2a2a2e', border: '1px solid rgba(255,255,255,0.10)' }}
               >
                 <Zap size={14} />
-                Upgrade ISSO
+                Upgrade ORACLE
               </button>
             </div>
           </div>
@@ -280,7 +323,7 @@ export function IssoSidebarShell() {
         collapsed ? 'flex-col-reverse gap-2 px-2' : 'flex-row items-center justify-between px-3'
       )}>
 
-        {/* Avatar — icon only, no label */}
+        {/* Avatar - icon only, no label */}
         <div ref={avatarRef} className="relative">
           <button
             onClick={() => { setShowAvatar(v => !v); setShowChangelog(false); }}
@@ -308,14 +351,14 @@ export function IssoSidebarShell() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-white truncate">Agency Account</p>
-                  <p className="text-xs text-neutral-500 truncate">agency@isso.co</p>
+                  <p className="text-xs text-neutral-500 truncate">agency@oracle.co</p>
                 </div>
               </div>
               <div
                 className="mx-3 my-2 px-3 py-2 rounded-xl"
                 style={{ backgroundColor: 'rgba(255,0,105,0.08)', border: '1px solid rgba(255,0,105,0.15)' }}
               >
-                <p className="text-xs font-semibold text-white">ISSO Agency Plan</p>
+                <p className="text-xs font-semibold text-white">ORACLE Agency Plan</p>
                 <p className="text-[11px] text-neutral-500 mt-0.5">$79 / month · Active</p>
               </div>
               <div className="py-1 px-2">

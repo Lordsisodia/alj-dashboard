@@ -1,5 +1,5 @@
 'use client';
-// IndustryFeatures — "5 Apps in One" tabbed product section. Client component for interactive tab switching.
+// IndustryFeatures - "5 Apps in One" tabbed product section. Client component for interactive tab switching.
 
 import { useState } from 'react';
 import Image from 'next/image';

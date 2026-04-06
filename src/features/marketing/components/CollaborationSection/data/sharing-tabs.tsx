@@ -50,7 +50,7 @@ export const SHARING_TABS: SharingTab[] = [
     id: 'reports',
     label: 'Performance Reports',
     ctaLabel: 'Highlight trends. Back it with proof.',
-    ctaText: "Turn creative data into deck-worthy insights. Share visual reports that break down what's driving performance — and what's just taking up space.",
+    ctaText: "Turn creative data into deck-worthy insights. Share visual reports that break down what's driving performance - and what's just taking up space.",
     buttonText: 'Start For Free',
     image: 'https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/680c3ed4458a2826d337aa28_home-mockup-2.webp',
     messageImage: 'https://cdn.prod.website-files.com/62a4ed18ddad95dde8b8bfa4/681927286de6a527f591fa12_reports-message.webp',

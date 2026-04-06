@@ -44,14 +44,14 @@ export const WhyChooseSection = () => {
     {
       icon: Zap,
       title: "Rapid MVP Delivery",
-      description: "From idea to app in just 48-72 hours—faster than your next pitch meeting.",
+      description: "From idea to app in just 48-72 hours-faster than your next pitch meeting.",
       stats: "48hr Turnaround",
       highlight: "Speed That Wins"
     },
     {
       icon: Globe,
       title: "Zero-Risk Commitment",
-      description: "No upfront costs—see your app, tweak it, love it, then pay.",
+      description: "No upfront costs-see your app, tweak it, love it, then pay.",
       stats: "Pay When Happy",
       highlight: "Risk Free"
     }

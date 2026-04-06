@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// Navigation Data — all items, labels, hrefs, icons in one place
+// Navigation Data - all items, labels, hrefs, icons in one place
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ─── Product data ─────────────────────────────────────────────────────────────
@@ -12,7 +12,7 @@ export const RESEARCH = [
 
 export const ANALYTICS = [
   { label: 'Agents', href: '/agents', desc: 'Your dedicated AI agent team, always working.', sprite: 'lens', gradient: 'lens' },
-  { label: 'Content Gen', href: '/content-gen', desc: 'AI video pipeline — concept to published reel.', sprite: 'briefs', gradient: 'briefs' },
+  { label: 'Content Gen', href: '/content-gen', desc: 'AI video pipeline - concept to published reel.', sprite: 'briefs', gradient: 'briefs' },
 ] as const;
 
 export const EXTEND = [
@@ -26,7 +26,7 @@ export const EXTEND = [
 export const SOLUTION_FEATURED = {
   label: 'OFM & Model Management',
   href: '/ofm',
-  desc: 'The complete ISSO stack built for model management agencies — automate content, track talent, and scale revenue.',
+  desc: 'The complete ISSO stack built for model management agencies - automate content, track talent, and scale revenue.',
   iconKey: 'OFM & Model Management',
 } as const;
 
@@ -62,7 +62,7 @@ export const RESOURCES_EARN = [
   { label: 'Affiliate Program', href: '/affiliates', desc: 'Earn 20% recurring commission', icon: 'affiliate', comingSoon: true },
 ] as const;
 
-// Two rows of 3 — split by a single divider, no section labels
+// Two rows of 3 - split by a single divider, no section labels
 export const RESOURCES_ROW1 = [
   { label: 'University', href: '/university', desc: 'Ad masterclasses', icon: 'university', comingSoon: true },
   { label: 'Knowledge Base', href: '/help', desc: 'Guides and tutorials', icon: 'knowledge', comingSoon: true },

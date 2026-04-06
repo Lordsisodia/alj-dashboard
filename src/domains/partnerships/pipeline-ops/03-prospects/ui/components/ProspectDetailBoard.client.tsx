@@ -20,7 +20,7 @@ const stageLabels: Record<PipelineStage, string> = {
 };
 
 const stageDescriptions: Record<PipelineStage, string> = {
-  prospect: "Lead logged — awaiting discovery",
+  prospect: "Lead logged - awaiting discovery",
   qualified: "Discovery complete, scoping next",
   proposal: "Proposal drafted or in review",
   negotiation: "Pricing, terms, or scope under revision",

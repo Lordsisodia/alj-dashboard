@@ -1,4 +1,4 @@
-// WebinarsSpeakerCTA — "Become a Speaker" tab content with headline, paragraph, and Apply CTA.
+// WebinarsSpeakerCTA - "Become a Speaker" tab content with headline, paragraph, and Apply CTA.
 
 import type { WebinarsPageData } from './data/webinars';
 

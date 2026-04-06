@@ -1,2 +1,2 @@
-export { ModelCard } from './ModelCard';
+export { ModelRosterCard } from './ModelRosterCard';
 export { RosterView } from './RosterView';

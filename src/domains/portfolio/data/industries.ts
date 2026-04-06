@@ -22,7 +22,7 @@ export const industries: Industry[] = [
     name: 'Tourism & Activities',
     slug: 'tourism-activities',
     description:
-      'Restaurant websites with bookings, menus, and payments – like our Elementary Restaurant build.',
+      'Restaurant websites with bookings, menus, and payments - like our Elementary Restaurant build.',
     icon: UtensilsCrossed,
     color: 'bg-amber-500',
     headerImage: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=1200&h=400&fit=crop',
@@ -36,7 +36,7 @@ export const industries: Industry[] = [
       ],
     },
     seoMetadata: {
-      title: 'Restaurant Booking & Ordering | SISO Agency',
+      title: 'Restaurant Booking & Ordering | ORACLE Agency',
       description:
         'Launch a restaurant site with bookings and online ordering in 48 hours. See our Elementary Restaurant project.',
       keywords: ['restaurant website', 'table reservations', 'online ordering', 'stripe payments'],
@@ -60,7 +60,7 @@ export const industries: Industry[] = [
       ],
     },
     seoMetadata: {
-      title: 'Fintech & Crypto App Development | SISO Agency',
+      title: 'Fintech & Crypto App Development | ORACLE Agency',
       description:
         'Launch your fintech or crypto app in 48-72 hours. See our work with Uber Crypt.',
       keywords: ['fintech app', 'crypto wallet', 'trading platform', 'blockchain app'],
@@ -84,7 +84,7 @@ export const industries: Industry[] = [
       ],
     },
     seoMetadata: {
-      title: 'Health & Wellness App Development | SISO Agency',
+      title: 'Health & Wellness App Development | ORACLE Agency',
       description: 'Build your health and wellness tracking app in 48 hours. See our work with Shout.',
       keywords: ['health app', 'wellness tracker', 'habit formation', 'fitness app'],
     },
@@ -108,7 +108,7 @@ export const industries: Industry[] = [
       ],
     },
     seoMetadata: {
-      title: 'Construction Management Software | SISO Agency',
+      title: 'Construction Management Software | ORACLE Agency',
       description:
         'Build your construction management system in 48-72 hours. See our work with Optimal and NM Construction.',
       keywords: [
@@ -137,9 +137,9 @@ export const industries: Industry[] = [
       ],
     },
     seoMetadata: {
-      title: 'SaaS Platform Development | SISO Agency',
+      title: 'SaaS Platform Development | ORACLE Agency',
       description:
-        'Build your SaaS platform in 48-72 hours. See our work with SISO Internal and other collaborative platforms.',
+        'Build your SaaS platform in 48-72 hours. See our work with ORACLE Internal and other collaborative platforms.',
       keywords: ['saas development', 'subscription software', 'team collaboration', 'platform development'],
     },
   },
@@ -161,7 +161,7 @@ export const industries: Industry[] = [
       ],
     },
     seoMetadata: {
-      title: 'E-Learning Platform Development | SISO Agency',
+      title: 'E-Learning Platform Development | ORACLE Agency',
       description:
         'Build your online course platform in 48-72 hours. See our work with Mooshin.',
       keywords: ['e-learning platform', 'online courses', 'LMS', 'course marketplace'],
@@ -185,7 +185,7 @@ export const industries: Industry[] = [
       ],
     },
     seoMetadata: {
-      title: 'Fitness & Sports App Development | SISO Agency',
+      title: 'Fitness & Sports App Development | ORACLE Agency',
       description:
         'Build your gym or sports facility app in 48 hours. See our work with Gritness Gym and Trojan MMA.',
       keywords: ['gym app', 'fitness software', 'class booking', 'sports management'],
@@ -209,7 +209,7 @@ export const industries: Industry[] = [
       ],
     },
     seoMetadata: {
-      title: 'Transportation & Rental App Development | SISO Agency',
+      title: 'Transportation & Rental App Development | ORACLE Agency',
       description:
         'Build your vehicle rental or transportation app in 48 hours. See our work with Five Star Car Hire.',
       keywords: ['rental app', 'car hire software', 'booking system', 'fleet management'],
@@ -235,7 +235,7 @@ export const industries: Industry[] = [
     seoMetadata: {
       title: 'Elementary Restaurant | Booking & Ordering Experience',
       description:
-        'See how we shipped Elementary’s restaurant experience with bookings, menu, and payments in 48 hours.',
+        'See how we shipped Elementary's restaurant experience with bookings, menu, and payments in 48 hours.',
       keywords: ['restaurant website', 'table reservations', 'online ordering', 'stripe payments', 'elementary restaurant'],
     },
   },
@@ -257,9 +257,9 @@ export const industries: Industry[] = [
       ],
     },
     seoMetadata: {
-      title: 'Internal Tools & Custom Software | SISO Agency',
+      title: 'Internal Tools & Custom Software | ORACLE Agency',
       description:
-        'Build custom internal tools and collaboration platforms in 48-72 hours. See our work with SISO Internal and Team Apollo.',
+        'Build custom internal tools and collaboration platforms in 48-72 hours. See our work with ORACLE Internal and Team Apollo.',
       keywords: ['internal tools', 'custom software', 'team collaboration', 'productivity app'],
     },
   },

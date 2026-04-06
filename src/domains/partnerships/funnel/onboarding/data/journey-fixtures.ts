@@ -32,7 +32,7 @@ const stageData: OnboardingStage[] = [
     info: [
       "Set a stretch goal up to $10K monthly",
       "Average project value slider keeps pricing real",
-      "We’ll auto-calc how many clients you need"
+      "We'll auto-calc how many clients you need"
     ],
     cta: "Calculate my path",
     icon: "line-chart"

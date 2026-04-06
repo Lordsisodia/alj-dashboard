@@ -169,7 +169,7 @@ export const testClient: PortfolioClient = {
   // Testimonial
   testimonial: {
     quote:
-      'SISO completely transformed our booking process. What we thought would take 4 months and £25,000 was delivered in 2 weeks for £8,000. The AI agents worked around the clock and we could watch the progress in real-time. Our members love the new system and bookings are up 45%. Best investment we\'ve made in our business.',
+      'ORACLE completely transformed our booking process. What we thought would take 4 months and £25,000 was delivered in 2 weeks for £8,000. The AI agents worked around the clock and we could watch the progress in real-time. Our members love the new system and bookings are up 45%. Best investment we\'ve made in our business.',
     author: 'Sarah Mitchell',
     title: 'Owner & Head Trainer, Acme Fitness Studio',
     photo: 'https://i.pravatar.cc/150?img=5', // Placeholder avatar
@@ -205,7 +205,7 @@ export const testClient: PortfolioClient = {
   metadata: {
     featured: true, // Show in featured section
     showInPortfolio: false,
-    seoTitle: 'Acme Fitness Studio - Complete Gym Management Platform | SISO Portfolio',
+    seoTitle: 'Acme Fitness Studio - Complete Gym Management Platform | ORACLE Portfolio',
     seoDescription:
       'AI-powered fitness booking and membership management system. Built in 14 days, saving 68% vs traditional agencies. Real-time booking, automated billing, member engagement.',
     tags: [

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// DropdownContainer — shared outer wrapper for ALL dropdowns
+// DropdownContainer - shared outer wrapper for ALL dropdowns
 // Ensures consistent positioning, styling, and width across Product/Solutions/Resources
 // ═══════════════════════════════════════════════════════════════════════════════
 

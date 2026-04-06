@@ -34,7 +34,7 @@ export const teamApollo: PortfolioClient = {
     },
     {
       question: 'How long does onboarding take?',
-      answer: 'Typical onboarding is 1–2 days: connect identity, set up channels, and import your first projects.',
+      answer: 'Typical onboarding is 1-2 days: connect identity, set up channels, and import your first projects.',
     },
     {
       question: 'Can we integrate Jira or Linear?',

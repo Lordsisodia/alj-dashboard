@@ -113,7 +113,7 @@ export const CLIENT_TEMPLATE: PortfolioClient = {
 
   // Testimonial (OPTIONAL)
   testimonial: {
-    quote: 'SISO delivered a polished experience faster than our internal teams could scope it.',
+    quote: 'ORACLE delivered a polished experience faster than our internal teams could scope it.',
     author: 'Jordan Riley',
     title: 'COO, Example SaaS',
     photo: '/portfolio/client-template/testimonial.jpg',
@@ -145,7 +145,7 @@ export const CLIENT_TEMPLATE: PortfolioClient = {
   metadata: {
     featured: false, // true if should appear in featured section
     showInPortfolio: true,
-    seoTitle: '[Client Name] - [Project Type] | SISO Portfolio',
+    seoTitle: '[Client Name] - [Project Type] | ORACLE Portfolio',
     seoDescription: '[SEO-optimized description including key features and tech]',
     tags: ['[tag1]', '[tag2]', '[tag3]'], // Relevant keywords
   },

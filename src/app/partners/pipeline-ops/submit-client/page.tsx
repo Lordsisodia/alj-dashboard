@@ -39,7 +39,7 @@ async function SubmitClientExperienceBoundary() {
 
 export default function PartnersPipelineOpsSubmitClientPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-white">Loading intake…</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-white">Loading intake...</div>}>
       {/* Streaming boundary to fetch pipeline config via cached fetch */}
       <SubmitClientExperienceBoundary />
     </Suspense>

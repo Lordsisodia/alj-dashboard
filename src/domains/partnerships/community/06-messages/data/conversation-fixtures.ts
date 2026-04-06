@@ -27,7 +27,7 @@ export const demoConversation: ConversationMessage[] = [
     authorInitials: "CD",
     authorTitle: "AI Success",
     direction: "outgoing",
-    content: "Uploading the Loom now—includes the PayPal wallet fix + the mission recap template.",
+    content: "Uploading the Loom now-includes the PayPal wallet fix + the mission recap template.",
     timestamp: relativeTime(38),
     attachments: [
       { id: "loom", label: "Wallet Fix Loom" },
@@ -57,7 +57,7 @@ export const demoConversation: ConversationMessage[] = [
     authorInitials: "NC",
     authorTitle: "Program Lead",
     direction: "incoming",
-    content: "Perfect—if anyone needs access to the partners/earnings prototype ping me and I’ll share the figma link.",
+    content: "Perfect-if anyone needs access to the partners/earnings prototype ping me and I'll share the figma link.",
     timestamp: relativeTime(5),
   },
 ];

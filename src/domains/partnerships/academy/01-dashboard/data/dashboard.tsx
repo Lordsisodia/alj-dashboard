@@ -52,13 +52,13 @@ export const dashboardCards: DashboardCard[] = [
   },
   {
     title: "Training Spotlight",
-    description: "This week’s high-impact lesson picked for you.",
+    description: "This week's high-impact lesson picked for you.",
     href: ACADEMY_ROUTES.spotlight,
     icon: <Sparkles className="h-4 w-4" />,
     stat: "18 min to complete",
     widget: {
       type: "spotlight",
-      lesson: "SISO Induction",
+      lesson: "ORACLE Induction",
       duration: "18 min",
     },
   },

@@ -46,7 +46,7 @@ export const PortalFeaturesSection = () => {
               Partner Portal Highlights
             </GradientHeading>
             <p className="text-sm sm:text-base text-siso-text-muted max-w-2xl">
-              Everything you and your clients need in one place—no spreadsheets or mystery updates.
+              Everything you and your clients need in one place-no spreadsheets or mystery updates.
             </p>
           </div>
           <div className="text-xs text-siso-text-muted uppercase tracking-wide">Real-time · Secure · White-label friendly</div>

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// SVG Icons — all nav-related icons in one place
+// SVG Icons - all nav-related icons in one place
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ─── Chevron ─────────────────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ export const SOLUTIONS_ICONS: Record<string, React.ReactNode> = {
 
 // ─── Resources icons (18×18) ────────────────────────────────────────────────
 
-// Exact paths from scraped foreplay.co HTML — 20×20 viewBox
+// Exact paths from scraped foreplay.co HTML - 20×20 viewBox
 export function UniversityIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

@@ -49,9 +49,19 @@ export interface Competitor {
   score: number;
   favorited: boolean;
   // enrichable fields
-  verified?: boolean;
-  bio?: string;
-  profilePicUrl?: string;
+  verified?:              boolean;
+  bio?:                   string;
+  profilePicUrl?:         string;
+  followsCount?:          number;
+  postsCount?:            number;
+  externalUrl?:           string;
+  isBusinessAccount?:     boolean;
+  isProfessionalAccount?: boolean;
+  businessCategoryName?:  string;
+  businessEmail?:         string;
+  isPrivate?:             boolean;
+  igtvVideoCount?:        number;
+  instagramId?:           string;
 }
 
 export interface DailyVolume { label: string; total: number; }
