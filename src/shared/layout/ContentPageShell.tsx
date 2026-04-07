@@ -43,11 +43,18 @@ function StatPill({ label, value }: { label: string; value: string | number }) {
     ? (displayed as number).toLocaleString()
     : (value as string);
 
+  // Single pill: label + divider + count, all in the inner card
   return (
     <BadgeTag
       className="ml-3 flex-shrink-0"
-      tag={<span className="text-[11px] text-neutral-500 font-medium">{label}</span>}
-      label={<span className="font-semibold text-neutral-700">{formatted}</span>}
+      tag={
+        <span className="flex items-center gap-1.5">
+          <span className="text-[11px] text-neutral-500 font-medium">{label}</span>
+          <span className="w-px h-3 bg-neutral-300 flex-shrink-0" />
+          <span className="font-semibold text-neutral-700">{formatted}</span>
+        </span>
+      }
+      label={<></>}
     />
   );
 }

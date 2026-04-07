@@ -48,8 +48,6 @@ export function OutlierFeed({ posts }: { posts: OutlierPost[] }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <TogglePill options={SOURCE_OPTS}    value={source}    onChange={setSource}    />
-          <TogglePill options={THRESHOLD_OPTS} value={threshold} onChange={setThreshold} />
           <span className="text-[10px] font-semibold px-2 py-1 rounded-lg" style={{ backgroundColor: 'rgba(255,0,105,0.08)', color: '#ff0069' }}>{filtered.length} signals</span>
         </div>
       </div>
