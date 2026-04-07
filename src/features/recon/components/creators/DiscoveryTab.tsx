@@ -2,11 +2,12 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, BarChart2, Loader2, Zap, Trash2 } from 'lucide-react';
+import { Loader2, Zap, Trash2 } from 'lucide-react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import type { Candidate, CandidateStatus } from '../../types';
+import { DetailPanel } from './discovery/DetailPanel';
 import { COMPETITORS } from '../../creatorData';
 import { DiscoveryHeader }  from './discovery/DiscoveryHeader';
 import { InfoTooltip }     from './discovery/InfoTooltip';
@@ -223,7 +224,11 @@ function ScrapedRow({ c }: { c: MappedCandidate }) {
 
       {c.avatarUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={c.avatarUrl} alt={c.handle} className="w-5 h-5 rounded flex-shrink-0 object-cover" />
+        <img
+          src={c.avatarUrl.includes('r2.dev') ? c.avatarUrl : `/api/recon/avatar?url=${encodeURIComponent(c.avatarUrl)}`}
+          alt={c.handle}
+          className="w-5 h-5 rounded flex-shrink-0 object-cover"
+        />
       ) : (
         <span
           className="text-[9px] font-bold flex-shrink-0 w-5 h-5 rounded flex items-center justify-center"
@@ -239,9 +244,8 @@ function ScrapedRow({ c }: { c: MappedCandidate }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThreshold = 10, onAlertChange, selectedCandidateId, onSelectCandidate, onClearCandidate }: { extraCandidates?: unknown[]; searchQuery?: string; runDiscoveryTrigger?: number; alertThreshold?: number; onAlertChange?: (v: number) => void; selectedCandidateId?: string | null; onSelectCandidate?: (id: string, candidate: Candidate) => void; onClearCandidate?: () => void } = {}) {
+export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalytics = false, scheduleHours, onScheduleChange }: { extraCandidates?: unknown[]; searchQuery?: string; runDiscoveryTrigger?: number; showAnalytics?: boolean; scheduleHours?: number; onScheduleChange?: (h: number) => void } = {}) {
   const [selectedId,      setSelectedId]      = useState<string | null>(null);
-  const [widgetsOpen,     setWidgetsOpen]      = useState(false);
   const [discovering,     setDiscovering]      = useState(false);
   const [seeding,         setSeeding]          = useState(false);
   const [scrapingItems,   setScrapingItems]    = useState<LiveScrapeItem[]>([]);
@@ -361,7 +365,6 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
       await updateStatus({ id: convexId as Id<'creatorCandidates'>, status }).catch(console.error);
     }
     setSelectedId(null);
-    onClearCandidate?.();
   }
 
   async function runDiscovery() {
@@ -391,58 +394,38 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
   // Suppress unused warning — discovering used by runDiscovery
   void discovering;
 
-  // Sync selectedId when selectedCandidateId prop changes (DetailPanel opened/closed externally)
-  useEffect(() => {
-    setSelectedId(selectedCandidateId ?? null);
-  }, [selectedCandidateId]);
-
   const loading = rawCandidates === undefined || seeding;
 
   return (
     <div className="px-6 py-6 w-full space-y-4 overflow-visible">
       {/* Header */}
       <DiscoveryHeader
-        total={allMapped.length}
-        pending={pending.length}
-        approved={approved.length}
         approvedToday={0}
         candidatesScraped={allMapped.length}
         contentScraped={0}
-        alertThreshold={alertThreshold}
-        onAlertChange={onAlertChange ?? (() => {})}
       />
 
       {/* Collapsible analytics */}
-      <div>
-        <button
-          onClick={() => setWidgetsOpen(v => !v)}
-          className="flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-neutral-600 transition-colors mb-2"
-        >
-          {widgetsOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-          <BarChart2 size={11} />
-          <span className="font-medium">{widgetsOpen ? 'Hide' : 'Show'} analytics</span>
-        </button>
-        <AnimatePresence>
-          {widgetsOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22 }}
-              className="grid grid-cols-3 gap-4 overflow-hidden"
-            >
-              <DiscoveryFunnel
-                total={allMapped.length}
-                pending={pending.length}
-                approved={approved.length}
-                tracking={COMPETITORS.filter(c => c.status === 'active').length}
-              />
-              <NicheDonut />
-              <ApprovalRatioWidget approved={approved.length} rejected={rejected.length} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      <AnimatePresence>
+        {showAnalytics && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22 }}
+            className="grid grid-cols-3 gap-4 overflow-hidden"
+          >
+            <DiscoveryFunnel
+          total={allMapped.length}
+          pending={pending.length}
+          approved={approved.length}
+          tracking={COMPETITORS.filter(c => c.status === 'active').length}
+        />
+        <NicheDonut />
+        <ApprovalRatioWidget approved={approved.length} rejected={rejected.length} />
+      </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 4-column Kanban pipeline */}
       <div className="grid gap-4 items-start" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
@@ -482,15 +465,7 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
                     key={c._convexId}
                     candidate={c}
                     isSelected={selectedId === c._convexId}
-                    onSelect={() => {
-                      if (selectedId === c._convexId) {
-                        setSelectedId(null);
-                        onClearCandidate?.();
-                      } else {
-                        setSelectedId(c._convexId);
-                        onSelectCandidate?.(c._convexId, c);
-                      }
-                    }}
+                    onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
                     onApprove={e => { e.stopPropagation(); handleApprove(c); }}
                     onReject={e => { e.stopPropagation(); handleReject(c); }}
                   />
@@ -519,15 +494,7 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
                     key={c._convexId}
                     candidate={c}
                     isScraping={scrapingItems.some(s => s.handle === c.handle)}
-                    onSelect={() => {
-                      if (selectedId === c._convexId) {
-                        setSelectedId(null);
-                        onClearCandidate?.();
-                      } else {
-                        setSelectedId(c._convexId);
-                        onSelectCandidate?.(c._convexId, c);
-                      }
-                    }}
+                    onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
                     onScrapeComplete={handles => handleScrapeComplete(handles, c.handle)}
                     onScrapeStart={() => addScraping(c)}
                     onScrapeEnd={() => removeScraping(c.handle)}
@@ -577,6 +544,17 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
         </div>
       )}
 
+      {/* Detail panel */}
+      <AnimatePresence>
+        {selected && (
+          <DetailPanel
+            key={selected._convexId}
+            candidate={selected}
+            onClose={() => setSelectedId(null)}
+            onDecision={handleDecision}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
