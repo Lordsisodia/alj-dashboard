@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useMutation } from 'convex/react';
 import { Heart, Eye, Bookmark, Maximize2, Play } from 'lucide-react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { fadeUp, NICHE_COLORS } from '../../constants';
 import { fmtNum, timeAgo, avatarColor, igThumb } from '../../utils';
 import { BoardPickerDropdown } from './BoardPickerDropdown';

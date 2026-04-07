@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation } from 'convex/react';
 import { Sparkles, Loader2, Zap, Mic, Lightbulb } from 'lucide-react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { ScoreRing } from '../shared/ScoreRing';
 import type { DrawerPost } from '../../types';
 

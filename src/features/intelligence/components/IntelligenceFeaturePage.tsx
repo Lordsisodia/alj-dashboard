@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from 'convex/react';
 import { Plus, LayoutDashboard } from 'lucide-react';
 
-import { api } from '../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon }      from '@/isso/layout/ProductIcon';
 import { QualifyView }   from './trends';

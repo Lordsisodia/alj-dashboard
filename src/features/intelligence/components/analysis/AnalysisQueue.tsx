@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useQuery } from 'convex/react';
 import { Sparkles, Flame } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { fadeUp } from '../../constants';
 
 interface Props { onAnalyse: (postId: string) => void; }

@@ -226,12 +226,12 @@ export default defineSchema({
     niche: v.string(),
     followerCount: v.number(),
     avatarUrl: v.optional(v.string()),
-    avatarColor: v.string(),
+    avatarColor: v.optional(v.string()),
     status: v.union(v.literal("active"), v.literal("paused")),
     lastScrapedAt: v.optional(v.number()),
-    postsScraped: v.number(),
-    avgEngagementRate: v.number(),
-    isOwn: v.boolean(),           // true = one of our models, false = competitor
+    postsScraped: v.optional(v.number()),
+    avgEngagementRate: v.optional(v.number()),
+    isOwn: v.optional(v.boolean()),           // true = one of our models, false = competitor
     // enrichment fields (populated by /api/enrich-profile)
     bio:          v.optional(v.string()),
     postsCount:   v.optional(v.number()),
@@ -254,7 +254,7 @@ export default defineSchema({
   // ── Scraped posts (Intelligence feed) ────────────────────────────
   scrapedPosts: defineTable({
     externalId: v.string(),       // Instagram post ID
-    accountId: v.id("trackedAccounts"),
+    accountId: v.optional(v.id("trackedAccounts")),
     handle: v.string(),           // denormalised for fast queries
     platform: v.union(v.literal("instagram"), v.literal("tiktok")),
     contentType: v.union(
@@ -278,8 +278,11 @@ export default defineSchema({
     firstComment: v.optional(v.string()), // top comment - sentiment signal
     outlierRatio: v.optional(v.number()), // views / followerCount - virality signal
     videoUrl: v.optional(v.string()),     // R2 permanent video URL (mp4)
-    saved: v.boolean(),           // user saved to swipe file
-    boardIds: v.array(v.string()), // which boards it's saved to
+    saved: v.optional(v.boolean()),           // user saved to swipe file
+    boardIds: v.optional(v.array(v.string())), // which boards it's saved to
+    baselineScore: v.optional(v.number()), // viral multiplier vs account average
+    savedForPipeline: v.optional(v.boolean()), // saved to content pipeline
+    savedAt: v.optional(v.number()), // timestamp when saved for pipeline
     aiAnalysis: v.optional(v.object({
       transcript:  v.optional(v.string()),
       hookScore:   v.number(),

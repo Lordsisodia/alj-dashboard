@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useQuery } from 'convex/react';
 import { GitBranch } from 'lucide-react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { fadeUp } from '../../constants';
 import { PatternCard } from './PatternCard';
 import type { PatternCluster } from '../../types';

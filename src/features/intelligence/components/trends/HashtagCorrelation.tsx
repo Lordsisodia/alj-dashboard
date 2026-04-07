@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useQuery } from 'convex/react';
 import { Hash } from 'lucide-react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { fadeUp } from '../../constants';
 
 interface Props {
