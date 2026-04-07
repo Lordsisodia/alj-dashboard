@@ -36,6 +36,47 @@ export function truncateId(id: string): string {
   return id.slice(-12).toUpperCase();
 }
 
+// ── Day grouping ────────────────────────────────────────────────────────────────
+
+export interface DayGroup<T> {
+  label: string; // e.g. "Apr 7 - Today"
+  posts: T[];
+}
+
+/** Group items by day using a timestamp extractor function. */
+export function groupByDay<T>(
+  items: T[],
+  getTimestamp: (item: T) => number,
+): DayGroup<T>[] {
+  const now = new Date();
+  const todayStr     = now.toDateString();
+  const yesterday    = new Date(now); yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toDateString();
+
+  const groups: Record<string, T[]> = {};
+  for (const item of items) {
+    const ts  = getTimestamp(item);
+    const key = new Date(ts).toDateString();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+  }
+
+  return Object.entries(groups)
+    .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+    .map(([key, posts]) => {
+      const d    = new Date(key);
+      let label: string;
+      if (d.toDateString() === todayStr) {
+        label = `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - Today`;
+      } else if (d.toDateString() === yesterdayStr) {
+        label = `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - Yesterday`;
+      } else {
+        label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+      return { label, posts };
+    });
+}
+
 /**
  * Returns a proxied image URL for Instagram CDN URLs.
  * Bypasses hotlink protection by routing through our server-side proxy
