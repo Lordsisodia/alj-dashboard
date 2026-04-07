@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Flame, ChevronRight } from 'lucide-react';
-import { fadeUp } from '../../constants';
+import { fadeUp, GRAD } from '../../constants';
 import { OutlierCard } from './OutlierCard';
 import type { OutlierPost } from '../../types';
 
@@ -11,23 +11,6 @@ type Threshold = 1 | 2 | 5 | 10;
 type Source    = 'all' | 'competitors' | 'own';
 
 const OWN_HANDLES = new Set(['@abg.ricebunny', '@onlytylerrex', '@rhinxrenx', '@ellamira']);
-
-const THRESHOLD_OPTS: { label: string; value: Threshold }[] = [{ label: '1×', value: 1 }, { label: '2×', value: 2 }, { label: '5×', value: 5 }, { label: '10×', value: 10 }];
-const SOURCE_OPTS:    { label: string; value: Source }[]    = [{ label: 'All', value: 'all' }, { label: 'Competitors', value: 'competitors' }, { label: 'Own', value: 'own' }];
-
-const GRAD = 'linear-gradient(135deg, #ff0069, #833ab4)';
-
-function TogglePill<T extends string | number>({ options, value, onChange }: { options: { label: string; value: T }[]; value: T; onChange: (v: T) => void }) {
-  return (
-    <div className="flex items-center rounded-lg overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.09)' }}>
-      {options.map(o => (
-        <button key={o.value} onClick={() => onChange(o.value)} className="px-2.5 py-1.5 text-[10px] font-semibold transition-colors" style={value === o.value ? { background: GRAD, color: '#fff' } : { color: '#9ca3af' }}>
-          {o.label}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 export function OutlierFeed({ posts }: { posts: OutlierPost[] }) {
   const [threshold, setThreshold] = useState<Threshold>(1);

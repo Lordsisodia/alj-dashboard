@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Flame } from 'lucide-react';
 import { OutlierFeed } from '../trends/OutlierFeed';
 import type { TrendsData } from '../../types';
 import { useQuery } from 'convex/react';
@@ -17,8 +16,6 @@ export function OutlierPanel({ days, niche = 'all' }: Props) {
     days,
     niche: niche !== 'all' ? niche : undefined,
   }) as TrendsData | undefined;
-
-  const outlierCount = raw?.outlierPosts?.length ?? 0;
 
   return (
     <motion.div
