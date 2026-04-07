@@ -58,27 +58,37 @@ export function AnalysisView({ days, niche }: Props) {
             <div className="flex flex-col gap-3">
               <div>
                 <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2">Pipeline</p>
-                <FunnelChart
-                  data={funnelData}
-                  orientation="vertical"
-                  layers={3}
-                  showPercentage={false}
-                  labelLayout="grouped"
-                  style={{ height: 200 }}
-                />
+                {stats === undefined ? (
+                  <div className="w-full rounded-xl animate-pulse" style={{ height: 200, background: 'rgba(0,0,0,0.05)' }} />
+                ) : (
+                  <FunnelChart
+                    data={funnelData}
+                    orientation="vertical"
+                    layers={3}
+                    showPercentage={false}
+                    labelLayout="grouped"
+                    style={{ height: 200 }}
+                  />
+                )}
               </div>
             </div>
 
             {/* MIDDLE — Queue + Timeline */}
             <div className="flex flex-col gap-4 overflow-y-auto min-h-0">
               {/* Video Tool link */}
-              <Link
-                href="/isso/tools"
-                className="flex items-center gap-1.5 self-start px-3 py-1.5 rounded-lg text-[11px] font-semibold text-white"
-                style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
-              >
-                <Video size={11} /> Analyse with Video Tool
-              </Link>
+              <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.06), rgba(131,58,180,0.06))', border: '1px solid rgba(255,0,105,0.12)' }}>
+                <div>
+                  <p className="text-[11px] font-semibold text-neutral-800">Analyse new content</p>
+                  <p className="text-[10px] text-neutral-400">Upload a video and get AI hook analysis</p>
+                </div>
+                <Link
+                  href="/isso/tools"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-white shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
+                >
+                  <Video size={11} /> Video Tool
+                </Link>
+              </div>
 
               <AnalysisQueue
                 onAnalyse={openDrawer}
