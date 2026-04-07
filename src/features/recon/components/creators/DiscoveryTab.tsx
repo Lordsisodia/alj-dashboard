@@ -254,11 +254,12 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
   // Convex
   const rawCandidates   = useQuery(api.candidates.list, {}) ?? undefined;
   const blockedHandles  = useQuery(api.candidates.listBlocked, {}) ?? [];
-  const seedPreApproved = useMutation(api.candidates.seedPreApproved);
-  const updateStatus    = useMutation(api.candidates.updateStatus);
-  const upsertCandidate = useMutation(api.candidates.upsert);
-  const clearDuplicates = useMutation(api.candidates.clearDuplicates);
-  const deleteAndBlock  = useMutation(api.candidates.deleteAndBlock);
+  const seedPreApproved  = useMutation(api.candidates.seedPreApproved);
+  const updateStatus     = useMutation(api.candidates.updateStatus);
+  const upsertCandidate  = useMutation(api.candidates.upsert);
+  const clearDuplicates  = useMutation(api.candidates.clearDuplicates);
+  const deleteAndBlock   = useMutation(api.candidates.deleteAndBlock);
+  const setEnrichStatus  = useMutation(api.candidates.setEnrichStatus);
 
   // Seed pre-approved list on first load if DB is empty
   useEffect(() => {
@@ -336,6 +337,10 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
 
   async function handleApprove(c: MappedCandidate) {
     await updateStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'approved' }).catch(console.error);
+    // If no real profile data, reset enrichStatus so card lands in Approved (not Scraped)
+    if (!c.avatarUrl && !c.followersRaw) {
+      await setEnrichStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'idle' }).catch(console.error);
+    }
   }
 
   async function handleReject(c: MappedCandidate) {

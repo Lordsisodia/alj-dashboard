@@ -167,6 +167,23 @@ export const seedPreApproved = mutation({
   },
 });
 
+// ── Fix migration: reset enrichStatus on pending candidates with no real data ──
+
+export const fixPendingEnrichStatus = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("creatorCandidates").collect();
+    let patched = 0;
+    for (const c of all) {
+      if (c.status === 'pending' && c.enrichStatus === 'done' && !c.avatarUrl && !c.followerCount) {
+        await ctx.db.patch(c._id, { enrichStatus: 'idle' });
+        patched++;
+      }
+    }
+    return { patched };
+  },
+});
+
 // ── One-time migration: mark all scraper-sourced candidates as enriched ───────
 
 export const migrateEnrichStatus = mutation({
