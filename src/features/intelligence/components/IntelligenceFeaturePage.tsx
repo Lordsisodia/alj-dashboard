@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMutation } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { Plus, LayoutDashboard, UserPlus } from 'lucide-react';
 
 import { api } from '../../../../convex/_generated/api';
@@ -41,7 +41,7 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
     { value: 'travel', label: 'Travel' },
   ];
 
-  function handleSubmit(e: React.FormEvent) {
+  function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!handle.trim()) return;
     addAccount({
@@ -60,7 +60,7 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
         animate={{ opacity: 1, scale: 1 }}
         className="relative bg-white rounded-2xl shadow-2xl w-80 overflow-hidden"
       >
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
+        <form onSubmit={onSubmit} className="flex flex-col gap-4 p-6">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-neutral-900">Add creator handle</h3>
             <button type="button" onClick={onClose} className="text-neutral-400 hover:text-neutral-600 text-lg leading-none">×</button>

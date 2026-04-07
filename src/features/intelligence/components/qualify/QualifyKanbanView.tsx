@@ -1,13 +1,12 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { motion } from 'framer-motion';
 import { Play, Check } from 'lucide-react';
-import { NICHE_COLORS } from '../../constants';
+import { NICHE_COLORS, GRAD } from '../../constants';
 import { fmtNum } from '../../utils';
-import { toast } from 'sonner';
 
 type QualifyPost = {
   _id: string;
@@ -51,7 +50,34 @@ function getBandForScore(score: number) {
   return BANDS[0];
 }
 
-// ── Reel card ─────────────────────────────────────────────────────────────────
+// ── Skeleton ─────────────────────────────────────────────────────────────────
+
+function KanbanSkeleton() {
+  return (
+    <div className="flex gap-4">
+      {BANDS.map(band => (
+        <div key={band.label} className="flex-shrink-0 w-48 rounded-2xl overflow-hidden" style={{ border: `1px solid ${band.color}20` }}>
+          <div className="px-3 py-2" style={{ backgroundColor: `${band.color}10` }}>
+            <div className="h-3 w-16 rounded bg-neutral-100 animate-pulse" />
+          </div>
+          <div className="p-2 space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="rounded-xl overflow-hidden animate-pulse" style={{ backgroundColor: '#f5f5f4' }}>
+                <div className="aspect-[9/16] bg-neutral-200" />
+                <div className="px-2.5 py-2 space-y-1">
+                  <div className="h-2.5 w-20 rounded bg-neutral-200" />
+                  <div className="h-2 w-14 rounded bg-neutral-200" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Reel card ────────────────────────────────────────────────────────────────
 
 function ReelCard({ post }: { post: QualifyPost }) {
   const band = getBandForScore(post.baselineScore);
@@ -61,7 +87,7 @@ function ReelCard({ post }: { post: QualifyPost }) {
     <motion.div
       className="rounded-xl overflow-hidden cursor-default"
       style={{ border: '1px solid rgba(0,0,0,0.08)', backgroundColor: '#fff' }}
-      whileHover={{ y: -2 }}
+      whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
       transition={{ duration: 0.15 }}
     >
       {/* Thumbnail */}
@@ -76,7 +102,7 @@ function ReelCard({ post }: { post: QualifyPost }) {
         </div>
         {/* Saved badge */}
         {post.savedForPipeline && (
-          <div className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}>
+          <div className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: GRAD }}>
             <Check size={9} className="text-white" />
           </div>
         )}
@@ -100,23 +126,29 @@ function ReelCard({ post }: { post: QualifyPost }) {
 // ── Column ────────────────────────────────────────────────────────────────────
 
 function KanbanColumn({ band, posts }: { band: typeof BANDS[0]; posts: QualifyPost[] }) {
-  if (posts.length === 0) return null;
+  const isEmpty = posts.length === 0;
 
   return (
     <div className="flex-shrink-0 w-48 rounded-2xl overflow-hidden" style={{ border: `1px solid ${band.color}30` }}>
       {/* Column header */}
       <div className="px-3 py-2 flex items-center justify-between" style={{ backgroundColor: `${band.color}15` }}>
-        <span className="text-[11px] font-bold" style={{ color: band.color }}>{band.label}</span>
-        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: `${band.color}25`, color: band.color }}>
+        <span className="text-[11px] font-bold" style={{ color: isEmpty ? '#9ca3af' : band.color }}>{band.label}</span>
+        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: `${band.color}25`, color: isEmpty ? '#9ca3af' : band.color }}>
           {posts.length}
         </span>
       </div>
 
-      {/* Cards */}
+      {/* Cards or empty state */}
       <div className="p-2 space-y-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 340px)' }}>
-        {posts.map(post => (
-          <ReelCard key={post._id} post={post} />
-        ))}
+        {isEmpty ? (
+          <div className="flex flex-col items-center justify-center py-6 gap-1 rounded-xl" style={{ border: `1px dashed ${band.color}25`, backgroundColor: `${band.color}05` }}>
+            <span className="text-[10px]" style={{ color: '#d1d5db' }}>No reels here</span>
+          </div>
+        ) : (
+          posts.map(post => (
+            <ReelCard key={post._id} post={post} />
+          ))
+        )}
       </div>
     </div>
   );
@@ -124,8 +156,10 @@ function KanbanColumn({ band, posts }: { band: typeof BANDS[0]; posts: QualifyPo
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-export function QualifyKanbanView({ view, onViewChange, days, onDaysChange, niche = 'all', platform = 'all' }: Props) {
+export function QualifyKanbanView({ days, niche = 'all', platform = 'all' }: Props) {
   const raw = useQuery(api.intelligence.getQualifyPosts, {}) as QualifyPost[] | undefined;
+
+  const isLoading = raw === undefined;
 
   const byBand = useMemo(() => {
     if (!raw) return BANDS.map(b => ({ ...b, posts: [] as QualifyPost[] }));
@@ -144,6 +178,8 @@ export function QualifyKanbanView({ view, onViewChange, days, onDaysChange, nich
 
     return BANDS.map(b => ({ ...b, posts: buckets[b.min] }));
   }, [raw, niche, platform]);
+
+  if (isLoading) return <KanbanSkeleton />;
 
   return (
     <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>

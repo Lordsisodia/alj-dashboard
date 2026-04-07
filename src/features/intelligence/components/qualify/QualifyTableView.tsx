@@ -4,9 +4,9 @@ import { useState, useRef, useMemo } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Search, Check, Play } from 'lucide-react';
+import { Search, Check, Play, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { NICHE_COLORS } from '../../constants';
+import { NICHE_COLORS, GRAD } from '../../constants';
 import { fmtNum } from '../../utils';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -40,8 +40,6 @@ interface Props {
   onViewChange:  (v: 'table' | 'kanban') => void;
   days:         number;
   onDaysChange:  (d: number) => void;
-  metric:       'er' | 'views';
-  onMetricChange: (m: 'er' | 'views') => void;
   niche?:       string;
   platform?:    string;
 }
@@ -66,20 +64,39 @@ function baselineColor(score: number): string {
   return 'text-pink-500';
 }
 
-// ── Column definitions ────────────────────────────────────────────────────────
+// ── Column definitions ──────────────────────────────────────────────────────────
 
 type SortKey = 'baselineScore' | 'views' | 'likes' | 'comments' | 'handle' | 'niche';
 
-const COLS: { key: SortKey; label: string; align?: 'right' }[] = [
-  { key: 'handle',        label: 'Creator' },
-  { key: 'niche',         label: 'Niche' },
-  { key: 'views',         label: 'Views',    align: 'right' },
-  { key: 'likes',         label: 'Likes',    align: 'right' },
-  { key: 'comments',      label: 'Comments', align: 'right' },
-  { key: 'baselineScore', label: 'Baseline ×', align: 'right' },
-];
+// ── Skeleton ───────────────────────────────────────────────────────────────────
 
-const GRAD = 'linear-gradient(135deg, #ff0069, #833ab4)';
+function TableSkeleton() {
+  return (
+    <div className="space-y-0">
+      {[...Array(8)].map((_, i) => (
+        <div
+          key={i}
+          className="grid items-center px-4 gap-4"
+          style={{ gridTemplateColumns: '48px 1fr 80px 72px 64px 56px 80px', height: 48, borderBottom: '1px solid rgba(0,0,0,0.06)' }}
+        >
+          <div className="h-3 w-4 rounded bg-neutral-100 animate-pulse" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-12 rounded bg-neutral-100 animate-pulse flex-shrink-0" />
+            <div className="space-y-1.5">
+              <div className="h-2.5 w-20 rounded bg-neutral-100 animate-pulse" />
+              <div className="h-2 w-10 rounded bg-neutral-100 animate-pulse" />
+            </div>
+          </div>
+          <div className="h-3 w-12 rounded bg-neutral-100 animate-pulse ml-auto" />
+          <div className="h-3 w-10 rounded bg-neutral-100 animate-pulse ml-auto" />
+          <div className="h-3 w-8 rounded bg-neutral-100 animate-pulse ml-auto" />
+          <div className="h-3 w-10 rounded bg-neutral-100 animate-pulse ml-auto" />
+          <div />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 
@@ -95,8 +112,6 @@ function QualifyToolbar({
   onViewChange,
   days,
   onDaysChange,
-  metric,
-  onMetricChange,
 }: {
   search: string;
   onSearch: (s: string) => void;
@@ -109,8 +124,6 @@ function QualifyToolbar({
   onViewChange: (v: 'table' | 'kanban') => void;
   days: number;
   onDaysChange: (d: number) => void;
-  metric: 'er' | 'views';
-  onMetricChange: (m: 'er' | 'views') => void;
 }) {
   const BANDS = [
     { label: 'All',   value: 0 },
@@ -131,13 +144,13 @@ function QualifyToolbar({
       className="flex items-center justify-between px-4 py-2.5"
       style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', backgroundColor: '#fafafa' }}
     >
-      {/* Left: search + filter chips */}
+      {/* Left: search + band chips */}
       <div className="flex items-center gap-3">
         <div
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
           style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.09)' }}
         >
-          <Search size={11} className="text-neutral-400" />
+          <Search size={11} className="text-neutral-400 flex-shrink-0" />
           <input
             value={search}
             onChange={e => onSearch(e.target.value)}
@@ -152,7 +165,7 @@ function QualifyToolbar({
             <button
               key={b.value}
               onClick={() => onBand(b.value)}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-colors"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all active:scale-95"
               style={band === b.value
                 ? { background: GRAD, color: '#fff' }
                 : { color: '#9ca3af', backgroundColor: 'transparent' }
@@ -166,7 +179,7 @@ function QualifyToolbar({
         <span className="text-[11px] text-neutral-400 tabular-nums">{total} reels</span>
       </div>
 
-      {/* Right: days pills + ER/Views + Table/Kanban + Save */}
+      {/* Right: days pills + Table/Kanban + Save */}
       <div className="flex items-center gap-2">
         {/* 7d / 30d / 90d pills */}
         <div className="flex items-center rounded-lg overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.09)' }}>
@@ -174,30 +187,13 @@ function QualifyToolbar({
             <button
               key={d.value}
               onClick={() => onDaysChange(d.value)}
-              className="px-2.5 py-1.5 text-[10px] font-semibold transition-colors"
+              className="px-2.5 py-1.5 text-[10px] font-semibold transition-all active:scale-95"
               style={days === d.value
                 ? { background: GRAD, color: '#fff' }
                 : { color: '#9ca3af' }
               }
             >
               {d.label}
-            </button>
-          ))}
-        </div>
-
-        {/* ER / Views metric toggle */}
-        <div className="flex items-center rounded-lg overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.09)' }}>
-          {(['er', 'views'] as const).map(m => (
-            <button
-              key={m}
-              onClick={() => onMetricChange(m)}
-              className="px-2.5 py-1.5 text-[10px] font-semibold uppercase transition-colors"
-              style={metric === m
-                ? { background: GRAD, color: '#fff' }
-                : { color: '#9ca3af' }
-              }
-            >
-              {m}
             </button>
           ))}
         </div>
@@ -211,7 +207,7 @@ function QualifyToolbar({
             <button
               key={v}
               onClick={() => onViewChange(v)}
-              className="px-3 py-1.5 text-[11px] font-semibold capitalize transition-colors"
+              className="px-3 py-1.5 text-[11px] font-semibold capitalize transition-all active:scale-95"
               style={view === v
                 ? { background: GRAD, color: '#fff' }
                 : { color: '#9ca3af' }
@@ -221,6 +217,7 @@ function QualifyToolbar({
             </button>
           ))}
         </div>
+
         <button
           onClick={onSaveTop}
           disabled={isSaving}
@@ -239,7 +236,7 @@ function QualifyToolbar({
   );
 }
 
-// ── Table row ─────────────────────────────────────────────────────────────────
+// ── Table row ──────────────────────────────────────────────────────────────────
 
 function QualifyRow({
   post,
@@ -254,18 +251,12 @@ function QualifyRow({
   sortAsc: boolean;
   onSort: (k: SortKey) => void;
 }) {
-  const band = getBand(post.baselineScore);
   const isPink = post.baselineScore >= 50;
   const nicheColor = NICHE_COLORS[post.niche] ?? '#833ab4';
 
-  function SortIcon({ k }: { k: SortKey }) {
-    if (sortKey !== k) return <span className="text-neutral-300 ml-1">↕</span>;
-    return <span className="ml-1">{sortAsc ? '↑' : '↓'}</span>;
-  }
-
   return (
     <div
-      className="grid items-center px-4 cursor-default transition-colors"
+      className="grid items-center px-4 cursor-default transition-colors hover:bg-black/[0.02]"
       style={{
         gridTemplateColumns: '48px 1fr 80px 72px 64px 56px 80px',
         height: 48,
@@ -276,7 +267,7 @@ function QualifyRow({
       {/* # */}
       <span className="text-[11px] text-neutral-400 tabular-nums">{rowIdx + 1}</span>
 
-      {/* Account */}
+      {/* Creator */}
       <div className="flex items-center gap-2 min-w-0 pr-4">
         {/* Thumbnail */}
         <div
@@ -329,16 +320,18 @@ function QualifyRow({
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export function QualifyTableView({ view, onViewChange, days, onDaysChange, metric, onMetricChange, niche = 'all', platform = 'all' }: Props) {
+export function QualifyTableView({ view, onViewChange, days, onDaysChange, niche = 'all', platform = 'all' }: Props) {
   const [search,   setSearch]   = useState('');
   const [band,     setBand]     = useState(0);
   const [sortKey,  setSortKey]  = useState<SortKey>('baselineScore');
   const [sortAsc,  setSortAsc]  = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const raw = useQuery(api.intelligence.getQualifyPosts, {}) as QualifyPost[] | undefined;
-
   const saveTop = useMutation(api.intelligence.saveTopPostsForPipeline);
+
+  const isLoading = raw === undefined;
 
   function handleSort(k: SortKey) {
     if (sortKey === k) setSortAsc(a => !a);
@@ -378,11 +371,16 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, metri
 
   async function handleSaveTop10() {
     if (!raw || raw.length === 0) return;
-    const top10Pct = Math.ceil(raw.length * 0.1);
-    const topPosts = raw.slice(0, top10Pct);
-    const ids = topPosts.map(p => p._id as any);
-    await saveTop({ postIds: ids });
-    toast(`Saved ${topPosts.length} reels to pipeline`);
+    setIsSaving(true);
+    try {
+      const top10Pct = Math.ceil(raw.length * 0.1);
+      const topPosts = raw.slice(0, top10Pct);
+      const ids = topPosts.map(p => p._id as any);
+      await saveTop({ postIds: ids });
+      toast(`Saved ${topPosts.length} reels to pipeline`);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   // Column header
@@ -402,8 +400,6 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, metri
     );
   }
 
-  const isSaving = false; // could track mutation in-flight
-
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}>
       <QualifyToolbar
@@ -411,15 +407,13 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, metri
         onSearch={setSearch}
         band={band}
         onBand={setBand}
-        total={sorted.length}
+        total={isLoading ? 0 : sorted.length}
         onSaveTop={handleSaveTop10}
         isSaving={isSaving}
         view={view}
         onViewChange={onViewChange}
         days={days}
         onDaysChange={onDaysChange}
-        metric={metric}
-        onMetricChange={onMetricChange}
       />
 
       {/* Header row — matches Recon CreatorsTable style */}
@@ -444,10 +438,28 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, metri
         </div>
       </div>
 
-      {sorted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-neutral-400">
-          <p className="text-sm font-medium">No reels match</p>
-          <p className="text-xs mt-1 opacity-70">Try adjusting your search or filter</p>
+      {isLoading ? (
+        <TableSkeleton />
+      ) : sorted.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f5f5f4' }}>
+            <Filter size={20} className="text-neutral-300" />
+          </div>
+          {search || band > 0 ? (
+            <>
+              <p className="text-sm font-semibold text-neutral-600">No reels match your filters</p>
+              <p className="text-xs text-neutral-400">Try a broader search or lower the multiplier threshold</p>
+              <button
+                onClick={() => { setSearch(''); setBand(0); }}
+                className="mt-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                style={{ backgroundColor: '#f5f5f4', color: '#666' }}
+              >
+                Clear filters
+              </button>
+            </>
+          ) : (
+            <p className="text-sm font-medium text-neutral-400">No reels indexed yet</p>
+          )}
         </div>
       ) : (
         <div ref={scrollRef} style={{ height: 'calc(100vh - 380px)', overflowY: 'auto' }}>
