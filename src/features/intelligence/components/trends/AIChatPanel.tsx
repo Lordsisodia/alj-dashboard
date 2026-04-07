@@ -54,9 +54,10 @@ interface Props {
   data:         TrendsData   | undefined;
   insightsData: InsightsData | undefined;
   onClose:      () => void;
+  embedded?:    boolean;
 }
 
-export function AIChatPanel({ data, insightsData, onClose }: Props) {
+export function AIChatPanel({ data, insightsData, onClose, embedded }: Props) {
   const topNiche  = data?.nicheStats[0];
   const topFormat = data?.formatStats[0];
   const saveRate  = insightsData
@@ -112,22 +113,24 @@ export function AIChatPanel({ data, insightsData, onClose }: Props) {
   }
 
   return (
-    <div className="flex flex-col rounded-xl overflow-hidden" style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.08)', minHeight: 480 }}>
-      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ borderBottom: '1px solid rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))' }}>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
-            <Sparkles size={13} className="text-white" />
+    <div className="flex flex-col rounded-xl overflow-hidden" style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.08)', minHeight: embedded ? undefined : 480 }}>
+      {!embedded && (
+        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0"
+          style={{ borderBottom: '1px solid rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))' }}>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
+              <Sparkles size={13} className="text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-neutral-900">Ask Intelligence</p>
+              <p className="text-[10px] text-neutral-400">Powered by Minimax · full trends + ratings context</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-semibold text-neutral-900">Ask Intelligence</p>
-            <p className="text-[10px] text-neutral-400">Powered by Minimax · full trends + ratings context</p>
-          </div>
+          <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-black/[0.05] transition-colors">
+            <X size={13} />
+          </button>
         </div>
-        <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-black/[0.05] transition-colors">
-          <X size={13} />
-        </button>
-      </div>
+      )}
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ maxHeight: 400 }}>
         <AnimatePresence initial={false}>
