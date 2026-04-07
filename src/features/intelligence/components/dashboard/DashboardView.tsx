@@ -85,16 +85,14 @@ export function DashboardView() {
       </motion.div>
 
       {/* ── 4. Intelligence Brief + Learning Signal (companion row) ── */}
-      {trends && (
+      {trends && insights && (
         <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
           {/* Intelligence Brief — ~65% */}
           <div className="col-span-2">
             <IntelligenceBrief trends={trends} />
           </div>
           {/* Learning Signal — ~35% */}
-          {insights && (
-            <LearningSignal data={insights} />
-          )}
+          <LearningSignal data={insights} />
         </motion.div>
       )}
 

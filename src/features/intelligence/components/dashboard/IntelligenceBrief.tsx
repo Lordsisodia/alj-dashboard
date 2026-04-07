@@ -73,7 +73,7 @@ export function IntelligenceBrief({ trends }: Props) {
     const hour12  = h24 % 12 || 12;
     const ampm    = h24 < 12 ? 'am' : 'pm';
     signals.push({
-      label: 'Best window',
+      label: 'Top performer',
       value: `${bestPost.contentType} on ${day} ${hour12}${ampm} - ${(bestPost.engagementRate * 100).toFixed(1)}% ER`,
       accent: '#22c55e',
     });
