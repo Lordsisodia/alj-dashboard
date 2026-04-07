@@ -130,7 +130,7 @@ export function DashboardView() {
       {/* ── 8. Summary links strip ── */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
         <Link
-          href="/isso/intelligence"
+          href="/isso/intelligence?tab=qualify"
           className="flex items-center justify-between px-4 py-3 rounded-xl border border-black/[0.07] hover:border-[#ff0069]/30 transition-colors group"
         >
           <div>
@@ -143,7 +143,7 @@ export function DashboardView() {
           <ArrowRight size={12} className="text-neutral-300 group-hover:text-[#ff0069] transition-colors shrink-0" />
         </Link>
         <Link
-          href="/isso/intelligence"
+          href="/isso/intelligence?tab=analysis"
           className="flex items-center justify-between px-4 py-3 rounded-xl border border-black/[0.07] hover:border-[#ff0069]/30 transition-colors group"
         >
           <div>
