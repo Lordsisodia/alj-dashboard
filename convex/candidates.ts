@@ -167,6 +167,23 @@ export const seedPreApproved = mutation({
   },
 });
 
+// ── One-time migration: mark all scraper-sourced candidates as enriched ───────
+
+export const migrateEnrichStatus = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("creatorCandidates").collect();
+    let patched = 0;
+    for (const c of all) {
+      if (c.source === 'scraper' && c.enrichStatus !== 'done') {
+        await ctx.db.patch(c._id, { enrichStatus: 'done' });
+        patched++;
+      }
+    }
+    return { patched };
+  },
+});
+
 // ── Mark a candidate as fully enriched (scraped) ─────────────────────────────
 
 export const markEnriched = mutation({

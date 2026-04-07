@@ -73,6 +73,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdn.prod.website-files.com' },
       { protocol: 'https', hostname: '**.website-files.com' },
       { protocol: 'https', hostname: 'img.clerk.com' },
+      { protocol: 'https', hostname: 'pub-6c398617211c499ea00c44c3d18564bc.r2.dev' },
     ],
   },
   async headers() {
@@ -91,7 +92,7 @@ const nextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.instagram.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
               "frame-src 'self' https://www.instagram.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://challenges.cloudflare.com",
-              "img-src 'self' data: blob: https://*.cdninstagram.com https://*.fbcdn.net https://www.instagram.com https://images.unsplash.com https://randomuser.me https://*.randomuser.me https://cdn.prod.website-files.com https://*.website-files.com https://img.clerk.com https://*.clerk.com",
+              "img-src 'self' data: blob: https://*.cdninstagram.com https://*.fbcdn.net https://www.instagram.com https://images.unsplash.com https://randomuser.me https://*.randomuser.me https://cdn.prod.website-files.com https://*.website-files.com https://img.clerk.com https://*.clerk.com https://pub-6c398617211c499ea00c44c3d18564bc.r2.dev",
               "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://www.instagram.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://*.clerk.com wss://*.clerk.accounts.dev https://pub-6c398617211c499ea00c44c3d18564bc.r2.dev",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com https://cdn.prod.website-files.com https://*.website-files.com",

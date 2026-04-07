@@ -20,7 +20,10 @@ const PUBLIC_BASE = process.env.R2_PUBLIC_URL   ?? 'https://pub-6c398617211c499e
 
 async function uploadAvatarToR2(username: string, picUrl: string): Promise<string | null> {
   try {
-    const res = await fetch(picUrl, { signal: AbortSignal.timeout(10_000) });
+    const res = await fetch(picUrl, {
+      headers: { 'Referer': 'https://www.instagram.com/', 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(10_000),
+    });
     if (!res.ok) return null;
     const buffer      = Buffer.from(await res.arrayBuffer());
     const contentType = res.headers.get('content-type') ?? 'image/jpeg';
