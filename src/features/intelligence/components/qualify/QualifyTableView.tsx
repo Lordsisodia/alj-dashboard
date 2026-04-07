@@ -118,6 +118,7 @@ function QualifyToolbar({
   band: number;
   onBand: (b: number) => void;
   total: number;
+  savedCount: number;
   onSaveTop: () => void;
   isSaving: boolean;
   view: 'table' | 'kanban';
@@ -176,7 +177,7 @@ function QualifyToolbar({
           ))}
         </div>
 
-        <span className="text-[11px] text-neutral-400 tabular-nums">{total} reels</span>
+        <span className="text-[11px] text-neutral-400 tabular-nums">{savedCount} saved · {total} shown</span>
       </div>
 
       {/* Right: days pills + Table/Kanban + Save */}
@@ -268,10 +269,10 @@ function QualifyRow({
       <span className="text-[11px] text-neutral-400 tabular-nums">{rowIdx + 1}</span>
 
       {/* Creator */}
-      <div className="flex items-center gap-2 min-w-0 pr-4">
+      <div className="flex items-center gap-2 min-w-0 pr-4" title={post.caption}>
         {/* Thumbnail */}
         <div
-          className="relative w-8 h-12 rounded overflow-hidden flex-shrink-0 flex items-center justify-center"
+          className="relative w-8 h-12 rounded overflow-hidden flex-shrink-0 flex items-center justify-center cursor-pointer"
           style={{ background: post.thumbnailUrl.startsWith('http') ? undefined : post.thumbnailUrl }}
         >
           <Play size={10} className="text-white/70" />
@@ -332,6 +333,7 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, niche
   const saveTop = useMutation(api.intelligence.saveTopPostsForPipeline);
 
   const isLoading = raw === undefined;
+  const savedCount = raw?.filter(p => p.savedForPipeline).length ?? 0;
 
   function handleSort(k: SortKey) {
     if (sortKey === k) setSortAsc(a => !a);
@@ -408,6 +410,7 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, niche
         band={band}
         onBand={setBand}
         total={isLoading ? 0 : sorted.length}
+        savedCount={isLoading ? 0 : savedCount}
         onSaveTop={handleSaveTop10}
         isSaving={isSaving}
         view={view}
@@ -433,7 +436,7 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, niche
         <SortHeader k="likes"         label="Likes"    align="right" />
         <SortHeader k="comments"      label="Comments" align="right" />
         <SortHeader k="baselineScore" label="Baseline ×" align="right" />
-        <div className="flex items-center justify-center h-full text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
+        <div className="flex items-center justify-center h-full text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400" title="Saved to pipeline">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         </div>
       </div>
