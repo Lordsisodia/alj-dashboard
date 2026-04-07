@@ -7,6 +7,31 @@
 
 ---
 
+## 2026-04-08 — Discovery Kanban + UI polish session
+
+**Did:**
+- Kanban redesign: 4-column grid (Unapproved / Approved / Scraping / Scraped), replaced 3-col layout + tab toggle
+- Scrape button on Approved cards with 10%/50%/All dropdown → `/api/recon/enrich-candidate`
+- Related handles from scrape → auto-inserted as pending candidates (suggestedBy attributed, capped at 10)
+- Instagram icon on all candidate/approved cards
+- Duplicate detection + clearDuplicates Convex mutation; badge + trash button in Unapproved header
+- Dashboard quick-action bar below PostsScrapedChart (Scrape Now / View Full Log / Filter by Niche)
+- "Discovery Pipeline" heading removed; Run Now/Every 6h moved to top bar (SchedulePicker in filterRightSlot, Run Discovery button wired via runDiscoveryTrigger pattern)
+- Scraping cards simplified: removed Reels/Photos/Carousels/Stories, percentage inline with handle, square avatar corners
+
+**Patterns established (reference for other sections):**
+- `runDiscoveryTrigger` pattern: lift trigger state to FeaturePage, pass as prop, useEffect in child fires action
+- `filterRightSlot` used for tab-specific controls in the ContentPageShell tab bar (see SchedulePicker for discovery, SortPill/DateRange/Visibility for feed)
+- Scraping card structure: square-corner avatar + handle + pct% on one row, progress bar below — minimal
+
+**Still open:**
+- Wire Scraping → Scraped columns end-to-end
+- Replace seed data with real Convex queries
+- AI feature #3 (viral velocity)
+- Remove temp @tongohmm seed once confirmed
+
+---
+
 ## 2026-04-07 — Quality Audit
 
 ### Static Data Audit

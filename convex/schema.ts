@@ -408,9 +408,13 @@ export default defineSchema({
     avgViews:          v.optional(v.number()),
     outlierRatio:      v.optional(v.number()),
     postsPerWeek:      v.optional(v.number()),
-    verified:          v.optional(v.boolean()),
-    isPrivate:         v.optional(v.boolean()),
-    instagramId:       v.optional(v.string()),
+    verified:           v.optional(v.boolean()),
+    isPrivate:          v.optional(v.boolean()),
+    isBusinessAccount:  v.optional(v.boolean()),
+    instagramId:        v.optional(v.string()),
+    externalUrl:        v.optional(v.string()),
+    highlightReelCount: v.optional(v.number()),
+    igtvVideoCount:     v.optional(v.number()),
     // Pipeline status
     status:            v.union(v.literal('pending'), v.literal('approved'), v.literal('rejected')),
     source:            v.union(v.literal('pre_approved'), v.literal('scraper'), v.literal('manual')),
@@ -426,6 +430,12 @@ export default defineSchema({
   }).index('by_handle', ['handle'])
     .index('by_status', ['status'])
     .index('by_added_at', ['addedAt']),
+
+  // ── Blocked handles (rejected from discovery, never re-add) ─────────────
+  blockedHandles: defineTable({
+    handle:    v.string(),   // normalised lowercase e.g. "@minaxash"
+    blockedAt: v.number(),
+  }).index('by_handle', ['handle']),
 
   // ── Tool analyses (Video Analyser runs) ──────────────────────────────────
   toolAnalyses: defineTable({

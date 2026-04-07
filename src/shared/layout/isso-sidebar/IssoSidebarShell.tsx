@@ -21,7 +21,7 @@ export interface SidebarConfig {
   planLabel?: string;
 }
 import {
-  Search, Plus, Zap, PanelLeftClose, PanelLeftOpen,
+  PanelLeftClose, PanelLeftOpen,
   Activity, LogOut, Settings, HelpCircle, ChevronRight,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -117,7 +117,6 @@ function IconTooltip({
 // ── Main sidebar ──────────────────────────────────────────────────────────────
 export function IssoSidebarShell({ config }: { config?: SidebarConfig }) {
   const pathname = usePathname() ?? '';
-  const [search, setSearch] = useState('');
   const [collapsed, setCollapsed] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
   const [showAvatar, setShowAvatar] = useState(false);
@@ -132,7 +131,6 @@ export function IssoSidebarShell({ config }: { config?: SidebarConfig }) {
   const persistentNav = config?.persistentNav ?? PERSISTENT_NAV;
   const platformsNav = config?.platformsNav ?? PLATFORMS_NAV;
   const appName = config?.appName ?? 'oracle';
-  const planLabel = config?.planLabel ?? 'Upgrade ORACLE';
   const changelog = config?.changelog ?? DEFAULT_CHANGELOG;
 
   // Derive active section from nav items
@@ -256,22 +254,6 @@ export function IssoSidebarShell({ config }: { config?: SidebarConfig }) {
             </nav>
           </div>
 
-          {/* Search */}
-          <div className="flex items-center gap-1 mt-3 px-3 flex-shrink-0">
-            <div className="flex-1 flex items-center gap-2 px-2.5 py-2 rounded-lg bg-white/5 hover:bg-white/[0.08] transition-colors min-w-0">
-              <Search size={14} className="text-neutral-600 flex-shrink-0" />
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search..."
-                className="flex-1 bg-transparent text-sm text-neutral-300 placeholder-neutral-600 outline-none min-w-0"
-              />
-            </div>
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 text-neutral-600 hover:text-neutral-300 transition-colors flex-shrink-0">
-              <Plus size={16} />
-            </button>
-          </div>
-
           {/* Platforms */}
           <div className="px-3 mt-4 flex-shrink-0">
             <div className="h-px w-full mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />
@@ -318,25 +300,6 @@ export function IssoSidebarShell({ config }: { config?: SidebarConfig }) {
           {/* Spacer */}
           <div className="flex-1" />
 
-          {/* Plan CTA */}
-          <div className="px-3 flex-shrink-0 mb-3">
-            <div
-              className="rounded-2xl p-4"
-              style={{ backgroundColor: '#1c1c1e', border: '1px solid rgba(255,255,255,0.10)' }}
-            >
-              <p className="text-sm text-white leading-snug mb-3">
-                <span className="font-bold">7 days left</span>
-                <span className="text-neutral-400"> on your trial. Get in touch with us if you have any questions.</span>
-              </p>
-              <button
-                className="w-full rounded-xl py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80 flex items-center justify-center gap-2"
-                style={{ backgroundColor: '#2a2a2e', border: '1px solid rgba(255,255,255,0.10)' }}
-              >
-                <Zap size={14} />
-                {planLabel}
-              </button>
-            </div>
-          </div>
         </>
       )}
 

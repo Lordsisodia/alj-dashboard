@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
@@ -8,9 +8,10 @@ import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { FILTER_CATEGORIES } from '@/features/intelligence/filterConfig';
 import { SortPill, VisibilityPill, DEFAULT_VISIBILITY, type SortId, type VisibilityState } from '@/isso/ui/FeedControls';
 import { DateRangePill } from '@/isso/ui/DateRangePill';
-import { Radar, UserPlus, Upload, Play, Clock, Globe, LayoutDashboard, Zap, FileDown, XCircle, Pause, RefreshCw, Filter, Save } from 'lucide-react';
+import { Radar, UserPlus, Upload, Play, Clock, Globe, LayoutDashboard, Zap, FileDown, XCircle, Pause, RefreshCw, Filter, Save, CalendarClock, ChevronDown } from 'lucide-react';
 import type { Tab, Competitor, Candidate } from '../types';
 import { COMPETITORS } from '../constants';
+import { ALERT_THRESHOLDS } from './creators/discovery/discoveryData';
 import { DiscoveryTab } from './creators';
 import { ReconModals, type ModalId, type DrawerState } from './ReconModals';
 
@@ -19,8 +20,105 @@ const CreatorsTable     = dynamic(() => import('./creators/CreatorsTable').then(
 const CreatorDetailView = dynamic(() => import('./creators/CreatorDetailView').then(m => ({ default: m.CreatorDetailView })), { ssr: false });
 const ReconFeedTab      = dynamic(() => import('./ReconFeedTab').then(m => ({ default: m.ReconFeedTab })),                    { ssr: false });
 
-function StepNum({ n }: { n: number }) {
-  return <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current text-[9px] font-bold leading-none flex-shrink-0">{n}</span>;
+const SCHEDULE_OPTIONS = [
+  { value: 3,  label: 'Every 3h'  },
+  { value: 6,  label: 'Every 6h'  },
+  { value: 12, label: 'Every 12h' },
+  { value: 24, label: 'Every 24h' },
+];
+
+function SchedulePicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const label = SCHEDULE_OPTIONS.find(o => o.value === value)?.label ?? `Every ${value}h`;
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-black/[0.04] transition-colors"
+        style={{ border: '1px solid rgba(0,0,0,0.09)' }}
+      >
+        <CalendarClock size={12} className="text-red-600" />
+        {label}
+        <ChevronDown size={11} className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1.5 z-50 rounded-xl bg-white py-1 min-w-[120px]"
+          style={{ border: '1px solid rgba(0,0,0,0.09)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
+        >
+          {SCHEDULE_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`w-full text-left px-3 py-2 text-xs transition-colors ${opt.value === value ? 'font-semibold text-neutral-900 bg-neutral-50' : 'text-neutral-500 hover:bg-neutral-50'}`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const ALERT_OPTIONS = [
+  { value: 5,  label: '5x'  },
+  { value: 10, label: '10x' },
+  { value: 20, label: '20x' },
+];
+
+function AlertPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const label = ALERT_OPTIONS.find(o => o.value === value)?.label ?? `${value}x`;
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-black/[0.04] transition-colors"
+        style={{ border: '1px solid rgba(0,0,0,0.09)' }}
+      >
+        <Zap size={12} className="text-amber-500" />
+        {label}
+        <ChevronDown size={11} className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1.5 z-50 rounded-xl bg-white py-1 min-w-[100px]"
+          style={{ border: '1px solid rgba(0,0,0,0.09)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
+        >
+          {ALERT_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`w-full text-left px-3 py-2 text-xs transition-colors ${opt.value === value ? 'font-semibold text-neutral-900 bg-neutral-50' : 'text-neutral-500 hover:bg-neutral-50'}`}
+            >
+              {opt.label} outlier spike
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ReconFeaturePage() {
@@ -35,7 +133,10 @@ export default function ReconFeaturePage() {
   const [modal, setModal]                     = useState<ModalId>(null);
   const [extraCandidates, setExtraCandidates] = useState<Candidate[]>([]);
   const [extraCreators, setExtraCreators]     = useState<Competitor[]>([]);
-  const [runAllTrigger, setRunAllTrigger]     = useState(0);
+  const [runAllTrigger, setRunAllTrigger]         = useState(0);
+  const [runDiscoveryTrigger, setRunDiscoveryTrigger] = useState(0);
+  const [scheduleHours, setScheduleHours]         = useState(6);
+  const [alertThreshold, setAlertThreshold]         = useState(10);
   function fireOnce<T>(set: (v: T[]) => void, value: T[]) { set(value); setTimeout(() => set([]), 0); }
 
   type DropdownItem = { id: string; label: string; icon: React.ReactNode; onClick: () => void };
@@ -91,22 +192,27 @@ export default function ReconFeaturePage() {
         }
         onAction={
           activeTab === 'log'       ? () => setRunAllTrigger(n => n + 1) :
-          activeTab === 'discovery' ? () => {}                           :
+          activeTab === 'discovery' ? () => setRunDiscoveryTrigger(n => n + 1) :
           activeTab === 'creators'  ? () => setModal('track-profile')    :
           () => {}
         }
         actionDropdownItems={dropdownItems[activeTab]}
         tabs={[
-          { id: 'log',       label: 'Dashboard',      icon: <LayoutDashboard size={13} /> },
-          { id: 'discovery', label: 'Discovery',      icon: <StepNum n={1} /> },
-          { id: 'creators',  label: `Creators (${COMPETITORS.length})`, icon: <StepNum n={2} /> },
-          { id: 'feed',      label: 'Community Feed', icon: <StepNum n={3} /> },
+          { id: 'log',       label: 'Dashboard',                                          icon: <LayoutDashboard size={13} /> },
+          { id: 'discovery', label: <span className="flex items-center gap-1.5">Discovery <span className="inline-flex items-center justify-center w-4 h-4 rounded-[4px] text-[9px] font-semibold" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}>1</span></span>, icon: null },
+          { id: 'creators',  label: <span className="flex items-center gap-1.5">Creators <span className="inline-flex items-center justify-center w-4 h-4 rounded-[4px] text-[9px] font-semibold" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}>2</span></span>, icon: null },
+          { id: 'feed',      label: <span className="flex items-center gap-1.5">Community Feed <span className="inline-flex items-center justify-center w-4 h-4 rounded-[4px] text-[9px] font-semibold" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}>3</span></span>, icon: null },
         ]}
         activeTab={activeTab}
         onTabChange={(id) => { setActiveTab(id as Tab); setShowFavorites(false); setSelectedCreator(null); setSearchQuery(''); }}
         nextProduct={{ label: 'Intelligence', icon: <ProductIcon product="intelligence" size={16} />, href: '/isso/intelligence' }}
         filterCategories={activeTab === 'feed' ? FILTER_CATEGORIES : undefined}
-        filterRightSlot={activeTab === 'feed' ? (
+        filterRightSlot={activeTab === 'discovery' ? (
+          <div className="flex items-center gap-2">
+            <SchedulePicker value={scheduleHours} onChange={setScheduleHours} />
+            <AlertPicker value={alertThreshold} onChange={setAlertThreshold} />
+          </div>
+        ) : activeTab === 'feed' ? (
           <div className="flex items-center gap-1.5">
             <SortPill value={sortBy} onChange={setSortBy} />
             <DateRangePill />
@@ -120,7 +226,7 @@ export default function ReconFeaturePage() {
         <div className={activeTab === 'feed' ? 'px-4 py-4 w-full' : 'w-full'}>
           <AnimatePresence>
             <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
-              {activeTab === 'discovery' && <DiscoveryTab extraCandidates={extraCandidates} searchQuery={searchQuery} />}
+              {activeTab === 'discovery' && <DiscoveryTab extraCandidates={extraCandidates} searchQuery={searchQuery} runDiscoveryTrigger={runDiscoveryTrigger} alertThreshold={alertThreshold} onAlertChange={setAlertThreshold} />}
               {activeTab === 'log'       && <LogDashboard extraCreators={extraCreators} runAllTrigger={runAllTrigger} />}
               {activeTab === 'creators'  && (
                 selectedCreator
