@@ -9,7 +9,7 @@ import { api } from '../../../../../convex/_generated/api';
 import { containerVariants } from '../../constants';
 import { PostDetailDrawer } from '../drawer/PostDetailDrawer';
 import { AnalysisQueue } from './AnalysisQueue';
-import { FunnelChart } from '../../../../../components/ui/funnel-chart';
+import { FunnelChart } from '@/components/ui/funnel-chart';
 import { ActivityFeed } from './ActivityFeed';
 import { AnalysedPostsTimeline } from './AnalysedPostsTimeline';
 import { AllPostsView } from './AllPostsView';

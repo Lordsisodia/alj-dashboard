@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useQuery, useMutation } from 'convex/react';
-import { Plus, LayoutDashboard, UserPlus } from 'lucide-react';
+import { Plus, LayoutDashboard, UserPlus, Table2, Columns } from 'lucide-react';
+import { ViewToggle } from '@/components/ui/view-toggle';
 
 import { api } from '../../../../convex/_generated/api';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
@@ -126,6 +127,7 @@ export default function IntelligenceFeaturePage() {
   const [niche,     setNiche]     = useState('all');
   const [platform,  setPlatform]  = useState('all');
   const [addLeadOpen, setAddLeadOpen] = useState(false);
+  const [qualifyView, setQualifyView] = useState<'table' | 'kanban'>('table');
   const stats = useQuery(api.intelligence.getStats, {});
   const indexedCount = stats?.totalIndexed ?? 0;
 
@@ -166,13 +168,23 @@ export default function IntelligenceFeaturePage() {
         nextProduct={{ label: 'Hub', icon: <ProductIcon product="hub" size={16} />, href: '/isso/community' }}
         filterCategories={filterCategories}
         onFilterSelect={handleFilterSelect}
-        filterRightSlot={undefined}
+        filterRightSlot={activeTab === 'qualify' ? (
+          <ViewToggle
+            value={qualifyView}
+            onChange={setQualifyView}
+            options={[
+              { value: 'table',  icon: <Table2  size={11} />, label: 'Table' },
+              { value: 'kanban', icon: <Columns size={11} />, label: 'Kanban' },
+            ]}
+            size="md"
+          />
+        ) : undefined}
       >
         <div className="px-6 py-6 w-full">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
               {activeTab === 'dashboard' && <DashboardView />}
-              {activeTab === 'qualify'   && <QualifyView  days={days} metric="er" niche={niche} platform={platform} />}
+              {activeTab === 'qualify'   && <QualifyView  days={days} metric="er" niche={niche} platform={platform} view={qualifyView} onViewChange={setQualifyView} />}
               {activeTab === 'analysis'  && <AnalysisView days={days} niche={niche} />}
               {activeTab === 'insights'  && <InsightsView />}
             </motion.div>

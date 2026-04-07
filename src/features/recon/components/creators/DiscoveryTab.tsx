@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, BarChart2, Loader2, Zap } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Loader2, Zap, Trash2 } from 'lucide-react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
@@ -15,7 +15,8 @@ import { DetailPanel }      from './discovery/DetailPanel';
 import { EmptyState }       from './discovery/EmptyState';
 import { DiscoveryFunnel }  from './discovery/DiscoveryFunnel';
 import { NicheDonut }       from './discovery/NicheDonut';
-import { ScrapingColumn }   from './discovery/ScrapingColumn';
+import { ScrapingColumn, type LiveScrapeItem } from './discovery/ScrapingColumn';
+import { ApprovedRow }      from './discovery/ApprovedRow';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -66,13 +67,13 @@ type ConvexCandidate = {
   aiVerdict?: 'HIRE' | 'WATCH' | 'PASS';
   aiReason?: string;
   enrichStatus?: string;
+  avatarUrl?: string;
 };
 
-type MappedCandidate = Candidate & { _convexId: string };
+type MappedCandidate = Candidate & { _convexId: string; avatarUrl?: string };
 
 function convexToCandidate(doc: ConvexCandidate): MappedCandidate {
   const avatarIdx = stableNum(doc.handle) % AVATAR_COLORS.length;
-  const addedDate = new Date(doc.addedAt);
   const daysAgo = Math.floor((Date.now() - doc.addedAt) / 86_400_000);
   const discoveredAt = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo}d ago`;
 
@@ -95,6 +96,7 @@ function convexToCandidate(doc: ConvexCandidate): MappedCandidate {
     discoveredAt,
     status:          doc.status as CandidateStatus,
     sampleGradients: SAMPLE_GRADIENTS,
+    avatarUrl:       doc.avatarUrl,
   };
 }
 
@@ -147,31 +149,6 @@ function PipelineColumn({ title, count, accentColor, columnBg, tooltip, headerEx
   );
 }
 
-function ApprovedRow({ candidate }: { candidate: MappedCandidate }) {
-  return (
-    <div
-      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
-      style={{ border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#fff' }}
-    >
-      <span
-        className="text-[9px] font-bold flex-shrink-0 w-5 h-5 rounded flex items-center justify-center"
-        style={{ backgroundColor: 'rgba(153,27,27,0.08)', color: '#991b1b' }}
-      >
-        {candidate.initials}
-      </span>
-      <p className="text-[11px] font-medium text-neutral-700 truncate flex-1">{candidate.handle}</p>
-      <span className="text-[8px] font-semibold px-1 py-0.5 rounded flex-shrink-0" style={{ backgroundColor: 'rgba(220,38,38,0.07)', color: '#b91c1c' }}>
-        {candidate.niche}
-      </span>
-      {candidate.outlierRatio > 0 && (
-        <span className="text-[9px] font-bold tabular-nums flex-shrink-0" style={{ color: '#dc2626' }}>
-          {candidate.outlierRatio.toFixed(2)}×
-        </span>
-      )}
-      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#4ade80' }} />
-    </div>
-  );
-}
 
 function ApprovalRatioWidget({ approved, rejected }: { approved: number; rejected: number }) {
   const total       = approved + rejected;
@@ -231,22 +208,46 @@ function RejectedPanel({ candidates }: { candidates: MappedCandidate[] }) {
   );
 }
 
+function ScrapedRow({ c }: { c: MappedCandidate }) {
+  return (
+    <div
+      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
+      style={{ border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#fff' }}
+    >
+      {c.avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={c.avatarUrl} alt={c.handle} className="w-5 h-5 rounded flex-shrink-0 object-cover" />
+      ) : (
+        <span
+          className="text-[9px] font-bold flex-shrink-0 w-5 h-5 rounded flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(153,27,27,0.08)', color: '#991b1b' }}
+        >
+          {c.initials}
+        </span>
+      )}
+      <p className="text-[11px] font-medium text-neutral-700 truncate flex-1">{c.handle}</p>
+    </div>
+  );
+}
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]; searchQuery?: string } = {}) {
+export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThreshold = 10, onAlertChange }: { extraCandidates?: unknown[]; searchQuery?: string; runDiscoveryTrigger?: number; alertThreshold?: number; onAlertChange?: (v: number) => void } = {}) {
   const [selectedId,      setSelectedId]      = useState<string | null>(null);
   const [widgetsOpen,     setWidgetsOpen]      = useState(false);
   const [discovering,     setDiscovering]      = useState(false);
-  const [alertThreshold,  setAlertThreshold]   = useState<number>(10);
-  const [scheduleHours,   setScheduleHours]    = useState<number>(6);
   const [seeding,         setSeeding]          = useState(false);
+  const [scrapingItems,   setScrapingItems]    = useState<LiveScrapeItem[]>([]);
   const seededRef = useRef(false);
 
   // Convex
   const rawCandidates   = useQuery(api.candidates.list, {}) ?? undefined;
+  const blockedHandles  = useQuery(api.candidates.listBlocked, {}) ?? [];
   const seedPreApproved = useMutation(api.candidates.seedPreApproved);
   const updateStatus    = useMutation(api.candidates.updateStatus);
+  const upsertCandidate = useMutation(api.candidates.upsert);
+  const clearDuplicates = useMutation(api.candidates.clearDuplicates);
+  const deleteAndBlock  = useMutation(api.candidates.deleteAndBlock);
 
   // Seed pre-approved list on first load if DB is empty
   useEffect(() => {
@@ -281,9 +282,67 @@ export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]
     c.niche.toLowerCase().includes(q) ||
     c.displayName.toLowerCase().includes(q);
 
-  const pending  = allMapped.filter(c => c.status === 'pending'  && matchesSearch(c)).sort((a, b) => b.outlierRatio - a.outlierRatio);
-  const approved = allMapped.filter(c => c.status === 'approved' && matchesSearch(c));
-  const rejected = allMapped.filter(c => c.status === 'rejected' && matchesSearch(c));
+  const pending           = allMapped.filter(c => c.status === 'pending'  && matchesSearch(c)).sort((a, b) => b.outlierRatio - a.outlierRatio);
+  const approved          = allMapped.filter(c => c.status === 'approved' && matchesSearch(c));
+  const approvedPending   = approved.filter(c => c.followersRaw === 0);
+  const scrapedCandidates = approved.filter(c => c.followersRaw > 0).sort((a, b) => b.followersRaw - a.followersRaw);
+  const rejected          = allMapped.filter(c => c.status === 'rejected' && matchesSearch(c));
+
+  // Duplicate detection on pending
+  const handleCount = new Map<string, number>();
+  pending.forEach(c => {
+    const norm = c.handle.toLowerCase();
+    handleCount.set(norm, (handleCount.get(norm) ?? 0) + 1);
+  });
+  const duplicateHandles = new Set(
+    [...handleCount.entries()]
+      .filter(([, count]) => count > 1)
+      .map(([handle]) => handle)
+  );
+  const duplicateCount = pending.filter(c => duplicateHandles.has(c.handle.toLowerCase())).length;
+
+  const blockedSet = useMemo(
+    () => new Set(blockedHandles.map(b => b.handle)),
+    [blockedHandles],
+  );
+
+  // Feed relatedHandles from a scrape into Unapproved (skip blocked)
+  async function handleScrapeComplete(relatedHandles: string[], suggestedBy: string) {
+    const filtered = relatedHandles.filter(h => !blockedSet.has(`@${h.replace('@', '')}`.toLowerCase()));
+    await Promise.allSettled(
+      filtered.slice(0, 10).map(h =>
+        upsertCandidate({
+          handle:      `@${h.replace('@', '')}`,
+          displayName: h.replace('@', ''),
+          status:      'pending',
+          source:      'scraper',
+          suggestedBy,
+        }).catch(() => {})
+      )
+    );
+  }
+
+  async function handleApprove(c: MappedCandidate) {
+    await updateStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'approved' }).catch(console.error);
+  }
+
+  async function handleReject(c: MappedCandidate) {
+    await deleteAndBlock({ id: c._convexId as Id<'creatorCandidates'> }).catch(console.error);
+  }
+
+  // TEMP: seed @tongohmm as pending for testing
+  const tempSeededRef = { value: false };
+  useEffect(() => {
+    if (tempSeededRef.value || rawCandidates === undefined) return;
+    tempSeededRef.value = true;
+    upsertCandidate({
+      handle:      '@tongohmm',
+      displayName: 'Tongohmm Klaatawan',
+      niche:       'Lifestyle',
+      status:      'pending',
+      source:      'manual',
+    }).catch(() => {});
+  }, [rawCandidates]);
 
   // Find selected candidate by convex _id
   const selected = allMapped.find(c => c._convexId === selectedId) ?? null;
@@ -302,6 +361,27 @@ export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]
     setDiscovering(false);
   }
 
+  function addScraping(c: MappedCandidate) {
+    setScrapingItems(prev => {
+      if (prev.some(i => i.handle === c.handle)) return prev;
+      return [...prev, { handle: c.handle, displayName: c.displayName, initials: c.initials, startedAt: Date.now() }];
+    });
+  }
+
+  function removeScraping(handle: string) {
+    setScrapingItems(prev => prev.filter(i => i.handle !== handle));
+  }
+
+  // Trigger from top-bar "Run Discovery" button
+  useEffect(() => {
+    if (!runDiscoveryTrigger) return;
+    runDiscovery();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runDiscoveryTrigger]);
+
+  // Suppress unused warning — discovering used by runDiscovery
+  void discovering;
+
   const loading = rawCandidates === undefined || seeding;
 
   return (
@@ -315,11 +395,7 @@ export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]
         candidatesScraped={allMapped.length}
         contentScraped={0}
         alertThreshold={alertThreshold}
-        discovering={discovering}
-        scheduleHours={scheduleHours}
-        onAlertChange={setAlertThreshold}
-        onScheduleChange={setScheduleHours}
-        onRunDiscovery={runDiscovery}
+        onAlertChange={onAlertChange ?? (() => {})}
       />
 
       {/* Collapsible analytics */}
@@ -365,6 +441,18 @@ export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]
             accentColor="#dc2626"
             columnBg="rgba(220,38,38,0.035)"
             tooltip="Oracle scans Instagram for creators with unusually high view-to-follower ratios. Pending candidates need a decision."
+            headerExtra={
+              duplicateCount > 0 ? (
+                <button
+                  onClick={() => clearDuplicates().then(() => window.location.reload())}
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ml-auto"
+                  style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#dc2626' }}
+                >
+                  <Trash2 size={9} />
+                  {duplicateCount} dupes
+                </button>
+              ) : undefined
+            }
           >
             {loading ? (
               <div className="flex flex-col items-center justify-center py-10 gap-2">
@@ -372,7 +460,7 @@ export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]
                 <p className="text-[10px] text-neutral-400">{seeding ? 'Seeding accounts...' : 'Loading...'}</p>
               </div>
             ) : pending.length === 0 ? (
-              <EmptyState filter="pending" onRunDiscovery={runDiscovery} />
+              <EmptyState filter="pending" />
             ) : (
               pending.map(c => (
                 <CandidateRow
@@ -380,6 +468,8 @@ export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]
                   candidate={c}
                   isSelected={selectedId === c._convexId}
                   onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
+                  onApprove={e => { e.stopPropagation(); handleApprove(c); }}
+                  onReject={e => { e.stopPropagation(); handleReject(c); }}
                 />
               ))
             )}
@@ -387,54 +477,51 @@ export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]
           <RejectedPanel candidates={rejected} />
         </motion.div>
 
-        {/* Col 2: Approved */}
+        {/* Col 2: Approved — awaiting scrape */}
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.09, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
           <PipelineColumn
             title="Approved"
-            count={approved.length}
+            count={approvedPending.length}
             accentColor="#991b1b"
             columnBg="rgba(153,27,27,0.045)"
-            tooltip="Creators cleared for active tracking. Their content history is pulled into the intelligence layer."
+            tooltip="Creators cleared for active tracking. Click Scrape to pull their full profile data."
           >
-            {approved.length === 0 ? (
+            {approvedPending.length === 0 ? (
               <p className="text-[11px] text-center py-8" style={{ color: 'rgba(153,27,27,0.4)' }}>No approved candidates yet</p>
             ) : (
-              approved.map(c => (
-                <div
+              approvedPending.map(c => (
+                <ApprovedRow
                   key={c._convexId}
-                  onClick={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
-                  className="cursor-pointer"
-                >
-                  <ApprovedRow candidate={c} />
-                </div>
+                  candidate={c}
+                  onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
+                  onScrapeComplete={handles => handleScrapeComplete(handles, c.handle)}
+                  onScrapeStart={() => addScraping(c)}
+                  onScrapeEnd={() => removeScraping(c.handle)}
+                />
               ))
             )}
           </PipelineColumn>
         </motion.div>
 
-        {/* Col 3: Scraping — untouched */}
+        {/* Col 3: Scraping — live */}
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
-          <ScrapingColumn discovering={discovering} columnBg="rgba(127,29,29,0.055)" />
+          <ScrapingColumn liveItems={scrapingItems} columnBg="rgba(127,29,29,0.055)" />
         </motion.div>
 
-        {/* Col 4: Scraped — placeholder */}
+        {/* Col 4: Scraped — enriched creators */}
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.27, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
           <PipelineColumn
             title="Scraped"
-            count={0}
+            count={scrapedCandidates.length}
             accentColor="#7f1d1d"
             columnBg="rgba(127,29,29,0.03)"
-            tooltip="Completed scrapes appear here once a creator's full post history has been collected."
+            tooltip="Approved creators with enriched profile data pulled from Instagram."
           >
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(127,29,29,0.06)', color: '#7f1d1d' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-              </div>
-              <p className="text-[11px] font-medium text-neutral-400">Completed scrapes will appear here</p>
-            </div>
+            {scrapedCandidates.length === 0 ? (
+              <p className="text-[11px] text-center py-8" style={{ color: 'rgba(127,29,29,0.3)' }}>Scrape an approved card to see results</p>
+            ) : (
+              scrapedCandidates.map(c => <ScrapedRow key={c._convexId} c={c} />)
+            )}
           </PipelineColumn>
         </motion.div>
       </div>

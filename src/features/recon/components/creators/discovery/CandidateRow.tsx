@@ -1,130 +1,72 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { fadeUp } from '../../../constants';
+import { Check, X } from 'lucide-react';
 import type { Candidate } from '../../../types';
-import { fmtViews } from './discoveryUtils';
 
-function heatColor(ratio: number): string {
-  if (ratio >= 2.0) return '#dc2626';
-  if (ratio >= 1.5) return '#b91c1c';
-  if (ratio >= 1.0) return 'rgba(153,27,27,0.55)';
-  return 'rgba(127,29,29,0.22)';
-}
-
-function ratioAvatarStyle(ratio: number): { bg: string; text: string } {
-  if (ratio >= 2.0) return { bg: 'rgba(220,38,38,0.12)', text: '#dc2626' };
-  if (ratio >= 1.5) return { bg: 'rgba(185,28,28,0.10)', text: '#b91c1c' };
-  if (ratio >= 1.0) return { bg: 'rgba(153,27,27,0.09)', text: '#991b1b' };
-  return { bg: 'rgba(127,29,29,0.07)', text: '#7f1d1d' };
-}
-
-function NichePill({ niche }: { niche: string }) {
-  return (
-    <span
-      className="px-1.5 py-0.5 rounded text-[8px] font-bold flex-shrink-0"
-      style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: '#b91c1c' }}
-    >
-      {niche}
-    </span>
-  );
-}
-
-function RatioChip({ ratio }: { ratio: number }) {
-  const hot   = ratio >= 2.0;
-  const color = ratio >= 2.0 ? '#dc2626' : ratio >= 1.5 ? '#b91c1c' : ratio >= 1.0 ? '#991b1b' : '#7f1d1d';
-  return (
-    <div
-      className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg text-[10px] font-bold tabular-nums flex-shrink-0"
-      style={{
-        backgroundColor: `${color}12`,
-        color,
-        boxShadow: hot ? `0 0 8px ${color}40` : undefined,
-      }}
-    >
-      {hot && <span className="text-[8px]">&#9889;</span>}
-      {ratio.toFixed(2)}&times;
-    </div>
-  );
-}
-
-interface CandidateRowProps {
+interface Props {
   candidate: Candidate;
   isSelected: boolean;
   isEvaluating?: boolean;
   onSelect: () => void;
+  onApprove?: (e: React.MouseEvent) => void;
+  onReject?: (e: React.MouseEvent) => void;
 }
 
-export function CandidateRow({ candidate, isSelected, isEvaluating = false, onSelect }: CandidateRowProps) {
-  const av    = ratioAvatarStyle(candidate.outlierRatio);
-  const isHot = candidate.outlierRatio >= 2.0;
-
+export function CandidateRow({ candidate, isSelected, onSelect, onApprove, onReject }: Props) {
   return (
-    <motion.div
-      variants={fadeUp}
+    <div
       onClick={onSelect}
-      className={cn(
-        'relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer transition-all overflow-hidden',
-        isSelected ? '' : 'hover:bg-[rgba(220,38,38,0.02)]',
-      )}
+      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-all"
       style={{
         backgroundColor: isSelected ? 'rgba(220,38,38,0.04)' : '#fff',
         border: isSelected ? '1px solid rgba(220,38,38,0.2)' : '1px solid rgba(0,0,0,0.06)',
-        borderLeft: `2px solid ${heatColor(candidate.outlierRatio)}`,
-        boxShadow: isHot ? '0 2px 12px rgba(220,38,38,0.1)' : undefined,
       }}
-      whileHover={{ y: -1, boxShadow: `0 4px 16px rgba(220,38,38,${isHot ? '0.15' : '0.06'})`, transition: { duration: 0.12 } }}
     >
-      {/* Oracle evaluation scan sweep */}
-      <AnimatePresence>
-        {isEvaluating && (
-          <motion.div
-            key="scan"
-            className="absolute inset-0 pointer-events-none z-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Scan line */}
-            <motion.div
-              className="absolute inset-y-0 w-24"
-              style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(220,38,38,0.18) 50%, transparent 100%)' }}
-              animate={{ x: ['-100%', '600%'] }}
-              transition={{ duration: 1.6, ease: 'easeInOut' }}
-            />
-            {/* Top edge highlight */}
-            <motion.div
-              className="absolute top-0 left-0 right-0 h-px"
-              style={{ background: 'linear-gradient(90deg, transparent, rgba(220,38,38,0.5), transparent)' }}
-              animate={{ x: ['-100%', '200%'] }}
-              transition={{ duration: 1.6, ease: 'easeInOut' }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
-        style={{ backgroundColor: av.bg, color: av.text }}
+      <span
+        className="text-[9px] font-bold flex-shrink-0 w-5 h-5 rounded flex items-center justify-center"
+        style={{ backgroundColor: 'rgba(153,27,27,0.08)', color: '#991b1b' }}
       >
         {candidate.initials}
-      </div>
+      </span>
+      <p className="text-[11px] font-medium text-neutral-700 truncate flex-1">{candidate.handle}</p>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <p className="text-xs font-semibold text-neutral-800 truncate">{candidate.handle}</p>
-          <NichePill niche={candidate.niche} />
-        </div>
-        <div className="flex items-center gap-1.5 text-[9px] text-neutral-400">
-          <span>{candidate.followers}</span>
-          <span className="text-neutral-200">·</span>
-          <span>{fmtViews(candidate.avgViews)} views</span>
-        </div>
-      </div>
+      {/* Approve */}
+      {onApprove && (
+        <button
+          onClick={onApprove}
+          className="flex-shrink-0 w-5 h-5 rounded flex items-center justify-center transition-all hover:brightness-110"
+          style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#16a34a' }}
+          title="Approve"
+        >
+          <Check size={9} strokeWidth={3} />
+        </button>
+      )}
 
-      <RatioChip ratio={candidate.outlierRatio} />
-    </motion.div>
+      {/* Reject + block */}
+      {onReject && (
+        <button
+          onClick={onReject}
+          className="flex-shrink-0 w-5 h-5 rounded flex items-center justify-center transition-all hover:brightness-110"
+          style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: '#dc2626' }}
+          title="Reject & block"
+        >
+          <X size={9} strokeWidth={3} />
+        </button>
+      )}
+
+      <a
+        href={`https://instagram.com/${candidate.handle.replace('@', '')}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={e => e.stopPropagation()}
+        className="flex-shrink-0 p-1 rounded-lg transition-all hover:brightness-110"
+        style={{ color: '#dc2626', backgroundColor: 'rgba(220,38,38,0.06)' }}
+        title="View on Instagram"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+        </svg>
+      </a>
+    </div>
   );
 }

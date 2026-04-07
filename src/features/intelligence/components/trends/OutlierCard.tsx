@@ -15,10 +15,10 @@ function briefParams(post: OutlierPost) {
   return new URLSearchParams({ niche: post.niche, format: post.contentType, hook: post.hook, from: post.handle });
 }
 
-function Thumbnail({ post, rank, hovered, onBrief }: { post: OutlierPost; rank: number; hovered: boolean; onBrief: () => void }) {
+function Thumbnail({ post, rank, hovered, onBrief, portrait }: { post: OutlierPost; rank: number; hovered: boolean; onBrief: () => void; portrait?: boolean }) {
   const bg = post.thumbnailUrl?.startsWith('linear') ? post.thumbnailUrl : '#f5f5f4';
   return (
-    <div className="relative w-full h-32" style={{ background: bg }}>
+    <div className="relative w-full" style={{ background: bg, aspectRatio: portrait ? '9/16' : undefined, height: portrait ? undefined : 128 }}>
       <div className="absolute top-2 left-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: 'rgba(0,0,0,0.45)', color: '#fff' }}>
         {rank}
       </div>
@@ -54,22 +54,42 @@ function CardBody({ post, nicheColor }: { post: OutlierPost; nicheColor: string 
   );
 }
 
-export function OutlierCard({ post, rank }: { post: OutlierPost; rank: number }) {
+export function OutlierCard({ post, rank, fullWidth = false, portrait = false }: { post: OutlierPost; rank: number; fullWidth?: boolean; portrait?: boolean }) {
   const [hovered, setHovered] = useState(false);
   const router = useRouter();
   const nicheColor = NICHE_COLORS[post.niche] ?? '#833ab4';
 
   return (
     <motion.div
-      className="flex-shrink-0 w-52 rounded-2xl overflow-hidden cursor-default"
+      className={`${fullWidth ? 'w-full' : 'flex-shrink-0 w-52'} rounded-2xl overflow-hidden cursor-default`}
       style={{ border: '1px solid rgba(0,0,0,0.08)', backgroundColor: '#fff' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       whileHover={{ y: -2 }}
       transition={{ duration: 0.18 }}
     >
-      <Thumbnail post={post} rank={rank} hovered={hovered} onBrief={() => router.push(`/isso/ideas?${briefParams(post)}`)} />
+      <Thumbnail post={post} rank={rank} hovered={hovered} portrait={portrait} onBrief={() => router.push(`/isso/ideas?${briefParams(post)}`)} />
       <CardBody post={post} nicheColor={nicheColor} />
     </motion.div>
+  );
+}
+
+export function OutlierListRow({ post, rank }: { post: OutlierPost; rank: number }) {
+  const nicheColor = NICHE_COLORS[post.niche] ?? '#833ab4';
+  const bg = post.thumbnailUrl?.startsWith('linear') ? post.thumbnailUrl : '#f5f5f4';
+
+  return (
+    <div
+      className="flex items-center gap-2.5 px-2 py-2 rounded-xl"
+      style={{ border: '1px solid rgba(0,0,0,0.06)', backgroundColor: '#fff' }}
+    >
+      <span className="text-[10px] font-bold text-neutral-400 w-4 text-center shrink-0">{rank}</span>
+      <div className="w-8 h-8 rounded-lg shrink-0 overflow-hidden" style={{ background: bg }} />
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] font-semibold text-neutral-700 truncate">{post.handle}</p>
+        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded text-white" style={{ backgroundColor: nicheColor }}>{post.niche}</span>
+      </div>
+      <span className="text-[10px] font-bold shrink-0" style={{ color: '#ff0069' }}>{post.outlierRatio.toFixed(1)}×</span>
+    </div>
   );
 }

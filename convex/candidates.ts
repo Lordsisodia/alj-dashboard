@@ -29,8 +29,13 @@ export const upsert = mutation({
     avgViews:          v.optional(v.number()),
     outlierRatio:      v.optional(v.number()),
     postsPerWeek:      v.optional(v.number()),
-    verified:          v.optional(v.boolean()),
-    instagramId:       v.optional(v.string()),
+    verified:           v.optional(v.boolean()),
+    isPrivate:          v.optional(v.boolean()),
+    isBusinessAccount:  v.optional(v.boolean()),
+    instagramId:        v.optional(v.string()),
+    externalUrl:        v.optional(v.string()),
+    highlightReelCount: v.optional(v.number()),
+    igtvVideoCount:     v.optional(v.number()),
     status:            v.union(v.literal('pending'), v.literal('approved'), v.literal('rejected')),
     source:            v.union(v.literal('pre_approved'), v.literal('scraper'), v.literal('manual')),
     suggestedBy:       v.optional(v.string()),
@@ -43,6 +48,14 @@ export const upsert = mutation({
       .query("creatorCandidates")
       .withIndex("by_handle", q => q.eq("handle", args.handle))
       .first();
+
+    // Check blocklist — skip if handle was previously rejected
+    const handleNorm = args.handle.toLowerCase();
+    const blocked = await ctx.db
+      .query("blockedHandles")
+      .withIndex("by_handle", q => q.eq("handle", handleNorm))
+      .first();
+    if (blocked) return null;
 
     if (existing) {
       // Only update if we have better data (don't overwrite approved with pending)
@@ -100,6 +113,25 @@ export const setEnrichStatus = mutation({
   },
 });
 
+// ── Clear duplicate pending candidates (keeps first occurrence) ────────────────
+
+export const clearDuplicates = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("creatorCandidates").collect();
+    const seen = new Map<string, string>();
+    for (const c of all) {
+      if (c.status !== 'pending') continue;
+      const k = c.handle.toLowerCase();
+      if (!seen.has(k)) {
+        seen.set(k, c._id);
+      } else {
+        await ctx.db.patch(c._id, { status: 'rejected' });
+      }
+    }
+  },
+});
+
 // ── Bulk seed pre-approved accounts ──────────────────────────────────────────
 
 export const seedPreApproved = mutation({
@@ -131,5 +163,34 @@ export const seedPreApproved = mutation({
       inserted++;
     }
     return { inserted };
+  },
+});
+
+// ── List blocked handles ──────────────────────────────────────────────────────
+
+export const listBlocked = query({
+  args: {},
+  handler: async (ctx) => {
+    return ctx.db.query("blockedHandles").collect();
+  },
+});
+
+// ── Delete a candidate and add handle to blocklist ────────────────────────────
+
+export const deleteAndBlock = mutation({
+  args: { id: v.id("creatorCandidates") },
+  handler: async (ctx, { id }) => {
+    const doc = await ctx.db.get(id);
+    if (!doc) return;
+    const handle = doc.handle.toLowerCase();
+    // Only insert if not already blocked
+    const existing = await ctx.db
+      .query("blockedHandles")
+      .withIndex("by_handle", q => q.eq("handle", handle))
+      .first();
+    if (!existing) {
+      await ctx.db.insert("blockedHandles", { handle, blockedAt: Date.now() });
+    }
+    await ctx.db.delete(id);
   },
 });
