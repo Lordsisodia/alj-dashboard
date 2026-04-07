@@ -48,13 +48,16 @@ const withPWA = process.env.NODE_ENV === "development"
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  typescript: { ignoreBuildErrors: false },
   webpack(config, { dev }) {
-    // In dev, use memory cache only — prevents stale module resolution
-    // errors caused by webpack's disk cache getting out of sync with
-    // tsconfig path alias changes or new/moved files.
     if (dev) {
-      config.cache = { type: 'memory' };
+      // Filesystem cache spills to disk instead of hoarding RAM.
+      // buildDependencies busts the cache when next.config.js changes.
+      config.cache = {
+        type: 'filesystem',
+        buildDependencies: { config: [__filename] },
+        maxAge: 60 * 60 * 1000, // 1 hour
+      };
     }
     return config;
   },

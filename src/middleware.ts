@@ -19,11 +19,7 @@ const DYNAMIC_PARTNER_ROUTES = [
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   // Protect /isso/* - require Clerk session
   // Skip in local dev when NEXT_PUBLIC_DEV_BYPASS_AUTH=true
-  const host = req.headers.get('host') ?? '';
-  const devBypass =
-    host.startsWith('localhost') ||
-    host.startsWith('127.0.0.1') ||
-    process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === 'true';
+  const devBypass = process.env.NODE_ENV === 'development';
   if (isProtected(req) && !devBypass) {
     await auth.protect();
   }

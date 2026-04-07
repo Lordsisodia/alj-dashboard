@@ -7,7 +7,7 @@ const AUTH_ROUTES = ['/sign-in', '/sign-up', '/login'];
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAuth = AUTH_ROUTES.some(r => pathname.startsWith(r));
+  const isAuth = AUTH_ROUTES.some(r => (pathname ?? '').startsWith(r));
 
   if (isAuth) return <>{children}</>;
 

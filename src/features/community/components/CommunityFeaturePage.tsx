@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { LayoutDashboard } from 'lucide-react';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
 import type { Tab } from '../types';
@@ -14,21 +14,8 @@ import { SavedTabContent } from './saved/SavedTabContent';
 // Re-export for Recon's existing import path
 export { LeaderboardSidebar } from './sidebar/LeaderboardSidebar';
 
-/** Small numbered circle for pills ①②③ */
-function NumBadge({ n }: { n: number }) {
-  return (
-    <span
-      className="inline-flex items-center justify-center rounded-full text-[9px] font-black leading-none flex-shrink-0"
-      style={{
-        width: 15,
-        height: 15,
-        background: 'currentColor',
-        color: 'inherit',
-      }}
-    >
-      <span style={{ color: '#fff', fontSize: 9 }}>{n}</span>
-    </span>
-  );
+function StepNum({ n }: { n: number }) {
+  return <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current text-[9px] font-bold leading-none flex-shrink-0">{n}</span>;
 }
 
 export default function CommunityFeaturePage() {
@@ -52,27 +39,27 @@ export default function CommunityFeaturePage() {
         {
           id: 'dashboard',
           label: 'Dashboard',
-          icon: <span style={{ fontSize: 13 }}>📊</span>,
+          icon: <LayoutDashboard size={12} />,
         },
         {
           id: 'vault',
-          label: '① Vault',
-          icon: <NumBadge n={1} />,
+          label: 'Vault',
+          icon: <StepNum n={1} />,
         },
         {
           id: 'approve',
-          label: '② Approve',
-          icon: <NumBadge n={2} />,
+          label: 'Approve',
+          icon: <StepNum n={2} />,
         },
         {
           id: 'saved',
-          label: `③ Saved${savedCount > 0 ? ` (${savedCount})` : ''}`,
-          icon: <NumBadge n={3} />,
+          label: `Saved${savedCount > 0 ? ` (${savedCount})` : ''}`,
+          icon: <StepNum n={3} />,
         },
       ]}
       activeTab={activeTab}
       onTabChange={(id) => setActiveTab(id as Tab)}
-      nextProduct={{ label: 'Content Gen', icon: <Sparkles size={13} />, href: '/isso/ideas' }}
+      nextProduct={{ label: 'Content Gen', icon: <ProductIcon product="content-gen" size={13} />, href: '/isso/ideas' }}
     >
       {activeTab === 'dashboard' && (
         <HubDashboardTab

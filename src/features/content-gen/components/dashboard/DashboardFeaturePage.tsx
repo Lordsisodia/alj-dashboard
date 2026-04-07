@@ -1,8 +1,6 @@
 'use client';
 
 import { Sparkles, Play, CheckCircle2, Clock, Zap } from 'lucide-react';
-import { ContentPageShell } from '@/isso/layout/ContentPageShell';
-import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { ModelSummaryCard } from './ModelSummaryCard';
 import { ActivityFeed } from './ActivityFeed';
 import { SEED_MODEL_SUMMARIES, SEED_ACTIVITY } from './types';
@@ -33,15 +31,7 @@ export default function DashboardFeaturePage() {
   const generating    = activity.filter(e => e.type === 'generated').length;
 
   return (
-    <ContentPageShell
-      icon={<ProductIcon product="content-gen" size={32} />}
-      title="Content Gen"
-      stat={{ label: 'Today', value: totalToday }}
-      searchPlaceholder="Search..."
-      actionLabel="New Scene"
-      actionIcon={<Sparkles size={14} />}
-    >
-      <div className="p-5 flex flex-col gap-6">
+    <div className="p-5 flex flex-col gap-6">
 
         {/* ── Stats row ─────────────────────────────────────────────── */}
         <div className="flex gap-3">
@@ -96,7 +86,6 @@ export default function DashboardFeaturePage() {
           </div>
 
         </div>
-      </div>
-    </ContentPageShell>
+    </div>
   );
 }

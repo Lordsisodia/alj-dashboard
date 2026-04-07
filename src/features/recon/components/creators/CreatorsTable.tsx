@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Heart, SearchX } from 'lucide-react';
 import { cn } from '@/lib/utils';

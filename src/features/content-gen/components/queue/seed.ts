@@ -1,4 +1,4 @@
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 import type { ActiveJob, HistoryJob } from './types';
 
 // Static seed data rendered while Convex is loading or the table is empty.

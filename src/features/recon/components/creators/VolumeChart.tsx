@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { TrendingUp } from 'lucide-react';
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import type { DailyVolume } from '../../types';
 
 interface VolumeChartProps {

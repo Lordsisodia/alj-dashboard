@@ -1,7 +1,7 @@
 'use client';
 
 import { Zap, Film, Waves } from 'lucide-react';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 
 export type Generator = 'flux' | 'kling' | 'higgsfield';
 export type Style = 'cinematic' | 'vlog' | 'aesthetic' | 'trending';

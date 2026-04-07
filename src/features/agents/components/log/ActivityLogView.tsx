@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { motion } from 'framer-motion';
 import { containerVariants, fadeUp } from '../../constants';
 import { ActivityLogList } from './ActivityLogList';

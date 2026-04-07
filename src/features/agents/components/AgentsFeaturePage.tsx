@@ -66,7 +66,7 @@ export default function AgentsFeaturePage() {
       activeFilter={activeFilter}
       onFilterChange={setActiveFilter}
     >
-      <div className="px-6 py-6 max-w-5xl mx-auto w-full">
+      <div className="px-6 py-6 w-full">
         <AnimatePresence mode="wait">
           <motion.div key={activeTab}
             initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}

@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { LOG_ENTRIES, type LogStatus } from '../../constants';
 import { containerVariants, fadeUp } from '../../constants';
 

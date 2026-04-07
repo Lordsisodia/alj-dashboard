@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Play, Filter } from 'lucide-react';
-import { ContentPageShell } from '@/isso/layout/ContentPageShell';
-import { ProductIcon } from '@/isso/layout/ProductIcon';
+import { Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SceneCard } from './SceneCard';
 import { SEED_SCENES } from './types';
@@ -30,16 +28,14 @@ const STATUS_FILTERS: { id: SceneStatus | 'all'; label: string }[] = [
 
 export default function ScenesFeaturePage() {
   const [activeFilter, setActiveFilter] = useState<string>('all');
-  const [search, setSearch]             = useState('');
 
   const scenes = SEED_SCENES; // swap for useQuery when wired
 
   const filtered = useMemo(() => {
     return scenes
       .filter(s => activeFilter === 'all' || s.status === activeFilter)
-      .filter(s => !search || s.sceneDescription.toLowerCase().includes(search.toLowerCase()) || s.modelName.toLowerCase().includes(search.toLowerCase()))
       .sort((a, b) => b.priorityScore - a.priorityScore);
-  }, [scenes, activeFilter, search]);
+  }, [scenes, activeFilter]);
 
   // Group by day
   const groups = useMemo(() => {
@@ -55,20 +51,23 @@ export default function ScenesFeaturePage() {
   const liveCount = scenes.filter(s => s.status === 'Generating').length;
 
   return (
-    <ContentPageShell
-      icon={<ProductIcon product="content-gen" size={32} />}
-      title="Scenes"
-      stat={{ label: 'Queued', value: scenes.filter(s => s.status === 'Pending' || s.status === 'Queued').length }}
-      searchPlaceholder="Search scenes or models..."
-      actionLabel="Add Scene"
-      actionIcon={<Play size={14} />}
-      filterChips={STATUS_FILTERS}
-      activeFilter={activeFilter}
-      onFilterChange={setActiveFilter}
-      searchValue={search}
-      onSearch={setSearch}
-    >
-      <div className="p-5">
+    <div className="p-5">
+      <div className="flex items-center gap-1 mb-4">
+        {STATUS_FILTERS.map(f => (
+          <button
+            key={f.id}
+            onClick={() => setActiveFilter(f.id)}
+            className={cn(
+              'px-3 py-1 rounded-lg text-xs font-medium transition-colors',
+              activeFilter === f.id
+                ? 'text-neutral-900 bg-black/[0.07]'
+                : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
+            )}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
         {/* Live indicator */}
         {liveCount > 0 && (
           <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl w-fit"
@@ -108,6 +107,5 @@ export default function ScenesFeaturePage() {
           </div>
         )}
       </div>
-    </ContentPageShell>
   );
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // The 8 pre-approved OFM accounts
-export const PRE_APPROVED = [
+const PRE_APPROVED = [
   { handle: '@minaxash',              displayName: 'Mina Ash',            niche: 'GFE'       },
   { handle: '@tinaxkitsune',          displayName: 'Tina Kitsune',        niche: 'GFE'       },
   { handle: '@a55tr1d',               displayName: 'Astrid',              niche: 'Lifestyle' },

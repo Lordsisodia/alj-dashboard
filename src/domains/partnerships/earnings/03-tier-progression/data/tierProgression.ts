@@ -91,7 +91,7 @@ export const unlockMissions: UnlockMission[] = [
   {
     id: "featured-course",
     title: "Finish a featured course",
-    description: "Complete "Discovery Basics" (or any featured course).",
+    description: "Complete 'Discovery Basics' (or any featured course).",
     reward: "+250 XP",
     steps: ["Start the featured course", "Finish modules", "Mark complete"],
     tiers: ["Trailblazer"],

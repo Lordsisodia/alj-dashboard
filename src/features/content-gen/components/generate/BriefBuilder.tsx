@@ -2,7 +2,7 @@
 
 import { Sparkles, Loader2, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 import type { ConvexModel, Generator, Style } from './types';
 import { generatorMeta, fmtEta } from './types';
 import { TalentPicker } from './TalentPicker';

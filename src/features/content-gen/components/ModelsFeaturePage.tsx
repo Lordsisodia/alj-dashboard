@@ -4,9 +4,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation } from 'convex/react';
 import { Plus } from 'lucide-react';
-import { api } from '../../../../convex/_generated/api';
-import { ContentPageShell } from '@/isso/layout/ContentPageShell';
-import { ProductIcon } from '@/isso/layout/ProductIcon';
+import { api } from '@/convex/_generated/api';
+import { cn } from '@/lib/utils';
 import { SkeletonCard } from './SkeletonCard';
 import { EmptyState } from './EmptyState';
 import { ModelGrid } from './ModelGrid';
@@ -60,19 +59,31 @@ export default function ContentGenModelsFeaturePage() {
 
   return (
     <>
-      <ContentPageShell
-        icon={<ProductIcon product="content-gen" size={32} />}
-        title="Models"
-        stat={{ label: 'Active', value: activeCount }}
-        searchPlaceholder="Search models..."
-        actionLabel="Add Model"
-        actionIcon={<Plus size={14} />}
-        onAction={openAdd}
-        filterChips={FILTER_CHIPS}
-        activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
-      >
-        <div className="p-5">
+      <div className="p-5">
+        <div className="flex items-center gap-1 mb-4">
+          {FILTER_CHIPS.map(f => (
+            <button
+              key={f.id}
+              onClick={() => setActiveFilter(f.id)}
+              className={cn(
+                'px-3 py-1 rounded-lg text-xs font-medium transition-colors',
+                activeFilter === f.id
+                  ? 'text-neutral-900 bg-black/[0.07]'
+                  : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
+          <div className="flex-1" />
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white transition-all hover:brightness-105 active:scale-95"
+            style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
+          >
+            <Plus size={12} /> Add Model
+          </button>
+        </div>
           {isLoading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
@@ -99,7 +110,6 @@ export default function ContentGenModelsFeaturePage() {
             />
           )}
         </div>
-      </ContentPageShell>
 
       <AnimatePresence>
         {panelOpen && (

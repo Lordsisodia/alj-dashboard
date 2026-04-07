@@ -19,11 +19,13 @@ const config: Config = {
   	extend: {
   		fontFamily: {
   			sans: [
-  				'Inter',
+  				'var(--font-inter)',
+  				'system-ui',
   				'sans-serif'
   			],
   			display: [
-  				'Inter',
+  				'var(--font-inter)',
+  				'system-ui',
   				'sans-serif'
   			]
   		},

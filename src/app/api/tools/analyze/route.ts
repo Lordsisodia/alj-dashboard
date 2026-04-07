@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ConvexHttpClient } from 'convex/browser';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { DEFAULT_ANALYSIS_PROMPT } from '../../../../features/tools/constants';
 
 const OPENROUTER_API  = 'https://openrouter.ai/api/v1/chat/completions';

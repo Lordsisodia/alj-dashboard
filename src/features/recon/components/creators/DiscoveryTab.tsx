@@ -4,8 +4,8 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, BarChart2, Loader2, Zap } from 'lucide-react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import type { Candidate, CandidateStatus } from '../../types';
 import { COMPETITORS } from '../../creatorData';
 import { DiscoveryHeader }  from './discovery/DiscoveryHeader';
@@ -231,52 +231,11 @@ function RejectedPanel({ candidates }: { candidates: MappedCandidate[] }) {
   );
 }
 
-// ── Candidates column tab toggle ─────────────────────────────────────────────
-
-type CandidateTab = 'unapproved' | 'approved';
-
-function CandidateTabToggle({ active, onChange, pendingCount, approvedCount }: {
-  active: CandidateTab;
-  onChange: (t: CandidateTab) => void;
-  pendingCount: number;
-  approvedCount: number;
-}) {
-  return (
-    <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid rgba(220,38,38,0.15)', backgroundColor: 'rgba(220,38,38,0.05)' }}>
-      {(['unapproved', 'approved'] as CandidateTab[]).map(tab => {
-        const isActive = active === tab;
-        const count    = tab === 'unapproved' ? pendingCount : approvedCount;
-        return (
-          <button
-            key={tab}
-            onClick={() => onChange(tab)}
-            className="flex items-center gap-1 px-2 py-1 text-[9px] font-semibold capitalize transition-all"
-            style={{
-              backgroundColor: isActive ? '#dc2626' : 'transparent',
-              color:           isActive ? '#fff'    : '#dc2626',
-            }}
-          >
-            {tab}
-            <span
-              className="px-1 rounded text-[8px] font-bold"
-              style={{
-                backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(220,38,38,0.15)',
-              }}
-            >
-              {count}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]; searchQuery?: string } = {}) {
   const [selectedId,      setSelectedId]      = useState<string | null>(null);
-  const [candidateTab,    setCandidateTab]     = useState<CandidateTab>('unapproved');
   const [widgetsOpen,     setWidgetsOpen]      = useState(false);
   const [discovering,     setDiscovering]      = useState(false);
   const [alertThreshold,  setAlertThreshold]   = useState<number>(10);
@@ -395,82 +354,88 @@ export function DiscoveryTab({ searchQuery = '' }: { extraCandidates?: unknown[]
         </AnimatePresence>
       </div>
 
-      {/* 3-column pipeline */}
-      <div className="grid gap-4 items-start" style={{ gridTemplateColumns: '1fr 1fr 2fr' }}>
+      {/* 4-column Kanban pipeline */}
+      <div className="grid gap-4 items-start" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
 
-        {/* Candidates column - tabbed: Unapproved / Approved */}
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
+        {/* Col 1: Unapproved */}
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col gap-2">
           <PipelineColumn
-            title="Candidates"
-            count={candidateTab === 'unapproved' ? pending.length : approved.length}
+            title="Unapproved"
+            count={pending.length}
             accentColor="#dc2626"
             columnBg="rgba(220,38,38,0.035)"
-            tooltip="Oracle scans Instagram for creators with unusually high view-to-follower ratios. Pending candidates need a decision; approved are cleared for tracking."
-            headerExtra={
-              <CandidateTabToggle
-                active={candidateTab}
-                onChange={setCandidateTab}
-                pendingCount={pending.length}
-                approvedCount={approved.length}
-              />
-            }
+            tooltip="Oracle scans Instagram for creators with unusually high view-to-follower ratios. Pending candidates need a decision."
           >
             {loading ? (
               <div className="flex flex-col items-center justify-center py-10 gap-2">
                 <Loader2 size={16} className="animate-spin" style={{ color: '#dc2626' }} />
                 <p className="text-[10px] text-neutral-400">{seeding ? 'Seeding accounts...' : 'Loading...'}</p>
               </div>
-            ) : candidateTab === 'unapproved' ? (
-              pending.length === 0 ? (
-                <EmptyState filter="pending" onRunDiscovery={runDiscovery} />
-              ) : (
-                pending.map(c => (
-                  <CandidateRow
-                    key={c._convexId}
-                    candidate={c}
-                    isSelected={selectedId === c._convexId}
-                    onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
-                  />
-                ))
-              )
+            ) : pending.length === 0 ? (
+              <EmptyState filter="pending" onRunDiscovery={runDiscovery} />
             ) : (
-              approved.length === 0 ? (
-                <p className="text-[11px] text-center py-8" style={{ color: 'rgba(153,27,27,0.4)' }}>No approved candidates yet</p>
-              ) : (
-                approved.map(c => (
-                  <div
-                    key={c._convexId}
-                    onClick={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
-                    className="cursor-pointer"
-                  >
-                    <ApprovedRow candidate={c} />
-                  </div>
-                ))
-              )
+              pending.map(c => (
+                <CandidateRow
+                  key={c._convexId}
+                  candidate={c}
+                  isSelected={selectedId === c._convexId}
+                  onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
+                />
+              ))
             )}
           </PipelineColumn>
+          <RejectedPanel candidates={rejected} />
         </motion.div>
 
-        {/* Tracking column - recently approved + rejected */}
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.09, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col gap-2">
+        {/* Col 2: Approved */}
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.09, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
           <PipelineColumn
-            title="Tracking"
+            title="Approved"
             count={approved.length}
             accentColor="#991b1b"
             columnBg="rgba(153,27,27,0.045)"
             tooltip="Creators cleared for active tracking. Their content history is pulled into the intelligence layer."
           >
             {approved.length === 0 ? (
-              <p className="text-[11px] text-center py-8" style={{ color: 'rgba(153,27,27,0.4)' }}>No tracked creators yet</p>
+              <p className="text-[11px] text-center py-8" style={{ color: 'rgba(153,27,27,0.4)' }}>No approved candidates yet</p>
             ) : (
-              approved.map(c => <ApprovedRow key={c._convexId} candidate={c} />)
+              approved.map(c => (
+                <div
+                  key={c._convexId}
+                  onClick={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
+                  className="cursor-pointer"
+                >
+                  <ApprovedRow candidate={c} />
+                </div>
+              ))
             )}
           </PipelineColumn>
-          <RejectedPanel candidates={rejected} />
         </motion.div>
 
+        {/* Col 3: Scraping — untouched */}
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
           <ScrapingColumn discovering={discovering} columnBg="rgba(127,29,29,0.055)" />
+        </motion.div>
+
+        {/* Col 4: Scraped — placeholder */}
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.27, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
+          <PipelineColumn
+            title="Scraped"
+            count={0}
+            accentColor="#7f1d1d"
+            columnBg="rgba(127,29,29,0.03)"
+            tooltip="Completed scrapes appear here once a creator's full post history has been collected."
+          >
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(127,29,29,0.06)', color: '#7f1d1d' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <p className="text-[11px] font-medium text-neutral-400">Completed scrapes will appear here</p>
+            </div>
+          </PipelineColumn>
         </motion.div>
       </div>
 

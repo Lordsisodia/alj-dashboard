@@ -1,7 +1,7 @@
 'use client';
 
 import { Loader2, Play, CheckCircle2, Send, X } from 'lucide-react';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 import type { ConvexJob, ConvexModel } from './types';
 import { jobGenerator, generatorMeta } from './types';
 

@@ -1,3 +1,7 @@
+// ─── Shared gradient ──────────────────────────────────────────────────────────
+
+export const GRAD = 'linear-gradient(135deg, #ff0069, #833ab4)';
+
 // ─── Animation presets ────────────────────────────────────────────────────────
 
 export const containerVariants = {

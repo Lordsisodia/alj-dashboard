@@ -26,7 +26,6 @@ export async function GET(
       { responseType: 'stream' }
     );
 
-    // @ts-expect-error - axios stream, not fetch Response
     const readable = res.data as NodeJS.ReadableStream;
 
     const stream = new ReadableStream({
