@@ -14,8 +14,6 @@ interface Signal {
   accent: string;
 }
 
-const ACCENT_COLORS = ['#ff0069', '#833ab4', '#4a9eff', '#f97316', '#22c55e'] as const;
-
 export function IntelligenceBrief({ trends }: Props) {
   const signals: Signal[] = [];
 
@@ -68,12 +66,15 @@ export function IntelligenceBrief({ trends }: Props) {
     ? trends.outlierPosts.reduce((a, b) => a.engagementRate > b.engagementRate ? a : b)
     : null;
   if (bestPost) {
-    const time = new Date(bestPost.postedAt);
-    const day  = time.toLocaleDateString('en-US', { weekday: 'short' });
-    const hour = time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+    const time    = new Date(bestPost.postedAt);
+    const days    = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const day     = days[time.getDay()];
+    const h24     = time.getHours();
+    const hour12  = h24 % 12 || 12;
+    const ampm    = h24 < 12 ? 'am' : 'pm';
     signals.push({
       label: 'Best window',
-      value: `${bestPost.contentType} on ${day} ${hour} - ${(bestPost.engagementRate * 100).toFixed(1)}% ER`,
+      value: `${bestPost.contentType} on ${day} ${hour12}${ampm} - ${(bestPost.engagementRate * 100).toFixed(1)}% ER`,
       accent: '#22c55e',
     });
   }
