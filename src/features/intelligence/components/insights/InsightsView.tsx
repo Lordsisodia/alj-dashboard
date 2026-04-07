@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from 'convex/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useMemo } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ImageOff } from 'lucide-react';
 import { api } from '../../../../../convex/_generated/api';
 import { RatingSummaryBar } from './RatingSummaryBar';
 import { LearningSignal }   from './LearningSignal';
@@ -15,7 +15,7 @@ import type { DrawerPost }  from '../../types';
 
 export function InsightsView() {
   const [chatOpen,           setChatOpen]           = useState(false);
-  const [highlightedPostId,   setHighlightedPostId]  = useState<string | null>(null);
+  const [highlightedPostId,  setHighlightedPostId]  = useState<string | null>(null);
   const [drawerIndex,        setDrawerIndex]        = useState<number | null>(null);
 
   const data        = useQuery(api.insights.getInsights, {}) as InsightsData | undefined;
@@ -101,6 +101,8 @@ export function InsightsView() {
 
   const insights = deriveInsights();
   const topRater = data?.raterActivity[0];
+  const hookCount = hookStats?.hookLines?.length ?? 0;
+  const postCount = data?.topRatedPosts?.length ?? 0;
 
   // Loading skeleton
   if (data === undefined) {
@@ -112,9 +114,9 @@ export function InsightsView() {
           ))}
         </div>
         <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-3 rounded-xl h-64 animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} />
-          <div className="col-span-6 rounded-xl h-64 animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} />
-          <div className="col-span-3 rounded-xl h-64 animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} />
+          <div className="col-span-3 rounded-xl h-80 animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} />
+          <div className="col-span-6 rounded-xl h-80 animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} />
+          <div className="col-span-3 rounded-xl h-80 animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} />
         </div>
       </div>
     );
@@ -140,52 +142,94 @@ export function InsightsView() {
         <div className="col-span-3 flex flex-col gap-2">
           {/* Section header */}
           <div
-            className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
+            className="flex items-center justify-between px-3 py-2.5 rounded-xl"
             style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))', border: '1px solid rgba(0,0,0,0.06)' }}
           >
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
-              <Sparkles size={11} className="text-white" />
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
+                <Sparkles size={11} className="text-white" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold text-neutral-900">Winning Hooks</p>
+                <p className="text-[9px] text-neutral-400">Top hooks by score</p>
+              </div>
             </div>
-            <div>
-              <p className="text-[11px] font-semibold text-neutral-900">Winning Hooks</p>
-              <p className="text-[9px] text-neutral-400">Top 12 by hook score</p>
-            </div>
+            {hookCount > 0 && (
+              <span
+                className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md text-white"
+                style={{ background: GRAD }}
+              >
+                {hookCount}
+              </span>
+            )}
           </div>
 
-          {/* Hook rows */}
-          <div
-            className="flex flex-col rounded-xl overflow-hidden"
-            style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
-          >
-            {(hookStats?.hookLines ?? []).length === 0 && (
-              <p className="text-[11px] text-neutral-400 text-center py-6">No hook data yet</p>
-            )}
-            {(hookStats?.hookLines ?? []).map((hook, i) => {
-              const mappedId = postIdMap.get(`${hook.handle}|${hook.niche}`);
-              const isHighlighted = highlightedPostId === mappedId;
-              return (
-                <div
-                  key={i}
-                  className={cn(
-                    "flex flex-col gap-1 py-2.5 px-3 border-b border-black/5 cursor-pointer transition-colors last:border-0",
-                    isHighlighted ? "bg-[#ff006908]" : "hover:bg-black/[0.02]"
-                  )}
-                  onMouseEnter={() => mappedId && setHighlightedPostId(mappedId)}
-                  onMouseLeave={() => setHighlightedPostId(null)}
-                >
-                  <p className="text-[11px] font-medium text-neutral-800 leading-relaxed line-clamp-2">
-                    &ldquo;{hook.hookLine}&rdquo;
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-neutral-400">@{hook.handle}</span>
-                    <span className="text-[10px] font-bold" style={{ color: '#ff0069' }}>
-                      {hook.hookScore.toFixed(1)}
-                    </span>
-                  </div>
+          {/* Hook rows — skeleton */}
+          {hookStats === undefined ? (
+            <div
+              className="flex flex-col rounded-xl overflow-hidden"
+              style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
+            >
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="flex flex-col gap-1.5 py-3 px-3 border-b border-black/5 last:border-0">
+                  <div className="h-3 rounded-md animate-pulse w-4/5" style={{ backgroundColor: 'rgba(0,0,0,0.06)' }} />
+                  <div className="h-2.5 rounded-md animate-pulse w-1/3 mt-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }} />
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div
+              className="flex flex-col rounded-xl overflow-hidden"
+              style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
+            >
+              {hookCount === 0 && (
+                <div className="flex flex-col items-center justify-center gap-2 py-10">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
+                    <ImageOff size={14} className="text-neutral-300" />
+                  </div>
+                  <p className="text-[11px] text-neutral-400">No hook data yet</p>
+                  <p className="text-[10px] text-neutral-300 text-center px-4">Run analysis on posts to surface winning hooks</p>
+                </div>
+              )}
+              {(hookStats?.hookLines ?? []).map((hook, i) => {
+                const mappedId = postIdMap.get(`${hook.handle}|${hook.niche}`);
+                const isHighlighted = highlightedPostId === mappedId;
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "relative flex flex-col gap-1 py-2.5 px-3 border-b border-black/5 cursor-pointer transition-all last:border-0",
+                      isHighlighted
+                        ? "bg-[#ff006908]"
+                        : "hover:bg-black/[0.02] hover:pl-4"
+                    )}
+                    onMouseEnter={() => mappedId && setHighlightedPostId(mappedId)}
+                    onMouseLeave={() => setHighlightedPostId(null)}
+                  >
+                    {/* Left accent bar — visible only when highlighted */}
+                    {isHighlighted && (
+                      <motion.div
+                        className="absolute left-0 top-0 bottom-0 w-0.5 rounded-r"
+                        style={{ background: GRAD }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.15 }}
+                      />
+                    )}
+                    <p className="text-[11px] font-medium text-neutral-800 leading-relaxed line-clamp-2 pr-3">
+                      &ldquo;{hook.hookLine}&rdquo;
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-neutral-400">@{hook.handle}</span>
+                      <span className="text-[10px] font-bold" style={{ color: '#ff0069' }}>
+                        {hook.hookScore.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* CENTER (50%) - Top Rated Posts + Patterns */}
@@ -204,23 +248,34 @@ export function InsightsView() {
                 <rect x="7" y="7" width="4" height="4" rx="1" fill="currentColor" opacity="0.5" />
               </svg>
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="text-[11px] font-semibold text-neutral-900">Top Rated Posts</p>
-              <p className="text-[9px] text-neutral-400">Saves count double - hover hooks to highlight</p>
+              <p className="text-[9px] text-neutral-400 truncate">Saves count double - hover hooks to highlight</p>
             </div>
+            {postCount > 0 && (
+              <span
+                className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md text-white shrink-0"
+                style={{ background: GRAD }}
+              >
+                {postCount}
+              </span>
+            )}
           </div>
 
           {/* Horizontal scrollable post strip */}
           <div className="overflow-x-auto flex gap-3 pb-2 -mx-1 px-1">
-            {data.topRatedPosts.map(post => (
-              <div
+            {data.topRatedPosts.map((post, i) => (
+              <motion.div
                 key={post._id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.04 }}
                 onClick={() => openDrawer(post._id)}
                 className={cn(
-                  "relative shrink-0 w-32 rounded-xl overflow-hidden cursor-pointer transition-all",
+                  "relative shrink-0 w-32 rounded-xl overflow-hidden cursor-pointer transition-all duration-200",
                   highlightedPostId === post._id
-                    ? "ring-2 ring-[#ff0069] scale-105 z-10"
-                    : "hover:scale-[1.03]"
+                    ? "ring-2 ring-[#ff0069] scale-105 z-10 shadow-lg shadow-[#ff0069]/20"
+                    : "hover:scale-[1.04] hover:shadow-md hover:shadow-black/10"
                 )}
                 style={{ aspectRatio: '9/16' }}
               >
@@ -230,47 +285,68 @@ export function InsightsView() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={post.thumbnailUrl} alt={post.handle} className="w-full h-full object-cover" />
                 )}
+                {/* Bottom gradient + ER */}
                 <div className="absolute bottom-0 inset-x-0 p-1.5 bg-gradient-to-t from-black/70 to-transparent">
                   <p className="text-[9px] text-white font-bold">
                     {post.engagementRate > 0 ? `${(post.engagementRate * 100).toFixed(1)}%` : '-'}
                   </p>
                 </div>
+                {/* Score badge */}
                 <div className="absolute top-1.5 right-1.5">
                   <span
                     className="text-[8px] font-bold px-1 py-0.5 rounded text-white"
-                    style={{ background: '#ff0069' }}
+                    style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
                   >
                     ★ {post.upCount + post.saveCount * 2}
                   </span>
                 </div>
-              </div>
+                {/* Niche tag */}
+                <div className="absolute top-1.5 left-1.5">
+                  <span
+                    className="text-[8px] font-semibold px-1 py-0.5 rounded text-white"
+                    style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+                  >
+                    {post.niche}
+                  </span>
+                </div>
+              </motion.div>
             ))}
             {data.topRatedPosts.length === 0 && (
               <div
-                className="flex items-center justify-center w-full rounded-xl py-10"
+                className="flex flex-col items-center justify-center gap-2 w-full rounded-xl py-12"
                 style={{ border: '1px dashed rgba(0,0,0,0.1)', backgroundColor: '#fafafa' }}
               >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
+                  <ImageOff size={14} className="text-neutral-300" />
+                </div>
                 <p className="text-xs text-neutral-400">No rated posts yet</p>
+                <p className="text-[10px] text-neutral-300">Rate posts to see your top picks here</p>
               </div>
             )}
           </div>
 
           {/* Patterns detected - inline bullets */}
-          <div>
-            <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2 px-1">
+          <div
+            className="rounded-xl px-4 py-3"
+            style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}
+          >
+            <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2.5">
               Patterns detected
             </p>
-            <div className="space-y-1.5 px-1">
-              {insights.map((insight, i) => (
-                <div key={i} className="flex items-start gap-2 text-[11px] text-neutral-700">
-                  <span className="text-[#ff0069] mt-0.5 shrink-0">·</span>
-                  <span className="leading-relaxed">{insight}</span>
-                </div>
-              ))}
-              {insights.length === 0 && (
-                <p className="text-[11px] text-neutral-400">Rate posts to see patterns emerge</p>
-              )}
-            </div>
+            {insights.length === 0 ? (
+              <p className="text-[11px] text-neutral-400 leading-relaxed">
+                Rate posts to surface patterns - insights appear as your team curates content
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {insights.map((insight, i) => (
+                  <div key={i} className="flex items-start gap-2.5 text-[11px] text-neutral-700">
+                    <span className="mt-0.5 shrink-0 w-1 h-1 rounded-full mt-1.5" style={{ backgroundColor: '#ff0069' }} />
+                    <span className="leading-relaxed">{insight}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -279,7 +355,10 @@ export function InsightsView() {
 
           {/* Ask Intelligence - compact card */}
           <div
-            className="rounded-xl overflow-hidden border border-black/[0.07]"
+            className={cn(
+              "rounded-xl overflow-hidden border border-black/[0.07] transition-colors",
+              !chatOpen && "shadow-sm shadow-black/5"
+            )}
             style={{ backgroundColor: '#fff' }}
           >
             {/* Card header */}
@@ -299,7 +378,7 @@ export function InsightsView() {
               {!chatOpen ? (
                 <button
                   onClick={() => setChatOpen(true)}
-                  className="text-[10px] font-semibold px-2 py-1 rounded-lg text-white"
+                  className="text-[10px] font-semibold px-2.5 py-1 rounded-lg text-white shadow-sm transition-all hover:shadow hover:opacity-90 active:scale-95"
                   style={{ background: GRAD }}
                 >
                   Open
@@ -307,7 +386,7 @@ export function InsightsView() {
               ) : (
                 <button
                   onClick={() => setChatOpen(false)}
-                  className="text-[10px] font-semibold px-2 py-1 rounded-lg text-[#ff0069] hover:bg-[#ff006908] transition-colors"
+                  className="text-[10px] font-semibold px-2.5 py-1 rounded-lg text-[#ff0069] hover:bg-[#ff006908] transition-colors active:scale-95"
                 >
                   Close
                 </button>
@@ -322,14 +401,16 @@ export function InsightsView() {
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="overflow-hidden border-t border-black/[0.06]"
+                  className="overflow-hidden"
                 >
-                  <AIChatPanel
-                    data={trends}
-                    insightsData={data}
-                    onClose={() => setChatOpen(false)}
-                    embedded
-                  />
+                  <div className="border-t border-black/[0.06]">
+                    <AIChatPanel
+                      data={trends}
+                      insightsData={data}
+                      onClose={() => setChatOpen(false)}
+                      embedded
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
