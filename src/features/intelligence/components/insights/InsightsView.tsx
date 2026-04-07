@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from 'convex/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useMemo } from 'react';
-import { Sparkles, ImageOff } from 'lucide-react';
+import { Sparkles, ImageOff, Brain } from 'lucide-react';
 import { api } from '../../../../../convex/_generated/api';
 import { RatingSummaryBar } from './RatingSummaryBar';
 import { LearningSignal }   from './LearningSignal';
@@ -23,6 +23,10 @@ export function InsightsView() {
   const hookStats   = useQuery(api.intelligence.getHookStats, { days: 30 });
   const seedRatings = useMutation(api.insightsSeed.seedSwipeRatings);
 
+  // Full posts for drawer — fetched by id so likes/views/saves are real
+  const postIds   = useMemo(() => (data?.topRatedPosts ?? []).map(p => p._id as any), [data?.topRatedPosts]);
+  const fullPosts = useQuery(api.intelligence.getPostsByIds, { ids: postIds });
+
   useEffect(() => {
     if (data && data.summary.totalRatings === 0) seedRatings({});
   }, [data, seedRatings]);
@@ -36,28 +40,30 @@ export function InsightsView() {
     return m;
   }, [data?.topRatedPosts]);
 
-  // Build drawer posts from topRatedPosts (DrawerPost shape)
-  const drawerPosts: DrawerPost[] = useMemo(() =>
-    (data?.topRatedPosts ?? []).map(p => ({
-      _id:            p._id as any,
-      externalId:     '',
+  // Build drawer posts from fullPosts (real likes/views/saves)
+  const drawerPosts: DrawerPost[] = useMemo(() => {
+    if (!fullPosts) return [];
+    return fullPosts.map(p => ({
+      _id:            p._id,
+      externalId:     p.externalId ?? '',
       handle:         p.handle,
-      platform:       'instagram',
-      niche:          p.niche,
-      contentType:    p.contentType,
-      thumbnailUrl:   p.thumbnailUrl,
+      platform:       p.platform ?? 'instagram',
+      niche:          p.niche ?? 'Unknown',
+      contentType:    p.contentType ?? 'reel',
+      thumbnailUrl:   p.thumbnailUrl ?? '',
       caption:        p.caption,
-      hashtags:       [],
-      likes:          0,
-      views:          0,
-      saves:          0,
-      engagementRate: p.engagementRate,
-      outlierRatio:   undefined,
-      postedAt:       0,
-      saved:          false,
-      aiAnalysis:    undefined,
-    })),
-  [data?.topRatedPosts]);
+      hashtags:       p.hashtags ?? [],
+      likes:          p.likes ?? 0,
+      views:          p.views ?? 0,
+      saves:          p.saves ?? 0,
+      engagementRate: p.engagementRate ?? 0,
+      outlierRatio:   p.outlierRatio,
+      postedAt:       p.postedAt ?? 0,
+      scrapedAt:      p.scrapedAt,
+      saved:          p.saved ?? false,
+      aiAnalysis:     p.aiAnalysis ?? undefined,
+    }));
+  }, [fullPosts]);
 
   function openDrawer(postId: string) {
     const idx = (data?.topRatedPosts ?? []).findIndex(p => p._id === postId);
@@ -262,8 +268,8 @@ export function InsightsView() {
             )}
           </div>
 
-          {/* Horizontal scrollable post strip */}
-          <div className="overflow-x-auto flex gap-3 pb-2 -mx-1 px-1">
+          {/* Horizontal scrollable post strip — fixed height, no aspect-ratio crop */}
+          <div className="overflow-x-auto flex gap-3 pb-2 -mx-1 px-1 items-start">
             {data.topRatedPosts.map((post, i) => (
               <motion.div
                 key={post._id}
@@ -277,7 +283,7 @@ export function InsightsView() {
                     ? "ring-2 ring-[#ff0069] scale-105 z-10 shadow-lg shadow-[#ff0069]/20"
                     : "hover:scale-[1.04] hover:shadow-md hover:shadow-black/10"
                 )}
-                style={{ aspectRatio: '9/16' }}
+                style={{ height: '176px' }}
               >
                 {post.thumbnailUrl.startsWith('linear-gradient') ? (
                   <div className="w-full h-full" style={{ background: post.thumbnailUrl }} />
@@ -371,7 +377,7 @@ export function InsightsView() {
           {/* Ask Intelligence - compact card */}
           <div
             className={cn(
-              "rounded-xl overflow-hidden border border-black/[0.07] transition-colors",
+              "rounded-xl overflow-hidden border border-black/[0.07]",
               !chatOpen && "shadow-sm shadow-black/5"
             )}
             style={{ backgroundColor: '#fff' }}
@@ -429,8 +435,27 @@ export function InsightsView() {
             </AnimatePresence>
           </div>
 
-          {/* Learning Signal */}
-          <LearningSignal data={data} />
+          {/* Learning Signal — wrapped in consistent card header */}
+          <div
+            className="rounded-xl overflow-hidden border border-black/[0.07]"
+            style={{ backgroundColor: '#fff' }}
+          >
+            <div
+              className="flex items-center gap-2 px-3 py-2.5"
+              style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))' }}
+            >
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
+                <Brain size={11} className="text-white" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold text-neutral-900">Team Learning</p>
+                <p className="text-[9px] text-neutral-400">Curation signals</p>
+              </div>
+            </div>
+            <div className="px-3 py-3">
+              <LearningSignal data={data} />
+            </div>
+          </div>
 
         </div>
       </div>
