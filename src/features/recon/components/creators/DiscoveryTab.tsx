@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Zap, Trash2 } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { useQuery, useMutation } from 'convex/react';
 import {
   DndContext,
@@ -133,7 +134,17 @@ type ColumnId = 'unapproved' | 'approved' | 'scraped';
 function DraggableCard({ id, column, children }: { id: string; column: ColumnId; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id, data: { column } });
   return (
-    <div ref={setNodeRef} style={{ opacity: isDragging ? 0 : 1, cursor: 'grab' }} {...listeners} {...attributes}>
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={{
+        opacity:     isDragging ? 0 : 1,
+        cursor:      isDragging ? 'grabbing' : 'grab',
+        touchAction: 'none',
+        userSelect:  'none',
+      }}
+    >
       {children}
     </div>
   );
@@ -168,6 +179,45 @@ function DragGhost({ c }: { c: MappedCandidate }) {
   );
 }
 
+// ── Skeleton shimmer row for loading states ──────────────────────────────────
+
+function SkeletonRow() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
+      style={{ border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#fff' }}
+    >
+      {[0.3, 0.45, 0.2, 0.5].map((opacity, i) => (
+        <motion.div
+          key={i}
+          className="h-3 rounded"
+          animate={{ opacity: [opacity, opacity + 0.2, opacity] }}
+          transition={{ duration: 1.4 + i * 0.15, repeat: Infinity, ease: 'easeInOut', delay: i * 0.1 }}
+          style={{ backgroundColor: '#f3f4f6', flex: i === 2 ? 1 : 'none', width: i === 2 ? 'auto' : i === 1 ? '40%' : i === 0 ? 10 : 50 }}
+        />
+      ))}
+    </motion.div>
+  );
+}
+
+// ── Pulse ring on new card arrival ─────────────────────────────────────────
+
+function PulseRing({ color = '#dc2626' }: { color?: string }) {
+  return (
+    <motion.div
+      initial={{ scale: 0, opacity: 0.8, ring: 0 }}
+      animate={{ scale: 2.5, opacity: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.7, ease: 'easeOut' }}
+      className="absolute inset-0 rounded-lg pointer-events-none"
+      style={{ border: `2px solid ${color}`, transformOrigin: 'center' }}
+    />
+  );
+}
+
 // ── Inline sub-components ────────────────────────────────────────────────────
 
 interface PipelineColumnProps {
@@ -178,12 +228,17 @@ interface PipelineColumnProps {
   tooltip: string;
   headerExtra?: React.ReactNode;
   children: React.ReactNode;
+  glowKey?: string | number; // changing this triggers a border-glow pulse
 }
 
-function PipelineColumn({ title, count, accentColor, columnBg, tooltip, headerExtra, children }: PipelineColumnProps) {
+function PipelineColumn({ title, count, accentColor, columnBg, tooltip, headerExtra, children, glowKey }: PipelineColumnProps) {
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.07)', borderLeft: `2px solid ${accentColor}`, backgroundColor: columnBg }}>
-      <div
+      <motion.div
+        key={glowKey}
+        initial={{ boxShadow: `0 0 0 0 ${accentColor}00` }}
+        animate={{ boxShadow: [`0 0 0 0 ${accentColor}00', `0 0 12px 2px ${accentColor}44`, `0 0 0 0 ${accentColor}00`] }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
         className="flex items-center gap-2 px-4 py-3"
         style={{ borderBottom: `1px solid ${accentColor}18` }}
       >
@@ -196,7 +251,7 @@ function PipelineColumn({ title, count, accentColor, columnBg, tooltip, headerEx
         >
           {count}
         </span>
-      </div>
+      </motion.div>
       <div className="p-3 max-h-[440px] overflow-y-auto space-y-1.5 scrollbar-thin">
         {children}
       </div>
@@ -305,6 +360,9 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
   const [scrapingItems,   setScrapingItems]    = useState<LiveScrapeItem[]>([]);
   const [activeId,        setActiveId]         = useState<string | null>(null);
   const [overColumn,      setOverColumn]       = useState<ColumnId | null>(null);
+  const [approvedGlow,    setApprovedGlow]     = useState(0);
+  const [scrapingGlow,    setScrapingGlow]     = useState(0);
+  const [scrapedGlow,     setScrapedGlow]      = useState(0);
   const seededRef = useRef(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -402,10 +460,12 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
         }).catch(() => {})
       )
     );
+    setScrapedGlow(n => n + 1);
   }
 
   async function handleApprove(c: MappedCandidate) {
     await updateStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'approved' }).catch(console.error);
+    setApprovedGlow(n => n + 1);
     // If no real profile data, reset enrichStatus so card lands in Approved (not Scraped)
     if (!c.avatarUrl && !c.followersRaw) {
       await setEnrichStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'idle' }).catch(console.error);
@@ -448,6 +508,7 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
   }
 
   function addScraping(c: MappedCandidate) {
+    setScrapingGlow(n => n + 1);
     setScrapingItems(prev => {
       if (prev.some(i => i.handle === c.handle)) return prev;
       return [...prev, { handle: c.handle, displayName: c.displayName, initials: c.initials, startedAt: Date.now() }];
@@ -606,18 +667,18 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
                 }
               >
                 {loading ? (
-                  <div className="flex flex-col items-center justify-center py-10 gap-2">
-                    <Loader2 size={16} className="animate-spin" style={{ color: '#dc2626' }} />
-                    <p className="text-[10px] text-neutral-400">{seeding ? 'Seeding accounts...' : 'Loading...'}</p>
-                  </div>
+                  <AnimatePresence>
+                    {[0,1,2,3].map(i => <SkeletonRow key={i} />)}
+                  </AnimatePresence>
                 ) : pending.length === 0 ? (
                   <EmptyState filter="pending" />
                 ) : (
-                  <AnimatePresence mode="popLayout">
-                    {pending.map(c => (
+                  <AnimatePresence>
+                    {pending.map((c, i) => (
                       <DraggableCard key={c._convexId} id={c._convexId} column="unapproved">
                         <CandidateRow
                           candidate={c}
+                          index={i}
                           isSelected={selectedId === c._convexId}
                           onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
                           onApprove={e => { e.stopPropagation(); handleApprove(c); }}
@@ -641,15 +702,17 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
                 accentColor="#991b1b"
                 columnBg="rgba(153,27,27,0.045)"
                 tooltip="Creators cleared for active tracking. Click Scrape or drag to Scraped to pull their full profile data."
+                glowKey={approvedGlow}
               >
                 {approvedPending.length === 0 ? (
                   <p className="text-[11px] text-center py-8" style={{ color: 'rgba(153,27,27,0.4)' }}>No approved candidates yet</p>
                 ) : (
-                  <AnimatePresence mode="popLayout">
-                    {approvedPending.map(c => (
+                  <AnimatePresence>
+                    {approvedPending.map((c, i) => (
                       <DraggableCard key={c._convexId} id={c._convexId} column="approved">
                         <ApprovedRow
                           candidate={c}
+                          index={i}
                           isScraping={scrapingItems.some(s => s.handle === c.handle)}
                           onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
                           onScrapeComplete={handles => handleScrapeComplete(handles, c.handle)}
@@ -666,7 +729,7 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
 
           {/* Col 3: Scraping — live */}
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
-            <ScrapingColumn liveItems={scrapingItems} columnBg="rgba(127,29,29,0.055)" />
+            <ScrapingColumn liveItems={scrapingItems} columnBg="rgba(127,29,29,0.055)" glowKey={scrapingGlow} />
           </motion.div>
 
           {/* Col 4: Scraped — enriched creators */}
@@ -678,6 +741,7 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
                 accentColor="#7f1d1d"
                 columnBg="rgba(127,29,29,0.03)"
                 tooltip="Approved creators with enriched profile data pulled from Instagram."
+                glowKey={scrapedGlow}
               >
                 {scrapedCandidates.length === 0 ? (
                   <p className="text-[11px] text-center py-8" style={{ color: 'rgba(127,29,29,0.3)' }}>Scrape an approved card to see results</p>
