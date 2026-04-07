@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
 
 // ── Feed query  -  powers the Intelligence Community Feed ──────────────────────
@@ -626,6 +626,36 @@ export const importScrapedPost = mutation({
   },
 });
 
+// ── Qualify tab — all scraped posts ordered by baseline score ──────────────────
+
+export const getQualifyPosts = query({
+  args: { minBaseline: v.optional(v.number()) },
+  handler: async (ctx, { minBaseline }) => {
+    let posts = await ctx.db.query("scrapedPosts").collect();
+    // Exclude seed posts
+    posts = posts.filter(p => !p.externalId?.startsWith('seed_'));
+    if (minBaseline !== undefined) {
+      posts = posts.filter(p => (p.baselineScore ?? 0) >= minBaseline);
+    }
+    // Use outlierRatio as baselineScore proxy; fall back to engagementRate * 10
+    return posts
+      .map(p => ({
+        ...p,
+        baselineScore: p.baselineScore ?? p.outlierRatio ?? parseFloat(((p.engagementRate ?? 0) * 10).toFixed(2)),
+      }))
+      .sort((a, b) => (b.baselineScore ?? 0) - (a.baselineScore ?? 0));
+  },
+});
+
+export const saveTopPostsForPipeline = mutation({
+  args: { postIds: v.array(v.id("scrapedPosts")) },
+  handler: async (ctx, { postIds }) => {
+    for (const id of postIds) {
+      await ctx.db.patch(id, { savedForPipeline: true, savedAt: Date.now() });
+    }
+  },
+});
+
 // ── Per-creator stats from real scraped data ──────────────────────────────────
 
 export const getCreatorStats = query({
@@ -894,6 +924,37 @@ export const getAnalysedPosts = query({
   },
 });
 
+// ── Analysis pipeline stats  -  funnel from qualified → downloaded → analyzed ──
+
+export const getAnalysisPipelineStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const posts = await ctx.db.query('scrapedPosts').collect();
+    const real = posts.filter(p => !p.externalId?.startsWith('seed_'));
+    const qualified        = real.filter(p => p.savedForPipeline === true);
+    const downloaded       = qualified.filter(p => !!p.videoUrl);
+    const analyzed         = downloaded.filter(p => !!p.aiAnalysis);
+    return {
+      totalQualified:    qualified.length,
+      downloaded:        downloaded.length,
+      pendingDownload:   qualified.length - downloaded.length,
+      analyzed:          analyzed.length,
+      queuedForAnalysis: downloaded.length - analyzed.length,
+    };
+  },
+});
+
+// ── Download post to R2 (scaffold — implementation TBD) ──────────────────────
+
+export const downloadPostToR2 = action({
+  args: { postId: v.id('scrapedPosts') },
+  handler: async (_ctx, _args) => {
+    // TODO: fetch video from source URL, upload to R2, patch videoUrl on post
+    // This will be implemented by the pipeline agent
+    throw new Error('Not implemented yet');
+  },
+});
+
 // ── Hook stats  -  aggregate hookScore distribution + emotion frequency ───────
 
 export const getHookStats = query({
@@ -951,5 +1012,24 @@ export const getHookStats = query({
       }));
 
     return { scoreDistribution, emotionFrequency, hookLines };
+  },
+});
+
+// ── One-time migration: patch stale documents missing required fields ──────────
+export const patchLegacyScrapedPosts = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("scrapedPosts").collect();
+    let patched = 0;
+    for (const doc of all) {
+      const updates: Record<string, unknown> = {};
+      if ((doc as any).saved === undefined)    updates.saved    = false;
+      if ((doc as any).boardIds === undefined) updates.boardIds = [];
+      if (Object.keys(updates).length > 0) {
+        await ctx.db.patch(doc._id, updates);
+        patched++;
+      }
+    }
+    return { patched, total: all.length };
   },
 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import type { SortId, DrawerPost } from '../types';
 
 interface Options {

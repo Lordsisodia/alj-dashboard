@@ -1,17 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { useState } from 'react';
+import { StatsBar }   from './StatsBar';
+import { OutlierPanel } from '../qualify/OutlierPanel';
+import { QualifyTableView } from '../qualify/QualifyTableView';
+import { QualifyKanbanView } from '../qualify/QualifyKanbanView';
 import { containerVariants } from '../../constants';
-import { StatsBar }           from './StatsBar';
-import { FormatChart }        from './FormatChart';
-import { NicheLeaderboard }   from './NicheLeaderboard';
-import { HooksTable }         from './HooksTable';
-import { OutlierFeed }        from './OutlierFeed';
-import { PatternInsights }    from './PatternInsights';
-import { HashtagCorrelation } from './HashtagCorrelation';
-import type { TrendsData }    from '../../types';
 
 interface Props {
   days:      number;
@@ -20,26 +15,24 @@ interface Props {
   platform?: string;
 }
 
-export function TrendsView({ days, metric, niche = 'all', platform = 'all' }: Props) {
-  const raw = useQuery(api.intelligence.getTrends, {
-    days,
-    niche:    niche    !== 'all' ? niche    : undefined,
-    platform: platform !== 'all' ? platform : undefined,
-  }) as TrendsData | undefined;
+export function TrendsView({ days: initialDays, metric: initialMetric, niche = 'all', platform = 'all' }: Props) {
+  const [view, setView] = useState<'table' | 'kanban'>('table');
+  const [days, setDays] = useState(initialDays);
+  const [metric, setMetric] = useState<'er' | 'views'>(initialMetric);
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="flex-1 min-w-0 space-y-5">
-      <StatsBar data={raw} days={days} />
-      <OutlierFeed posts={raw?.outlierPosts ?? []} />
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="flex-1 min-w-0">
+      <StatsBar days={days} niche={niche} platform={platform} metric={metric} />
 
-      <div className="grid grid-cols-2 gap-4">
-        <FormatChart formats={raw?.formatStats ?? []} metric={metric} />
-        <NicheLeaderboard niches={raw?.nicheStats ?? []} />
+      <div className="relative">
+        <div className="pr-80">
+          {view === 'table'
+            ? <QualifyTableView view={view} onViewChange={setView} days={days} onDaysChange={setDays} metric={metric} onMetricChange={setMetric} niche={niche} platform={platform} />
+            : <QualifyKanbanView view={view} onViewChange={setView} days={days} onDaysChange={setDays} niche={niche} platform={platform} />
+          }
+        </div>
+        <OutlierPanel days={days} niche={niche} />
       </div>
-
-      <HashtagCorrelation days={days} niche={niche} />
-      <HooksTable hooks={raw?.topHooks ?? []} />
-      <PatternInsights days={days} niche={niche} />
     </motion.div>
   );
 }

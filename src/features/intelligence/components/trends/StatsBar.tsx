@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { FileText, TrendingUp, Film, Tag, Flame } from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import { fadeUp } from '../../constants';
 import type { TrendsData } from '../../types';
 
@@ -14,16 +16,24 @@ const ICONS = [
 ];
 
 interface Props {
-  data: TrendsData | undefined;
-  days: number;
+  days:      number;
+  niche?:    string;
+  platform?: string;
+  metric?:   'er' | 'views';
 }
 
-export function StatsBar({ data, days }: Props) {
-  const topFormat    = data?.formatStats[0]?.format ?? '-';
-  const topNiche     = data?.nicheStats[0]?.niche   ?? '-';
-  const avgER        = data ? (data.avgER * 100).toFixed(2) + '%' : '-';
-  const total        = data?.totalPosts ?? 0;
-  const outlierCount = data?.outlierPosts?.length ?? 0;
+export function StatsBar({ days, niche = 'all', platform = 'all' }: Props) {
+  const raw = useQuery(api.intelligence.getTrends, {
+    days,
+    niche:    niche    !== 'all' ? niche    : undefined,
+    platform: platform !== 'all' ? platform : undefined,
+  }) as TrendsData | undefined;
+
+  const topFormat     = raw?.formatStats[0]?.format ?? '-';
+  const topNiche      = raw?.nicheStats[0]?.niche   ?? '-';
+  const avgER         = raw ? (raw.avgER * 100).toFixed(2) + '%' : '-';
+  const total         = raw?.totalPosts ?? 0;
+  const outlierCount  = raw?.outlierPosts?.length ?? 0;
 
   const stats = [
     { label: `Posts (${days}d)`,  value: total.toLocaleString() },
@@ -36,7 +46,7 @@ export function StatsBar({ data, days }: Props) {
   return (
     <motion.div
       variants={fadeUp}
-      className="grid grid-cols-5 gap-3"
+      className="grid grid-cols-5 gap-3 mb-4"
     >
       {stats.map((s, i) => (
         <div

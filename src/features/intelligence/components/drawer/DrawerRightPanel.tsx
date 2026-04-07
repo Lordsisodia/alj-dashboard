@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Bookmark, Info, Sparkles, FileText, Download, Flag } from 'lucide-react';
 import { useMutation } from 'convex/react';
 import { cn } from '@/lib/utils';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { DetailsTab }    from './DetailsTab';
 import { AIAnalysisTab } from './AIAnalysisTab';
 import { TranscriptTab } from './TranscriptTab';

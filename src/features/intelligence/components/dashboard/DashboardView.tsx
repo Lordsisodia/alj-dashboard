@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { motion }    from 'framer-motion';
 import { useQuery }  from 'convex/react';
-import { api }       from '../../../../../convex/_generated/api';
+import { api }       from '@/convex/_generated/api';
 import { containerVariants, fadeUp } from '../../constants';
 import { FileText, TrendingUp, Flame, Sparkles } from 'lucide-react';
 import { PipelineStatusStrip } from './PipelineStatusStrip';
@@ -11,15 +11,26 @@ import { KPIDeltaTile }        from './KPIDeltaTile';
 import { OutlierRow }          from './OutlierRow';
 import { ActionQueue }         from './ActionQueue';
 import { LearningSignal }      from '../insights/LearningSignal';
-import type { TrendsData }     from '../../types';
-import type { InsightsData }   from '../../types';
+import { FormatChart }         from '../trends/FormatChart';
+import { NicheLeaderboard }    from '../trends/NicheLeaderboard';
+import { HooksTable }          from '../trends/HooksTable';
+import { PatternInsights }         from '../trends/PatternInsights';
+import { HashtagCorrelation }      from '../trends/HashtagCorrelation';
+import { HookScoreDistribution }   from '../analysis/HookScoreDistribution';
+import { EmotionFrequency }        from '../analysis/EmotionFrequency';
+import { HookLineGallery }         from '../analysis/HookLineGallery';
+import { RuleCards }               from '../analysis/RuleCards';
+import { PulseReportCard }         from './PulseReportCard';
+import type { TrendsData }        from '../../types';
+import type { InsightsData }      from '../../types';
 
 export function DashboardView() {
   const router = useRouter();
 
-  const stats    = useQuery(api.intelligence.getStats, {});
-  const trends   = useQuery(api.intelligence.getTrends, { days: 7 }) as TrendsData   | undefined;
-  const insights = useQuery(api.insights.getInsights,  {})           as InsightsData | undefined;
+  const stats     = useQuery(api.intelligence.getStats, {});
+  const trends    = useQuery(api.intelligence.getTrends, { days: 7 }) as TrendsData   | undefined;
+  const insights  = useQuery(api.insights.getInsights,  {})           as InsightsData | undefined;
+  const hookStats = useQuery(api.intelligence.getHookStats, { days: 30 });
 
   const isLoading = stats === undefined || trends === undefined;
 
@@ -97,6 +108,14 @@ export function DashboardView() {
       {/* What the system is learning */}
       {insights && <LearningSignal data={insights} />}
 
+      {/* Pulse Report */}
+      <PulseReportCard
+        stats={stats ?? null}
+        trends={trends ?? null}
+        hookStats={hookStats ?? null}
+        insights={insights ?? null}
+      />
+
       {/* Action queue */}
       <ActionQueue
         unanalysedCount={stats?.unanalysedCount ?? 0}
@@ -104,6 +123,44 @@ export function DashboardView() {
         onGoAnalysis={() => {}}
         onGoHub={() => router.push('/isso/community')}
       />
+
+      {/* ── Moved from TrendsView ── */}
+      {trends && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <FormatChart formats={trends.formatStats} metric={'er'} />
+            <NicheLeaderboard niches={trends.nicheStats} />
+          </div>
+
+          <HashtagCorrelation days={7} niche="all" />
+          <HooksTable hooks={trends.topHooks} />
+          <PatternInsights days={7} niche="all" />
+        </>
+      )}
+
+      {/* ── Analysis insights (moved from Analysis tab) ── */}
+      {hookStats && hookStats.scoreDistribution.some(b => b.count > 0) && (
+        <>
+          <motion.p variants={fadeUp} className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide pt-2">
+            Analysis insights
+          </motion.p>
+          <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4">
+            <HookScoreDistribution distribution={hookStats.scoreDistribution} />
+            <EmotionFrequency emotions={hookStats.emotionFrequency} />
+          </motion.div>
+          {hookStats.hookLines.length > 0 && (
+            <HookLineGallery hookLines={hookStats.hookLines} />
+          )}
+          {hookStats.hookLines.length >= 3 && (
+            <RuleCards posts={hookStats.hookLines.map(h => ({
+              hookLine:       h.hookLine,
+              hookScore:      h.hookScore,
+              engagementRate: h.engagementRate,
+              emotions:       [],
+            }))} />
+          )}
+        </>
+      )}
 
     </motion.div>
   );

@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from 'convex/react';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { containerVariants } from '../../constants';
 import { RatingSummaryBar } from './RatingSummaryBar';
 import { TopRatedPosts }    from './TopRatedPosts';
