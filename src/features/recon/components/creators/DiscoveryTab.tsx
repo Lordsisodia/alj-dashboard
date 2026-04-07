@@ -4,6 +4,18 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Zap, Trash2 } from 'lucide-react';
 import { useQuery, useMutation } from 'convex/react';
+import {
+  DndContext,
+  DragOverlay,
+  useDroppable,
+  useDraggable,
+  type DragEndEvent,
+  type DragStartEvent,
+  type DragOverEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import type { Candidate, CandidateStatus } from '../../types';
@@ -113,6 +125,48 @@ const PRE_APPROVED = [
   { handle: '@kittygoofygirl',        displayName: 'kittygoofygirl',      niche: 'GFE'       },
   { handle: '@tootinytrina',          displayName: 'tootinytrina',        niche: 'GFE'       },
 ];
+
+// ── Drag-and-drop primitives ──────────────────────────────────────────────────
+
+type ColumnId = 'unapproved' | 'approved' | 'scraped';
+
+function DraggableCard({ id, column, children }: { id: string; column: ColumnId; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id, data: { column } });
+  return (
+    <div ref={setNodeRef} style={{ opacity: isDragging ? 0 : 1, cursor: 'grab' }} {...listeners} {...attributes}>
+      {children}
+    </div>
+  );
+}
+
+function DroppableZone({ id, isOver, children }: { id: ColumnId; isOver: boolean; children: React.ReactNode }) {
+  const { setNodeRef } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} style={{ borderRadius: 12, transition: 'box-shadow 0.15s', boxShadow: isOver ? '0 0 0 2px #991b1b66' : 'none' }}>
+      {children}
+    </div>
+  );
+}
+
+// Minimal ghost card shown while dragging
+function DragGhost({ c }: { c: MappedCandidate }) {
+  return (
+    <div
+      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg shadow-xl"
+      style={{ border: '1px solid rgba(153,27,27,0.25)', backgroundColor: '#fff', opacity: 0.95, width: 180, cursor: 'grabbing' }}
+    >
+      {c.avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={c.avatarUrl.includes('r2.dev') ? c.avatarUrl : `/api/recon/avatar?url=${encodeURIComponent(c.avatarUrl)}`} alt="" className="w-5 h-5 rounded flex-shrink-0 object-cover" />
+      ) : (
+        <span className="text-[9px] font-bold flex-shrink-0 w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: 'rgba(153,27,27,0.08)', color: '#991b1b' }}>
+          {c.initials}
+        </span>
+      )}
+      <p className="text-[11px] font-medium text-neutral-700 truncate flex-1">{c.handle}</p>
+    </div>
+  );
+}
 
 // ── Inline sub-components ────────────────────────────────────────────────────
 
@@ -249,7 +303,11 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
   const [discovering,     setDiscovering]      = useState(false);
   const [seeding,         setSeeding]          = useState(false);
   const [scrapingItems,   setScrapingItems]    = useState<LiveScrapeItem[]>([]);
+  const [activeId,        setActiveId]         = useState<string | null>(null);
+  const [overColumn,      setOverColumn]       = useState<ColumnId | null>(null);
   const seededRef = useRef(false);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   // Convex
   const rawCandidates   = useQuery(api.candidates.list, {}) ?? undefined;
@@ -300,6 +358,17 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
   const approvedPending   = approved.filter(c => c.enrichStatus !== 'done' && !scrapingHandles.has(c.handle));
   const scrapedCandidates = approved.filter(c => c.enrichStatus === 'done').sort((a, b) => b.followersRaw - a.followersRaw);
   const rejected          = allMapped.filter(c => c.status === 'rejected' && matchesSearch(c));
+
+  // Header stats
+  const avgViews = scrapedCandidates.length > 0
+    ? scrapedCandidates.reduce((sum, c) => sum + (c.avgViews ?? 0), 0) / scrapedCandidates.length : 0;
+  const avgEngagement = scrapedCandidates.length > 0
+    ? scrapedCandidates.reduce((sum, c) => sum + (parseFloat(c.engagementRate) || 0), 0) / scrapedCandidates.length : 0;
+  const avgFollowers = scrapedCandidates.length > 0
+    ? scrapedCandidates.reduce((sum, c) => sum + (c.followersRaw ?? 0), 0) / scrapedCandidates.length : 0;
+  const nicheCount = new Map<string, number>();
+  approved.forEach(c => { if (c.niche) nicheCount.set(c.niche, (nicheCount.get(c.niche) ?? 0) + 1); });
+  const topNiche = [...nicheCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
 
   // Duplicate detection on pending
   const handleCount = new Map<string, number>();
@@ -389,6 +458,25 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
     setScrapingItems(prev => prev.filter(i => i.handle !== handle));
   }
 
+  async function triggerScrape(c: MappedCandidate) {
+    addScraping(c);
+    try {
+      const res = await fetch('/api/recon/enrich-candidate', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ handle: c.handle }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.relatedHandles?.length) await handleScrapeComplete(data.relatedHandles, c.handle);
+      }
+    } catch (err) {
+      console.error('[triggerScrape]', err);
+    } finally {
+      removeScraping(c.handle);
+    }
+  }
+
   // Trigger from top-bar "Run Discovery" button
   useEffect(() => {
     if (!runDiscoveryTrigger) return;
@@ -398,6 +486,60 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
 
   // Suppress unused warning — discovering used by runDiscovery
   void discovering;
+  void scheduleHours;
+  void onScheduleChange;
+
+  // ── Drag-and-drop handlers ──────────────────────────────────────────────────
+
+  const activeCandidate = activeId ? allMapped.find(c => c._convexId === activeId) ?? null : null;
+
+  function onDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id as string);
+  }
+
+  function onDragOver(event: DragOverEvent) {
+    setOverColumn((event.over?.id as ColumnId) ?? null);
+  }
+
+  async function onDragEnd(event: DragEndEvent) {
+    setActiveId(null);
+    setOverColumn(null);
+
+    const { active, over } = event;
+    if (!over) return;
+
+    const fromColumn = active.data.current?.column as ColumnId;
+    const toColumn   = over.id as ColumnId;
+    if (fromColumn === toColumn) return;
+
+    const c = allMapped.find(c => c._convexId === active.id);
+    if (!c) return;
+
+    if (fromColumn === 'unapproved' && toColumn === 'approved') {
+      await handleApprove(c);
+
+    } else if (fromColumn === 'unapproved' && toColumn === 'scraped') {
+      await handleApprove(c);
+      triggerScrape(c);
+
+    } else if (fromColumn === 'approved' && toColumn === 'unapproved') {
+      await updateStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'pending' }).catch(console.error);
+
+    } else if (fromColumn === 'approved' && toColumn === 'scraped') {
+      triggerScrape(c);
+
+    } else if (fromColumn === 'scraped' && toColumn === 'unapproved') {
+      await updateStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'pending' }).catch(console.error);
+      await setEnrichStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'idle' }).catch(console.error);
+
+    } else if (fromColumn === 'scraped' && toColumn === 'approved') {
+      await setEnrichStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'idle' }).catch(console.error);
+
+    } else if (fromColumn === 'scraped' && toColumn === 'scraped') {
+      // Re-scrape
+      triggerScrape(c);
+    }
+  }
 
   const loading = rawCandidates === undefined || seeding;
 
@@ -405,9 +547,14 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
     <div className="px-6 py-6 w-full space-y-4 overflow-visible">
       {/* Header */}
       <DiscoveryHeader
-        approvedToday={0}
-        candidatesScraped={allMapped.length}
-        contentScraped={0}
+        pending={pending.length}
+        scraped={scrapedCandidates.length}
+        rejected={rejected.length}
+        totalTracked={approved.length}
+        avgViews={avgViews}
+        avgEngagement={avgEngagement}
+        avgFollowers={avgFollowers}
+        topNiche={topNiche}
       />
 
       {/* Collapsible analytics */}
@@ -433,105 +580,124 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, showAnalyt
       </AnimatePresence>
 
       {/* 4-column Kanban pipeline */}
-      <div className="grid gap-4 items-start" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
+      <DndContext sensors={sensors} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}>
+        <div className="grid gap-4 items-start" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
 
-        {/* Col 1: Unapproved */}
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col gap-2">
-          <PipelineColumn
-            title="Unapproved"
-            count={pending.length}
-            accentColor="#dc2626"
-            columnBg="rgba(220,38,38,0.035)"
-            tooltip="Oracle scans Instagram for creators with unusually high view-to-follower ratios. Pending candidates need a decision."
-            headerExtra={
-              duplicateCount > 0 ? (
-                <button
-                  onClick={() => clearDuplicates().then(() => window.location.reload())}
-                  className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ml-auto"
-                  style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#dc2626' }}
-                >
-                  <Trash2 size={9} />
-                  {duplicateCount} dupes
-                </button>
-              ) : undefined
-            }
-          >
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-10 gap-2">
-                <Loader2 size={16} className="animate-spin" style={{ color: '#dc2626' }} />
-                <p className="text-[10px] text-neutral-400">{seeding ? 'Seeding accounts...' : 'Loading...'}</p>
-              </div>
-            ) : pending.length === 0 ? (
-              <EmptyState filter="pending" />
-            ) : (
-              <AnimatePresence mode="popLayout">
-                {pending.map(c => (
-                  <CandidateRow
-                    key={c._convexId}
-                    candidate={c}
-                    isSelected={selectedId === c._convexId}
-                    onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
-                    onApprove={e => { e.stopPropagation(); handleApprove(c); }}
-                    onReject={e => { e.stopPropagation(); handleReject(c); }}
-                  />
-                ))}
-              </AnimatePresence>
-            )}
-          </PipelineColumn>
-          <RejectedPanel candidates={rejected} />
-        </motion.div>
+          {/* Col 1: Unapproved */}
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col gap-2">
+            <DroppableZone id="unapproved" isOver={overColumn === 'unapproved'}>
+              <PipelineColumn
+                title="Unapproved"
+                count={pending.length}
+                accentColor="#dc2626"
+                columnBg="rgba(220,38,38,0.035)"
+                tooltip="Oracle scans Instagram for creators with unusually high view-to-follower ratios. Pending candidates need a decision."
+                headerExtra={
+                  duplicateCount > 0 ? (
+                    <button
+                      onClick={() => clearDuplicates().then(() => window.location.reload())}
+                      className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ml-auto"
+                      style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#dc2626' }}
+                    >
+                      <Trash2 size={9} />
+                      {duplicateCount} dupes
+                    </button>
+                  ) : undefined
+                }
+              >
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-10 gap-2">
+                    <Loader2 size={16} className="animate-spin" style={{ color: '#dc2626' }} />
+                    <p className="text-[10px] text-neutral-400">{seeding ? 'Seeding accounts...' : 'Loading...'}</p>
+                  </div>
+                ) : pending.length === 0 ? (
+                  <EmptyState filter="pending" />
+                ) : (
+                  <AnimatePresence mode="popLayout">
+                    {pending.map(c => (
+                      <DraggableCard key={c._convexId} id={c._convexId} column="unapproved">
+                        <CandidateRow
+                          candidate={c}
+                          isSelected={selectedId === c._convexId}
+                          onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
+                          onApprove={e => { e.stopPropagation(); handleApprove(c); }}
+                          onReject={e => { e.stopPropagation(); handleReject(c); }}
+                        />
+                      </DraggableCard>
+                    ))}
+                  </AnimatePresence>
+                )}
+              </PipelineColumn>
+            </DroppableZone>
+            <RejectedPanel candidates={rejected} />
+          </motion.div>
 
-        {/* Col 2: Approved — awaiting scrape */}
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.09, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
-          <PipelineColumn
-            title="Approved"
-            count={approvedPending.length}
-            accentColor="#991b1b"
-            columnBg="rgba(153,27,27,0.045)"
-            tooltip="Creators cleared for active tracking. Click Scrape to pull their full profile data."
-          >
-            {approvedPending.length === 0 ? (
-              <p className="text-[11px] text-center py-8" style={{ color: 'rgba(153,27,27,0.4)' }}>No approved candidates yet</p>
-            ) : (
-              <AnimatePresence mode="popLayout">
-                {approvedPending.map(c => (
-                  <ApprovedRow
-                    key={c._convexId}
-                    candidate={c}
-                    isScraping={scrapingItems.some(s => s.handle === c.handle)}
-                    onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
-                    onScrapeComplete={handles => handleScrapeComplete(handles, c.handle)}
-                    onScrapeStart={() => addScraping(c)}
-                    onScrapeEnd={() => removeScraping(c.handle)}
-                  />
-                ))}
-              </AnimatePresence>
-            )}
-          </PipelineColumn>
-        </motion.div>
+          {/* Col 2: Approved — awaiting scrape */}
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.09, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
+            <DroppableZone id="approved" isOver={overColumn === 'approved'}>
+              <PipelineColumn
+                title="Approved"
+                count={approvedPending.length}
+                accentColor="#991b1b"
+                columnBg="rgba(153,27,27,0.045)"
+                tooltip="Creators cleared for active tracking. Click Scrape or drag to Scraped to pull their full profile data."
+              >
+                {approvedPending.length === 0 ? (
+                  <p className="text-[11px] text-center py-8" style={{ color: 'rgba(153,27,27,0.4)' }}>No approved candidates yet</p>
+                ) : (
+                  <AnimatePresence mode="popLayout">
+                    {approvedPending.map(c => (
+                      <DraggableCard key={c._convexId} id={c._convexId} column="approved">
+                        <ApprovedRow
+                          candidate={c}
+                          isScraping={scrapingItems.some(s => s.handle === c.handle)}
+                          onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
+                          onScrapeComplete={handles => handleScrapeComplete(handles, c.handle)}
+                          onScrapeStart={() => addScraping(c)}
+                          onScrapeEnd={() => removeScraping(c.handle)}
+                        />
+                      </DraggableCard>
+                    ))}
+                  </AnimatePresence>
+                )}
+              </PipelineColumn>
+            </DroppableZone>
+          </motion.div>
 
-        {/* Col 3: Scraping — live */}
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
-          <ScrapingColumn liveItems={scrapingItems} columnBg="rgba(127,29,29,0.055)" />
-        </motion.div>
+          {/* Col 3: Scraping — live */}
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
+            <ScrapingColumn liveItems={scrapingItems} columnBg="rgba(127,29,29,0.055)" />
+          </motion.div>
 
-        {/* Col 4: Scraped — enriched creators */}
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.27, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
-          <PipelineColumn
-            title="Scraped"
-            count={scrapedCandidates.length}
-            accentColor="#7f1d1d"
-            columnBg="rgba(127,29,29,0.03)"
-            tooltip="Approved creators with enriched profile data pulled from Instagram."
-          >
-            {scrapedCandidates.length === 0 ? (
-              <p className="text-[11px] text-center py-8" style={{ color: 'rgba(127,29,29,0.3)' }}>Scrape an approved card to see results</p>
-            ) : (
-              scrapedCandidates.map(c => <ScrapedRow key={c._convexId} c={c} />)
-            )}
-          </PipelineColumn>
-        </motion.div>
-      </div>
+          {/* Col 4: Scraped — enriched creators */}
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.27, duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}>
+            <DroppableZone id="scraped" isOver={overColumn === 'scraped'}>
+              <PipelineColumn
+                title="Scraped"
+                count={scrapedCandidates.length}
+                accentColor="#7f1d1d"
+                columnBg="rgba(127,29,29,0.03)"
+                tooltip="Approved creators with enriched profile data pulled from Instagram."
+              >
+                {scrapedCandidates.length === 0 ? (
+                  <p className="text-[11px] text-center py-8" style={{ color: 'rgba(127,29,29,0.3)' }}>Scrape an approved card to see results</p>
+                ) : (
+                  scrapedCandidates.map(c => (
+                    <DraggableCard key={c._convexId} id={c._convexId} column="scraped">
+                      <ScrapedRow c={c} />
+                    </DraggableCard>
+                  ))
+                )}
+              </PipelineColumn>
+            </DroppableZone>
+          </motion.div>
+        </div>
+
+        {/* Drag overlay — ghost card that follows the cursor */}
+        <DragOverlay dropAnimation={{ duration: 180, easing: 'ease' }}>
+          {activeCandidate ? <DragGhost c={activeCandidate} /> : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Manual seed button - visible when no data and not loading */}
       {!loading && allMapped.length === 0 && (
