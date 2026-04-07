@@ -6,15 +6,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { FILTER_CATEGORIES } from '@/features/intelligence/filterConfig';
-import { SortPill, VisibilityPill, DEFAULT_VISIBILITY, type SortId, type VisibilityState } from '@/isso/ui/FeedControls';
+import { SortPill, VisibilityPill, DensityPill, DEFAULT_VISIBILITY, DENSITY_OPTIONS, type SortId, type VisibilityState, type DensityId } from '@/isso/ui/FeedControls';
 import { DateRangePill } from '@/isso/ui/DateRangePill';
-import { Radar, UserPlus, Upload, Play, Clock, Globe, LayoutDashboard, Zap, FileDown, XCircle, Pause, RefreshCw, Filter, Save, CalendarClock, ChevronDown } from 'lucide-react';
+import { Radar, UserPlus, Upload, Play, Clock, Globe, LayoutDashboard, Zap, FileDown, XCircle, Pause, RefreshCw, Filter, Save, CalendarClock, ChevronDown, BarChart2, Sparkles, Star, Target } from 'lucide-react';
 import type { Tab, Competitor, Candidate } from '../types';
 import { COMPETITORS } from '../constants';
-import { ALERT_THRESHOLDS } from './creators/discovery/discoveryData';
 import { DiscoveryTab } from './creators';
-import { DetailPanel } from './creators/discovery/DetailPanel';
 import { ReconModals, type ModalId, type DrawerState } from './ReconModals';
+import { StatusDropdown } from './creators/TableToolbar';
+import { STATUS_VIEWS, type StatusView } from './creators/tableUtils';
+import SuggestiveSearch from '@/components/ui/suggestive-search';
+import { useDiscoveryTab } from '../hooks/useDiscoveryTab';
+import { useLogDashboard } from '../hooks/useLogDashboard';
+import { useFeedTab } from '../hooks/useFeedTab';
+import { useCreatorsTab } from '../hooks/useCreatorsTab';
 
 const LogDashboard      = dynamic(() => import('./creators/LogDashboard').then(m => ({ default: m.LogDashboard })),           { ssr: false });
 const CreatorsTable     = dynamic(() => import('./creators/CreatorsTable').then(m => ({ default: m.CreatorsTable })),         { ssr: false });
@@ -72,84 +77,31 @@ function SchedulePicker({ value, onChange }: { value: number; onChange: (v: numb
   );
 }
 
-const ALERT_OPTIONS = [
-  { value: 5,  label: '5x'  },
-  { value: 10, label: '10x' },
-  { value: 20, label: '20x' },
-];
-
-function AlertPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const label = ALERT_OPTIONS.find(o => o.value === value)?.label ?? `${value}x`;
-
-  useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-black/[0.04] transition-colors"
-        style={{ border: '1px solid rgba(0,0,0,0.09)' }}
-      >
-        <Zap size={12} className="text-amber-500" />
-        {label}
-        <ChevronDown size={11} className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {open && (
-        <div
-          className="absolute right-0 top-full mt-1.5 z-50 rounded-xl bg-white py-1 min-w-[100px]"
-          style={{ border: '1px solid rgba(0,0,0,0.09)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
-        >
-          {ALERT_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`w-full text-left px-3 py-2 text-xs transition-colors ${opt.value === value ? 'font-semibold text-neutral-900 bg-neutral-50' : 'text-neutral-500 hover:bg-neutral-50'}`}
-            >
-              {opt.label} outlier spike
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function ReconFeaturePage() {
   const [activeTab, setActiveTab]             = useState<Tab>('log');
-  const [searchQuery, setSearchQuery]         = useState('');
-  const [showFavorites, setShowFavorites]     = useState(false);
-  const [sortBy, setSortBy]                   = useState<SortId>('newest');
-  const [visibility, setVisibility]           = useState<VisibilityState>(DEFAULT_VISIBILITY);
-  const [viewMode, setViewMode]               = useState<'grid' | 'list'>('grid');
-  const [drawer, setDrawer]                   = useState<DrawerState | null>(null);
-  const [selectedCreator, setSelectedCreator] = useState<Competitor | null>(null);
   const [modal, setModal]                     = useState<ModalId>(null);
   const [extraCandidates, setExtraCandidates] = useState<Candidate[]>([]);
   const [extraCreators, setExtraCreators]     = useState<Competitor[]>([]);
-  const [runAllTrigger, setRunAllTrigger]         = useState(0);
-  const [runDiscoveryTrigger, setRunDiscoveryTrigger] = useState(0);
-  const [scheduleHours, setScheduleHours]         = useState(6);
-  const [alertThreshold, setAlertThreshold]         = useState(10);
-  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [drawer, setDrawer]                   = useState<DrawerState | null>(null);
   function fireOnce<T>(set: (v: T[]) => void, value: T[]) { set(value); setTimeout(() => set([]), 0); }
+
+  const { sortBy, setSortBy, visibility, setVisibility, viewMode, setViewMode, columns, setColumns } = useFeedTab();
+  const { searchQuery, setSearchQuery, runDiscoveryTrigger, setRunDiscoveryTrigger, scheduleHours, setScheduleHours, showAnalytics, setShowAnalytics } = useDiscoveryTab();
+  const { runAllTrigger, setRunAllTrigger } = useLogDashboard();
+  const { creatorsStatusView, setCreatorsStatusView } = useCreatorsTab();
+  const [creatorsStatusCounts, setCreatorsStatusCounts] = useState<Record<StatusView, number>>({ all: 0, raw: 0, enriched: 0, scraped: 0, failed: 0 });
+  const [selectedCreator, setSelectedCreator] = useState<Competitor | null>(null);
+
+  const searchBar = <SuggestiveSearch onChange={v => setSearchQuery(v)} />;
 
   type DropdownItem = { id: string; label: string; icon: React.ReactNode; onClick: () => void };
 
   const dropdownItems: Record<Tab, DropdownItem[]> = {
     log: [
-      { id: 'run-all',        label: 'Run All Scrapers',    icon: <Play size={13} />,       onClick: () => setRunAllTrigger(n => n + 1) },
-      { id: 'schedule',       label: 'Schedule Scrape',     icon: <Clock size={13} />,      onClick: () => {} },
-      { id: 'pause-all',      label: 'Pause All Scrapers',  icon: <Pause size={13} />,      onClick: () => {} },
-      { id: 'export-report',  label: 'Export Report',       icon: <FileDown size={13} />,   onClick: () => {} },
+      { id: 'generate-digest',    label: 'Generate Weekly Digest',     icon: <Sparkles size={13} />,  onClick: () => {} },
+      { id: 'generate-viral',     label: 'Generate Viral Alert',        icon: <Zap size={13} />,       onClick: () => {} },
+      { id: 'generate-spotlight',  label: 'Generate Creator Spotlight', icon: <Star size={13} />,       onClick: () => {} },
+      { id: 'generate-benchmark', label: 'Generate Benchmark',          icon: <Target size={13} />,     onClick: () => {} },
     ],
     discovery: [
       { id: 'add-handle',     label: 'Add Handle Manually', icon: <UserPlus size={13} />,   onClick: () => setModal('add-handle') },
@@ -179,16 +131,15 @@ export default function ReconFeaturePage() {
         title="Recon"
         stat={{ label: 'Creators tracked', value: COMPETITORS.length }}
         searchPlaceholder="Search creators, niches..."
-        searchValue={searchQuery}
-        onSearch={setSearchQuery}
+        searchBarComponent={searchBar}
         actionLabel={
-          activeTab === 'log'       ? 'Run'           :
+          activeTab === 'log'       ? 'Generate'          :
           activeTab === 'discovery' ? 'Run Discovery' :
           activeTab === 'creators'  ? 'Add Creator'   :
           'Refresh'
         }
         actionIcon={
-          activeTab === 'log'       ? <Play size={14} />      :
+          activeTab === 'log'       ? <Sparkles size={14} />  :
           activeTab === 'discovery' ? <Zap size={14} />       :
           activeTab === 'creators'  ? <UserPlus size={14} />  :
           <RefreshCw size={14} />
@@ -212,14 +163,26 @@ export default function ReconFeaturePage() {
         filterCategories={activeTab === 'feed' ? FILTER_CATEGORIES : undefined}
         filterRightSlot={activeTab === 'discovery' ? (
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowAnalytics(v => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-black/[0.04] transition-colors"
+              style={{ border: '1px solid rgba(0,0,0,0.09)' }}
+            >
+              <BarChart2 size={12} />
+              {showAnalytics ? 'Hide' : 'Show'} analytics
+            </button>
             <SchedulePicker value={scheduleHours} onChange={setScheduleHours} />
-            <AlertPicker value={alertThreshold} onChange={setAlertThreshold} />
+          </div>
+        ) : activeTab === 'creators' ? (
+          <div className="flex items-center gap-2">
+            <StatusDropdown value={creatorsStatusView} onChange={setCreatorsStatusView} counts={creatorsStatusCounts} />
           </div>
         ) : activeTab === 'feed' ? (
           <div className="flex items-center gap-1.5">
             <SortPill value={sortBy} onChange={setSortBy} />
             <DateRangePill />
             <VisibilityPill value={visibility} onChange={setVisibility} />
+            <DensityPill value={columns} onChange={setColumns} />
           </div>
         ) : undefined}
         showViewToggle={activeTab === 'feed'}
@@ -229,15 +192,22 @@ export default function ReconFeaturePage() {
         <div className={activeTab === 'feed' ? 'px-4 py-4 w-full' : 'w-full'}>
           <AnimatePresence>
             <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
-              {activeTab === 'discovery' && <DiscoveryTab extraCandidates={extraCandidates} searchQuery={searchQuery} runDiscoveryTrigger={runDiscoveryTrigger} alertThreshold={alertThreshold} onAlertChange={setAlertThreshold} selectedCandidateId={selectedCandidateId} onSelectCandidate={(id, candidate) => { setSelectedCandidateId(id); setSelectedCandidate(candidate); }} onClearCandidate={() => { setSelectedCandidateId(null); setSelectedCandidate(null); }} />}
-              {activeTab === 'log'       && <LogDashboard extraCreators={extraCreators} runAllTrigger={runAllTrigger} />}
+              {activeTab === 'discovery' && <DiscoveryTab extraCandidates={extraCandidates} showAnalytics={showAnalytics} />}
+              {activeTab === 'log'       && <LogDashboard extraCreators={extraCreators} />}
               {activeTab === 'creators'  && (
                 selectedCreator
                   ? <CreatorDetailView creator={selectedCreator} onBack={() => setSelectedCreator(null)} />
-                  : <CreatorsTable showFavoritesOnly={showFavorites} onToggleFavorites={() => setShowFavorites(v => !v)} onOpen={setSelectedCreator} extraCreators={extraCreators} searchQuery={searchQuery} />
+                  : <CreatorsTable
+                      onOpen={setSelectedCreator}
+                      extraCreators={extraCreators}
+                      searchQuery={searchQuery}
+                      statusCounts={creatorsStatusCounts}
+                      onStatusCountsChange={setCreatorsStatusCounts}
+                    />
+                  )}
               )}
               {activeTab === 'feed' && (
-                <ReconFeedTab sortBy={sortBy} visibility={visibility} viewMode={viewMode} onPostClick={(index, posts) => setDrawer({ index, posts })} />
+                <ReconFeedTab onPostClick={(index, posts) => setDrawer({ index, posts })} onAnalyzeClick={(index, posts) => setDrawer({ index, posts, initialTab: 'ai' })} />
               )}
             </motion.div>
           </AnimatePresence>
@@ -253,23 +223,6 @@ export default function ReconFeaturePage() {
         onBulkImport={cs => fireOnce(setExtraCandidates, cs)}
         onAddCreator={c => fireOnce(setExtraCreators, [c])}
       />
-
-      <AnimatePresence>
-        {selectedCandidate && (
-          <DetailPanel
-            key={selectedCandidateId!}
-            candidate={selectedCandidate}
-            onClose={() => { setSelectedCandidateId(null); setSelectedCandidate(null); }}
-            onDecision={() => {
-              setSelectedCandidateId(null);
-              setSelectedCandidate(null);
-            }}
-          />
-        )}
-      </AnimatePresence>
-    </>
-  );
-}
     </>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ArrowUpDown, Check, Eye, Heart, PlayCircle, Bookmark, TrendingUp, Clock, ChevronDown } from 'lucide-react';
+import { ArrowUpDown, Check, Eye, Heart, PlayCircle, Bookmark, TrendingUp, Clock, ChevronDown, LayoutGrid, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ─── Sort ──────────────────────────────────────────────────────────────────────
@@ -13,7 +13,8 @@ export type SortId =
   | 'most-views'
   | 'most-saves'
   | 'top-engagement'
-  | 'trending';
+  | 'trending'
+  | 'viral';
 
 export interface SortOption {
   id: SortId;
@@ -29,6 +30,7 @@ const SORT_OPTIONS: SortOption[] = [
   { id: 'most-saves',   label: 'Most Saves',       icon: <Bookmark size={12} />    },
   { id: 'top-engagement', label: 'Top Engagement', icon: <TrendingUp size={12} />  },
   { id: 'trending',     label: 'Trending',         icon: <TrendingUp size={12} />  },
+  { id: 'viral',        label: 'Viral First',     icon: <Zap size={12} />        },
 ];
 
 export function SortPill({
@@ -192,6 +194,69 @@ export function VisibilityPill({
           <ToggleRow label="Like Count"     checked={value.likeCount}    onChange={v => set('likeCount', v)}    />
           <ToggleRow label="View Count"     checked={value.viewCount}    onChange={v => set('viewCount', v)}    />
           <ToggleRow label="Save Count"     checked={value.saveCount}    onChange={v => set('saveCount', v)}    />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Density ────────────────────────────────────────────────────────────────────
+
+export const DENSITY_OPTIONS = [2, 3, 4, 6, 8] as const;
+export type DensityId = typeof DENSITY_OPTIONS[number];
+
+export function DensityPill({
+  value,
+  onChange,
+}: {
+  value: DensityId;
+  onChange: (id: DensityId) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={cn(
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors select-none',
+          open ? 'bg-black/[0.07] text-neutral-800' : 'text-neutral-600 hover:text-neutral-800 hover:bg-black/[0.04]',
+        )}
+        style={{ border: '1px solid rgba(0,0,0,0.09)' }}
+      >
+        <LayoutGrid size={12} />
+        {value}
+        <ChevronDown size={10} className={cn('transition-transform duration-150', open && 'rotate-180')} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-[calc(100%+6px)] w-32 rounded-xl py-1 z-50"
+          style={{
+            backgroundColor: '#fff',
+            border: '1px solid rgba(0,0,0,0.09)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          }}
+        >
+          {DENSITY_OPTIONS.map(n => (
+            <button
+              key={n}
+              onClick={() => { onChange(n); setOpen(false); }}
+              className="w-full flex items-center justify-between px-3 py-2.5 text-xs text-neutral-700 hover:bg-black/[0.04] transition-colors"
+            >
+              <span>{n} cols</span>
+              {value === n && <Check size={11} className="text-neutral-500 flex-shrink-0" />}
+            </button>
+          ))}
         </div>
       )}
     </div>

@@ -14,6 +14,7 @@ export interface LiveScrapeItem {
 interface Props {
   liveItems?: LiveScrapeItem[];
   columnBg?: string;
+  glowKey?: string | number;
 }
 
 function LiveScrapeRow({ item }: { item: LiveScrapeItem }) {
@@ -62,9 +63,13 @@ function LiveScrapeRow({ item }: { item: LiveScrapeItem }) {
   );
 }
 
-export function ScrapingColumn({ liveItems = [], columnBg = '#fff' }: Props) {
+export function ScrapingColumn({ liveItems = [], columnBg = '#fff', glowKey }: Props) {
   return (
-    <div
+    <motion.div
+      key={glowKey}
+      initial={{ boxShadow: '0 0 0 0 #dc262600' }}
+      animate={{ boxShadow: ['0 0 0 0 #dc262600', '0 0 14px 3px #dc262666', '0 0 0 0 #dc262600'] }}
+      transition={{ duration: 0.9, ease: 'easeOut' }}
       className="rounded-xl overflow-hidden"
       style={{ border: '1px solid rgba(0,0,0,0.07)', borderLeft: '2px solid #dc2626', backgroundColor: columnBg }}
     >
@@ -102,6 +107,6 @@ export function ScrapingColumn({ liveItems = [], columnBg = '#fff' }: Props) {
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }

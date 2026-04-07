@@ -9,14 +9,28 @@ export function fmtNum(n: number): string {
   return String(n);
 }
 
+export interface NicheERMap {
+  [niche: string]: number; // avg ER for niche
+}
+
+export function nicheERDelta(er: number, niche: string, nicheERMap: NicheERMap): string {
+  const avg = nicheERMap[niche];
+  if (avg == null || avg === 0) return '';
+  const delta = er - avg;
+  const sign  = delta >= 0 ? '+' : '';
+  return `${sign}${(delta * 100).toFixed(1)}%`;
+}
+
 export function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
-  const d    = Math.floor(diff / 86_400_000);
-  if (d === 0) {
-    const h = Math.floor(diff / 3_600_000);
-    return h === 0 ? 'Just now' : `${h}h`;
-  }
-  if (d < 30) return `${d}d`;
+  const s = Math.floor(diff / 1_000);
+  if (s < 60)       return 'Just now';
+  const m = Math.floor(s / 60);
+  if (m < 60)       return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24)       return `${h}h`;
+  const d = Math.floor(h / 24);
+  if (d < 7)        return `${d}d`;
   return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
@@ -34,6 +48,28 @@ export function avatarColor(handle: string): string {
 
 export function truncateId(id: string): string {
   return id.slice(-12).toUpperCase();
+}
+
+// ── Creator velocity ────────────────────────────────────────────────────────────
+
+export interface CreatorStats {
+  handle:         string;
+  postsThisWeek: number;
+  trendBuckets:  number[]; // [day-7, day-6, ..., day-0]
+}
+
+export function creatorVelocity(handle: string, stats: CreatorStats[]): { direction: 'up' | 'down' | 'same'; pct: number } {
+  const s = stats.find(s => s.handle === handle);
+  if (!s || s.trendBuckets.length < 14) return { direction: 'same', pct: 0 };
+
+  const thisWeek  = s.trendBuckets.slice(-7).reduce((a, b) => a + b, 0);
+  const lastWeek  = s.trendBuckets.slice(-14, -7).reduce((a, b) => a + b, 0);
+  if (lastWeek === 0) return thisWeek > 0 ? { direction: 'up', pct: 100 } : { direction: 'same', pct: 0 };
+
+  const pct = Math.round(((thisWeek - lastWeek) / lastWeek) * 100);
+  if (pct > 5)  return { direction: 'up',   pct };
+  if (pct < -5) return { direction: 'down', pct: Math.abs(pct) };
+  return { direction: 'same', pct: 0 };
 }
 
 // ── Day grouping ────────────────────────────────────────────────────────────────

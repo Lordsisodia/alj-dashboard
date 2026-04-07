@@ -7,24 +7,29 @@ import { useFeed } from '../../hooks/useFeed';
 import { PostCard } from './PostCard';
 import { PostListItem, PostListHeader } from './PostListItem';
 import { SkeletonCard } from './SkeletonCard';
-import type { SortId, VisibilityState, DrawerPost } from '../../types';
+import type { DensityId, SortId, VisibilityState, DrawerPost } from '../../types';
+import type { CreatorStats, NicheERMap } from '../../utils';
 
 interface Props {
-  sortBy:       SortId;
-  visibility:   VisibilityState;
-  viewMode:     'grid' | 'list';
-  handle?:      string;
-  niche?:       string;
-  contentType?: string;
-  onPostClick:  (index: number, posts: DrawerPost[]) => void;
+  sortBy:          SortId;
+  visibility:      VisibilityState;
+  viewMode:        'grid' | 'list';
+  columns:         DensityId;
+  handle?:        string;
+  niche?:         string;
+  contentType?:   string;
+  onPostClick:    (index: number, posts: DrawerPost[]) => void;
+  onAnalyzeClick?: (index: number, posts: DrawerPost[]) => void;
+  creatorStatsMap?: Record<string, CreatorStats>;
+  nicheERMap?:     NicheERMap;
 }
 
-export function FeedView({ sortBy, visibility, viewMode, handle, niche, contentType, onPostClick }: Props) {
+export function FeedView({ sortBy, visibility, viewMode, columns, handle, niche, contentType, onPostClick, onAnalyzeClick, creatorStatsMap, nicheERMap }: Props) {
   const { posts, isLoading, isEmpty } = useFeed({ sortBy, handle, niche, contentType });
 
   if (isLoading) {
     return (
-      <div className="columns-2 sm:columns-3 lg:columns-4 gap-4">
+      <div className="gap-4" style={{ columns: viewMode === 'grid' ? columns : undefined }}>
         {Array.from({ length: 12 }).map((_, i) => (
           <div key={i} className="break-inside-avoid mb-4"><SkeletonCard tall={i % 3 === 0} /></div>
         ))}
@@ -57,10 +62,23 @@ export function FeedView({ sortBy, visibility, viewMode, handle, niche, contentT
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="columns-2 sm:columns-3 lg:columns-4 gap-4">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="gap-4"
+      style={{ columns: viewMode === 'grid' ? columns : undefined }}
+    >
       {drawerPosts.map((post, i) => (
         <div key={post._id} className="break-inside-avoid mb-4">
-          <PostCard post={post as any} visibility={visibility} onPostClick={() => onPostClick(i, drawerPosts)} />
+          <PostCard
+            post={post as any}
+            visibility={visibility}
+            onPostClick={() => onPostClick(i, drawerPosts)}
+            onAnalyzeClick={onAnalyzeClick ? () => onAnalyzeClick(i, drawerPosts) : undefined}
+            creatorStatsMap={creatorStatsMap}
+            nicheERMap={nicheERMap}
+          />
         </div>
       ))}
     </motion.div>

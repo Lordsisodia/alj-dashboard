@@ -143,7 +143,7 @@ export function DetailPanel({ candidate, onClose, onDecision }: Props) {
     : candidate.outlierRatio >= 1.0 ? '#ef4444'
     : '#991b1b';
 
-  return (
+  const panel = (
     <>
       {/* Backdrop */}
       <motion.div
@@ -259,9 +259,14 @@ export function DetailPanel({ candidate, onClose, onDecision }: Props) {
             ))}
           </div>
 
-          {/* Discovered via */}
-          <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 px-0.5">
-            <Radar size={10} className="flex-shrink-0" />
+          {/* Bio */}
+          {candidate.bio && (
+            <p className="text-[11px] text-neutral-500 leading-snug">{candidate.bio}</p>
+          )}
+
+          {/* Source */}
+          <div className="flex items-center gap-1.5 text-[10px] text-neutral-400">
+            <Radar size={10} />
             {candidate.suggestedBy
               ? <span>via <span className="font-semibold text-neutral-600">{candidate.suggestedBy}</span></span>
               : <span>Added manually</span>}
@@ -323,4 +328,6 @@ export function DetailPanel({ candidate, onClose, onDecision }: Props) {
       </motion.div>
     </>
   );
+
+  return createPortal(panel, document.body);
 }

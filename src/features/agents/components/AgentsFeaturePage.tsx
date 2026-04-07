@@ -1,22 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { Bot, Activity, FileText, Plus, LayoutDashboard, Network, History, Repeat, CircleDot, Inbox, DollarSign } from 'lucide-react';
 import type { Tab } from '../types';
 import { useAgentTasks } from '../hooks';
-import { ActivityView } from './activity';
-import { ReportsView } from './reports';
-import { RequestsView } from './requests';
-import { OverviewView } from './overview/OverviewView';
-import { OrgChartView } from './orgchart/OrgChartView';
-import { ActivityLogView } from './log/ActivityLogView';
-import { RoutinesView } from './routines/RoutinesView';
-import { IssuesView } from './issues/IssuesView';
-import { InboxView } from './inbox/InboxView';
-import { CostsView } from './costs/CostsView';
+
+// All sub-views are lazy — only the active tab's code ships to the client
+const OverviewView = dynamic(() => import('./overview/OverviewView'), { ssr: false });
+const OrgChartView = dynamic(() => import('./orgchart/OrgChartView'), { ssr: false });
+const ActivityView = dynamic(() => import('./activity'), { ssr: false });
+const ActivityLogView = dynamic(() => import('./log/ActivityLogView'), { ssr: false });
+const RoutinesView = dynamic(() => import('./routines/RoutinesView'), { ssr: false });
+const IssuesView = dynamic(() => import('./issues/IssuesView'), { ssr: false });
+const InboxView = dynamic(() => import('./inbox/InboxView'), { ssr: false });
+const CostsView = dynamic(() => import('./costs/CostsView'), { ssr: false });
+const ReportsView = dynamic(() => import('./reports'), { ssr: false });
+const RequestsView = dynamic(() => import('./requests'), { ssr: false });
 
 function StepNum({ n }: { n: number }) {
   return (

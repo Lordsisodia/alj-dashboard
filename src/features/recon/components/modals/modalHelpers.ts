@@ -1,6 +1,6 @@
 import type { Candidate, Competitor } from '../../types';
 
-// ── Constants ──────────────────────────────────────────────────────────────────
+// -- Constants ------------------------------------------------------------------
 
 export const NICHES = ['GFE', 'Fitness', 'Lifestyle', 'ABG', 'Alt', 'Cosplay'];
 
@@ -9,12 +9,12 @@ export const NICHE_COLORS: Record<string, string> = {
   ABG: '#833ab4', Alt: '#6b7280', Cosplay: '#fcaf45', Unknown: '#9ca3af',
 };
 
-// ── Shared input styles ────────────────────────────────────────────────────────
+// -- Shared input styles --------------------------------------------------------
 
 export const inputCls = 'w-full px-3 py-2.5 rounded-xl text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none transition-colors';
 export const inputStyle = { border: '1px solid rgba(0,0,0,0.12)' };
 
-// ── Factory helpers ────────────────────────────────────────────────────────────
+// -- Factory helpers ------------------------------------------------------------
 
 function toInitials(handle: string): string {
   const s = handle.replace(/^@/, '').replace(/[._-]/g, ' ').trim();
@@ -51,6 +51,7 @@ export function makeCandidate(handle: string, niche: string): Candidate {
     engagementRate: '-',
     postsPerWeek: 0,
     suggestedBy: null,
+    source: 'manual',
     discoveredAt: 'Just now',
     status: 'pending',
     sampleGradients: autoGradients(color),

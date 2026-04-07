@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BadgeTag } from '@/components/ui/badge-tag';
+import { ViewToggle } from '@/components/ui/view-toggle';
 // CreatePresetModal is only shown when user opens Saved Filters and clicks "Create preset"  -  lazy load
 const CreatePresetModal = dynamic(() => import('@/isso/ui/CreatePresetModal').then(m => ({ default: m.CreatePresetModal })), { ssr: false });
 
@@ -356,7 +357,7 @@ function AddFilterPill({ categories, onFilterSelect }: { categories: FilterCateg
 
 export interface ContentTab {
   id: string;
-  label: string;
+  label: ReactNode;
   icon?: ReactNode;
 }
 
@@ -400,6 +401,8 @@ export interface ContentPageShellProps {
   // Search bar - controlled
   searchValue?: string;
   onSearch?: (q: string) => void;
+  // Custom search bar component (e.g. fancy animated SearchBar) — replaces native input
+  searchBarComponent?: ReactNode;
   // View toggle (grid / list)  -  controlled
   showViewToggle?: boolean;
   viewMode?: 'grid' | 'list';
@@ -432,6 +435,7 @@ export function ContentPageShell({
   filterRightSlot,
   searchValue,
   onSearch,
+  searchBarComponent,
   showViewToggle = false,
   viewMode: viewModeProp,
   onViewModeChange,
@@ -473,24 +477,28 @@ export function ContentPageShell({
 
         {/* Centre: search */}
         <div className="absolute left-1/2 -translate-x-1/2 w-80 pointer-events-none">
-          <div
-            className="w-full flex items-center gap-2 px-3 h-9 rounded-xl pointer-events-auto"
-            style={{ backgroundColor: '#f5f5f4', border: '1px solid rgba(0,0,0,0.07)' }}
-          >
-            <Search size={13} className="text-neutral-400 flex-shrink-0" />
-            <input
-              className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 bg-transparent outline-none min-w-0"
-              placeholder={searchPlaceholder}
-              value={searchValue ?? ''}
-              onChange={e => onSearch?.(e.target.value)}
-            />
-            <kbd
-              className="text-[10px] text-neutral-400 px-1.5 py-0.5 rounded flex-shrink-0"
-              style={{ backgroundColor: 'rgba(0,0,0,0.05)', fontFamily: 'inherit' }}
+          {searchBarComponent ? (
+            <div className="pointer-events-auto">{searchBarComponent}</div>
+          ) : (
+            <div
+              className="w-full flex items-center gap-2 px-3 h-9 rounded-xl pointer-events-auto"
+              style={{ backgroundColor: '#f5f5f4', border: '1px solid rgba(0,0,0,0.07)' }}
             >
-              {searchShortcut}
-            </kbd>
-          </div>
+              <Search size={13} className="text-neutral-400 flex-shrink-0" />
+              <input
+                className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 bg-transparent outline-none min-w-0"
+                placeholder={searchPlaceholder}
+                value={searchValue ?? ''}
+                onChange={e => onSearch?.(e.target.value)}
+              />
+              <kbd
+                className="text-[10px] text-neutral-400 px-1.5 py-0.5 rounded flex-shrink-0"
+                style={{ backgroundColor: 'rgba(0,0,0,0.05)', fontFamily: 'inherit' }}
+              >
+                {searchShortcut}
+              </kbd>
+            </div>
+          )}
         </div>
 
         <div className="flex-1" />
@@ -618,29 +626,14 @@ export function ContentPageShell({
               )}
 
               {showViewToggle && (
-                <div
-                  className="flex items-center rounded-lg overflow-hidden"
-                  style={{ border: '1px solid rgba(0,0,0,0.09)' }}
-                >
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={cn(
-                      'flex items-center justify-center w-7 h-7 transition-colors',
-                      viewMode === 'grid' ? 'bg-black/[0.06] text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'
-                    )}
-                  >
-                    <LayoutGrid size={13} />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={cn(
-                      'flex items-center justify-center w-7 h-7 transition-colors',
-                      viewMode === 'list' ? 'bg-black/[0.06] text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'
-                    )}
-                  >
-                    <List size={13} />
-                  </button>
-                </div>
+                <ViewToggle
+                  value={viewMode}
+                  onChange={setViewMode}
+                  options={[
+                    { value: 'grid', icon: <LayoutGrid size={11} /> },
+                    { value: 'list', icon: <List size={11} /> },
+                  ]}
+                />
               )}
             </div>
           )}

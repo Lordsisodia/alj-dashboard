@@ -1,15 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, Sparkles } from 'lucide-react';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
-import DashboardFeaturePage from './dashboard/DashboardFeaturePage';
-import ScenesFeaturePage from './scenes/ScenesFeaturePage';
-import LivePipelinePage from './generate/LivePipelinePage';
-import GalleryFeaturePage from './gallery/GalleryFeaturePage';
-import ContentGenModelsFeaturePage from './ModelsFeaturePage';
+
+// All sub-pages are lazy — only the active tab's code ships to the client
+const DashboardFeaturePage = dynamic(() => import('./dashboard/DashboardFeaturePage'), { ssr: false });
+const ScenesFeaturePage = dynamic(() => import('./scenes/ScenesFeaturePage'), { ssr: false });
+const LivePipelinePage = dynamic(() => import('./generate/LivePipelinePage'), { ssr: false });
+const GalleryFeaturePage = dynamic(() => import('./gallery/GalleryFeaturePage'), { ssr: false });
+const ContentGenModelsFeaturePage = dynamic(() => import('./ModelsFeaturePage'), { ssr: false });
 
 type Tab = 'dashboard' | 'scenes' | 'generate' | 'gallery' | 'models';
 

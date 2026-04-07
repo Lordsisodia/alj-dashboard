@@ -28,7 +28,7 @@ const testimonials: Testimonial[] = [
 ];
 
 export default function SignInRoute() {
-  const { signIn, isLoaded } = useSignIn();
+  const signIn = useSignIn();
   const { setActive } = useClerk();
   const { isSignedIn } = useAuth();
   const router = useRouter();
@@ -42,7 +42,7 @@ export default function SignInRoute() {
 
   async function handleSignIn(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!isLoaded || !signIn) return;
+    if (!signIn) return;
     const data = new FormData(e.currentTarget);
     setLoading(true);
     setError('');
@@ -64,7 +64,7 @@ export default function SignInRoute() {
   }
 
   async function handleGoogleSignIn() {
-    if (!isLoaded || !signIn) return;
+    if (!signIn) return;
     try {
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',

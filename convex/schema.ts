@@ -590,4 +590,26 @@ export default defineSchema({
     }),
   }),
 
+  // -- Creator briefs (Recon — OpenRouter AI-generated profiles) ------------------------
+  creatorBriefs: defineTable({
+    handle:           v.string(),
+    displayName:       v.string(),
+    niche:            v.string(),
+    // OpenRouter output
+    contentScore:     v.number(),       // 1-10
+    consistencyScore: v.number(),       // 1-10
+    monetizationRating: v.number(),      // 1-10
+    topHooks:         v.array(v.string()),
+    contentPatterns:  v.array(v.string()),
+    overallVerdict:   v.string(),       // HIRE | WATCH | PASS
+    recommendation:   v.string(),
+    // Raw source data snapshot at time of generation
+    followerCount:    v.number(),
+    engagementRate:  v.number(),
+    postsThisWeek:    v.number(),
+    source:           v.string(),
+    generatedAt:      v.number(),
+  }).index('by_handle', ['handle'])
+    .index('by_generated_at', ['generatedAt']),
+
 });

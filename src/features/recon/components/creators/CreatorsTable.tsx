@@ -8,28 +8,34 @@ import { Heart, SearchX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { COMPETITORS, computeProfileHealth } from '../../constants';
 import type { Competitor } from '../../types';
-import { DEFAULT_FILTERS, type CreatorFilters } from './CreatorsFilterBar';
+import { DEFAULT_FILTERS, POSTS_OPTS, type CreatorFilters } from './CreatorsFilterBar';
 import { TableToolbar } from './TableToolbar';
 import { ColumnFilterHeader } from './ColumnFilterHeader';
 import { CreatorRow } from './CreatorRow';
 import { CreatorCard } from './CreatorCard';
 import { BulkActionBar } from './BulkActionBar';
-import { COLUMN_DEFS, DEFAULT_COL_VISIBILITY, buildGridCols, computeTableWidth, COL_BORDER, applyFilters, applyStatusFilter, STATUS_VIEWS, relativeTime, formatFollowers, NICHE_OPTS, FOLLOW_OPTS, FOLLOWING_OPTS, POSTS_OPTS, ENG_OPTS, SCORE_OPTS, HEALTH_OPTS, type ColVisibility, type StatusView } from './tableUtils';
+import { COLUMN_DEFS, DEFAULT_COL_VISIBILITY, buildGridCols, computeTableWidth, COL_BORDER, applyFilters, applyStatusFilter, STATUS_VIEWS, relativeTime, formatFollowers, NICHE_OPTS, HEALTH_OPTS, type ColVisibility, type StatusView } from './tableUtils';
 import { useEnrich } from '../../hooks/useEnrich';
+import { useCreatorsTab } from '../../hooks/useCreatorsTab';
 
 interface CreatorsTableProps {
-  showFavoritesOnly: boolean;
-  onToggleFavorites: () => void;
   onOpen: (c: Competitor) => void;
   extraCreators?: Competitor[];
   searchQuery?: string;
+  statusCounts: Record<StatusView, number>;
+  onStatusCountsChange: (c: Record<StatusView, number>) => void;
 }
 
-export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, extraCreators = [], searchQuery = '' }: CreatorsTableProps) {
+export function CreatorsTable({ onOpen, extraCreators = [], searchQuery = '', statusCounts, onStatusCountsChange }: CreatorsTableProps) {
+  const { showFavorites, setShowFavorites, creatorsStatusView, setCreatorsStatusView, selectedCreator, setSelectedCreator } = useCreatorsTab();
   const [creators, setCreators]     = useState<Competitor[]>([...extraCreators, ...COMPETITORS]);
   const [filters, setFilters]       = useState<CreatorFilters>(DEFAULT_FILTERS);
   const [selected, setSelected]     = useState<Set<number>>(new Set());
   const [viewMode, setViewMode]     = useState<'list' | 'grid'>('list');
+  const showFavoritesOnly = showFavorites;
+  const onToggleFavorites = () => setShowFavorites(v => !v);
+  const statusView = creatorsStatusView;
+  const onStatusViewChange = setCreatorsStatusView;
   const [colVis, setColVis]         = useState<ColVisibility>(() => {
     if (typeof window === 'undefined') return DEFAULT_COL_VISIBILITY;
     try {
@@ -37,7 +43,6 @@ export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, ex
       return saved ? { ...DEFAULT_COL_VISIBILITY, ...JSON.parse(saved) } : DEFAULT_COL_VISIBILITY;
     } catch { return DEFAULT_COL_VISIBILITY; }
   });
-  const [statusView, setStatusView] = useState<StatusView>('all');
   const { enrich, isEnriching }     = useEnrich();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -59,34 +64,46 @@ export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, ex
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [extraCreators]);
 
-  const liveStats = useQuery(api.intelligence.getCreatorStats, {});
+  const liveStats  = useQuery(api.intelligence.getCreatorStats, {});
+  const candidates = useQuery(api.candidates.list, { status: 'approved' });
+
   const merged = creators.map(c => {
     const live = liveStats?.find(s => s.handle === c.handle);
-    if (!live) return c;
+    const cand = candidates?.find(y => y.handle === c.handle);
     return {
       ...c,
-      followers:      live.followerCount > 0 ? formatFollowers(live.followerCount) : c.followers,
-      engagementRate: live.avgEngagement  > 0 ? `${live.avgEngagement}%`           : c.engagementRate,
-      postsPerWeek:   live.postsThisWeek  >= 0 ? live.postsThisWeek                : c.postsPerWeek,
-      trend:          live.trendBuckets.some((v: number) => v > 0) ? live.trendBuckets : c.trend,
-      lastScraped:    relativeTime(live.lastScrapedAt ?? live.lastPostAt),
-      ...(live.bio                           && { bio:                    live.bio                   }),
-      ...(live.avatarUrl                     && { profilePicUrl:          live.avatarUrl             }),
-      ...(live.verified          != null        && { verified:            live.verified              }),
-      ...(live.followsCount      != null        && { followsCount:        live.followsCount          }),
-      ...(live.postsCount        != null        && { postsCount:          live.postsCount            }),
-      ...(live.externalUrl                   && { externalUrl:            live.externalUrl           }),
-      ...(live.isBusinessAccount != null        && { isBusinessAccount:   live.isBusinessAccount     }),
-      ...(live.isProfessionalAccount != null    && { isProfessionalAccount: live.isProfessionalAccount }),
-      ...(live.businessCategoryName          && { businessCategoryName:   live.businessCategoryName  }),
-      ...(live.businessEmail                 && { businessEmail:          live.businessEmail         }),
-      ...(live.isPrivate         != null        && { isPrivate:           live.isPrivate             }),
-      ...(live.igtvVideoCount    != null        && { igtvVideoCount:      live.igtvVideoCount        }),
-      ...(live.instagramId                   && { instagramId:            live.instagramId           }),
-      _totalPosts:   live.totalPosts,
-      _totalLikes:   live.totalLikes,
-      _totalViews:   live.totalViews,
-      _enrichStatus: live.enrichStatus,
+      ...(live && {
+        followers:      live.followerCount > 0 ? formatFollowers(live.followerCount) : c.followers,
+        engagementRate: live.avgEngagement  > 0 ? `${live.avgEngagement}%`           : c.engagementRate,
+        postsPerWeek:   live.postsThisWeek  >= 0 ? live.postsThisWeek                : c.postsPerWeek,
+        trend:          live.trendBuckets.some((v: number) => v > 0) ? live.trendBuckets : c.trend,
+        lastScraped:    relativeTime(live.lastScrapedAt ?? live.lastPostAt),
+        ...(live.bio                           && { bio:                    live.bio                   }),
+        ...(live.avatarUrl                     && { profilePicUrl:          live.avatarUrl             }),
+        ...(live.verified          != null        && { verified:            live.verified              }),
+        ...(live.followsCount      != null        && { followsCount:        live.followsCount          }),
+        ...(live.postsCount        != null        && { postsCount:          live.postsCount            }),
+        ...(live.externalUrl                   && { externalUrl:            live.externalUrl           }),
+        ...(live.isBusinessAccount != null        && { isBusinessAccount:   live.isBusinessAccount     }),
+        ...(live.isProfessionalAccount != null    && { isProfessionalAccount: live.isProfessionalAccount }),
+        ...(live.businessCategoryName          && { businessCategoryName:   live.businessCategoryName  }),
+        ...(live.businessEmail                 && { businessEmail:          live.businessEmail         }),
+        ...(live.isPrivate         != null        && { isPrivate:           live.isPrivate             }),
+        ...(live.igtvVideoCount    != null        && { igtvVideoCount:      live.igtvVideoCount        }),
+        ...(live.instagramId                   && { instagramId:            live.instagramId           }),
+        _totalPosts:   live.totalPosts,
+        _totalLikes:   live.totalLikes,
+        _totalViews:   live.totalViews,
+        _enrichStatus: live.enrichStatus,
+        postsThisWeek: live.postsThisWeek,
+      }),
+      ...(cand && {
+        aiScore:          cand.aiScore,
+        aiVerdict:        cand.aiVerdict,
+        aiReason:         cand.aiReason,
+        highlightReelCount: cand.highlightReelCount,
+        source:           cand.source,
+      }),
     };
   });
 
@@ -97,9 +114,12 @@ export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, ex
   );
 
   // Status counts (computed before status filter applied)
-  const statusCounts = Object.fromEntries(
+  const computedStatusCounts = Object.fromEntries(
     STATUS_VIEWS.map(sv => [sv.key, applyStatusFilter(searchFiltered as any, sv.key).length])
   ) as Record<StatusView, number>;
+
+  // Sync counts to parent so StatusDropdown stays in sync
+  useEffect(() => { onStatusCountsChange(computedStatusCounts); }, [computedStatusCounts, onStatusCountsChange]);
 
   const statusFiltered = applyStatusFilter(searchFiltered as any, statusView);
   const filtered       = applyFilters(statusFiltered as any, filters);
@@ -114,7 +134,7 @@ export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, ex
     overscan: 8,
   });
 
-  // ── Row interactions ──────────────────────────────────────────────────────────
+  // -- Row interactions ----------------------------------------------------------
   function toggleSelect(id: number, e: React.MouseEvent) {
     e.stopPropagation();
     setSelected(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
@@ -128,7 +148,7 @@ export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, ex
     setCreators(prev => prev.map(c => c.id === id ? { ...c, status: c.status === 'active' ? 'paused' : 'active' } : c));
   }
 
-  // ── Select-all ────────────────────────────────────────────────────────────────
+  // -- Select-all ----------------------------------------------------------------
   const allFilteredIds   = filtered.map(c => c.id);
   const allSelected      = allFilteredIds.length > 0 && allFilteredIds.every(id => selected.has(id));
   const someSelected     = allFilteredIds.some(id => selected.has(id));
@@ -141,7 +161,7 @@ export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, ex
     }
   }
 
-  // ── Bulk actions ──────────────────────────────────────────────────────────────
+  // -- Bulk actions --------------------------------------------------------------
   function bulkEnrich() {
     const handles = filtered.filter(c => selected.has(c.id)).map(c => c.handle);
     handles.forEach(h => enrich(h));
@@ -155,7 +175,7 @@ export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, ex
 
   const enrichingCount = filtered.filter(c => selected.has(c.id) && isEnriching(c.handle)).length;
 
-  // ── Header helpers ────────────────────────────────────────────────────────────
+  // -- Header helpers ------------------------------------------------------------
   const hdrCell = { borderRight: COL_BORDER };
   const hdrBase = 'flex items-center justify-center h-full text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400';
 
@@ -175,7 +195,7 @@ export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, ex
         colVis={colVis}
         onColVisChange={handleColVisChange}
         statusView={statusView}
-        onStatusViewChange={setStatusView}
+        onStatusViewChange={onStatusViewChange}
         statusCounts={statusCounts}
       />
 
@@ -228,17 +248,23 @@ export function CreatorsTable({ showFavoritesOnly, onToggleFavorites, onOpen, ex
             <div className={hdrBase} style={hdrCell}>#</div>
             <ColumnFilterHeader label="Creator" style={hdrCell} />
             {visibleCols.map(col => {
-              if (col.key === 'health')    return <ColumnFilterHeader key={col.key} label="Profile Health" options={HEALTH_OPTS}    value={filters.health}    onChange={v => set('health',    v as string)}   style={hdrCell} />;
-              if (col.key === 'niche')     return <ColumnFilterHeader key={col.key} label="Niche"          options={NICHE_OPTS}     multi value={filters.niche} onChange={v => set('niche',  v as string[])} style={hdrCell} />;
-              if (col.key === 'followers') return <ColumnFilterHeader key={col.key} label="Followers"      options={FOLLOW_OPTS}    value={filters.followers} align="right" onChange={v => set('followers', v as string)} style={hdrCell} />;
-              if (col.key === 'following') return <ColumnFilterHeader key={col.key} label="Following"      options={FOLLOWING_OPTS} value={filters.following} align="right" onChange={v => set('following', v as string)} style={hdrCell} />;
-              if (col.key === 'posts')     return <ColumnFilterHeader key={col.key} label="Posts"          options={POSTS_OPTS}     value={filters.posts}     align="right" onChange={v => set('posts',     v as string)} style={hdrCell} />;
-              if (col.key === 'engRate')   return <ColumnFilterHeader key={col.key} label="Eng. Rate"      options={ENG_OPTS}       value={filters.engRate}   align="right" onChange={v => set('engRate',   v as string)} style={hdrCell} />;
-              if (col.key === 'score')     return <ColumnFilterHeader key={col.key} label="Score"          options={SCORE_OPTS}     value={filters.score}               onChange={v => set('score',     v as string)} style={hdrCell} />;
-              if (col.key === 'trend')     return <ColumnFilterHeader key={col.key} label="Trend" style={hdrCell} />;
+              if (col.key === 'health')    return <ColumnFilterHeader key={col.key} label="Profile" options={HEALTH_OPTS} value={filters.health} onChange={v => set('health', v as string)} style={hdrCell} />;
+              if (col.key === 'niche')     return <ColumnFilterHeader key={col.key} label="Niche" options={NICHE_OPTS} multi value={filters.niche} onChange={v => set('niche', v as string[])} style={hdrCell} />;
+              if (col.key === 'followers') return <div key={col.key} className={`${hdrBase} justify-end pr-3`} style={hdrCell}>Followers</div>;
+              if (col.key === 'following') return <div key={col.key} className={`${hdrBase} justify-end pr-3`} style={hdrCell}>Following</div>;
+              if (col.key === 'posts')     return <ColumnFilterHeader key={col.key} label="Posts" options={POSTS_OPTS} value={filters.posts} align="right" onChange={v => set('posts', v as string)} style={hdrCell} />;
+              if (col.key === 'engRate')  return <div key={col.key} className={`${hdrBase} justify-end pr-3`} style={hdrCell}>Eng. Rate</div>;
+              if (col.key === 'score')     return <div key={col.key} className={hdrBase} style={hdrCell}>Score</div>;
+              if (col.key === 'postsThisWeek') return <div key={col.key} className={hdrBase} style={hdrCell}>Posts/Wk</div>;
               if (col.key === 'category')  return <div key={col.key} className={hdrBase} style={hdrCell}>IG Category</div>;
               if (col.key === 'linkInBio') return <div key={col.key} className={`${hdrBase} justify-center`} style={hdrCell}>Link</div>;
               if (col.key === 'email')     return <div key={col.key} className={hdrBase} style={hdrCell}>Email</div>;
+              if (col.key === 'verified')  return <div key={col.key} className={hdrBase} style={hdrCell}>Verified</div>;
+              if (col.key === 'private')   return <div key={col.key} className={hdrBase} style={hdrCell}>Private</div>;
+              if (col.key === 'enrichStatus') return <div key={col.key} className={hdrBase} style={hdrCell}>Enrich</div>;
+              if (col.key === 'source')    return <div key={col.key} className={hdrBase} style={hdrCell}>Source</div>;
+              if (col.key === 'igtvVideoCount') return <div key={col.key} className={hdrBase} style={hdrCell}>IGTV</div>;
+              if (col.key === 'highlightReels') return <div key={col.key} className={hdrBase} style={hdrCell}>Highlights</div>;
               return null;
             })}
             <div className={hdrBase} style={hdrCell} title="Favorites"><Heart size={11} /></div>

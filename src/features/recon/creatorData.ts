@@ -16,7 +16,7 @@ export function computeProfileHealth(c: Competitor): number {
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
-// ── Real scraped creators ──────────────────────────────────────────────────────
+// -- Real scraped creators ------------------------------------------------------
 
 export const COMPETITORS: Competitor[] = [
   {
@@ -102,7 +102,7 @@ export const DAILY_VOLUME: DailyVolume[] = [
   { label: 'Apr 5',  total: 267 }, { label: 'Apr 6',  total: 284 },
 ];
 
-// ── Scrape log ─────────────────────────────────────────────────────────────────
+// -- Scrape log -----------------------------------------------------------------
 export type LogStatus = 'success' | 'running' | 'failed';
 export interface LogEntry { id: number; timestamp: string; action: string; handle: string; status: LogStatus; }
 

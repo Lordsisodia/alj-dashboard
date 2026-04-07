@@ -7,7 +7,9 @@ import { hasActiveFilters, type CreatorFilters } from './CreatorsFilterBar';
 import { ColumnVisibilityPill } from './ColumnVisibilityPill';
 import { STATUS_VIEWS, type ColVisibility, type StatusView } from './tableUtils';
 
-// ── Status dropdown ────────────────────────────────────────────────────────────
+export { StatusDropdown };
+
+// -- Status dropdown ------------------------------------------------------------
 
 function StatusDropdown({ value, onChange, counts }: {
   value:    StatusView;
@@ -74,7 +76,7 @@ function StatusDropdown({ value, onChange, counts }: {
   );
 }
 
-// ── Main toolbar ───────────────────────────────────────────────────────────────
+// -- Main toolbar ---------------------------------------------------------------
 
 interface Props {
   count:               number;
@@ -87,12 +89,9 @@ interface Props {
   onViewModeChange:    (v: 'list' | 'grid') => void;
   colVis:              ColVisibility;
   onColVisChange:      (v: ColVisibility) => void;
-  statusView:          StatusView;
-  onStatusViewChange:  (v: StatusView) => void;
-  statusCounts:        Record<StatusView, number>;
 }
 
-export function TableToolbar({ count, total, filters, onClearFilters, showFavoritesOnly, onToggleFavorites, viewMode, onViewModeChange, colVis, onColVisChange, statusView, onStatusViewChange, statusCounts }: Props) {
+export function TableToolbar({ count, total, filters, onClearFilters, showFavoritesOnly, onToggleFavorites, viewMode, onViewModeChange, colVis, onColVisChange }: Props) {
   const active = hasActiveFilters(filters);
 
   return (
@@ -102,7 +101,6 @@ export function TableToolbar({ count, total, filters, onClearFilters, showFavori
     >
       {/* Left: status dropdown + filter indicator */}
       <div className="flex items-center gap-2">
-        <StatusDropdown value={statusView} onChange={onStatusViewChange} counts={statusCounts} />
         {active && (
           <button
             onClick={onClearFilters}

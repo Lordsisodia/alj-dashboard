@@ -12,7 +12,7 @@ import {
 } from './modals/AddActionModals';
 
 export type ModalId = 'add-handle' | 'bulk-import' | 'track-profile' | 'track-niche' | null;
-export interface DrawerState { index: number; posts: DrawerPost[] }
+export interface DrawerState { index: number; posts: DrawerPost[]; initialTab?: 'details' | 'ai' | 'transcript'; }
 
 interface ReconModalsProps {
   modal: ModalId;
@@ -40,7 +40,7 @@ export function ReconModals({ modal, drawer, onCloseModal, onCloseDrawer, onAddC
         <TrackNicheModal onClose={onCloseModal} />
       )}
       {drawer && (
-        <PostDetailDrawer posts={drawer.posts} initialIndex={drawer.index} onClose={onCloseDrawer} />
+        <PostDetailDrawer posts={drawer.posts} initialIndex={drawer.index} initialTab={drawer.initialTab} onClose={onCloseDrawer} />
       )}
     </AnimatePresence>
   );

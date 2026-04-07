@@ -4,21 +4,24 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useMutation } from 'convex/react';
-import { Heart, Eye, Bookmark, Maximize2, Play } from 'lucide-react';
+import { Heart, Eye, Bookmark, Maximize2, Play, Sparkles } from 'lucide-react';
 import { api } from '@/convex/_generated/api';
 import { fadeUp, NICHE_COLORS } from '../../constants';
-import { fmtNum, timeAgo, avatarColor, igThumb } from '../../utils';
+import { fmtNum, timeAgo, avatarColor, igThumb, creatorVelocity, nicheERDelta, type CreatorStats, type NicheERMap } from '../../utils';
 import { BoardPickerDropdown } from './BoardPickerDropdown';
 import { VideoLightbox } from '../shared/VideoLightbox';
 import type { Post, VisibilityState } from '../../types';
 
 interface Props {
-  post:         Post;
-  visibility:   VisibilityState;
-  onPostClick?: () => void;
+  post:             Post;
+  visibility:       VisibilityState;
+  onPostClick?:    () => void;
+  onAnalyzeClick?: () => void;
+  creatorStatsMap?: Record<string, CreatorStats>;
+  nicheERMap?:      NicheERMap;
 }
 
-function CardHeader({ post, visibility }: { post: Post; visibility: VisibilityState }) {
+function CardHeader({ post, visibility, onAnalyzeClick, velocity, erDelta }: { post: Post; visibility: VisibilityState; onAnalyzeClick?: () => void; velocity?: { direction: 'up' | 'down' | 'same'; pct: number }; erDelta?: string }) {
   const nicheColor = NICHE_COLORS[post.niche] ?? '#833ab4';
   const avColor    = avatarColor(post.handle);
   return (
@@ -27,13 +30,37 @@ function CardHeader({ post, visibility }: { post: Post; visibility: VisibilitySt
         <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: avColor }}>
           {post.handle.replace('@', '').charAt(0).toUpperCase()}
         </div>
-        {visibility.brandDetails && <span className="text-xs font-semibold text-neutral-800 truncate">{post.handle}</span>}
+        {visibility.brandDetails && (
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-xs font-semibold text-neutral-800 truncate">{post.handle}</span>
+            {velocity && velocity.direction !== 'same' && (
+              <span className={`text-[10px] font-bold flex-shrink-0 ${velocity.direction === 'up' ? 'text-green-600' : 'text-red-400'}`}>
+                {velocity.direction === 'up' ? '▲' : '▼'}{velocity.pct}%
+              </span>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">
         {visibility.brandDetails && (
           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md text-white" style={{ backgroundColor: nicheColor }}>{post.niche}</span>
         )}
+        {erDelta && (
+          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${erDelta.startsWith('+') ? 'text-green-600 bg-green-50' : erDelta.startsWith('-') ? 'text-red-400 bg-red-50' : 'text-neutral-500 bg-neutral-100'}`}>
+            {erDelta}
+          </span>
+        )}
         <span className="text-[10px] text-neutral-400 font-medium">{timeAgo(post.postedAt)}</span>
+        {onAnalyzeClick && (
+          <button
+            onClick={e => { e.stopPropagation(); onAnalyzeClick(); }}
+            className="w-6 h-6 rounded-md flex items-center justify-center hover:scale-110 transition-transform"
+            style={{ backgroundColor: 'rgba(131,58,180,0.1)' }}
+            title="AI Analysis"
+          >
+            <Sparkles size={11} style={{ color: '#833ab4' }} />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -69,11 +96,17 @@ function CardThumbnail({ post, onPlay, onExpand }: { post: Post; onPlay: () => v
   );
 }
 
-export function PostCard({ post, visibility, onPostClick }: Props) {
+export function PostCard({ post, visibility, onPostClick, onAnalyzeClick, creatorStatsMap, nicheERMap }: Props) {
   const [playing, setPlaying] = useState(false);
   const toggleSave = useMutation(api.intelligence.toggleSave);
   const isVideo    = post.contentType === 'reel' || post.contentType === 'story';
   const canPlay    = isVideo && (!!post.videoUrl || (!post.externalId?.startsWith('ig_') && !!post.externalId));
+
+  const velocity = creatorStatsMap ? creatorVelocity(post.handle, Object.values(creatorStatsMap)) : undefined;
+  const erDelta = nicheERMap && post.engagementRate != null ? nicheERDelta(post.engagementRate, post.niche, nicheERMap) : undefined;
+
+  // Save rate
+  const saveRate = post.views && post.views > 0 ? (post.saves / post.views) * 100 : null;
 
   return (
     <>
@@ -83,7 +116,7 @@ export function PostCard({ post, visibility, onPostClick }: Props) {
         style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
         whileHover={{ y: -2, boxShadow: '0 6px 20px rgba(0,0,0,0.10)', transition: { duration: 0.18 } }}
       >
-        <CardHeader post={post} visibility={visibility} />
+        <CardHeader post={post} visibility={visibility} onAnalyzeClick={onAnalyzeClick} velocity={velocity} erDelta={erDelta} />
         <CardThumbnail post={post} onPlay={() => canPlay ? setPlaying(true) : onPostClick?.()} onExpand={() => onPostClick?.()} />
 
         {(visibility.likeCount || visibility.viewCount || visibility.saveCount) && (
@@ -94,6 +127,11 @@ export function PostCard({ post, visibility, onPostClick }: Props) {
             {post.engagementRate !== undefined && (
               <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(131,58,180,0.08)', color: '#833ab4' }}>
                 {post.engagementRate.toFixed(1)}%
+              </span>
+            )}
+            {saveRate !== null && (
+              <span className="text-[10px] font-medium text-neutral-400" title="Save rate">
+                {saveRate.toFixed(2)}% sv
               </span>
             )}
           </div>
