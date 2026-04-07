@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { useQuery, useMutation } from 'convex/react';
 import { Plus, LayoutDashboard, UserPlus } from 'lucide-react';
 
@@ -28,6 +29,7 @@ function StepNum({ n }: { n: number }) {
 function AddLeadModal({ onClose }: { onClose: () => void }) {
   const [handle, setHandle] = useState('');
   const [niche,  setNiche]  = useState('all');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const addAccount = useMutation(api.recon.addTrackedAccount);
 
   const NICHE_OPTIONS = [
@@ -41,16 +43,23 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
     { value: 'travel', label: 'Travel' },
   ];
 
-  function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = handle.trim();
     if (!trimmed) return;
-    addAccount({
-      handle: trimmed.startsWith('@') ? trimmed : `@${trimmed}`,
-      platform: 'instagram',
-      niche: niche === 'all' ? undefined : niche,
-    } as any);
-    onClose();
+    setIsSubmitting(true);
+    try {
+      await addAccount({
+        handle: trimmed.startsWith('@') ? trimmed : `@${trimmed}`,
+        platform: 'instagram',
+        niche: niche === 'all' ? undefined : niche,
+      } as any);
+      onClose();
+    } catch {
+      toast.error('Failed to add lead. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -93,10 +102,16 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
 
           <button
             type="submit"
-            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-105 active:scale-[0.98]"
+            disabled={isSubmitting}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-105 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
           >
-            Add Lead
+            {isSubmitting ? (
+              <>
+                <span className="w-3.5 h-3.5 border border-white border-t-transparent rounded-full animate-spin" />
+                Adding…
+              </>
+            ) : 'Add Lead'}
           </button>
         </form>
       </motion.div>
