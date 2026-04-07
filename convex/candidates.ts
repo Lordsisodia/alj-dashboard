@@ -42,6 +42,7 @@ export const upsert = mutation({
     aiScore:           v.optional(v.number()),
     aiVerdict:         v.optional(v.union(v.literal('HIRE'), v.literal('WATCH'), v.literal('PASS'))),
     aiReason:          v.optional(v.string()),
+    enrichStatus:      v.optional(v.union(v.literal('idle'), v.literal('enriching'), v.literal('done'), v.literal('error'))),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -163,6 +164,20 @@ export const seedPreApproved = mutation({
       inserted++;
     }
     return { inserted };
+  },
+});
+
+// ── Mark a candidate as fully enriched (scraped) ─────────────────────────────
+
+export const markEnriched = mutation({
+  args: { handle: v.string() },
+  handler: async (ctx, { handle }) => {
+    const doc = await ctx.db
+      .query("creatorCandidates")
+      .withIndex("by_handle", q => q.eq("handle", handle))
+      .first();
+    if (!doc) return;
+    await ctx.db.patch(doc._id, { enrichStatus: 'done', enrichedAt: Date.now() });
   },
 });
 

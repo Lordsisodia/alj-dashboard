@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X, TrendingUp, ExternalLink, CheckCircle, XCircle, Sparkles, Loader2, Radar, Zap } from 'lucide-react';
 import { useMutation, useQuery } from 'convex/react';
@@ -146,7 +147,7 @@ export function DetailPanel({ candidate, onClose, onDecision }: Props) {
     <>
       {/* Backdrop */}
       <motion.div
-        className="fixed inset-0 z-40"
+        className="fixed inset-0 z-[190]"
         style={{ backgroundColor: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(2px)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -156,7 +157,7 @@ export function DetailPanel({ candidate, onClose, onDecision }: Props) {
 
       {/* Side panel */}
       <motion.div
-        className="fixed top-0 right-0 bottom-0 z-50 w-80 bg-white overflow-y-auto flex flex-col"
+        className="fixed top-0 right-0 bottom-0 z-[200] w-80 bg-white overflow-y-auto flex flex-col"
         style={{ boxShadow: '-4px 0 32px rgba(0,0,0,0.12)' }}
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
