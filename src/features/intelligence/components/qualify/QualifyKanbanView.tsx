@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { motion } from 'framer-motion';
-import { Play, Check } from 'lucide-react';
-import { NICHE_COLORS, GRAD } from '../../constants';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Eye, Heart, ChevronDown, ChevronUp } from 'lucide-react';
+import { NICHE_COLORS } from '../../constants';
 import { fmtNum } from '../../utils';
 
 type QualifyPost = {
@@ -27,6 +27,7 @@ interface Props {
   niche?:    string;
   platform?: string;
 }
+
 
 // ── Band config ────────────────────────────────────────────────────────────────
 
@@ -57,13 +58,10 @@ function KanbanSkeleton() {
             <div className="h-3 w-16 rounded bg-neutral-100 animate-pulse" />
           </div>
           <div className="p-2 space-y-2">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="rounded-xl overflow-hidden animate-pulse" style={{ backgroundColor: '#f5f5f4' }}>
-                <div className="aspect-[9/16] bg-neutral-200" />
-                <div className="px-2.5 py-2 space-y-1">
-                  <div className="h-2.5 w-20 rounded bg-neutral-200" />
-                  <div className="h-2 w-14 rounded bg-neutral-200" />
-                </div>
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="rounded-xl px-2.5 py-2 space-y-1.5 animate-pulse" style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}>
+                <div className="h-2.5 w-20 rounded bg-neutral-100" />
+                <div className="h-2 w-12 rounded bg-neutral-100" />
               </div>
             ))}
           </div>
@@ -73,49 +71,57 @@ function KanbanSkeleton() {
   );
 }
 
-// ── Reel card ────────────────────────────────────────────────────────────────
+// ── List row ──────────────────────────────────────────────────────────────────
 
-function ReelCard({ post }: { post: QualifyPost }) {
+function ReelListRow({ post }: { post: QualifyPost }) {
+  const [open, setOpen] = useState(false);
   const band = getBandForScore(post.baselineScore);
   const nicheColor = NICHE_COLORS[post.niche] ?? '#833ab4';
 
   return (
-    <motion.div
-      className="rounded-xl overflow-hidden cursor-default"
-      style={{ border: '1px solid rgba(0,0,0,0.08)', backgroundColor: '#fff' }}
-      whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
-      transition={{ duration: 0.15 }}
+    <div
+      className="rounded-xl overflow-hidden cursor-pointer"
+      style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
+      onClick={() => setOpen(v => !v)}
     >
-      {/* Thumbnail */}
-      <div
-        className="relative w-full aspect-[9/16] flex items-center justify-center"
-        style={{ background: post.thumbnailUrl.startsWith('http') ? undefined : post.thumbnailUrl }}
-      >
-        <Play size={14} className="text-white/60" />
-        {/* Platform badge */}
-        <div className="absolute top-1.5 right-1.5 text-[8px] font-bold px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.45)', color: '#fff' }}>
-          {post.platform === 'tiktok' ? 'TT' : 'IG'}
+      {/* Row */}
+      <div className="flex items-center gap-2 px-2.5 py-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-semibold text-neutral-700 truncate">{post.handle}</p>
+          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded text-white" style={{ backgroundColor: nicheColor }}>{post.niche}</span>
         </div>
-        {/* Saved badge */}
-        {post.savedForPipeline && (
-          <div className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: GRAD }}>
-            <Check size={9} className="text-white" />
-          </div>
-        )}
+        <span className="text-[11px] font-bold shrink-0" style={{ color: band.color }}>{post.baselineScore.toFixed(1)}×</span>
+        {open ? <ChevronUp size={11} className="text-neutral-300 shrink-0" /> : <ChevronDown size={11} className="text-neutral-300 shrink-0" />}
       </div>
 
-      {/* Card body */}
-      <div className="px-2.5 py-2 space-y-1">
-        <p className="text-[10px] font-semibold text-neutral-700 truncate">{post.handle}</p>
-        <p className="text-[9px] text-neutral-400 truncate capitalize">{post.niche}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-[9px] text-neutral-400">{fmtNum(post.views)} views</span>
-          <span className="text-[10px] font-bold" style={{ color: band.color }}>
-            {post.baselineScore.toFixed(1)}×
-          </span>
-        </div>
-      </div>
-    </motion.div>
+      {/* Expanded stats */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="overflow-hidden"
+          >
+            <div
+              className="flex items-center gap-3 px-2.5 py-2"
+              style={{ borderTop: '1px solid rgba(0,0,0,0.06)', backgroundColor: '#fafafa' }}
+            >
+              <div className="flex items-center gap-1">
+                <Eye size={10} className="text-neutral-300" />
+                <span className="text-[10px] text-neutral-500">{fmtNum(post.views)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Heart size={10} className="text-neutral-300" />
+                <span className="text-[10px] text-neutral-500">{fmtNum(post.likes)}</span>
+              </div>
+              <span className="text-[9px] text-neutral-400 capitalize ml-auto">{post.platform}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -137,12 +143,17 @@ function KanbanColumn({ band, posts }: { band: typeof BANDS[0]; posts: QualifyPo
       {/* Cards or empty state */}
       <div className="p-2 space-y-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 340px)' }}>
         {isEmpty ? (
-          <div className="flex flex-col items-center justify-center py-6 gap-1 rounded-xl" style={{ border: `1px dashed ${band.color}25`, backgroundColor: `${band.color}05` }}>
-            <span className="text-[10px]" style={{ color: '#d1d5db' }}>No reels here</span>
+          <div className="flex flex-col items-center justify-center py-6 gap-2 rounded-xl" style={{ border: `1px dashed ${band.color}25`, backgroundColor: `${band.color}05` }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={band.color} strokeWidth="1.5" opacity="0.4">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8M12 17v4"/>
+              <path d="M7 10l3 3 7-7"/>
+            </svg>
+            <span className="text-[10px]" style={{ color: '#d1d5db' }}>Nothing here yet</span>
           </div>
         ) : (
           posts.map(post => (
-            <ReelCard key={post._id} post={post} />
+            <ReelListRow key={post._id} post={post} />
           ))
         )}
       </div>
