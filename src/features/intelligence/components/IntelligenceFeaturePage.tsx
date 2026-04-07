@@ -43,9 +43,10 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!handle.trim()) return;
+    const trimmed = handle.trim();
+    if (!trimmed) return;
     addAccount({
-      handle: handle.startsWith('@') ? handle : `@${handle}`,
+      handle: trimmed.startsWith('@') ? trimmed : `@${trimmed}`,
       platform: 'instagram',
       niche: niche === 'all' ? undefined : niche,
     } as any);
@@ -71,7 +72,7 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
             <input
               autoFocus
               value={handle}
-              onChange={e => setHandle(e.target.value)}
+              onChange={e => setHandle(e.target.value.trim())}
               placeholder="@username"
               className="w-full px-3 py-2 rounded-xl text-sm border border-neutral-200 focus:outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
             />
