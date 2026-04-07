@@ -257,7 +257,7 @@ function QualifyRow({
 
   return (
     <div
-      className="grid items-center px-4 cursor-default transition-colors hover:bg-black/[0.02]"
+      className="grid items-center px-4 cursor-default transition-colors hover:bg-black/[0.04]"
       style={{
         gridTemplateColumns: '48px 1fr 80px 72px 64px 56px 80px',
         height: 48,

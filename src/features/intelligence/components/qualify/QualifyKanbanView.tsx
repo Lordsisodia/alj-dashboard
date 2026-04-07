@@ -24,12 +24,8 @@ type QualifyPost = {
 };
 
 interface Props {
-  view:         'table' | 'kanban';
-  onViewChange: (v: 'table' | 'kanban') => void;
-  days:         number;
-  onDaysChange?: (d: number) => void;
-  niche?:       string;
-  platform?:    string;
+  niche?:    string;
+  platform?: string;
 }
 
 // ── Band config ────────────────────────────────────────────────────────────────
@@ -156,7 +152,7 @@ function KanbanColumn({ band, posts }: { band: typeof BANDS[0]; posts: QualifyPo
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-export function QualifyKanbanView({ days, niche = 'all', platform = 'all' }: Props) {
+export function QualifyKanbanView({ niche = 'all', platform = 'all' }: Props) {
   const raw = useQuery(api.intelligence.getQualifyPosts, {}) as QualifyPost[] | undefined;
 
   const isLoading = raw === undefined;
