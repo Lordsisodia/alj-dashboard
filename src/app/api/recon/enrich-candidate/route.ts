@@ -37,28 +37,35 @@ async function writeToConvex(enriched: Record<string, unknown>) {
   if (!process.env.NEXT_PUBLIC_CONVEX_URL) return;
   try {
     const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL);
+    const n = (v: unknown) => (v != null ? (v as number) : undefined);
+    const s = (v: unknown) => (v != null ? (v as string) : undefined);
+    const b = (v: unknown) => (v != null ? (v as boolean) : undefined);
     await convex.mutation(api.candidates.upsert, {
       handle:             enriched.handle as string,
       displayName:        enriched.displayName as string,
-      followerCount:       enriched.followerCount as number | undefined,
-      followsCount:        enriched.followsCount as number | undefined,
-      postsCount:          enriched.postsCount as number | undefined,
-      bio:                enriched.bio as string | undefined,
-      avatarUrl:          enriched.avatarUrl as string | undefined,
-      verified:           enriched.verified as boolean | undefined,
-      isPrivate:          enriched.isPrivate as boolean | undefined,
-      isBusinessAccount:  enriched.isBusinessAccount as boolean | undefined,
-      instagramId:        enriched.instagramId as string | undefined,
-      externalUrl:        enriched.externalUrl as string | undefined,
-      highlightReelCount: enriched.highlightReelCount as number | undefined,
-      igtvVideoCount:    enriched.igtvVideoCount as number | undefined,
-      avgViews:           enriched.avgViews as number | undefined,
-      outlierRatio:       enriched.outlierRatio as number | undefined,
-      status:  'approved',
-      source:  'scraper',
+      followerCount:      n(enriched.followerCount),
+      followsCount:       n(enriched.followsCount),
+      postsCount:         n(enriched.postsCount),
+      bio:                s(enriched.bio),
+      avatarUrl:          s(enriched.avatarUrl),
+      verified:           b(enriched.verified),
+      isPrivate:          b(enriched.isPrivate),
+      isBusinessAccount:  b(enriched.isBusinessAccount),
+      instagramId:        s(enriched.instagramId),
+      externalUrl:        s(enriched.externalUrl),
+      highlightReelCount: n(enriched.highlightReelCount),
+      igtvVideoCount:     n(enriched.igtvVideoCount),
+      avgViews:           n(enriched.avgViews),
+      outlierRatio:       n(enriched.outlierRatio),
+      status:       'approved',
+      source:       'scraper',
+      enrichStatus: 'done',
     });
+    // Always patch enrichStatus=done directly — upsert INSERT path overrides it with 'idle'
+    await convex.mutation(api.candidates.markEnriched, { handle: enriched.handle as string });
   } catch (e) {
     console.error('[enrich-candidate] Convex write failed:', e);
+    throw e;
   }
 }
 
@@ -87,7 +94,7 @@ export async function POST(req: NextRequest) {
     const p = items[0];
     if (!p) return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
 
-    const followerCount = p.followersCount ?? 0;
+    const followerCount = p.followersCount ?? undefined;
     const avgViews      = p.latestIgtvVideos?.[0]?.videoViewCount
                        ?? p.latestPosts?.[0]?.videoViewCount
                        ?? null;
@@ -126,16 +133,12 @@ export async function POST(req: NextRequest) {
       outlierRatio,
     };
 
-    // Race R2 upload against a short timeout — respond as soon as Apify returns
-    const [stableAvatar] = await Promise.all([
-      avatarUpload,
-      new Promise(r => setTimeout(r, 500)), // minimum 500ms so UI feels natural
-    ]);
+    // Race R2 upload — respond as soon as Apify returns
+    const [stableAvatar] = await Promise.all([avatarUpload]);
 
     enriched.avatarUrl = stableAvatar ?? rawAvatarUrl;
 
-    // Fire Convex write without awaiting — doesn't block the response
-    writeToConvex(enriched);
+    await writeToConvex(enriched);
 
     return NextResponse.json({ ...enriched, relatedHandles });
   } catch (err) {

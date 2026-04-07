@@ -13,6 +13,7 @@ import type { Tab, Competitor, Candidate } from '../types';
 import { COMPETITORS } from '../constants';
 import { ALERT_THRESHOLDS } from './creators/discovery/discoveryData';
 import { DiscoveryTab } from './creators';
+import { DetailPanel } from './creators/discovery/DetailPanel';
 import { ReconModals, type ModalId, type DrawerState } from './ReconModals';
 
 const LogDashboard      = dynamic(() => import('./creators/LogDashboard').then(m => ({ default: m.LogDashboard })),           { ssr: false });
@@ -137,6 +138,8 @@ export default function ReconFeaturePage() {
   const [runDiscoveryTrigger, setRunDiscoveryTrigger] = useState(0);
   const [scheduleHours, setScheduleHours]         = useState(6);
   const [alertThreshold, setAlertThreshold]         = useState(10);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   function fireOnce<T>(set: (v: T[]) => void, value: T[]) { set(value); setTimeout(() => set([]), 0); }
 
   type DropdownItem = { id: string; label: string; icon: React.ReactNode; onClick: () => void };
@@ -226,7 +229,7 @@ export default function ReconFeaturePage() {
         <div className={activeTab === 'feed' ? 'px-4 py-4 w-full' : 'w-full'}>
           <AnimatePresence>
             <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
-              {activeTab === 'discovery' && <DiscoveryTab extraCandidates={extraCandidates} searchQuery={searchQuery} runDiscoveryTrigger={runDiscoveryTrigger} alertThreshold={alertThreshold} onAlertChange={setAlertThreshold} />}
+              {activeTab === 'discovery' && <DiscoveryTab extraCandidates={extraCandidates} searchQuery={searchQuery} runDiscoveryTrigger={runDiscoveryTrigger} alertThreshold={alertThreshold} onAlertChange={setAlertThreshold} selectedCandidateId={selectedCandidateId} onSelectCandidate={(id, candidate) => { setSelectedCandidateId(id); setSelectedCandidate(candidate); }} onClearCandidate={() => { setSelectedCandidateId(null); setSelectedCandidate(null); }} />}
               {activeTab === 'log'       && <LogDashboard extraCreators={extraCreators} runAllTrigger={runAllTrigger} />}
               {activeTab === 'creators'  && (
                 selectedCreator
@@ -250,6 +253,23 @@ export default function ReconFeaturePage() {
         onBulkImport={cs => fireOnce(setExtraCandidates, cs)}
         onAddCreator={c => fireOnce(setExtraCreators, [c])}
       />
+
+      <AnimatePresence>
+        {selectedCandidate && (
+          <DetailPanel
+            key={selectedCandidateId!}
+            candidate={selectedCandidate}
+            onClose={() => { setSelectedCandidateId(null); setSelectedCandidate(null); }}
+            onDecision={() => {
+              setSelectedCandidateId(null);
+              setSelectedCandidate(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
     </>
   );
 }

@@ -11,7 +11,6 @@ import { COMPETITORS } from '../../creatorData';
 import { DiscoveryHeader }  from './discovery/DiscoveryHeader';
 import { InfoTooltip }     from './discovery/InfoTooltip';
 import { CandidateRow }     from './discovery/CandidateRow';
-import { DetailPanel }      from './discovery/DetailPanel';
 import { EmptyState }       from './discovery/EmptyState';
 import { DiscoveryFunnel }  from './discovery/DiscoveryFunnel';
 import { NicheDonut }       from './discovery/NicheDonut';
@@ -70,7 +69,7 @@ type ConvexCandidate = {
   avatarUrl?: string;
 };
 
-type MappedCandidate = Candidate & { _convexId: string; avatarUrl?: string };
+type MappedCandidate = Candidate & { _convexId: string; avatarUrl?: string; enrichStatus?: string };
 
 function convexToCandidate(doc: ConvexCandidate): MappedCandidate {
   const avatarIdx = stableNum(doc.handle) % AVATAR_COLORS.length;
@@ -97,6 +96,7 @@ function convexToCandidate(doc: ConvexCandidate): MappedCandidate {
     status:          doc.status as CandidateStatus,
     sampleGradients: SAMPLE_GRADIENTS,
     avatarUrl:       doc.avatarUrl,
+    enrichStatus:    doc.enrichStatus,
   };
 }
 
@@ -127,7 +127,7 @@ interface PipelineColumnProps {
 
 function PipelineColumn({ title, count, accentColor, columnBg, tooltip, headerExtra, children }: PipelineColumnProps) {
   return (
-    <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: columnBg }}>
+    <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.07)', borderLeft: `2px solid ${accentColor}`, backgroundColor: columnBg }}>
       <div
         className="flex items-center gap-2 px-4 py-3"
         style={{ borderBottom: `1px solid ${accentColor}18` }}
@@ -210,10 +210,17 @@ function RejectedPanel({ candidates }: { candidates: MappedCandidate[] }) {
 
 function ScrapedRow({ c }: { c: MappedCandidate }) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      whileHover={{ y: -1, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
       className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
       style={{ border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#fff' }}
     >
+      {/* Status dot — green for scraped */}
+      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#16a34a' }} />
+
       {c.avatarUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={c.avatarUrl} alt={c.handle} className="w-5 h-5 rounded flex-shrink-0 object-cover" />
@@ -226,13 +233,13 @@ function ScrapedRow({ c }: { c: MappedCandidate }) {
         </span>
       )}
       <p className="text-[11px] font-medium text-neutral-700 truncate flex-1">{c.handle}</p>
-    </div>
+    </motion.div>
   );
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThreshold = 10, onAlertChange }: { extraCandidates?: unknown[]; searchQuery?: string; runDiscoveryTrigger?: number; alertThreshold?: number; onAlertChange?: (v: number) => void } = {}) {
+export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThreshold = 10, onAlertChange, selectedCandidateId, onSelectCandidate, onClearCandidate }: { extraCandidates?: unknown[]; searchQuery?: string; runDiscoveryTrigger?: number; alertThreshold?: number; onAlertChange?: (v: number) => void; selectedCandidateId?: string | null; onSelectCandidate?: (id: string, candidate: Candidate) => void; onClearCandidate?: () => void } = {}) {
   const [selectedId,      setSelectedId]      = useState<string | null>(null);
   const [widgetsOpen,     setWidgetsOpen]      = useState(false);
   const [discovering,     setDiscovering]      = useState(false);
@@ -284,8 +291,9 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
 
   const pending           = allMapped.filter(c => c.status === 'pending'  && matchesSearch(c)).sort((a, b) => b.outlierRatio - a.outlierRatio);
   const approved          = allMapped.filter(c => c.status === 'approved' && matchesSearch(c));
-  const approvedPending   = approved.filter(c => c.followersRaw === 0);
-  const scrapedCandidates = approved.filter(c => c.followersRaw > 0).sort((a, b) => b.followersRaw - a.followersRaw);
+  const scrapingHandles   = new Set(scrapingItems.map(i => i.handle));
+  const approvedPending   = approved.filter(c => c.enrichStatus !== 'done' && !scrapingHandles.has(c.handle));
+  const scrapedCandidates = approved.filter(c => c.enrichStatus === 'done').sort((a, b) => b.followersRaw - a.followersRaw);
   const rejected          = allMapped.filter(c => c.status === 'rejected' && matchesSearch(c));
 
   // Duplicate detection on pending
@@ -353,6 +361,7 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
       await updateStatus({ id: convexId as Id<'creatorCandidates'>, status }).catch(console.error);
     }
     setSelectedId(null);
+    onClearCandidate?.();
   }
 
   async function runDiscovery() {
@@ -382,10 +391,15 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
   // Suppress unused warning — discovering used by runDiscovery
   void discovering;
 
+  // Sync selectedId when selectedCandidateId prop changes (DetailPanel opened/closed externally)
+  useEffect(() => {
+    setSelectedId(selectedCandidateId ?? null);
+  }, [selectedCandidateId]);
+
   const loading = rawCandidates === undefined || seeding;
 
   return (
-    <div className="px-6 py-6 w-full space-y-4">
+    <div className="px-6 py-6 w-full space-y-4 overflow-visible">
       {/* Header */}
       <DiscoveryHeader
         total={allMapped.length}
@@ -462,16 +476,26 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
             ) : pending.length === 0 ? (
               <EmptyState filter="pending" />
             ) : (
-              pending.map(c => (
-                <CandidateRow
-                  key={c._convexId}
-                  candidate={c}
-                  isSelected={selectedId === c._convexId}
-                  onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
-                  onApprove={e => { e.stopPropagation(); handleApprove(c); }}
-                  onReject={e => { e.stopPropagation(); handleReject(c); }}
-                />
-              ))
+              <AnimatePresence mode="popLayout">
+                {pending.map(c => (
+                  <CandidateRow
+                    key={c._convexId}
+                    candidate={c}
+                    isSelected={selectedId === c._convexId}
+                    onSelect={() => {
+                      if (selectedId === c._convexId) {
+                        setSelectedId(null);
+                        onClearCandidate?.();
+                      } else {
+                        setSelectedId(c._convexId);
+                        onSelectCandidate?.(c._convexId, c);
+                      }
+                    }}
+                    onApprove={e => { e.stopPropagation(); handleApprove(c); }}
+                    onReject={e => { e.stopPropagation(); handleReject(c); }}
+                  />
+                ))}
+              </AnimatePresence>
             )}
           </PipelineColumn>
           <RejectedPanel candidates={rejected} />
@@ -489,16 +513,27 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
             {approvedPending.length === 0 ? (
               <p className="text-[11px] text-center py-8" style={{ color: 'rgba(153,27,27,0.4)' }}>No approved candidates yet</p>
             ) : (
-              approvedPending.map(c => (
-                <ApprovedRow
-                  key={c._convexId}
-                  candidate={c}
-                  onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)}
-                  onScrapeComplete={handles => handleScrapeComplete(handles, c.handle)}
-                  onScrapeStart={() => addScraping(c)}
-                  onScrapeEnd={() => removeScraping(c.handle)}
-                />
-              ))
+              <AnimatePresence mode="popLayout">
+                {approvedPending.map(c => (
+                  <ApprovedRow
+                    key={c._convexId}
+                    candidate={c}
+                    isScraping={scrapingItems.some(s => s.handle === c.handle)}
+                    onSelect={() => {
+                      if (selectedId === c._convexId) {
+                        setSelectedId(null);
+                        onClearCandidate?.();
+                      } else {
+                        setSelectedId(c._convexId);
+                        onSelectCandidate?.(c._convexId, c);
+                      }
+                    }}
+                    onScrapeComplete={handles => handleScrapeComplete(handles, c.handle)}
+                    onScrapeStart={() => addScraping(c)}
+                    onScrapeEnd={() => removeScraping(c.handle)}
+                  />
+                ))}
+              </AnimatePresence>
             )}
           </PipelineColumn>
         </motion.div>
@@ -542,17 +577,6 @@ export function DiscoveryTab({ searchQuery = '', runDiscoveryTrigger, alertThres
         </div>
       )}
 
-      {/* Detail panel */}
-      <AnimatePresence>
-        {selected && (
-          <DetailPanel
-            key={selected._convexId}
-            candidate={selected}
-            onClose={() => setSelectedId(null)}
-            onDecision={handleDecision}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
