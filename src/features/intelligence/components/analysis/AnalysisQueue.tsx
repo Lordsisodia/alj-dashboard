@@ -4,11 +4,10 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useQuery } from 'convex/react';
 import { Sparkles, Flame } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { api } from '@/convex/_generated/api';
+import { api } from '../../../../../convex/_generated/api';
 import { fadeUp } from '../../constants';
 
-interface Props { onAnalyse: (postId: string) => void; }
+interface Props { onAnalyse: (postId: string) => void; fullPage?: boolean; onViewAllQueue?: () => void; }
 
 function QueueCard({ post, index, onAnalyse }: {
   post: { _id: string; handle: string; niche: string; contentType: string; thumbnailUrl: string; engagementRate: number; outlierRatio: number };
@@ -49,7 +48,7 @@ function QueueCard({ post, index, onAnalyse }: {
   );
 }
 
-export function AnalysisQueue({ onAnalyse }: Props) {
+export function AnalysisQueue({ onAnalyse, fullPage, onViewAllQueue }: Props) {
   const queue = useQuery(api.intelligence.getAnalysisQueue, { days: 90 });
 
   if (queue === undefined) {
@@ -74,10 +73,18 @@ export function AnalysisQueue({ onAnalyse }: Props) {
         </span>
       </div>
       <div className="grid grid-cols-8 gap-3">
-        {queue.slice(0, 8).map((post, i) => (
+        {queue.slice(0, fullPage ? undefined : 8).map((post, i) => (
           <QueueCard key={post._id} post={post} index={i} onAnalyse={onAnalyse} />
         ))}
       </div>
+      {!fullPage && queue.length > 8 && (
+        <button
+          onClick={onViewAllQueue}
+          className="w-full text-center text-[11px] font-medium text-neutral-400 hover:text-neutral-700 transition-colors py-1"
+        >
+          See all {queue.length} in queue →
+        </button>
+      )}
     </motion.div>
   );
 }
