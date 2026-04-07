@@ -894,6 +894,16 @@ export const getAnalysedPosts = query({
   },
 });
 
+// ── Fetch full posts by ids (for drawer) ────────────────────────────────────
+
+export const getPostsByIds = query({
+  args: { ids: v.array(v.id("scrapedPosts")) },
+  handler: async (ctx, args) => {
+    const results = await Promise.all(args.ids.map(id => ctx.db.get(id)));
+    return results.filter(Boolean);
+  },
+});
+
 // ── Hook stats  -  aggregate hookScore distribution + emotion frequency ───────
 
 export const getHookStats = query({
