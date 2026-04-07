@@ -23,18 +23,21 @@ const CONVEX_URL = process.env.CONVEX_URL ?? "https://quiet-oriole-943.convex.cl
 // ── Files to import ───────────────────────────────────────────────────────────
 const FILES = [
   {
-    path: "/Users/shaansisodia/Downloads/dataset_instagram-reel-scraper_2026-03-28_07-52-33-577 (2).json",
-    niche: "GFE",  // minaxash — lifestyle/GFE
-  },
-  {
-    path: "/Users/shaansisodia/Downloads/dataset_instagram-reel-scraper_2026-03-28_08-08-07-406 (2).json",
-    niche: "E-Girl",  // cuddlesweetbuns / egirlasianemily
-  },
-  {
-    path: "/Users/shaansisodia/Downloads/dataset_instagram-reel-scraper_2026-03-28_07-58-47-148 (1).json",
-    niche: "Thirst Trap",  // a55tr1d / kittygoofygirl / tootinytrina
+    path: "/Users/shaansisodia/Downloads/dataset_instagram-reel-scraper_2026-04-05_23-54-03-354.json",
+    niche: "E-Girl",  // cuddlesweetbuns / egirlasianemily / minaxash / tinaxkitsune
   },
 ];
+
+// Fields Convex accepts
+// NOTE: 'id' is deliberately excluded — 19-digit Instagram IDs exceed JavaScript's
+// Number precision and get mangled in transit. The mutation uses shortCode as the
+// externalId anyway, so 'id' is not needed.
+const ALLOWED_FIELDS = new Set([
+  'shortCode', 'caption', 'hashtags', 'url',
+  'commentsCount', 'displayUrl', 'likesCount', 'timestamp',
+  'firstComment', 'ownerFullName', 'ownerUsername',
+  'videoUrl', 'videoViewCount', 'videoPlayCount',
+]);
 
 async function main() {
   const client = new ConvexHttpClient(CONVEX_URL);
@@ -43,7 +46,7 @@ async function main() {
   let totalAccounts = 0;
   let totalSkipped = 0;
 
-  const BATCH_SIZE = 50;
+  const BATCH_SIZE = 10;
 
   for (const file of FILES) {
     console.log(`\n📂 Importing: ${file.path}`);
@@ -51,7 +54,13 @@ async function main() {
     console.log(`  ${raw.length} rows total`);
 
     for (let i = 0; i < raw.length; i += BATCH_SIZE) {
-      const batch = raw.slice(i, i + BATCH_SIZE);
+      const batch = raw.slice(i, i + BATCH_SIZE).map(row => {
+        const cleaned = {};
+        for (const key of ALLOWED_FIELDS) {
+          if (key in row) cleaned[key] = row[key];
+        }
+        return cleaned;
+      });
       try {
         const result = await client.mutation(api.scraperImport.importFromScraper, {
           posts: batch,
@@ -63,12 +72,6 @@ async function main() {
         totalSkipped += result.skipped;
       } catch (err) {
         console.error(`  Batch ${i}–${i + batch.length}: ❌ ${err.message}`);
-        // Log offending rows
-        batch.forEach((row, j) => {
-          if (!row.ownerUsername || !row.displayUrl) {
-            console.log(`    Row ${i + j} missing fields:`, JSON.stringify(row).slice(0, 120));
-          }
-        });
       }
     }
   }

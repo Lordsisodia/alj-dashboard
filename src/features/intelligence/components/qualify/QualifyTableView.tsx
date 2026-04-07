@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useRef, useMemo } from 'react';
-import { useQuery, useMutation } from 'convex/react';
+import { useState, useRef, useMemo, useEffect } from 'react';
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Search, Check, Play, Filter } from 'lucide-react';
+import { Search, Check, Filter, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NICHE_COLORS, GRAD } from '../../constants';
 import { fmtNum } from '../../utils';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 
 type QualifyPost = {
   _id: string;
@@ -36,12 +35,10 @@ type QualifyPost = {
 };
 
 interface Props {
-  view:         'table' | 'kanban';
-  onViewChange:  (v: 'table' | 'kanban') => void;
-  days:         number;
-  onDaysChange:  (d: number) => void;
-  niche?:       string;
-  platform?:    string;
+  days:        number;
+  onDaysChange: (d: number) => void;
+  niche?:      string;
+  platform?:   string;
 }
 
 // ── Band helpers ────────────────────────────────────────────────────────────────
@@ -66,7 +63,30 @@ function baselineColor(score: number): string {
 
 // ── Column definitions ──────────────────────────────────────────────────────────
 
-type SortKey = 'baselineScore' | 'views' | 'likes' | 'comments' | 'handle' | 'niche';
+type SortKey = 'baselineScore' | 'views' | 'likes' | 'comments' | 'handle' | 'postedAt';
+
+const AVATAR_COLORS = ['#f43f5e','#8b5cf6','#3b82f6','#10b981','#f59e0b','#ec4899','#6366f1','#14b8a6'];
+function handleInitials(handle: string): string {
+  const clean = handle.replace(/^@/, '');
+  const words = clean.match(/[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)/g) ?? [clean];
+  return words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : clean.slice(0, 2).toUpperCase();
+}
+function handleColor(handle: string): string {
+  let h = 0;
+  for (let i = 0; i < handle.length; i++) h = (h * 31 + handle.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+
+function timeAgo(ts: number): string {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}d ago`;
+  return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
 
 // ── Skeleton ───────────────────────────────────────────────────────────────────
 
@@ -77,7 +97,7 @@ function TableSkeleton() {
         <div
           key={i}
           className="grid items-center px-4 gap-4"
-          style={{ gridTemplateColumns: '48px 1fr 80px 72px 64px 56px 80px', height: 48, borderBottom: '1px solid rgba(0,0,0,0.06)' }}
+          style={{ gridTemplateColumns: COL, height: 48, borderBottom: '1px solid rgba(0,0,0,0.06)' }}
         >
           <div className="h-3 w-4 rounded bg-neutral-100 animate-pulse" />
           <div className="flex items-center gap-2">
@@ -106,10 +126,7 @@ function QualifyToolbar({
   band,
   onBand,
   total,
-  onSaveTop,
-  isSaving,
-  view,
-  onViewChange,
+  savedCount,
   days,
   onDaysChange,
 }: {
@@ -119,13 +136,22 @@ function QualifyToolbar({
   onBand: (b: number) => void;
   total: number;
   savedCount: number;
-  onSaveTop: () => void;
-  isSaving: boolean;
-  view: 'table' | 'kanban';
-  onViewChange: (v: 'table' | 'kanban') => void;
   days: number;
   onDaysChange: (d: number) => void;
 }) {
+  const [bandOpen, setBandOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onMouseDown(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setBandOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, []);
+
   const BANDS = [
     { label: 'All',   value: 0 },
     { label: '2×+',  value: 1 },
@@ -160,21 +186,35 @@ function QualifyToolbar({
           />
         </div>
 
-        {/* Band filter chips */}
-        <div className="flex items-center gap-1">
-          {BANDS.map(b => (
-            <button
-              key={b.value}
-              onClick={() => onBand(b.value)}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all active:scale-95"
-              style={band === b.value
-                ? { background: GRAD, color: '#fff' }
-                : { color: '#9ca3af', backgroundColor: 'transparent' }
-              }
+        {/* Band filter dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setBandOpen(v => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-colors"
+            style={band === 0
+              ? { border: '1px solid rgba(0,0,0,0.09)', color: '#6b7280', backgroundColor: '#fff' }
+              : { border: '1px solid rgba(0,0,0,0.09)', background: GRAD, color: '#fff' }
+            }
+          >
+            <span>{BANDS.find(b => b.value === band)?.label ?? 'All bands'}</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          {bandOpen && (
+            <div
+              className="absolute left-0 top-[calc(100%+4px)] w-36 rounded-xl z-50 overflow-hidden"
+              style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.09)', boxShadow: '0 8px 24px rgba(0,0,0,0.10)' }}
             >
-              {b.label}
-            </button>
-          ))}
+              {BANDS.map(b => (
+                <button
+                  key={b.value}
+                  onClick={() => { onBand(b.value); setBandOpen(false); }}
+                  className="w-full flex items-center px-3 py-2.5 text-[11px] text-neutral-700 hover:bg-black/[0.04] transition-colors text-left"
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <span className="text-[11px] text-neutral-400 tabular-nums">{savedCount} saved · {total} shown</span>
@@ -199,39 +239,6 @@ function QualifyToolbar({
           ))}
         </div>
 
-        {/* Table | Kanban toggle */}
-        <div
-          className="flex items-center rounded-lg overflow-hidden"
-          style={{ border: '1px solid rgba(0,0,0,0.09)' }}
-        >
-          {(['table', 'kanban'] as const).map(v => (
-            <button
-              key={v}
-              onClick={() => onViewChange(v)}
-              className="px-3 py-1.5 text-[11px] font-semibold capitalize transition-all active:scale-95"
-              style={view === v
-                ? { background: GRAD, color: '#fff' }
-                : { color: '#9ca3af' }
-              }
-            >
-              {v}
-            </button>
-          ))}
-        </div>
-
-        <button
-          onClick={onSaveTop}
-          disabled={isSaving}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-white disabled:opacity-50 transition-all hover:brightness-105 active:scale-95"
-          style={{ background: GRAD }}
-        >
-          {isSaving ? (
-            <span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <Check size={11} />
-          )}
-          Save Top 10%
-        </button>
       </div>
     </div>
   );
@@ -239,81 +246,70 @@ function QualifyToolbar({
 
 // ── Table row ──────────────────────────────────────────────────────────────────
 
-function QualifyRow({
-  post,
-  rowIdx,
-  sortKey,
-  sortAsc,
-  onSort,
-}: {
-  post: QualifyPost;
-  rowIdx: number;
-  sortKey: SortKey;
-  sortAsc: boolean;
-  onSort: (k: SortKey) => void;
-}) {
+const COL = '40px 200px 90px 80px 76px 80px 90px';
+const DIV = { borderRight: '1px solid rgba(0,0,0,0.06)' } as const;
+
+function QualifyRow({ post, rowIdx }: { post: QualifyPost; rowIdx: number }) {
   const isPink = post.baselineScore >= 50;
-  const nicheColor = NICHE_COLORS[post.niche] ?? '#833ab4';
 
   return (
     <div
-      className="grid items-center px-4 cursor-default transition-colors hover:bg-black/[0.04]"
+      className="grid items-stretch cursor-default transition-colors hover:bg-black/[0.04] relative group"
       style={{
-        gridTemplateColumns: '48px 1fr 80px 72px 64px 56px 80px',
+        gridTemplateColumns: COL,
         height: 48,
         borderBottom: '1px solid rgba(0,0,0,0.06)',
         backgroundColor: isPink ? 'rgba(255,0,105,0.03)' : '#fff',
       }}
     >
+      {/* Left border accent on hover */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ background: 'linear-gradient(to bottom, #a855f7, #ec4899)' }}
+      />
       {/* # */}
-      <span className="text-[11px] text-neutral-400 tabular-nums">{rowIdx + 1}</span>
+      <div className="flex items-center justify-center h-full" style={DIV}>
+        <span className="text-[11px] text-neutral-400 tabular-nums">{rowIdx + 1}</span>
+      </div>
 
       {/* Creator */}
-      <div className="flex items-center gap-2 min-w-0 pr-4" title={post.caption}>
-        {/* Thumbnail */}
+      <div className="flex items-center gap-2 min-w-0 px-3 h-full" title={post.caption} style={DIV}>
         <div
-          className="relative w-8 h-12 rounded overflow-hidden flex-shrink-0 flex items-center justify-center cursor-pointer"
-          style={{ background: post.thumbnailUrl.startsWith('http') ? undefined : post.thumbnailUrl }}
+          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white"
+          style={{ backgroundColor: handleColor(post.handle) }}
         >
-          <Play size={10} className="text-white/70" />
+          {handleInitials(post.handle)}
         </div>
         <div className="min-w-0">
           <p className="text-[11px] font-semibold text-neutral-800 truncate">{post.handle}</p>
-          <p className="text-[9px] text-neutral-400 capitalize">{post.platform}</p>
         </div>
       </div>
 
-      {/* Niche */}
-      <span
-        className="text-[10px] font-semibold px-1.5 py-0.5 rounded text-white self-center"
-        style={{ backgroundColor: nicheColor, width: 'fit-content' }}
-      >
-        {post.niche}
-      </span>
+      {/* Posted */}
+      <div className="flex items-center justify-center h-full" style={DIV}>
+        <span className="text-[11px] text-neutral-500 tabular-nums">{timeAgo(post.postedAt)}</span>
+      </div>
 
       {/* Views */}
-      <span className="text-[11px] text-neutral-600 text-right tabular-nums">{fmtNum(post.views)}</span>
+      <div className="flex items-center justify-center h-full" style={DIV}>
+        <span className="text-[11px] text-neutral-600 tabular-nums">{fmtNum(post.views)}</span>
+      </div>
 
       {/* Likes */}
-      <span className="text-[11px] text-neutral-600 text-right tabular-nums">{fmtNum(post.likes)}</span>
+      <div className="flex items-center justify-center h-full" style={DIV}>
+        <span className="text-[11px] text-neutral-600 tabular-nums">{fmtNum(post.likes)}</span>
+      </div>
 
       {/* Comments */}
-      <span className="text-[11px] text-neutral-600 text-right tabular-nums">{fmtNum(post.comments)}</span>
+      <div className="flex items-center justify-center h-full" style={DIV}>
+        <span className="text-[11px] text-neutral-600 tabular-nums">{fmtNum(post.comments)}</span>
+      </div>
 
       {/* Baseline Score */}
-      <div className="flex items-center justify-end gap-1">
+      <div className="flex items-center justify-center h-full">
         <span className={cn('text-[12px] font-bold', baselineColor(post.baselineScore))}>
           {post.baselineScore.toFixed(1)}×
         </span>
-      </div>
-
-      {/* Saved */}
-      <div className="flex items-center justify-center">
-        {post.savedForPipeline && (
-          <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: GRAD }}>
-            <Check size={10} className="text-white" />
-          </div>
-        )}
       </div>
     </div>
   );
@@ -321,32 +317,32 @@ function QualifyRow({
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export function QualifyTableView({ view, onViewChange, days, onDaysChange, niche = 'all', platform = 'all' }: Props) {
-  const [search,   setSearch]   = useState('');
-  const [band,     setBand]     = useState(0);
-  const [sortKey,  setSortKey]  = useState<SortKey>('baselineScore');
-  const [sortAsc,  setSortAsc]  = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+export function QualifyTableView({ days, onDaysChange, niche = 'all', platform = 'all' }: Props) {
+  const [search,  setSearch]  = useState('');
+  const [band,    setBand]    = useState(0);
+  const [sortKey, setSortKey] = useState<SortKey>('baselineScore');
+  const [sortAsc, setSortAsc] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const raw = useQuery(api.intelligence.getQualifyPosts, {}) as QualifyPost[] | undefined;
-  const saveTop = useMutation(api.intelligence.saveTopPostsForPipeline);
 
   const isLoading = raw === undefined;
   const savedCount = raw?.filter(p => p.savedForPipeline).length ?? 0;
 
-  function handleSort(k: SortKey) {
-    if (sortKey === k) setSortAsc(a => !a);
-    else { setSortKey(k); setSortAsc(false); }
+  function handleSort(k: SortKey, asc: boolean) {
+    setSortKey(k);
+    setSortAsc(asc);
   }
 
   const filtered = useMemo(() => {
     if (!raw) return [];
     const q = search.toLowerCase().trim();
     return raw
+      .filter(p => (niche === 'all' || p.niche === niche))
+      .filter(p => (platform === 'all' || p.platform === platform))
       .filter(p => !q || p.handle.toLowerCase().includes(q))
       .filter(p => band === 0 || p.baselineScore >= band);
-  }, [raw, search, band]);
+  }, [raw, niche, platform, search, band]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -354,10 +350,10 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, niche
       let bv: number | string = 0;
       if (sortKey === 'baselineScore') { av = a.baselineScore; bv = b.baselineScore; }
       else if (sortKey === 'views')    { av = a.views;         bv = b.views; }
-      else if (sortKey === 'likes')   { av = a.likes;         bv = b.likes; }
-      else if (sortKey === 'comments'){ av = a.comments;      bv = b.comments; }
-      else if (sortKey === 'handle')  { av = a.handle;        bv = b.handle; }
-      else if (sortKey === 'niche')   { av = a.niche;         bv = b.niche; }
+      else if (sortKey === 'likes')    { av = a.likes;         bv = b.likes; }
+      else if (sortKey === 'comments') { av = a.comments;      bv = b.comments; }
+      else if (sortKey === 'handle')   { av = a.handle;        bv = b.handle; }
+      else if (sortKey === 'postedAt') { av = a.postedAt;      bv = b.postedAt; }
       if (av < bv) return sortAsc ? -1 : 1;
       if (av > bv) return sortAsc ? 1 : -1;
       return 0;
@@ -371,34 +367,68 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, niche
     overscan: 8,
   });
 
-  async function handleSaveTop10() {
-    if (!raw || raw.length === 0) return;
-    setIsSaving(true);
-    try {
-      const top10Pct = Math.ceil(raw.length * 0.1);
-      const topPosts = raw.slice(0, top10Pct);
-      const ids = topPosts.map(p => p._id as any);
-      await saveTop({ postIds: ids });
-      toast(`Saved ${topPosts.length} reels to pipeline`);
-    } finally {
-      setIsSaving(false);
-    }
-  }
+  // Column header with sort dropdown
+  function SortColumnHeader({ k, label, align = 'left', divider = false }: { k: SortKey; label: string; align?: 'left' | 'right' | 'center'; divider?: boolean }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+    const isActive = sortKey === k;
+    const isText = k === 'handle';
+    const opts = isText
+      ? [{ label: 'A → Z', asc: true }, { label: 'Z → A', asc: false }]
+      : [{ label: 'High → Low', asc: false }, { label: 'Low → High', asc: true }];
 
-  // Column header
-  function SortHeader({ k, label, align }: { k: SortKey; label: string; align?: 'right' }) {
+    useEffect(() => {
+      if (!open) return;
+      function onDown(e: MouseEvent) {
+        if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      }
+      document.addEventListener('mousedown', onDown);
+      return () => document.removeEventListener('mousedown', onDown);
+    }, [open]);
+
     return (
-      <button
-        onClick={() => handleSort(k)}
-        className={cn(
-          'flex items-center justify-center h-full text-[10px] font-semibold uppercase tracking-wide transition-colors',
-          align === 'right' ? 'text-right pr-3' : 'text-left',
-          sortKey === k ? 'text-neutral-700' : 'text-neutral-400',
+      <div ref={ref} className={cn('relative flex items-center h-full', align === 'right' && 'justify-end', align === 'center' && 'justify-center')} style={divider ? { borderRight: '1px solid rgba(0,0,0,0.06)' } : undefined}>
+        <button
+          onClick={() => setOpen(v => !v)}
+          className={cn(
+            'flex items-center gap-1 h-full w-full text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors hover:bg-neutral-100/80 group/hdr whitespace-nowrap',
+            align === 'right' ? 'justify-end pr-1' : align === 'center' ? 'justify-center' : 'justify-start pl-3',
+            isActive ? 'text-neutral-700' : 'text-neutral-400',
+          )}
+        >
+          {label}
+          <ChevronDown
+            size={9}
+            className={cn(
+              'flex-shrink-0 transition-transform duration-150',
+              open && 'rotate-180',
+              isActive ? 'text-neutral-500' : 'text-neutral-300 group-hover/hdr:text-neutral-400',
+            )}
+          />
+        </button>
+        {open && (
+          <div
+            className={cn('absolute top-full z-50 mt-1 rounded-xl bg-white py-1 min-w-[140px]', align === 'right' ? 'right-0' : align === 'center' ? 'left-1/2 -translate-x-1/2' : 'left-0')}
+            style={{ border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 20px rgba(0,0,0,0.09)' }}
+          >
+            {opts.map(opt => {
+              const checked = isActive && sortAsc === opt.asc;
+              return (
+                <button
+                  key={String(opt.asc)}
+                  onClick={() => { handleSort(k, opt.asc); setOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left hover:bg-neutral-50 transition-colors"
+                >
+                  <div className={cn('w-3.5 h-3.5 rounded-full flex items-center justify-center border flex-shrink-0 transition-colors', checked ? 'bg-blue-500 border-blue-500' : 'border-neutral-200')}>
+                    {checked && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  </div>
+                  <span className={checked ? 'text-neutral-900 font-medium' : 'text-neutral-500'}>{opt.label}</span>
+                </button>
+              );
+            })}
+          </div>
         )}
-      >
-        {label}
-        {sortKey === k ? (sortAsc ? '↑' : '↓') : '↕'}
-      </button>
+      </div>
     );
   }
 
@@ -411,34 +441,27 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, niche
         onBand={setBand}
         total={isLoading ? 0 : sorted.length}
         savedCount={isLoading ? 0 : savedCount}
-        onSaveTop={handleSaveTop10}
-        isSaving={isSaving}
-        view={view}
-        onViewChange={onViewChange}
         days={days}
         onDaysChange={onDaysChange}
       />
 
-      {/* Header row — matches Recon CreatorsTable style */}
+      {/* Header row */}
       <div
-        className="grid px-4"
+        className="grid items-center"
         style={{
-          gridTemplateColumns: '48px 1fr 80px 72px 64px 56px 80px',
+          gridTemplateColumns: COL,
           height: 36,
           borderBottom: '1px solid rgba(0,0,0,0.10)',
           backgroundColor: '#f9f9f9',
         }}
       >
-        <div className="flex items-center h-full text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">#</div>
-        <SortHeader k="handle"        label="Creator" />
-        <SortHeader k="niche"         label="Niche" />
-        <SortHeader k="views"         label="Views"    align="right" />
-        <SortHeader k="likes"         label="Likes"    align="right" />
-        <SortHeader k="comments"      label="Comments" align="right" />
-        <SortHeader k="baselineScore" label="Baseline ×" align="right" />
-        <div className="flex items-center justify-center h-full text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400" title="Saved to pipeline">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-        </div>
+        <div className="flex items-center justify-center h-full text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400" style={DIV}>#</div>
+        <SortColumnHeader k="handle"        label="Creator"  align="left"   divider />
+        <SortColumnHeader k="postedAt"      label="Posted"   align="center" divider />
+        <SortColumnHeader k="views"         label="Views"    align="center" divider />
+        <SortColumnHeader k="likes"         label="Likes"    align="center" divider />
+        <SortColumnHeader k="comments"      label="Comments" align="center" divider />
+        <SortColumnHeader k="baselineScore" label="vs Median" align="center" />
       </div>
 
       {isLoading ? (
@@ -471,13 +494,7 @@ export function QualifyTableView({ view, onViewChange, days, onDaysChange, niche
               const post = sorted[vRow.index];
               return (
                 <div key={post._id} style={{ position: 'absolute', top: 0, left: 0, right: 0, transform: `translateY(${vRow.start}px)` }}>
-                  <QualifyRow
-                    post={post}
-                    rowIdx={vRow.index}
-                    sortKey={sortKey}
-                    sortAsc={sortAsc}
-                    onSort={handleSort}
-                  />
+                  <QualifyRow post={post} rowIdx={vRow.index} />
                 </div>
               );
             })}
