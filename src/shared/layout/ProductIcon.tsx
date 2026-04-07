@@ -1,10 +1,12 @@
-// Maps each product ID to its sprite PNG
-const PRODUCT_SPRITES: Record<string, string> = {
-  hub:          '/sprites/nav-spritesheet-160x160-library.png',
-  intelligence: '/sprites/nav-spritesheet-160x160-discovery.png',
-  recon:        '/sprites/nav-spritesheet-160x160-spyder.png',
-  agents:       '/sprites/nav-spritesheet-160x160-lens.png',
-  'content-gen': '/sprites/nav-spritesheet-160x160-briefs.png',
+// Static PNG icons — frame 1 extracted from animated spritesheets at 36px (2x display size).
+// Each icon: ~3KB vs the original 500–640KB spritesheet.
+// Stored in public/sprites-icons/ — served as static assets, no bundle overhead.
+const PRODUCT_ICONS: Record<string, string> = {
+  hub:          '/sprites-icons/library-36.png',
+  intelligence: '/sprites-icons/discovery-36.png',
+  recon:        '/sprites-icons/spyder-36.png',
+  agents:       '/sprites-icons/lens-36.png',
+  'content-gen': '/sprites-icons/briefs-36.png',
 };
 
 interface ProductIconProps {
@@ -14,30 +16,25 @@ interface ProductIconProps {
 }
 
 /**
- * Renders the product sprite icon at any size.
- * Use in ContentPageShell's `icon` prop to match the sidebar icons.
- *
- * Example:
- *   <ContentPageShell icon={<ProductIcon product="recon" size={18} />} ... />
+ * Renders the product icon at any size using a static PNG.
+ * Maintains the original animated sprite aesthetic without loading a full spritesheet.
  */
 export function ProductIcon({ product, size = 18, className }: ProductIconProps) {
-  const src = PRODUCT_SPRITES[product];
+  const src = PRODUCT_ICONS[product];
   if (!src) return null;
-  // The spritesheets are horizontal animation strips (4960×160, 31 frames).
-  // We show only the first frame using backgroundPosition: left + backgroundSize: auto 100%.
   return (
-    <div
-      aria-label={product}
+    <img
+      src={src}
+      alt={product}
+      width={size}
+      height={size}
       className={className}
       style={{
         width: size,
         height: size,
         flexShrink: 0,
-        backgroundImage: `url('${src}')`,
-        backgroundSize: 'auto 100%',
-        backgroundPosition: 'left center',
-        backgroundRepeat: 'no-repeat',
         borderRadius: Math.round(size * 0.28),
+        objectFit: 'contain',
       }}
     />
   );

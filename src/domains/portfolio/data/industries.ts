@@ -235,7 +235,7 @@ export const industries: Industry[] = [
     seoMetadata: {
       title: 'Elementary Restaurant | Booking & Ordering Experience',
       description:
-        'See how we shipped Elementary's restaurant experience with bookings, menu, and payments in 48 hours.',
+        "See how we shipped Elementary's restaurant experience with bookings, menu, and payments in 48 hours.",
       keywords: ['restaurant website', 'table reservations', 'online ordering', 'stripe payments', 'elementary restaurant'],
     },
   },

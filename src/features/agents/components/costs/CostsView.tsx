@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { motion } from 'framer-motion';
 import { containerVariants, fadeUp } from '../../constants';
 import { DollarSign, Cpu, ReceiptText, TrendingDown } from 'lucide-react';
@@ -15,7 +15,10 @@ function fmtDate(ts: number) {
   return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-const PROVIDER_COLORS: Record<string, { grad: string; dot: string; bg: string; text: string }> = {
+const BUDGET_ALERT_THRESHOLD_PCT = 40; // flag if agent uses >40% of total monthly spend
+const MONTHLY_BUDGET_CENTS = 100_00; // $100.00 default monthly budget
+
+const PROVIDER_COLORS = {
   Anthropic: { grad: 'linear-gradient(135deg,#ff0069,#833ab4)', dot: '#ff0069', bg: 'rgba(255,0,105,0.08)', text: '#cc0054' },
   FLUX:      { grad: 'linear-gradient(135deg,#833ab4,#4a9eff)', dot: '#833ab4', bg: 'rgba(131,58,180,0.08)', text: '#5c2a87' },
   Kling:     { grad: 'linear-gradient(135deg,#4a9eff,#78c257)', dot: '#4a9eff', bg: 'rgba(74,158,255,0.08)',  text: '#1d6eb5' },
@@ -46,6 +49,11 @@ export function CostsView() {
   }, {});
   const agentRows = Object.entries(byAgent).sort((a, b) => b[1] - a[1]);
   const maxAgent = Math.max(...agentRows.map(r => r[1]), 1);
+
+  // Flag agents burning >BUDGET_ALERT_THRESHOLD_PCT% of total monthly spend
+  const overBudgetAgents = agentRows
+    .filter(([, cents]) => totalCents > 0 && (cents / totalCents) * 100 > BUDGET_ALERT_THRESHOLD_PCT)
+    .map(([name]) => name);
 
   const byProvider = Object.entries(
     rows.reduce<Record<string, number>>((acc, r) => {
@@ -78,6 +86,16 @@ export function CostsView() {
       </motion.div>
 
       {/* Metric tiles */}
+      {overBudgetAgents.length > 0 && (
+        <motion.div variants={fadeUp} className="rounded-2xl px-4 py-3 flex items-center gap-3"
+          style={{ background: 'linear-gradient(135deg, rgba(255,100,0,0.06), rgba(255,150,0,0.04))', border: '1px solid rgba(255,100,0,0.18)' }}>
+          <TrendingDown size={13} style={{ color: '#ff6400' }} />
+          <p className="text-[11px] text-orange-700">
+            <span className="font-bold">{overBudgetAgents.length} agent{overBudgetAgents.length > 1 ? 's' : ''}</span> exceeding {BUDGET_ALERT_THRESHOLD_PCT}% of monthly budget:{' '}
+            <span className="font-semibold">{overBudgetAgents.join(', ')}</span>
+          </p>
+        </motion.div>
+      )}
       <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
         {metrics.map(({ icon: Icon, label, value, sub, idx }) => (
           <div key={label} className="rounded-2xl p-4 flex gap-3 items-start overflow-hidden relative"
@@ -113,10 +131,14 @@ export function CostsView() {
             {agentRows.map(([name, cents]) => {
               const pct = (cents / maxAgent) * 100;
               const share = totalCents > 0 ? ((cents / totalCents) * 100).toFixed(0) : '0';
+              const isOverBudget = overBudgetAgents.includes(name);
               return (
                 <div key={name}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-semibold text-neutral-800 truncate max-w-[180px]">{name}</span>
+                    <div className="flex items-center gap-1.5">
+                      {isOverBudget && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-600">HIGH</span>}
+                      <span className="text-[11px] font-semibold text-neutral-800 truncate max-w-[150px]">{name}</span>
+                    </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className="text-[10px] text-neutral-400">{share}%</span>
                       <span className="text-[11px] font-bold text-neutral-900 tabular-nums">{fmtCents(cents)}</span>
@@ -124,7 +146,7 @@ export function CostsView() {
                   </div>
                   <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
                     <div className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#ff0069,#833ab4)' }} />
+                      style={{ width: `${pct}%`, background: isOverBudget ? 'linear-gradient(90deg,#ff6400,#ff9900)' : 'linear-gradient(90deg,#ff0069,#833ab4)' }} />
                   </div>
                 </div>
               );
@@ -148,7 +170,7 @@ export function CostsView() {
             {/* Mini donut-style bars */}
             <div className="px-4 py-3 space-y-2.5">
               {byProvider.map(([provider, cents]) => {
-                const cfg = PROVIDER_COLORS[provider] ?? { dot: '#94a3b8', bg: 'rgba(148,163,184,0.1)', text: '#6b7280', grad: 'linear-gradient(135deg,#94a3b8,#cbd5e1)' };
+                const cfg = PROVIDER_COLORS[provider as keyof typeof PROVIDER_COLORS] ?? { dot: '#94a3b8', bg: 'rgba(148,163,184,0.1)', text: '#6b7280', grad: 'linear-gradient(135deg,#94a3b8,#cbd5e1)' };
                 const pct = totalProviderCents > 0 ? (cents / totalProviderCents) * 100 : 0;
                 return (
                   <div key={provider}>
@@ -177,7 +199,7 @@ export function CostsView() {
             </div>
             <div className="divide-y divide-neutral-50 max-h-[180px] overflow-y-auto">
               {rows.slice(0, 8).map(r => {
-                const cfg = PROVIDER_COLORS[r.provider];
+                const cfg = PROVIDER_COLORS[r.provider as keyof typeof PROVIDER_COLORS];
                 return (
                   <div key={r._id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-neutral-50/60 transition-colors">
                     <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"

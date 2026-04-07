@@ -1,4 +1,4 @@
-import type { Id } from '../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 
 export type Niche = 'GFE' | 'Fitness' | 'Meme' | 'Thirst Trap' | 'Lifestyle';
 

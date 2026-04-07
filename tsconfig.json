@@ -45,6 +45,9 @@
       "@/shared/*": [
         "./src/domains/partnerships/_shared/*"
       ],
+      "@/shared/layout/*": [
+        "./src/shared/layout/*"
+      ],
       "@/isso/*": [
         "./src/shared/*"
       ],
@@ -64,8 +67,7 @@
         "./src/config/*"
       ],
       "@/components/*": [
-        "./src/components/*",
-        "./components/*"
+        "./src/components/*"
       ],
       "@/hooks/*": [
         "./src/hooks/*"

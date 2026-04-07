@@ -3,7 +3,23 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ISSO_NAV_CONFIG, PERSISTENT_NAV, PLATFORMS_NAV } from './sidebar-config';
+import type { SectionConfig, NavItem, PlatformItem } from './sidebar-config';
 import { cn } from '@/lib/utils';
+
+export interface ChangelogEntry {
+  date: string;
+  tag: 'new' | 'update' | 'fix';
+  title: string;
+}
+
+export interface SidebarConfig {
+  navConfig?: SectionConfig[];
+  persistentNav?: NavItem[];
+  platformsNav?: PlatformItem[];
+  appName?: string;
+  changelog?: ChangelogEntry[];
+  planLabel?: string;
+}
 import {
   Search, Plus, Zap, PanelLeftClose, PanelLeftOpen,
   Activity, LogOut, Settings, HelpCircle, ChevronRight,
@@ -20,7 +36,7 @@ const PRODUCT_SPRITES: Record<string, string> = {
 };
 
 // ── Changelog entries ─────────────────────────────────────────────────────────
-const CHANGELOG = [
+const DEFAULT_CHANGELOG: ChangelogEntry[] = [
   { date: 'Apr 2026', tag: 'new',     title: 'Intelligence v2 - Trend radar launched' },
   { date: 'Mar 2026', tag: 'update',  title: 'Schedule - bulk upload & CSV export' },
   { date: 'Mar 2026', tag: 'new',     title: 'Recon agent - competitor scraping live' },
@@ -99,7 +115,7 @@ function IconTooltip({
 }
 
 // ── Main sidebar ──────────────────────────────────────────────────────────────
-export function IssoSidebarShell() {
+export function IssoSidebarShell({ config }: { config?: SidebarConfig }) {
   const pathname = usePathname() ?? '';
   const [search, setSearch] = useState('');
   const [collapsed, setCollapsed] = useState(false);
@@ -112,17 +128,24 @@ export function IssoSidebarShell() {
   useOnClickOutside(changelogRef, () => setShowChangelog(false));
   useOnClickOutside(avatarRef, () => setShowAvatar(false));
 
+  const navConfig = config?.navConfig ?? ISSO_NAV_CONFIG;
+  const persistentNav = config?.persistentNav ?? PERSISTENT_NAV;
+  const platformsNav = config?.platformsNav ?? PLATFORMS_NAV;
+  const appName = config?.appName ?? 'oracle';
+  const planLabel = config?.planLabel ?? 'Upgrade ORACLE';
+  const changelog = config?.changelog ?? DEFAULT_CHANGELOG;
+
   // Derive active section from nav items
-  const activeSection = ISSO_NAV_CONFIG.find(section =>
+  const activeSection = navConfig.find(section =>
     section.sections.some(s =>
       s.items.some(item =>
         pathname === item.href ||
         (item.href !== '/isso' && pathname.startsWith(item.href + '/'))
       )
     )
-  )?.id ?? 'hub';
+  )?.id ?? (navConfig[0]?.id ?? 'hub');
 
-  const activeConfig = ISSO_NAV_CONFIG.find(s => s.id === activeSection);
+  const activeConfig = navConfig.find(s => s.id === activeSection);
 
   return (
     <aside className="flex flex-col flex-shrink-0 h-full" style={{ width: collapsed ? '76px' : '288px', transition: 'width 200ms ease' }}>
@@ -133,7 +156,7 @@ export function IssoSidebarShell() {
           <>
             <div className="flex items-center gap-2.5 px-1">
               <ForeplayLogoIcon size={28} />
-              <span className="text-white font-semibold text-sm tracking-tight select-none">oracle</span>
+              <span className="text-white font-semibold text-sm tracking-tight select-none">{appName}</span>
             </div>
             <button
               onClick={() => setCollapsed(true)}
@@ -159,7 +182,7 @@ export function IssoSidebarShell() {
 
       {/* ── Product icon row ── */}
       <div className={cn('flex flex-shrink-0', collapsed ? 'flex-col items-center gap-1 px-2' : 'flex-row items-center justify-between px-3 mb-1')}>
-        {ISSO_NAV_CONFIG.map((section) => {
+        {navConfig.map((section) => {
           const isActive = activeSection === section.id;
           const sprite = PRODUCT_SPRITES[section.id];
           const btn = (
@@ -205,7 +228,7 @@ export function IssoSidebarShell() {
             <div className="h-px w-full mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />
             <p className="px-2 pb-1.5 text-[10px] uppercase tracking-[0.2em] text-neutral-600 select-none">Pages</p>
             <nav className="flex flex-col gap-0.5">
-              {PERSISTENT_NAV.map((item) => {
+              {persistentNav.map((item) => {
                 const isActive =
                   pathname === item.href ||
                   pathname.startsWith(item.href + '/');
@@ -254,7 +277,7 @@ export function IssoSidebarShell() {
             <div className="h-px w-full mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />
             <p className="px-2 pb-1.5 text-[10px] uppercase tracking-[0.2em] text-neutral-600 select-none">Platforms</p>
             <nav className="flex flex-col gap-0.5">
-              {PLATFORMS_NAV.map((platform) => {
+              {platformsNav.map((platform) => {
                 const isActive = pathname.startsWith(platform.href);
                 const Icon = platform.icon;
                 return (
@@ -310,7 +333,7 @@ export function IssoSidebarShell() {
                 style={{ backgroundColor: '#2a2a2e', border: '1px solid rgba(255,255,255,0.10)' }}
               >
                 <Zap size={14} />
-                Upgrade ORACLE
+                {planLabel}
               </button>
             </div>
           </div>
@@ -418,7 +441,7 @@ export function IssoSidebarShell() {
                 </div>
                 {/* Entries */}
                 <div className="py-2 max-h-[480px] overflow-y-auto">
-                  {CHANGELOG.map((entry, i) => (
+                  {changelog.map((entry, i) => (
                     <div key={i} className="flex items-start gap-4 px-6 py-3.5 hover:bg-white/[0.03] transition-colors">
                       <span className="text-[11px] text-neutral-600 mt-0.5 w-16 flex-shrink-0">{entry.date}</span>
                       <div className="flex-1 min-w-0 flex items-start gap-3">

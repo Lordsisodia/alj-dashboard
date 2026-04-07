@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, TrendingUp, ExternalLink, CheckCircle, XCircle, Sparkles, Loader2, Radar, Zap } from 'lucide-react';
 import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../../../../convex/_generated/api';
-import type { Id } from '../../../../../../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import type { Candidate, CandidateStatus } from '../../../types';
 import { fmtViews } from './discoveryUtils';
 

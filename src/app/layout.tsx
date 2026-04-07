@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import React from "react";
+import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import WebVitals from "@/components/analytics/WebVitals";
 import { AppProviders } from "./providers";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "SISO Platform",
@@ -18,7 +21,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
         <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
         {/* Preload the most-used font weights so they're ready before CSS is parsed */}

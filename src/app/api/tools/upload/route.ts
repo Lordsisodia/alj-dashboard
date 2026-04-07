@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { ConvexHttpClient } from 'convex/browser';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 
 const R2 = new S3Client({
   region: 'auto',

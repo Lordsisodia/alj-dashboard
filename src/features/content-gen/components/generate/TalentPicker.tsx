@@ -2,7 +2,7 @@
 
 import { AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 import type { ConvexModel } from './types';
 import { initials } from './types';
 

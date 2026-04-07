@@ -1,7 +1,7 @@
 'use client';
 
 import { Sparkles } from 'lucide-react';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 import type { ConvexJob, ConvexModel } from './types';
 import { JobCard } from './JobCard';
 

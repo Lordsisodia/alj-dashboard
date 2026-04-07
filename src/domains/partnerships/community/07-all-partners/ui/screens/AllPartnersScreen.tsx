@@ -81,7 +81,7 @@ export function AllPartnersScreen({ partners, withShell = true }: { partners: Pa
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Try "commerce mentor" or "LATAM""
+                placeholder="Try 'commerce mentor' or 'LATAM'"
                 className="w-full rounded-2xl border border-white/15 bg-siso-bg-tertiary px-4 py-2 text-sm text-white placeholder:text-siso-text-muted focus:border-siso-orange focus:outline-none focus:ring-2 focus:ring-siso-orange/25"
               />
               <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-siso-text-muted">

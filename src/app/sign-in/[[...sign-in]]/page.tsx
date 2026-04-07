@@ -1,7 +1,6 @@
 'use client';
 
-import { useSignIn } from '@clerk/nextjs/legacy';
-import { useAuth, useClerk } from '@clerk/nextjs';
+import { useSignIn, useAuth, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { SignInPage } from '@/isso/ui/sign-in';

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Inbox } from 'lucide-react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { containerVariants, fadeUp } from '../../constants';
 import type { Priority } from '../../types';
 import { type FilterOption, type DisplayRequest } from './lib';

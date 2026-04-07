@@ -1,0 +1,327 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1775562944984,
+  "projectRoot": "/Users/shaansisodia/SISO_Workspace/SISO_Agency/apps/isso-dashboard",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": ">=20 <21",
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "esbuild",
+        "version": "0.25.12",
+        "category": "build"
+      },
+      {
+        "name": "next",
+        "version": "15.1.4",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "vitest",
+        "version": "2.1.8",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "pnpm",
+    "runtime": "Node.js 2021"
+  },
+  "build": {
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
+    "lintCommand": "pnpm lint",
+    "devCommand": "pnpm dev",
+    "scripts": {
+      "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev --turbo",
+      "dev:clean": "rm -rf .next && NODE_OPTIONS='--max-old-space-size=4096' next dev --turbo",
+      "clean": "rm -rf .next",
+      "build": "NODE_OPTIONS='--max-old-space-size=8192' next build",
+      "predev": "node scripts/check-node.js",
+      "prebuild": "node scripts/check-node.js",
+      "prestart": "node scripts/check-node.js",
+      "perf:hydration": "node scripts/perf/check-hydration-heuristics.mjs",
+      "perf:baseline": "node scripts/perf/run-baseline.mjs",
+      "perf:budgets": "node scripts/perf/check-bundle-budgets.mjs",
+      "perf:media": "node scripts/perf/check-hero-media.mjs",
+      "perf:tti": "node scripts/perf/check-tti.mjs",
+      "perf:lighthouse-budgets": "node scripts/perf/check-lighthouse-budgets.mjs",
+      "start": "next start",
+      "lint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint .",
+      "lint:warnings": "node scripts/check-lint-warnings.mjs",
+      "typecheck": "tsc --noEmit",
+      "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+      "test": "vitest",
+      "test:ui": "vitest --ui",
+      "portfolio:export": "node scripts/portfolio/export-clients.cjs",
+      "check:partners-structure": "node scripts/check-partnership-structure.mjs",
+      "generate:partner-feature": "node scripts/generate-partner-feature.mjs",
+      "check:nav-sync": "node scripts/check-nav-sync.mjs",
+      "check:partners": "cross-env CHECK_MODE=strict node scripts/run-checks.mjs"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": "*.spec.ts",
+    "fileOrganization": "feature-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "components",
+      "docs",
+      "public",
+      "scripts",
+      "src",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "archive": {
+      "path": "archive",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775562944911,
+      "keyFiles": []
+    },
+    "components": {
+      "path": "components",
+      "purpose": "UI components",
+      "fileCount": 2,
+      "lastAccessed": 1775562944920,
+      "keyFiles": [
+        "Footer.tsx",
+        "Logo.tsx"
+      ]
+    },
+    "convex": {
+      "path": "convex",
+      "purpose": null,
+      "fileCount": 26,
+      "lastAccessed": 1775562944947,
+      "keyFiles": [
+        "activity.ts",
+        "agentDebugLogs.ts",
+        "agentReports.ts",
+        "agents.ts",
+        "analytics.ts"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1775562944949,
+      "keyFiles": [
+        "README.md"
+      ]
+    },
+    "notes": {
+      "path": "notes",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775562944952,
+      "keyFiles": [
+        "portfolio-project-notes.md"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 5,
+      "lastAccessed": 1775562944959,
+      "keyFiles": [
+        "favicon.ico",
+        "siso-logo.svg",
+        "sw.js",
+        "swe-worker-5c72df51bb1f6ee0.js",
+        "workbox-84c8cf68.js"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 18,
+      "lastAccessed": 1775562944964,
+      "keyFiles": [
+        "agent-deck.sh",
+        "check-lint-warnings.mjs",
+        "check-nav-sync.mjs",
+        "check-node.js",
+        "check-partnership-structure.mjs"
+      ]
+    },
+    "siso-app-factory": {
+      "path": "siso-app-factory",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775562944966,
+      "keyFiles": []
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 1,
+      "lastAccessed": 1775562944968,
+      "keyFiles": [
+        "middleware.ts"
+      ]
+    },
+    "stubs": {
+      "path": "stubs",
+      "purpose": "Stub implementations",
+      "fileCount": 1,
+      "lastAccessed": 1775562944970,
+      "keyFiles": [
+        "class-variance-authority.ts"
+      ]
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 1,
+      "lastAccessed": 1775562944970,
+      "keyFiles": [
+        "providers.spec.ts"
+      ]
+    },
+    "tmp": {
+      "path": "tmp",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775562944971,
+      "keyFiles": [
+        "__dummy"
+      ]
+    },
+    "public/assets": {
+      "path": "public/assets",
+      "purpose": "Static assets",
+      "fileCount": 0,
+      "lastAccessed": 1775562944973,
+      "keyFiles": []
+    },
+    "public/data": {
+      "path": "public/data",
+      "purpose": "Data files",
+      "fileCount": 3,
+      "lastAccessed": 1775562944974,
+      "keyFiles": [
+        "partner-nav-config.json",
+        "pipeline-ops-config.json",
+        "recruitment-submit-config.json"
+      ]
+    },
+    "public/docs": {
+      "path": "public/docs",
+      "purpose": "Documentation",
+      "fileCount": 7,
+      "lastAccessed": 1775562944974,
+      "keyFiles": [
+        "commission-payment-terms.md",
+        "compliance-regulatory.md",
+        "cookie-tracking-policy.md"
+      ]
+    },
+    "scripts/data": {
+      "path": "scripts/data",
+      "purpose": "Data files",
+      "fileCount": 0,
+      "lastAccessed": 1775562944975,
+      "keyFiles": []
+    },
+    "src/app": {
+      "path": "src/app",
+      "purpose": "Application code",
+      "fileCount": 3,
+      "lastAccessed": 1775562944975,
+      "keyFiles": [
+        "globals.css",
+        "layout.tsx",
+        "manifest.ts"
+      ]
+    },
+    "src/assets": {
+      "path": "src/assets",
+      "purpose": "Static assets",
+      "fileCount": 1,
+      "lastAccessed": 1775562944975,
+      "keyFiles": [
+        "integrations.ts"
+      ]
+    },
+    "src/components": {
+      "path": "src/components",
+      "purpose": "UI components",
+      "fileCount": 1,
+      "lastAccessed": 1775562944975,
+      "keyFiles": [
+        "Logo.tsx"
+      ]
+    },
+    "src/config": {
+      "path": "src/config",
+      "purpose": "Configuration files",
+      "fileCount": 3,
+      "lastAccessed": 1775562944976,
+      "keyFiles": [
+        "icon-registry.tsx",
+        "partner-nav-config.ts",
+        "partnership-config.ts"
+      ]
+    },
+    "src/lib": {
+      "path": "src/lib",
+      "purpose": "Library code",
+      "fileCount": 3,
+      "lastAccessed": 1775562944976,
+      "keyFiles": [
+        "apifyTokens.ts",
+        "cdn.ts",
+        "utils.ts"
+      ]
+    },
+    "src/pages": {
+      "path": "src/pages",
+      "purpose": "Page components",
+      "fileCount": 1,
+      "lastAccessed": 1775562944978,
+      "keyFiles": [
+        "_document.tsx"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

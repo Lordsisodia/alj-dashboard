@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { X } from 'lucide-react';
 
 const AGENTS = ['Recon Scraper #1', 'Recon Scraper #2', 'Intelligence Indexer', 'Post Scheduler Bot', 'Weekly Report Agent'];

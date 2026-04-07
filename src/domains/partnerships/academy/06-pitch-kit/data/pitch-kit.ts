@@ -112,7 +112,7 @@ export const pitchKitDetails: Record<string, PitchKitDetail> = {
     ...pitchAssets.find((p) => p.id === "deck-standard")!,
     researchBullets: [
       "SMBs value <90-day ROI and fast setup over bespoke builds.",
-      "Standard kit covers discovery → demo → close with generic proof placeholders.",
+      "Standard kit covers discovery  ->  demo  ->  close with generic proof placeholders.",
       "Add 1-2 portfolio links for credibility; keep deck lightweight for mobile.",
     ],
     talkTrack: "Lead with time-to-value, show the deck highlight reel, then confirm a tailored proof follow-up.",
@@ -240,9 +240,9 @@ export const pitchKitDetails: Record<string, PitchKitDetail> = {
         type: "objections",
         title: "Answer the common pushbacks",
         bullets: [
-          ""We're locked into a POS" → Keep POS; this is the front-end/loyalty layer.",
-          ""Too busy to switch" → Start with one location; menu stays in sync.",
-          ""Delivery apps already cover us" → Direct saves 15-30% fees; run A/B incentive.",
+          "We're locked into a POS -> Keep POS; this is the front-end/loyalty layer.",
+          "Too busy to switch -> Start with one location; menu stays in sync.",
+          "Delivery apps already cover us -> Direct saves 15-30% fees; run A/B incentive.",
         ],
       },
       {

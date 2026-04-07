@@ -10,7 +10,7 @@ const faqs = [
   },
   {
     q: 'What does it cost to start?',
-    a: 'Zero upfront. You pay when you're happy with the build and ready to launch.'
+    a: "Zero upfront. You pay when you're happy with the build and ready to launch."
   },
   {
     q: 'Do you co-sell with our team?',

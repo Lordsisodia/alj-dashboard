@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
-import type { Id } from '../../../../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import { AnimatePresence } from 'framer-motion';
 import { ListVideo, History } from 'lucide-react';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';

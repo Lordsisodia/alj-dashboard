@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Database, Radar, Library, Clock, FileStack, Users, Zap } from 'lucide-react';
+import { Database, Radar, Library, Clock, FileStack, Users, Zap, Play, List, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { COMPETITORS, DAILY_VOLUME } from '../../constants'; // COMPETITORS seeds initial state
 import type { Competitor } from '../../types';
 import { PostsScrapedChart } from './PostsScrapedChart';
@@ -121,6 +121,22 @@ export function LogDashboard({
         <div className="grid grid-cols-[2fr_1fr] gap-3 px-3 pt-4 pb-2">
           <PostsScrapedChart data={DAILY_VOLUME} />
           <ScrapingReport />
+        </div>
+
+        {/* ⑤ Quick-action row — desktop only */}
+        <div className="hidden md:flex items-center gap-2 px-3 pt-2 pb-1">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white/70 hover:text-white hover:bg-white/8 border border-white/8 hover:border-white/15 transition-colors">
+            <Play size={11} className="text-emerald-400" />
+            Scrape Now
+          </button>
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white/70 hover:text-white hover:bg-white/8 border border-white/8 hover:border-white/15 transition-colors">
+            <List size={11} className="text-blue-400" />
+            View Full Log
+          </button>
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white/70 hover:text-white hover:bg-white/8 border border-white/8 hover:border-white/15 transition-colors">
+            <SlidersHorizontal size={11} className="text-purple-400" />
+            Filter by Niche
+          </button>
         </div>
 
         {/* bottom clearance */}

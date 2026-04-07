@@ -1,5 +1,5 @@
-import DashboardFeaturePage from '@/features/content-gen/components/dashboard/DashboardFeaturePage';
+import ContentGenFeaturePage from '@/features/content-gen/components/ContentGenFeaturePage';
 
 export default function ContentGenPage() {
-  return <DashboardFeaturePage />;
+  return <ContentGenFeaturePage />;
 }

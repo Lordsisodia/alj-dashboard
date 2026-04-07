@@ -1,4 +1,4 @@
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 
 export type Provider  = 'FLUX' | 'Kling' | 'Higgsfield';
 export type JobStatus = 'Queued' | 'Generating' | 'Done' | 'Failed';

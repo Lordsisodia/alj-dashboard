@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Zap, Film, Waves, CheckCircle2, XCircle, Hourglass, Loader2 } from 'lucide-react';
-import { ContentPageShell } from '@/isso/layout/ContentPageShell';
-import { ProductIcon } from '@/isso/layout/ProductIcon';
+import { cn } from '@/lib/utils';
 import { useQuery, useMutation } from 'convex/react';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 import { SEED_ACTIVE, SEED_HISTORY } from '../queue/seed';
 import { PROVIDER_CFG } from '../queue/types';
 import type { ActiveJob } from '../queue/types';
@@ -14,7 +13,6 @@ import { ModelAvatar, ProviderBadge, StatusBadge } from '../queue/atoms';
 import { EtaCountdown } from '../queue/EtaCountdown';
 import { StatsStrip } from '../queue/StatsStrip';
 import { HistorySection } from '../queue/HistorySection';
-import { cn } from '@/lib/utils';
 
 // api cast - Convex types generated separately
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,20 +136,35 @@ export default function LivePipelinePage() {
   const generatingCount = activeJobs.filter(j => j.status === 'Generating').length;
 
   return (
-    <ContentPageShell
-      icon={<ProductIcon product="content-gen" size={32} />}
-      title="Generate"
-      stat={{ label: 'Active', value: activeJobs.length }}
-      searchPlaceholder="Search jobs..."
-      actionLabel="New Job"
-      tabs={[
-        { id: 'live',    label: 'Live',    icon: generatingCount > 0 ? <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-60" /><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500" /></span> : undefined },
-        { id: 'history', label: 'History' },
-      ]}
-      activeTab={tab}
-      onTabChange={id => setTab(id as Tab)}
-    >
-      <div className="p-5">
+    <div className="p-5">
+      <div className="flex items-center gap-1 mb-4">
+        <button
+          onClick={() => setTab('live')}
+          className={cn(
+            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+            tab === 'live' ? 'text-white' : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
+          )}
+          style={tab === 'live' ? { background: 'linear-gradient(135deg, #ff0069, #833ab4)' } : undefined}
+        >
+          {generatingCount > 0 && (
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-60" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500" />
+            </span>
+          )}
+          Live
+        </button>
+        <button
+          onClick={() => setTab('history')}
+          className={cn(
+            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+            tab === 'history' ? 'text-white' : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
+          )}
+          style={tab === 'history' ? { background: 'linear-gradient(135deg, #ff0069, #833ab4)' } : undefined}
+        >
+          History
+        </button>
+      </div>
         {tab === 'live' && (
           <>
             <StatsStrip jobs={activeJobs} />
@@ -186,6 +199,5 @@ export default function LivePipelinePage() {
             : <div className="max-w-2xl"><HistorySection jobs={historyJobs} /></div>
         )}
       </div>
-    </ContentPageShell>
   );
 }

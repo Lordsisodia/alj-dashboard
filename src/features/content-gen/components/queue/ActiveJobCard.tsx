@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { RefreshCw, Ban } from 'lucide-react';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '@/convex/_generated/dataModel';
 import type { ActiveJob } from './types';
 import { PROVIDER_CFG } from './types';
 import { ModelAvatar, ProviderBadge, StatusBadge } from './atoms';

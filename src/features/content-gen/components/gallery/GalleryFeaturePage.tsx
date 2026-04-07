@@ -3,8 +3,6 @@
 import { useState, useMemo } from 'react';
 import { Play, CheckCircle2, XCircle, Send, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ContentPageShell } from '@/isso/layout/ContentPageShell';
-import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { cn } from '@/lib/utils';
 import { SEED_HISTORY } from '../queue/seed';
 import { PROVIDER_CFG } from '../queue/types';
@@ -138,33 +136,34 @@ function GalleryCard({ job }: { job: HistoryJob }) {
 
 export default function GalleryFeaturePage() {
   const [activeFilter, setActiveFilter] = useState('all');
-  const [search, setSearch]             = useState('');
 
   const jobs = SEED_HISTORY; // swap for useQuery(api.contentGen.getHistory)
 
   const filtered = useMemo(() => {
     return jobs
-      .filter(j => activeFilter === 'all' || j.outcome === activeFilter || (activeFilter === 'Pending Review' && !j.outcome))
-      .filter(j => !search || j.name.toLowerCase().includes(search.toLowerCase()) || j.modelName.toLowerCase().includes(search.toLowerCase()));
-  }, [jobs, activeFilter, search]);
+      .filter(j => activeFilter === 'all' || j.outcome === activeFilter || (activeFilter === 'Pending Review' && !j.outcome));
+  }, [jobs, activeFilter]);
 
   const needsReview = jobs.filter(j => !j.outcome || j.outcome === 'Pending Review').length;
 
   return (
-    <ContentPageShell
-      icon={<ProductIcon product="content-gen" size={32} />}
-      title="Gallery"
-      stat={{ label: 'Needs Review', value: needsReview }}
-      searchPlaceholder="Search by name or model..."
-      actionLabel="Export"
-      filterChips={OUTCOME_FILTERS}
-      activeFilter={activeFilter}
-      onFilterChange={setActiveFilter}
-      searchValue={search}
-      onSearch={setSearch}
-      showViewToggle
-    >
-      <div className="p-5">
+    <div className="p-5">
+      <div className="flex items-center gap-1 mb-4">
+        {OUTCOME_FILTERS.map(f => (
+          <button
+            key={f.id}
+            onClick={() => setActiveFilter(f.id)}
+            className={cn(
+              'px-3 py-1 rounded-lg text-xs font-medium transition-colors',
+              activeFilter === f.id
+                ? 'text-neutral-900 bg-black/[0.07]'
+                : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
+            )}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 gap-3">
             <Play size={28} className="text-neutral-200" />
@@ -178,6 +177,5 @@ export default function GalleryFeaturePage() {
           </div>
         )}
       </div>
-    </ContentPageShell>
   );
 }
