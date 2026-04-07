@@ -99,7 +99,7 @@ export function WeeklyDigestCard() {
 
   return (
     <div
-      className="mx-3 mt-4 rounded-xl overflow-hidden"
+      className="rounded-xl overflow-hidden"
       style={{ border: '1px solid rgba(131,58,180,0.18)', background: 'linear-gradient(135deg, rgba(255,0,105,0.025), rgba(131,58,180,0.04))' }}
     >
       {/* Single compact header row */}

@@ -15,6 +15,7 @@ import type * as approvals from "../approvals.js";
 import type * as candidates from "../candidates.js";
 import type * as contentGen from "../contentGen.js";
 import type * as costs from "../costs.js";
+import type * as creatorBriefs from "../creatorBriefs.js";
 import type * as featureRequests from "../featureRequests.js";
 import type * as insights from "../insights.js";
 import type * as insightsSeed from "../insightsSeed.js";
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   candidates: typeof candidates;
   contentGen: typeof contentGen;
   costs: typeof costs;
+  creatorBriefs: typeof creatorBriefs;
   featureRequests: typeof featureRequests;
   insights: typeof insights;
   insightsSeed: typeof insightsSeed;

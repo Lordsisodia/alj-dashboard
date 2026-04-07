@@ -36,14 +36,25 @@ export type Post = {
   likes:           number;
   views:           number;
   saves:           number;
+  comments:        number;
+  reach?:          number;
   engagementRate?: number;
   outlierRatio?:   number;
   postedAt:        number;
   saved:           boolean;
+  savedForPipeline?: boolean;
   contentType:     string;
   platform?:       string;
   caption?:        string;
   hashtags?:       string[];
+  aiAnalysis?: {
+    hookScore: number;
+    hookLine: string;
+    emotions: string[];
+    breakdown: string;
+    suggestions: string[];
+    analyzedAt: number;
+  };
 };
 
 // Full shape for the detail drawer
@@ -61,11 +72,13 @@ export interface DrawerPost {
   likes:           number;
   views:           number;
   saves:           number;
+  comments:       number;
   engagementRate?: number;
   outlierRatio?:   number;
   postedAt:        number;
   scrapedAt?:      number;
   saved:           boolean;
+  savedForPipeline?: boolean;
   aiAnalysis?: {
     transcript?:  string;
     hookScore:    number;
@@ -76,6 +89,9 @@ export interface DrawerPost {
     analyzedAt:   number;
   };
 }
+
+export const DENSITY_OPTIONS = [2, 3, 4, 6, 8] as const;
+export type DensityId = typeof DENSITY_OPTIONS[number];
 
 // Re-export domain-specific types
 export * from './trendsTypes';

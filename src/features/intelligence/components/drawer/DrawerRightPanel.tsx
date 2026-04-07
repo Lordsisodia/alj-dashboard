@@ -28,8 +28,8 @@ const TABS = [
   { id: 'transcript' as DrawerTab, label: 'Transcript', icon: <FileText size={12} /> },
 ];
 
-export function DrawerRightPanel({ post }: { post: DrawerPost }) {
-  const [tab, setTab] = useState<DrawerTab>('details');
+export function DrawerRightPanel({ post, initialTab }: { post: DrawerPost; initialTab?: 'details' | 'ai' | 'transcript' }) {
+  const [tab, setTab] = useState<DrawerTab>(initialTab ?? 'details');
   const toggleSave    = useMutation(api.intelligence.toggleSave);
 
   return (

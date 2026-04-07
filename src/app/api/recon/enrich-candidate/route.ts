@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
       .slice(0, 30);
 
     const rawAvatarUrl = p.profilePicUrlHD ?? p.profilePicUrl ?? null;
+    console.log(`[enrich] ${username} - rawAvatarUrl: ${rawAvatarUrl ? 'found' : 'MISSING'}`);
 
     // Kick off R2 upload + Convex write in parallel — don't await them
     const avatarUpload = rawAvatarUrl
@@ -138,6 +139,7 @@ export async function POST(req: NextRequest) {
 
     // Race R2 upload — respond as soon as Apify returns
     const [stableAvatar] = await Promise.all([avatarUpload]);
+    console.log(`[enrich] ${username} - R2 upload: ${stableAvatar ? 'OK' : 'failed'}, final avatarUrl: ${stableAvatar ?? rawAvatarUrl ?? 'NULL'}`);
 
     enriched.avatarUrl = stableAvatar ?? rawAvatarUrl;
 

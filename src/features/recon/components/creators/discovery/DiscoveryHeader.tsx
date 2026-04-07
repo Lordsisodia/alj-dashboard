@@ -1,53 +1,54 @@
 'use client';
 
-import { Check, Clock, Users, Zap, TrendingUp, ScanSearch, FileStack } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { MiniStat } from './MiniStat';
-import { ALERT_THRESHOLDS } from './discoveryData';
+import { TrendingUp, ScanSearch, FileStack, Users, XCircle } from 'lucide-react';
 
 interface Props {
-  total: number;
   pending: number;
-  approved: number;
-  approvedToday: number;
-  candidatesScraped: number;
-  contentScraped: number;
-  alertThreshold: number;
-  onAlertChange: (v: number) => void;
+  scraped: number;
+  rejected: number;
+  totalTracked: number;
+  avgViews: number;
+  avgEngagement: number;
+  avgFollowers: number;
+  topNiche: string;
 }
 
 export function DiscoveryHeader({
-  total, pending, approved, approvedToday, candidatesScraped, contentScraped,
-  alertThreshold, onAlertChange,
+  pending, scraped, rejected, totalTracked,
+  avgViews, avgEngagement, avgFollowers, topNiche,
 }: Props) {
   return (
-    <div className="space-y-3">
-      {/* Stats + alert row */}
-      <div className="flex items-center gap-3">
-        <MiniStat label="Total candidates"  value={total}    icon={<Users size={15} />} color="#7f1d1d" />
-        <MiniStat label="Pending review"    value={pending}  icon={<Clock size={15} />} color="#f59e0b" />
-        <MiniStat label="Approved to track" value={approved} icon={<Check size={15} />} color="#78c257" />
-      </div>
-
-      {/* Secondary pills row */}
-      <div className="flex items-center gap-2">
-        <StatPill icon={<TrendingUp size={10} />} value={approvedToday}     label="approved today"    color="#991b1b" />
-        <StatPill icon={<ScanSearch  size={10} />} value={candidatesScraped} label="candidates scraped" color="#7f1d1d" />
-        <StatPill icon={<FileStack  size={10} />} value={contentScraped}    label="content pieces"    color="#7f1d1d" large />
-      </div>
+    <div className="flex items-center gap-2 flex-wrap">
+      <StatPill icon={<Users      size={10} />} value={pending}        label="pending"        color="#7f1d1d" />
+      <StatPill icon={<ScanSearch  size={10} />} value={scraped}        label="scraped"        color="#991b1b" />
+      <StatPill icon={<XCircle     size={10} />} value={rejected}       label="rejected"       color="#7f1d1d" />
+      <StatPill icon={<TrendingUp  size={10} />} value={totalTracked}    label="total tracked"  color="#991b1b" />
+      <StatPill icon={<FileStack   size={10} />} value={Math.round(avgViews).toLocaleString()} label="avg views"     color="#7f1d1d" />
+      <StatPill icon={<TrendingUp  size={10} />} value={avgEngagement.toFixed(1) + '%'} label="avg eng."  color="#7f1d1d" />
+      <StatPill icon={<Users       size={10} />} value={Math.round(avgFollowers).toLocaleString()} label="avg followers" color="#7f1d1d" />
+      {topNiche && (
+        <div
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white"
+          style={{ border: '1px solid rgba(0,0,0,0.07)' }}
+        >
+          <span className="text-[10px] font-semibold text-neutral-500">Top niche</span>
+          <span className="w-px h-3 bg-neutral-300" />
+          <span className="text-[11px] font-bold text-neutral-700">{topNiche}</span>
+        </div>
+      )}
     </div>
   );
 }
 
-function StatPill({ icon, value, label, color, large }: { icon: React.ReactNode; value: number; label: string; color: string; large?: boolean }) {
+function StatPill({ icon, value, label, color }: { icon: React.ReactNode; value: number | string; label: string; color: string }) {
   return (
     <div
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white"
+      className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white"
       style={{ border: '1px solid rgba(0,0,0,0.07)' }}
     >
       <span style={{ color }}>{icon}</span>
-      <span className="text-[11px] font-bold tabular-nums" style={{ color }}>
-        {large ? value.toLocaleString() : value.toLocaleString()}
+      <span className="text-[12px] font-bold tabular-nums" style={{ color }}>
+        {typeof value === 'number' ? value.toLocaleString() : value}
       </span>
       <span className="text-[10px] text-neutral-400">{label}</span>
     </div>

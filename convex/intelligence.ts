@@ -15,7 +15,8 @@ export const getFeed = query({
       v.literal("most-saves"),
       v.literal("top-engagement"),
       v.literal("trending"),
-      v.literal("top")
+      v.literal("top"),
+      v.literal("viral")
     )),
     limit:       v.optional(v.number()),
   },
@@ -55,6 +56,13 @@ export const getFeed = query({
         posts.sort((a, b) => (b.engagementRate ?? 0) - (a.engagementRate ?? 0));
         break;
       }
+      case "viral":
+        posts.sort((a, b) => {
+          const ar = a.outlierRatio ?? (a.engagementRate ?? 0) * 10;
+          const br = b.outlierRatio ?? (b.engagementRate ?? 0) * 10;
+          return br - ar;
+        });
+        break;
       default:
         // newest
         posts.sort((a, b) => (b.postedAt ?? 0) - (a.postedAt ?? 0));
@@ -952,6 +960,115 @@ export const downloadPostToR2 = action({
     // TODO: fetch video from source URL, upload to R2, patch videoUrl on post
     // This will be implemented by the pipeline agent
     throw new Error('Not implemented yet');
+  },
+});
+
+// ── Heatmap data  -  7-day × 24-hour grid of engagement activity ────────────────
+
+export const getHeatmapData = query({
+  args: { days: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const days   = args.days ?? 30;
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+
+    const posts = await ctx.db.query("scrapedPosts").collect();
+    const real  = posts.filter(p =>
+      !p.externalId?.startsWith('seed_') &&
+      (p.postedAt ?? 0) > cutoff
+    );
+
+    // 7 rows (Mon–Sun) × 8 columns (3-hour buckets: 0,3,6,9,12,15,18,21)
+    const DAYS  = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
+
+    // Accumulate: sum + count per cell
+    const cells: Record<string, { sum: number; count: number }> = {};
+    for (const d of DAYS) {
+      for (const h of HOURS) {
+        cells[`${d}_${h}`] = { sum: 0, count: 0 };
+      }
+    }
+
+    for (const p of real) {
+      const date = new Date(p.postedAt);
+      const dow  = DAYS[date.getDay() === 0 ? 6 : date.getDay() - 1]; // Mon=0
+      const hr   = date.getHours();
+      const bucket = HOURS.find(h => hr >= h && hr < h + 3) ?? HOURS[Math.floor(hr / 3)];
+      const key  = `${dow}_${bucket}`;
+      if (cells[key]) {
+        cells[key].sum   += p.engagementRate ?? 0;
+        cells[key].count += 1;
+      }
+    }
+
+    // Build heatmap rows
+    const heatmapData = DAYS.map(day => ({
+      key: day,
+      data: HOURS.map(h => {
+        const c = cells[`${day}_${h}`];
+        return {
+          key:  `${h}h`,
+          data: c.count > 0 ? parseFloat((c.sum / c.count).toFixed(4)) : null,
+        };
+      }),
+    }));
+
+    // Stats
+    const allER    = real.map(p => p.engagementRate ?? 0);
+    const avgER    = allER.length ? allER.reduce((s, v) => s + v, 0) / allER.length : 0;
+    const topPosts = [...real].sort((a, b) => (b.engagementRate ?? 0) - (a.engagementRate ?? 0)).slice(0, 5);
+
+    // Niche breakdown
+    const nicheMap: Record<string, number> = {};
+    for (const p of real) {
+      nicheMap[p.niche] = (nicheMap[p.niche] ?? 0) + 1;
+    }
+    const topNiche = Object.entries(nicheMap).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'N/A';
+
+    // Posts this week vs last
+    const now        = Date.now();
+    const weekMs     = 7 * 24 * 60 * 60 * 1000;
+    const thisWeek   = real.filter(p => (p.postedAt ?? 0) > now - weekMs).length;
+    const lastWeek   = real.filter(p => {
+      const t = p.postedAt ?? 0;
+      return t > now - weekMs * 2 && t <= now - weekMs;
+    }).length;
+    const pctChange = lastWeek > 0 ? parseFloat((((thisWeek - lastWeek) / lastWeek) * 100).toFixed(1)) : 0;
+
+    // Metric list — derive from real posts
+    const totalViews   = real.reduce((s, p) => s + (p.views ?? 0), 0);
+    const totalSaves   = real.reduce((s, p) => s + (p.saves ?? 0), 0);
+    const totalLikes  = real.reduce((s, p) => s + (p.likes ?? 0), 0);
+
+    const avgViews    = real.length ? totalViews / real.length : 0;
+    const avgSaves    = real.length ? totalSaves / real.length : 0;
+    const avgLikes    = real.length ? totalLikes / real.length : 0;
+
+    return {
+      heatmapData,
+      stats: {
+        totalPosts:      real.length,
+        postsThisWeek:   thisWeek,
+        postsLastWeek:   lastWeek,
+        pctChange,
+        avgEngagementRate: parseFloat((avgER * 100).toFixed(2)),
+        topNiche,
+        topPosts: topPosts.map(p => ({
+          handle:    p.handle,
+          niche:     p.niche,
+          er:        parseFloat(((p.engagementRate ?? 0) * 100).toFixed(2)),
+          views:     p.views ?? 0,
+          likes:     p.likes ?? 0,
+          saves:     p.saves ?? 0,
+        })),
+      },
+      metrics: {
+        avgViews:    Math.round(avgViews).toLocaleString(),
+        avgSaves:    Math.round(avgSaves).toLocaleString(),
+        avgLikes:    Math.round(avgLikes).toLocaleString(),
+        totalPosts:  real.length,
+      },
+    };
   },
 });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Loader2 } from 'lucide-react';
 
@@ -15,10 +15,13 @@ interface Props {
     followersRaw: number;
     engagementRate: string;
   };
+  index?: number;
+  isSelected?: boolean;
   onSelect?: () => void;
   onScrapeComplete?: (relatedHandles: string[]) => void;
   onScrapeStart?: () => void;
   onScrapeEnd?: () => void;
+  isScraping?: boolean;
 }
 
 function ScrapeButton({ handle, onScrapeComplete, onScrapeStart, onScrapeEnd }: {
@@ -65,32 +68,92 @@ function ScrapeButton({ handle, onScrapeComplete, onScrapeStart, onScrapeEnd }: 
 }
 
 function getTierRing(ratio: number): string {
-  if (ratio >= 5) return '#16a34a';
-  if (ratio >= 2) return '#d97706';
+  if (ratio >= 2) return ratio >= 5 ? '#16a34a' : '#d97706';
   return 'transparent';
 }
 
-interface ApprovedRowProps extends Props {
-  isScraping?: boolean;
-}
-
-export function ApprovedRow({ candidate, onSelect, onScrapeComplete, onScrapeStart, onScrapeEnd, isScraping }: ApprovedRowProps) {
-  const ringColor = getTierRing(candidate.outlierRatio);
-
+function ShimmerCard() {
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
+      style={{ border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#fff' }}
+    >
+      {/* Shimmer skeleton */}
+      <motion.div
+        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+        animate={{ backgroundColor: ['#d1d5db', '#e5e7eb', '#d1d5db'] }}
+        transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="w-5 h-5 rounded flex-shrink-0"
+        animate={{ opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ backgroundColor: '#f3f4f6' }}
+      />
+      <motion.div
+        className="h-3 flex-1 rounded"
+        animate={{ opacity: [0.2, 0.5, 0.2] }}
+        transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: 0.15 }}
+        style={{ backgroundColor: '#f3f4f6' }}
+      />
+      <motion.div
+        className="w-12 h-3 rounded flex-shrink-0"
+        animate={{ opacity: [0.2, 0.5, 0.2] }}
+        transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: 0.25 }}
+        style={{ backgroundColor: '#f3f4f6' }}
+      />
+    </motion.div>
+  );
+}
+
+export function ApprovedRow({ candidate, index = 0, isSelected, onSelect, onScrapeComplete, onScrapeStart, onScrapeEnd, isScraping }: Props) {
+  const ringColor = getTierRing(candidate.outlierRatio);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+  const spring = { stiffness: 300, damping: 30 };
+
+  function handleMouseMove(e: React.MouseEvent) {
+    if (isScraping) return;
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    setTilt({ rotateX: -dy * 5, rotateY: dx * 5 });
+  }
+  function handleMouseLeave() {
+    setTilt({ rotateX: 0, rotateY: 0 });
+  }
+
+  const motionDiv = (
+    <motion.div
+      ref={cardRef}
       layout
       onClick={onSelect}
-      initial={{ opacity: 0, y: 8, scale: 0.97 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       animate={
         isScraping
-          ? { opacity: [1, 0], scale: [1, 0.9], transition: { duration: 0.3 } }
-          : { opacity: 1, y: 0, scale: 1 }
+          ? { opacity: [1, 0.6], scale: [1, 0.97] }
+          : { opacity: 1, scale: 1, rotateX: 0, rotateY: 0 }
       }
-      whileHover={!isScraping ? { y: -1, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' } : {}}
-      transition={{ duration: 0.15 }}
+      whileHover={!isScraping ? { y: -2, boxShadow: '0 8px 20px rgba(0,0,0,0.1)' } : {}}
+      transition={
+        isScraping
+          ? { duration: 0.3 }
+          : { layout: { duration: 0.15 }, rotateX: spring, rotateY: spring }
+      }
+      style={{
+        perspective: 600,
+        transformOrigin: 'center center',
+        border: '1px solid rgba(0,0,0,0.05)',
+        backgroundColor: '#fff',
+      }}
       className="relative overflow-hidden flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer"
-      style={{ border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#fff' }}
     >
       {/* Green ripple burst on scrape start */}
       <AnimatePresence>
@@ -146,6 +209,16 @@ export function ApprovedRow({ candidate, onSelect, onScrapeComplete, onScrapeSta
           <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
         </svg>
       </a>
+    </motion.div>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: Math.min(index * 0.04, 0.4), duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+    >
+      {motionDiv}
     </motion.div>
   );
 }

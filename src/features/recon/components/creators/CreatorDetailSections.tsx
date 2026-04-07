@@ -5,7 +5,7 @@ import { ScoreBadge } from './ScoreBadge';
 import type { Competitor } from '../../types';
 import { computeProfileHealth } from '../../constants';
 
-// ── Trend Sparkline Card ────────────────────────────────────────────────────────
+// -- Trend Sparkline Card --------------------------------------------------------
 
 export function TrendCard({ c }: { c: Competitor }) {
   const trend = c.trend ?? [];
@@ -57,7 +57,7 @@ export function TrendCard({ c }: { c: Competitor }) {
   );
 }
 
-// ── Profile Health Breakdown ────────────────────────────────────────────────────
+// -- Profile Health Breakdown ----------------------------------------------------
 
 function staleDot(lastScraped: string) {
   const days = Math.floor((Date.now() - new Date(lastScraped).getTime()) / 86_400_000);
@@ -108,7 +108,7 @@ export function ProfileHealthSection({ c }: { c: Competitor }) {
   );
 }
 
-// ── Notes Field ─────────────────────────────────────────────────────────────────
+// -- Notes Field -----------------------------------------------------------------
 
 export function NotesField({ handle }: { handle: string }) {
   const key = `recon-note-${handle}`;

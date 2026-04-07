@@ -32,6 +32,130 @@
 
 ---
 
+## 2026-04-08 — RESTRUCTURE PLAN (source of truth)
+
+### Constraint: No file over 120 lines
+
+### Target structure
+```
+src/features/recon/
+├── ANIMATIONS.md                   ← 11 animation systems, documented once
+├── types.ts                        ← Candidate, Competitor, ConvexCandidate, MappedCandidate types
+├── constants.ts                    ← PRE_APPROVED seed accounts (moved from DiscoveryTab inline)
+├── components/
+│   ├── ReconFeaturePage.tsx        ← shell + tab router (unchanged, 214 lines)
+│   ├── ReconModals.tsx
+│   ├── kanban/                    ← Discovery pill — the triage Kanban
+│   │   ├── README.md
+│   │   ├── KanbanBoard.tsx        (~370 lines) — board logic + DnD state
+│   │   ├── CandidateCard.tsx      (~90 lines) — swipe + tilt + confetti + flip
+│   │   ├── ApprovedCard.tsx       (~90 lines) — tilt + ScrapeButton
+│   │   ├── ScrapedCard.tsx        (~35 lines)
+│   │   ├── KanbanColumn.tsx       (~35 lines) — column shell + glow pulse
+│   │   ├── DragGhost.tsx          (~20 lines)
+│   │   ├── RejectedPanel.tsx      (~35 lines)
+│   │   ├── ApprovalRatioWidget.tsx (~35 lines)
+│   │   ├── FunnelWidget.tsx       (~35 lines) — props-based
+│   │   ├── NicheDonut.tsx        (~70 lines) — props-based, no COMPETITORS
+│   │   └── index.ts
+│   ├── shared/                    ← used in kanban + elsewhere
+│   │   ├── README.md
+│   │   ├── InfoTooltip.tsx        (fix syntax error: `}}` → `})`)
+│   │   ├── SkeletonRow.tsx        (~25 lines) — shimmer loading
+│   │   ├── RatioBadge.tsx        (23 lines)
+│   │   ├── MiniStat.tsx          (55 lines)
+│   │   └── EmptyState.tsx        (17 lines)
+│   ├── detail/
+│   │   ├── README.md
+│   │   └── DetailPanel.tsx        (delete dead first return block, ~320 lines)
+│   └── feed/
+│       ├── README.md
+│       └── ReconFeedTab.tsx
+└── hooks/
+    └── README.md
+    └── useEnrich.ts
+```
+
+---
+
+### 11 Animation Systems (ANIMATIONS.md)
+
+| # | System | Used in | Key params |
+|---|---|---|---|
+| 1 | Card entrance stagger | CandidateCard, ApprovedCard, ScrapedCard | `delay: min(i*0.04, 0.4)`, `duration: 0.3`, ease `[0.25,0.1,0.25,1]` |
+| 2 | 3D tilt on mouse | CandidateCard, ApprovedCard | `rotateX: -dy*5, rotateY: dx*5`, spring `{stiffness:300, damping:30}` |
+| 3 | Swipe to decide | CandidateCard only | `drag="x"`, threshold 80px, right=approve green, left=reject red |
+| 4 | Confetti burst | CandidateCard only | 14 particles, radial velocity 40-90px, ~0.9s, green or red |
+| 5 | Column glow pulse | KanbanColumn, ScrapingColumn | `glowKey` prop increment triggers `boxShadow` keyframe 0.8-0.9s |
+| 6 | Card flip (back face) | CandidateCard | `rotateY: 180`, `backfaceVisibility: hidden`, duration 0.45s |
+| 7 | Skeleton shimmer | CandidateCard, ApprovedCard, SkeletonRow | opacity keyframe loop 1.4-1.75s, staggered |
+| 8 | Drag ghost | KanbanBoard (DragOverlay) | 180px fixed card, follows cursor via dnd-kit |
+| 9 | Scrape progress bar | ScrapingColumn | width 0→100% over 8s linear + shimmer sweep every 2.6s |
+| 10 | Rejected panel expand | RejectedPanel | `AnimatePresence`, `height: 0→auto`, 0.2s |
+| 11 | Detail panel slide | DetailPanel | spring `{stiffness:380, damping:38}`, `x:100%→0` |
+
+---
+
+### Migration order
+
+**Phase 1 — Shared + utils (no broken imports)**
+- 1.1 `shared/SkeletonRow.tsx` — extract inline from DiscoveryTab (~25 lines)
+- 1.2 `shared/InfoTooltip.tsx` — fix `}}` → `})` line 43
+- 1.3 `shared/RatioBadge.tsx` — move from discovery/
+- 1.4 `shared/MiniStat.tsx` — move from discovery/
+- 1.5 `shared/EmptyState.tsx` — move from discovery/
+- 1.6 `constants.ts` — extract `PRE_APPROVED` from DiscoveryTab inline
+- 1.7 `types.ts` additions — `ConvexCandidate`, `MappedCandidate` types
+- 1.8 Write `ANIMATIONS.md`
+
+**Phase 2 — Extract kanban cards and columns**
+- 2.1 `kanban/ScrapedCard.tsx` — extract inline `ScrapedRow` from DiscoveryTab (~35 lines)
+- 2.2 `kanban/KanbanColumn.tsx` — extract inline `PipelineColumn` (~35 lines)
+- 2.3 `kanban/DragGhost.tsx` — extract inline (~20 lines)
+- 2.4 `kanban/RejectedPanel.tsx` — extract inline (~35 lines)
+- 2.5 `kanban/ApprovalRatioWidget.tsx` — extract inline (~35 lines)
+- 2.6 `kanban/FunnelWidget.tsx` — refactor DiscoveryFunnel.tsx to props-based (~35 lines)
+- 2.7 `kanban/NicheDonut.tsx` — refactor to props-based, no COMPETITORS (~70 lines)
+- 2.8 `kanban/CandidateCard.tsx` — refactor CandidateRow.tsx (~90 lines)
+- 2.9 `kanban/ApprovedCard.tsx` — refactor ApprovedRow.tsx, fix `}}`→`})` line 219 (~90 lines)
+
+**Phase 3 — Orchestrator + cleanup**
+- 3.1 `kanban/KanbanBoard.tsx` — refactor DiscoveryTab.tsx (~370 lines)
+- 3.2 `detail/DetailPanel.tsx` — delete first return block (lines 146-326), keep portal version (~320 lines)
+- 3.3 Delete: discoveryData.ts, constants.tsx (re-export layer), SamplePostGrid.tsx (dead)
+- 3.4 Write all 5 READMEs: root + kanban/ + shared/ + detail/ + feed/
+- 3.5 Update all import paths across codebase
+
+### Bugs to fix during migration
+- DetailPanel.tsx: first return block (lines 146-326) is dead — delete it
+- ApprovedRow.tsx line 219: `}}` → `})`
+- InfoTooltip.tsx line 43: `}}` → `})`
+- SamplePostGrid.tsx: dead code — never imported — delete
+
+### Files to delete after migration
+- src/features/recon/components/creators/discovery/ (entire folder — replaced by kanban/ + shared/)
+- src/features/recon/constants.tsx (re-export layer)
+- src/features/recon/components/creators/discoveryData.ts (orphaned)
+- src/features/recon/components/creators/SamplePostGrid.tsx (dead)
+- src/features/recon/components/creators/discovery/ (the whole old discovery/ folder)
+
+### Import path rewrites needed
+- DiscoveryTab → KanbanBoard
+- discovery/CandidateRow → kanban/CandidateCard
+- discovery/ApprovedRow → kanban/ApprovedCard
+- discovery/ScrapingColumn → kanban/ScrapingColumn (move)
+- discovery/DiscoveryHeader → kanban/KanbanHeader
+- discovery/DiscoveryFunnel → kanban/FunnelWidget
+- discovery/NicheDonut → kanban/NicheDonut
+- discovery/DetailPanel → detail/DetailPanel
+- discovery/InfoTooltip → shared/InfoTooltip
+- discovery/RatioBadge → shared/RatioBadge
+- discovery/MiniStat → shared/MiniStat
+- discovery/EmptyState → shared/EmptyState
+- discovery/discoveryUtils → kanban/utils (or shared/utils)
+
+---
+
 ## 2026-04-07 — Quality Audit
 
 ### Static Data Audit

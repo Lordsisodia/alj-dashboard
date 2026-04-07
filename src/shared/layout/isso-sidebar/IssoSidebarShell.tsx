@@ -26,13 +26,13 @@ import {
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
-// ── Product icon sprites ──────────────────────────────────────────────────────
+// ── Product icon sprites (static 36px PNGs, ~3KB each) ──────────────────────
 const PRODUCT_SPRITES: Record<string, string> = {
-  hub:           '/sprites/nav-spritesheet-160x160-library.png',
-  intelligence:  '/sprites/nav-spritesheet-160x160-discovery.png',
-  recon:         '/sprites/nav-spritesheet-160x160-spyder.png',
-  agents:        '/sprites/nav-spritesheet-160x160-lens.png',
-  'content-gen': '/sprites/nav-spritesheet-160x160-briefs.png',
+  hub:           '/sprites-icons/library-36.png',
+  intelligence:  '/sprites-icons/discovery-36.png',
+  recon:         '/sprites-icons/spyder-36.png',
+  agents:        '/sprites-icons/lens-36.png',
+  'content-gen': '/sprites-icons/briefs-36.png',
 };
 
 // ── Changelog entries ─────────────────────────────────────────────────────────

@@ -12,10 +12,11 @@ import type { DrawerPost } from '../../types';
 interface Props {
   posts:        DrawerPost[];
   initialIndex: number;
+  initialTab?:  'details' | 'ai' | 'transcript';
   onClose:      () => void;
 }
 
-export function PostDetailDrawer({ posts, initialIndex, onClose }: Props) {
+export function PostDetailDrawer({ posts, initialIndex, initialTab, onClose }: Props) {
   const [index, setIndex] = useState(initialIndex);
   const post    = posts[index];
   const hasPrev = index > 0;
@@ -77,7 +78,7 @@ export function PostDetailDrawer({ posts, initialIndex, onClose }: Props) {
         {/* Body - key on post._id resets tab state when navigating */}
         <div className="flex flex-1 overflow-hidden">
           <DrawerMediaPanel post={post} hasPrev={hasPrev} hasNext={hasNext} onPrev={goPrev} onNext={goNext} />
-          <DrawerRightPanel key={post._id} post={post} />
+          <DrawerRightPanel key={post._id} post={post} initialTab={initialTab} />
         </div>
       </motion.div>
     </motion.div>

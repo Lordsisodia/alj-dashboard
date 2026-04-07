@@ -6,12 +6,17 @@ import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { COMPETITORS, DAILY_VOLUME } from '../../constants'; // COMPETITORS seeds initial state
 import type { Competitor } from '../../types';
+import { useLogDashboard } from '../../hooks/useLogDashboard';
 import { PostsScrapedChart } from './PostsScrapedChart';
 import { PipelineFunnel }    from './PipelineFunnel';
 import { ActivityFeed }      from './ActivityFeed';
-import { WeeklyDigestCard }  from './WeeklyDigestCard';
+import { WeeklyDigestCard }      from './WeeklyDigestCard';
+import { ViralAlertCard }        from './ViralAlertCard';
+import { CreatorSpotlightCard }  from './CreatorSpotlightCard';
+import { EngagementBenchmarkCard } from './EngagementBenchmarkCard';
 import { ScrapingReport }    from '@/components/ui/scraping-report';
 import { DashboardMetricCard } from '@/components/ui/dashboard-overview';
+import IncidentHeatmapReportCard from '@/components/ui/heat-map-xl';
 
 const TOTAL_IN_LIBRARY = DAILY_VOLUME.reduce((s, d) => s + d.total, 0);
 
@@ -24,11 +29,10 @@ const STATS = (postsToday: number, activeCount: number, total: number, totalCrea
 
 export function LogDashboard({
   extraCreators = [],
-  runAllTrigger = 0,
 }: {
   extraCreators?: Competitor[];
-  runAllTrigger?: number;
 } = {}) {
+  const { runAllTrigger } = useLogDashboard();
   const [competitors, setCompetitors] = useState<Competitor[]>(COMPETITORS);
 
   useEffect(() => {
@@ -74,11 +78,20 @@ export function LogDashboard({
   return (
     <div className="flex items-start w-full">
 
-      {/* ── Main content column ───────────────────────────────────── */}
+      {/* -- Main content column ------------------------------------- */}
       <div className="flex-1 flex flex-col min-w-0">
 
-        {/* ① Weekly digest - compact command bar at top */}
-        <WeeklyDigestCard />
+        {/* ① AI insight cards — 2×2 grid (heatmap spans full width as row 3) */}
+        <div className="grid grid-cols-2 gap-3 px-3 mt-4">
+          <WeeklyDigestCard />
+          <ViralAlertCard />
+          <CreatorSpotlightCard />
+          <EngagementBenchmarkCard />
+          {/* Heatmap spans both columns — real engagement data by day×hour */}
+          <div className="col-span-2">
+            <IncidentHeatmapReportCard />
+          </div>
+        </div>
 
         {/* ② Pipeline funnel - inset card */}
         <div className="px-3 pt-3">
@@ -144,7 +157,7 @@ export function LogDashboard({
 
       </div>
 
-      {/* ── Right sidebar: Live Activity ──────────────────────────── */}
+      {/* -- Right sidebar: Live Activity ---------------------------- */}
       <div
         className="w-72 flex-shrink-0 sticky top-0 self-start"
         style={{

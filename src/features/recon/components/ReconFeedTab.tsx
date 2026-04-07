@@ -2,22 +2,20 @@
 
 import { FeedView } from '@/features/intelligence/components/feed/FeedView';
 import type { DrawerPost } from '@/features/intelligence/types';
-import type { SortId, VisibilityState } from '@/isso/ui/FeedControls';
+import { useFeedTab } from '../hooks/useFeedTab';
 
-interface ReconFeedTabProps {
-  sortBy:      SortId;
-  visibility:  VisibilityState;
-  viewMode:    'grid' | 'list';
-  onPostClick: (index: number, posts: DrawerPost[]) => void;
-}
-
-export function ReconFeedTab({ sortBy, visibility, viewMode, onPostClick }: ReconFeedTabProps) {
+export function ReconFeedTab({ onPostClick, onAnalyzeClick }: { onPostClick: (index: number, posts: DrawerPost[]) => void; onAnalyzeClick?: (index: number, posts: DrawerPost[]) => void }) {
+  const { sortBy, visibility, viewMode, columns, creatorStatsMap, nicheERMap } = useFeedTab();
   return (
     <FeedView
       sortBy={sortBy}
       visibility={visibility}
       viewMode={viewMode}
+      columns={columns}
       onPostClick={onPostClick}
+      onAnalyzeClick={onAnalyzeClick}
+      creatorStatsMap={creatorStatsMap}
+      nicheERMap={nicheERMap}
     />
   );
 }

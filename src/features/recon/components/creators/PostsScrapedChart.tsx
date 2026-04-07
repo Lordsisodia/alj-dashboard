@@ -1,7 +1,7 @@
 'use client';
 
 import { TrendingUp } from 'lucide-react';
-import BarChart, { Bar, BarXAxis, Grid, ChartTooltip } from '@/components/ui/bar-chart';
+import { BarChart, Bar, XAxis, CartesianGrid, Tooltip as RechartsTooltip } from 'recharts';
 import type { DailyVolume } from '../../types';
 
 interface PostsScrapedChartProps {
@@ -56,15 +56,12 @@ export function PostsScrapedChart({ data }: PostsScrapedChartProps) {
       <div className="px-4 pb-4">
         <BarChart
           data={chartData}
-          xDataKey="label"
-          aspectRatio="3 / 1"
-          barGap={0.25}
           margin={{ top: 8, right: 4, bottom: 28, left: 4 }}
         >
-          <Grid horizontal numTicksRows={4} stroke="rgba(0,0,0,0.05)" strokeDasharray="3,3" />
+          <CartesianGrid stroke="rgba(0,0,0,0.05)" strokeDasharray="3,3" />
+          <XAxis dataKey="label" maxLabels={7} />
           <Bar dataKey="total" fill="#dc2626" animationType="grow" />
-          <BarXAxis maxLabels={7} />
-          <ChartTooltip
+          <RechartsTooltip
             content={({ point }) => {
               const p = point as { label: string; total: number };
               return (
