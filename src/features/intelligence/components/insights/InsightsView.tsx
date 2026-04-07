@@ -164,7 +164,7 @@ export function InsightsView() {
             )}
           </div>
 
-          {/* Hook rows — skeleton */}
+          {/* Hook rows - loading skeleton */}
           {hookStats === undefined ? (
             <div
               className="flex flex-col rounded-xl overflow-hidden"
@@ -172,8 +172,8 @@ export function InsightsView() {
             >
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="flex flex-col gap-1.5 py-3 px-3 border-b border-black/5 last:border-0">
-                  <div className="h-3 rounded-md animate-pulse w-4/5" style={{ backgroundColor: 'rgba(0,0,0,0.06)' }} />
-                  <div className="h-2.5 rounded-md animate-pulse w-1/3 mt-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }} />
+                  <div className="h-3 rounded-md animate-pulse" style={{ width: '80%', backgroundColor: 'rgba(0,0,0,0.06)' }} />
+                  <div className="h-2.5 rounded-md animate-pulse mt-0.5" style={{ width: '33%', backgroundColor: 'rgba(0,0,0,0.05)' }} />
                 </div>
               ))}
             </div>
@@ -201,7 +201,7 @@ export function InsightsView() {
                       "relative flex flex-col gap-1 py-2.5 px-3 border-b border-black/5 cursor-pointer transition-all last:border-0",
                       isHighlighted
                         ? "bg-[#ff006908]"
-                        : "hover:bg-black/[0.02] hover:pl-4"
+                        : "hover:bg-black/[0.02] hover:translate-x-0.5"
                     )}
                     onMouseEnter={() => mappedId && setHighlightedPostId(mappedId)}
                     onMouseLeave={() => setHighlightedPostId(null)}
@@ -325,29 +325,44 @@ export function InsightsView() {
             )}
           </div>
 
-          {/* Patterns detected - inline bullets */}
-          <div
-            className="rounded-xl px-4 py-3"
-            style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}
-          >
-            <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2.5">
-              Patterns detected
-            </p>
-            {insights.length === 0 ? (
-              <p className="text-[11px] text-neutral-400 leading-relaxed">
-                Rate posts to surface patterns - insights appear as your team curates content
+          {/* Patterns / Signals section */}
+          {trends === undefined ? (
+            <div
+              className="rounded-xl px-4 py-3 space-y-2"
+              style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}
+            >
+              <div className="h-3 rounded-md animate-pulse w-20" style={{ backgroundColor: 'rgba(0,0,0,0.06)' }} />
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className="w-1 h-1 rounded-full mt-1.5 shrink-0 animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} />
+                  <div className="h-3 rounded-md animate-pulse flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.06)' }} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div
+              className="rounded-xl px-4 py-3"
+              style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}
+            >
+              <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2.5">
+                Signals
               </p>
-            ) : (
-              <div className="space-y-2">
-                {insights.map((insight, i) => (
-                  <div key={i} className="flex items-start gap-2.5 text-[11px] text-neutral-700">
-                    <span className="mt-0.5 shrink-0 w-1 h-1 rounded-full mt-1.5" style={{ backgroundColor: '#ff0069' }} />
-                    <span className="leading-relaxed">{insight}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+              {insights.length === 0 ? (
+                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  Rate posts to surface signals - patterns appear as your team curates content
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {insights.map((insight, i) => (
+                    <div key={i} className="flex items-start gap-2.5 text-[11px] text-neutral-700">
+                      <span className="mt-1.5 shrink-0 w-1 h-1 rounded-full" style={{ backgroundColor: '#ff0069' }} />
+                      <span className="leading-relaxed">{insight}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* RIGHT (26%) - AI Chat + Learning */}
@@ -403,14 +418,12 @@ export function InsightsView() {
                   transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
                   className="overflow-hidden"
                 >
-                  <div className="border-t border-black/[0.06]">
-                    <AIChatPanel
-                      data={trends}
-                      insightsData={data}
-                      onClose={() => setChatOpen(false)}
-                      embedded
-                    />
-                  </div>
+                  <AIChatPanel
+                    data={trends}
+                    insightsData={data}
+                    onClose={() => setChatOpen(false)}
+                    embedded
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
