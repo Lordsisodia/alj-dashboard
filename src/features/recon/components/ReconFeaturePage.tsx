@@ -89,7 +89,7 @@ export default function ReconFeaturePage() {
   const [drawer, setDrawer]                   = useState<DrawerState | null>(null);
   function fireOnce<T>(set: (v: T[]) => void, value: T[]) { set(value); setTimeout(() => set([]), 0); }
 
-  const { viewMode, setViewMode, columns, setColumns } = useFeedTab();
+  const { viewMode, setViewMode, columns, setColumns, sortBy, visibility, creatorStatsMap, nicheERMap } = useFeedTab();
   const { searchQuery, setSearchQuery, runDiscoveryTrigger, setRunDiscoveryTrigger, scheduleHours, setScheduleHours, showAnalytics, setShowAnalytics } = useDiscoveryTab();
   const { runAllTrigger, setRunAllTrigger } = useLogDashboard();
   const { showFavorites, setShowFavorites, creatorsStatusView, setCreatorsStatusView, viewMode: creatorsViewMode, setViewMode: setCreatorsViewMode, colVis, handleColVisChange } = useCreatorsTab();
@@ -249,7 +249,16 @@ export default function ReconFeaturePage() {
                     />
               )}
               {activeTab === 'feed' && (
-                <ReconFeedTab onPostClick={(index, posts) => setDrawer({ index, posts })} onAnalyzeClick={(index, posts) => setDrawer({ index, posts, initialTab: 'ai' })} />
+                <ReconFeedTab
+                  onPostClick={(index, posts) => setDrawer({ index, posts })}
+                  onAnalyzeClick={(index, posts) => setDrawer({ index, posts, initialTab: 'ai' })}
+                  sortBy={sortBy}
+                  visibility={visibility}
+                  viewMode={viewMode}
+                  columns={columns}
+                  creatorStatsMap={creatorStatsMap}
+                  nicheERMap={nicheERMap}
+                />
               )}
             </motion.div>
           </AnimatePresence>
