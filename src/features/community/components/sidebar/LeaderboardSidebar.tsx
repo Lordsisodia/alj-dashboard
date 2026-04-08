@@ -1,5 +1,5 @@
-import { Award, Check } from 'lucide-react';
-import { LEADERBOARD_ENTRIES, CREATORS } from '../../constants';
+import { Award } from 'lucide-react';
+import { LEADERBOARD_ENTRIES } from '../../constants';
 import { fmtK } from '../../utils';
 
 export function LeaderboardSidebar() {
@@ -44,41 +44,6 @@ export function LeaderboardSidebar() {
         </div>
       </div>
 
-      <div className="rounded-xl p-4" style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.06), rgba(131,58,180,0.06))', border: '1px solid rgba(255,0,105,0.15)' }}>
-        <p className="text-xs font-semibold text-neutral-800 mb-1.5">Grow your reach</p>
-        <p className="text-[11px] text-neutral-500 mb-3 leading-relaxed">
-          Every post through ISSO gets featured here. Drive views to your real profile.
-        </p>
-        <button className="w-full py-2 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95" style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}>
-          Connect Account
-        </button>
-      </div>
-
-      <div className="rounded-xl overflow-hidden bg-white" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
-        <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-          <span className="text-xs font-semibold text-neutral-900">Discover</span>
-          <button className="text-[11px] font-medium" style={{ color: '#ff0069' }}>See all</button>
-        </div>
-        <div className="p-3 space-y-2.5">
-          {CREATORS.map(c => (
-            <div key={c.handle} className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{ backgroundColor: c.color }}>
-                {c.initials}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
-                  <span className="text-[11px] font-semibold truncate" style={{ color: c.color }}>{c.handle}</span>
-                  <Check size={9} style={{ color: c.color }} className="flex-shrink-0" />
-                </div>
-                <p className="text-[10px] text-neutral-400">{fmtK(c.followers)} followers</p>
-              </div>
-              <button className="px-2.5 py-1 rounded-lg text-[10px] font-semibold flex-shrink-0 transition-all hover:opacity-80" style={{ backgroundColor: 'rgba(255,0,105,0.07)', color: '#ff0069', border: '1px solid rgba(255,0,105,0.15)' }}>
-                Follow
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

@@ -3,12 +3,14 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { Search, Check, Filter, ChevronDown } from 'lucide-react';
+import { Search, Filter, ChevronDown, BookmarkPlus, X, Layers, Eye } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { NICHE_COLORS, GRAD } from '../../constants';
+import { GRAD } from '../../constants';
 import { fmtNum } from '../../utils';
-import { motion } from 'framer-motion';
+import { VirtualTable } from '@/components/table/VirtualTable';
+import { SelectCheckbox } from '@/features/recon/components/table/shared/SelectCheckbox';
+import { TableCard } from '@/features/recon/components/table/shared/TableCard';
 
 type QualifyPost = {
   _id: string;
@@ -30,6 +32,9 @@ type QualifyPost = {
   scrapedAt: number;
   outlierRatio?: number;
   baselineScore: number;
+  creatorMedianViews?: number;
+  creatorMedianLikes?: number;
+  creatorMedianComments?: number;
   savedForPipeline?: boolean;
   saved?: boolean;
 };
@@ -41,16 +46,15 @@ interface Props {
   platform?:   string;
 }
 
-// ── Band helpers ────────────────────────────────────────────────────────────────
+// ── Column layout ──────────────────────────────────────────────────────────────
 
-function getBand(score: number): { label: string; color: string; bg: string } {
-  if (score < 1)  return { label: 'Below Baseline', color: 'text-neutral-400',    bg: 'bg-neutral-100' };
-  if (score < 5)  return { label: '2×',            color: 'text-blue-400',       bg: 'bg-blue-50' };
-  if (score < 10) return { label: '5×',            color: 'text-emerald-400',    bg: 'bg-emerald-50' };
-  if (score < 20) return { label: '10×',           color: 'text-yellow-400',     bg: 'bg-yellow-50' };
-  if (score < 50) return { label: '20×',           color: 'text-orange-400',     bg: 'bg-orange-50' };
-  return           { label: '🔥 50×+',            color: 'text-pink-500',        bg: 'bg-pink-50' };
-}
+const COL        = '36px 40px 200px 80px 90px 76px 76px 66px 110px 100px';
+const TABLE_WIDTH = 874; // sum of COL widths
+const DIV        = { borderRight: '1px solid rgba(0,0,0,0.06)' } as const;
+
+type SortKey = 'baselineScore' | 'views' | 'likes' | 'comments' | 'handle' | 'postedAt' | 'medianViews' | 'likeRate';
+
+// ── Band helpers ────────────────────────────────────────────────────────────────
 
 function baselineColor(score: number): string {
   if (score < 1)  return 'text-neutral-400';
@@ -61,16 +65,16 @@ function baselineColor(score: number): string {
   return 'text-pink-500';
 }
 
-// ── Column definitions ──────────────────────────────────────────────────────────
-
-type SortKey = 'baselineScore' | 'views' | 'likes' | 'comments' | 'handle' | 'postedAt';
+// ── Avatar helpers ──────────────────────────────────────────────────────────────
 
 const AVATAR_COLORS = ['#f43f5e','#8b5cf6','#3b82f6','#10b981','#f59e0b','#ec4899','#6366f1','#14b8a6'];
+
 function handleInitials(handle: string): string {
   const clean = handle.replace(/^@/, '');
   const words = clean.match(/[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)/g) ?? [clean];
   return words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : clean.slice(0, 2).toUpperCase();
 }
+
 function handleColor(handle: string): string {
   let h = 0;
   for (let i = 0; i < handle.length; i++) h = (h * 31 + handle.charCodeAt(i)) >>> 0;
@@ -121,32 +125,29 @@ function TableSkeleton() {
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 
 function QualifyToolbar({
-  search,
-  onSearch,
-  band,
-  onBand,
-  total,
-  savedCount,
-  days,
-  onDaysChange,
+  search, onSearch, band, onBand, total, savedCount, creatorCount, days, onDaysChange, groupByCreator, onGroupByCreator,
+  creatorFilter, onCreatorFilter, creators,
 }: {
-  search: string;
-  onSearch: (s: string) => void;
-  band: number;
-  onBand: (b: number) => void;
-  total: number;
-  savedCount: number;
-  days: number;
-  onDaysChange: (d: number) => void;
+  search: string; onSearch: (s: string) => void;
+  band: number;   onBand: (b: number) => void;
+  total: number;  savedCount: number; creatorCount: number;
+  days: number;   onDaysChange: (d: number) => void;
+  groupByCreator: boolean; onGroupByCreator: (v: boolean) => void;
+  creatorFilter: string; onCreatorFilter: (h: string) => void;
+  creators: Array<{ handle: string; count: number }>;
 }) {
-  const [bandOpen, setBandOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [bandOpen, setBandOpen]       = useState(false);
+  const [creatorOpen, setCreatorOpen] = useState(false);
+  const [infoOpen, setInfoOpen]       = useState(false);
+  const dropdownRef    = useRef<HTMLDivElement>(null);
+  const creatorDropRef = useRef<HTMLDivElement>(null);
+  const infoRef        = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function onMouseDown(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setBandOpen(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setBandOpen(false);
+      if (creatorDropRef.current && !creatorDropRef.current.contains(e.target as Node)) setCreatorOpen(false);
+      if (infoRef.current && !infoRef.current.contains(e.target as Node)) setInfoOpen(false);
     }
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
@@ -171,7 +172,6 @@ function QualifyToolbar({
       className="flex items-center justify-between px-4 py-2.5"
       style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', backgroundColor: '#fafafa' }}
     >
-      {/* Left: search + band chips */}
       <div className="flex items-center gap-3">
         <div
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
@@ -186,7 +186,6 @@ function QualifyToolbar({
           />
         </div>
 
-        {/* Band filter dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setBandOpen(v => !v)}
@@ -217,28 +216,118 @@ function QualifyToolbar({
           )}
         </div>
 
-        <span className="text-[11px] text-neutral-400 tabular-nums">{savedCount} saved · {total} shown</span>
+        {/* Creator filter dropdown */}
+        <div className="relative" ref={creatorDropRef}>
+          <button
+            onClick={() => setCreatorOpen(v => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-colors"
+            style={creatorFilter
+              ? { border: '1px solid rgba(0,0,0,0.09)', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff' }
+              : { border: '1px solid rgba(0,0,0,0.09)', color: '#6b7280', backgroundColor: '#fff' }
+            }
+          >
+            <span>{creatorFilter || 'All creators'}</span>
+            {creatorFilter
+              ? <X size={9} className="opacity-70" onClick={e => { e.stopPropagation(); onCreatorFilter(''); }} />
+              : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M6 9l6 6 6-6"/></svg>
+            }
+          </button>
+          {creatorOpen && (
+            <div
+              className="absolute left-0 top-[calc(100%+4px)] w-44 rounded-xl z-50 overflow-hidden overflow-y-auto"
+              style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.09)', boxShadow: '0 8px 24px rgba(0,0,0,0.10)', maxHeight: 240 }}
+            >
+              <button
+                onClick={() => { onCreatorFilter(''); setCreatorOpen(false); }}
+                className="w-full flex items-center px-3 py-2.5 text-[11px] text-neutral-700 hover:bg-black/[0.04] transition-colors text-left"
+                style={!creatorFilter ? { color: '#6366f1', fontWeight: 600 } : undefined}
+              >
+                All creators
+              </button>
+              {creators.map(({ handle: h, count }) => (
+                <button
+                  key={h}
+                  onClick={() => { onCreatorFilter(h); setCreatorOpen(false); }}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-[11px] hover:bg-black/[0.04] transition-colors text-left"
+                  style={creatorFilter === h ? { color: '#6366f1', fontWeight: 600 } : { color: '#374151' }}
+                >
+                  <span className="truncate">@{h}</span>
+                  <span className="text-[10px] text-neutral-400 flex-shrink-0 ml-2">{count}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <span className="text-[11px] text-neutral-400 tabular-nums">{creatorCount} creators · {total} posts · {savedCount} saved</span>
+
+        <button
+          onClick={() => onGroupByCreator(!groupByCreator)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all"
+          style={groupByCreator
+            ? { background: 'linear-gradient(135deg,#a855f7,#ec4899)', color: '#fff', border: '1px solid transparent' }
+            : { border: '1px solid rgba(0,0,0,0.09)', color: '#6b7280', backgroundColor: '#fff' }
+          }
+        >
+          <Layers size={10} />
+          Group by creator
+        </button>
       </div>
 
-      {/* Right: days pills + Table/Kanban + Save */}
       <div className="flex items-center gap-2">
-        {/* 7d / 30d / 90d pills */}
+        <div className="relative" ref={infoRef}>
+          <button
+            onClick={() => setInfoOpen(v => !v)}
+            className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
+            style={infoOpen
+              ? { background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', border: '1px solid transparent' }
+              : { border: '1px solid rgba(0,0,0,0.09)', color: '#9ca3af', backgroundColor: '#fff' }
+            }
+            title="Column definitions"
+          >
+            <Eye size={12} />
+          </button>
+          {infoOpen && (
+            <div
+              className="absolute right-0 top-[calc(100%+6px)] z-50 rounded-xl overflow-hidden"
+              style={{ width: 320, backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.09)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
+            >
+              <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', backgroundColor: '#fafafa' }}>
+                <p className="text-[11px] font-semibold text-neutral-700">Column definitions</p>
+              </div>
+              <div className="py-1">
+                {[
+                  { col: 'Thumbnail', desc: 'Post preview. Type badge at bottom: post or carousel (Reels show no badge).' },
+                  { col: 'Creator', desc: 'Account handle and niche tag.' },
+                  { col: 'Posted', desc: 'Time since the post was published.' },
+                  { col: 'Views', desc: 'Total video plays. Reels only - photos and carousels always show 0 since Instagram doesn\'t expose view counts on non-video posts.' },
+                  { col: 'Likes', desc: 'Total likes received on the post.' },
+                  { col: 'Cmts', desc: 'Comment count - measures audience conversation depth.' },
+                  { col: 'Like%', desc: 'Likes / Views. Quality signal independent of reach. Green >=5%, yellow >=2%, grey <2%.' },
+                  { col: 'Med Views', desc: 'This creator\'s median reel views, computed from all scraped posts with views > 0. The baseline for vs Median.' },
+                  { col: 'vs Median', desc: 'This post\'s views / creator median. 2.0x = post got double the creator\'s typical views. Shows - if no view data.' },
+                ].map(({ col, desc }) => (
+                  <div key={col} className="px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                    <p className="text-[10px] font-semibold text-neutral-700 uppercase tracking-[0.08em] mb-0.5">{col}</p>
+                    <p className="text-[11px] text-neutral-500 leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         <div className="flex items-center rounded-lg overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.09)' }}>
           {DAYS_OPTIONS.map(d => (
             <button
               key={d.value}
               onClick={() => onDaysChange(d.value)}
               className="px-2.5 py-1.5 text-[10px] font-semibold transition-all active:scale-95"
-              style={days === d.value
-                ? { background: GRAD, color: '#fff' }
-                : { color: '#9ca3af' }
-              }
+              style={days === d.value ? { background: GRAD, color: '#fff' } : { color: '#9ca3af' }}
             >
               {d.label}
             </button>
           ))}
         </div>
-
       </div>
     </div>
   );
@@ -246,66 +335,137 @@ function QualifyToolbar({
 
 // ── Table row ──────────────────────────────────────────────────────────────────
 
-const COL = '40px 200px 90px 80px 76px 80px 90px';
-const DIV = { borderRight: '1px solid rgba(0,0,0,0.06)' } as const;
-
-function QualifyRow({ post, rowIdx }: { post: QualifyPost; rowIdx: number }) {
+function QualifyRow({
+  post, rowIdx, isSelected, anySelected, onSelect, avatarByHandle, isFirstInGroup,
+}: {
+  post: QualifyPost;
+  rowIdx: number;
+  isSelected: boolean;
+  anySelected: boolean;
+  onSelect: (e: React.MouseEvent) => void;
+  avatarByHandle: Map<string, string | undefined>;
+  isFirstInGroup?: boolean;
+}) {
   const isPink = post.baselineScore >= 50;
+  const [imgErr, setImgErr]     = useState(false);
+  const [thumbErr, setThumbErr] = useState(false);
+  const avatarUrl = avatarByHandle.get(post.handle);
 
   return (
     <div
-      className="grid items-stretch cursor-default transition-colors hover:bg-black/[0.04] relative group"
+      className={cn(
+        'grid items-stretch cursor-default transition-colors relative group',
+        !isSelected && 'hover:bg-[#f9f8ff]',
+      )}
       style={{
         gridTemplateColumns: COL,
         height: 48,
         borderBottom: '1px solid rgba(0,0,0,0.06)',
-        backgroundColor: isPink ? 'rgba(255,0,105,0.03)' : '#fff',
+        borderTop: isFirstInGroup ? '2px solid rgba(139,92,246,0.15)' : undefined,
+        backgroundColor: isSelected
+          ? 'rgba(139, 92, 246, 0.06)'
+          : isPink
+            ? 'rgba(255,0,105,0.03)'
+            : undefined,
       }}
     >
-      {/* Left border accent on hover */}
-      <div
-        className="absolute left-0 top-0 bottom-0 w-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ background: 'linear-gradient(to bottom, #a855f7, #ec4899)' }}
-      />
-      {/* # */}
-      <div className="flex items-center justify-center h-full" style={DIV}>
-        <span className="text-[11px] text-neutral-400 tabular-nums">{rowIdx + 1}</span>
+      <div className="absolute left-0 top-0 bottom-0 w-0.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to bottom, #a855f7, #ec4899)' }} />
+
+      {/* Checkbox */}
+      <div className="flex items-center justify-center h-full pl-2" style={DIV} onClick={onSelect}>
+        <SelectCheckbox
+          state={isSelected ? 'all' : 'none'}
+          tint="violet"
+          visible={anySelected || isSelected}
+        />
       </div>
 
-      {/* Creator */}
+      {/* Thumbnail + content type badge */}
+      <div className="relative flex items-center justify-center h-full overflow-hidden" style={DIV}>
+        {post.thumbnailUrl && !thumbErr ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={post.thumbnailUrl}
+            alt=""
+            className="w-full h-full object-cover"
+            onError={() => setThumbErr(true)}
+          />
+        ) : (
+          <div className="w-full h-full" style={{ background: `linear-gradient(135deg, ${handleColor(post.handle)}40, ${handleColor(post.handle)}20)` }} />
+        )}
+        {post.contentType && post.contentType !== 'reel' && (
+          <span
+            className="absolute bottom-0.5 left-0 right-0 text-center text-[7px] font-bold uppercase tracking-wide leading-none py-0.5"
+            style={{ background: 'rgba(0,0,0,0.55)', color: '#fff' }}
+          >
+            {post.contentType === 'carousel' ? 'car' : post.contentType}
+          </span>
+        )}
+      </div>
+
       <div className="flex items-center gap-2 min-w-0 px-3 h-full" title={post.caption} style={DIV}>
-        <div
-          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white"
-          style={{ backgroundColor: handleColor(post.handle) }}
-        >
-          {handleInitials(post.handle)}
-        </div>
+        {avatarUrl && !imgErr ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatarUrl}
+            alt={post.handle}
+            className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+            onError={() => setImgErr(true)}
+          />
+        ) : (
+          <div
+            className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white"
+            style={{ backgroundColor: handleColor(post.handle) }}
+          >
+            {handleInitials(post.handle)}
+          </div>
+        )}
         <div className="min-w-0">
           <p className="text-[11px] font-semibold text-neutral-800 truncate">{post.handle}</p>
+          {post.niche && post.niche !== 'Unknown' && (
+            <span className="text-[9px] font-medium px-1 py-0.5 rounded" style={{ backgroundColor: `${handleColor(post.niche)}20`, color: handleColor(post.niche) }}>
+              {post.niche}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Posted */}
       <div className="flex items-center justify-center h-full" style={DIV}>
         <span className="text-[11px] text-neutral-500 tabular-nums">{timeAgo(post.postedAt)}</span>
       </div>
 
-      {/* Views */}
       <div className="flex items-center justify-center h-full" style={DIV}>
         <span className="text-[11px] text-neutral-600 tabular-nums">{fmtNum(post.views)}</span>
       </div>
 
-      {/* Likes */}
       <div className="flex items-center justify-center h-full" style={DIV}>
         <span className="text-[11px] text-neutral-600 tabular-nums">{fmtNum(post.likes)}</span>
       </div>
 
-      {/* Comments */}
       <div className="flex items-center justify-center h-full" style={DIV}>
         <span className="text-[11px] text-neutral-600 tabular-nums">{fmtNum(post.comments)}</span>
       </div>
 
-      {/* Baseline Score */}
+      <div className="flex items-center justify-center h-full" style={DIV}>
+        {post.views > 0 ? (
+          <span className="text-[11px] tabular-nums" style={{
+            color: post.likes / post.views >= 0.05 ? '#16a34a'
+                 : post.likes / post.views >= 0.02 ? '#ca8a04'
+                 : '#9ca3af',
+          }}>
+            {(post.likes / post.views * 100).toFixed(1)}%
+          </span>
+        ) : (
+          <span className="text-[11px] text-neutral-300">—</span>
+        )}
+      </div>
+
+      <div className="flex items-center justify-center h-full" style={DIV}>
+        <span className="text-[11px] text-neutral-400 tabular-nums">
+          {post.creatorMedianViews ? fmtNum(post.creatorMedianViews) : '-'}
+        </span>
+      </div>
+
       <div className="flex items-center justify-center h-full">
         <span className={cn('text-[12px] font-bold', baselineColor(post.baselineScore))}>
           {post.baselineScore.toFixed(1)}×
@@ -318,16 +478,34 @@ function QualifyRow({ post, rowIdx }: { post: QualifyPost; rowIdx: number }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export function QualifyTableView({ days, onDaysChange, niche = 'all', platform = 'all' }: Props) {
-  const [search,  setSearch]  = useState('');
-  const [band,    setBand]    = useState(0);
-  const [sortKey, setSortKey] = useState<SortKey>('baselineScore');
-  const [sortAsc, setSortAsc] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [search,         setSearch]         = useState('');
+  const [band,           setBand]           = useState(0);
+  const [sortKey,        setSortKey]        = useState<SortKey>('baselineScore');
+  const [sortAsc,        setSortAsc]        = useState(false);
+  const [selected,       setSelected]       = useState<Set<string>>(new Set());
+  const [groupByCreator, setGroupByCreator] = useState(false);
+  const [creatorFilter,  setCreatorFilter]  = useState('');
 
-  const raw = useQuery(api.intelligence.getQualifyPosts, {}) as QualifyPost[] | undefined;
+  const raw             = useQuery(api.intelligence.getQualifyPosts, {}) as QualifyPost[] | undefined;
+  const trackedAccounts = useQuery(api.trackedAccounts.list, {}) ?? [];
 
-  const isLoading = raw === undefined;
+  const avatarByHandle = useMemo(
+    () => new Map(trackedAccounts.map(a => [a.handle, a.avatarUrl as string | undefined])),
+    [trackedAccounts],
+  );
+
+  const isLoading  = raw === undefined;
   const savedCount = raw?.filter(p => p.savedForPipeline).length ?? 0;
+
+  // Unique creators with post counts, sorted A→Z for the dropdown
+  const creators = useMemo(() => {
+    if (!raw) return [];
+    const counts = new Map<string, number>();
+    for (const p of raw) counts.set(p.handle, (counts.get(p.handle) ?? 0) + 1);
+    return [...counts.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([handle, count]) => ({ handle, count }));
+  }, [raw]);
 
   function handleSort(k: SortKey, asc: boolean) {
     setSortKey(k);
@@ -336,44 +514,66 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
 
   const filtered = useMemo(() => {
     if (!raw) return [];
-    const q = search.toLowerCase().trim();
+    const q      = search.toLowerCase().trim();
+    const cutoff = days > 0 ? Date.now() - days * 24 * 60 * 60 * 1000 : 0;
     return raw
-      .filter(p => (niche === 'all' || p.niche === niche))
-      .filter(p => (platform === 'all' || p.platform === platform))
+      .filter(p => niche === 'all' || p.niche === niche)
+      .filter(p => platform === 'all' || p.platform === platform)
+      .filter(p => !creatorFilter || p.handle === creatorFilter)
       .filter(p => !q || p.handle.toLowerCase().includes(q))
-      .filter(p => band === 0 || p.baselineScore >= band);
-  }, [raw, niche, platform, search, band]);
+      .filter(p => band === 0 || p.baselineScore >= band)
+      .filter(p => cutoff === 0 || (p.scrapedAt ?? 0) >= cutoff);
+  }, [raw, niche, platform, search, band, days, creatorFilter]);
 
   const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
+    const arr = [...filtered].sort((a, b) => {
       let av: number | string = 0;
       let bv: number | string = 0;
-      if (sortKey === 'baselineScore') { av = a.baselineScore; bv = b.baselineScore; }
-      else if (sortKey === 'views')    { av = a.views;         bv = b.views; }
-      else if (sortKey === 'likes')    { av = a.likes;         bv = b.likes; }
-      else if (sortKey === 'comments') { av = a.comments;      bv = b.comments; }
-      else if (sortKey === 'handle')   { av = a.handle;        bv = b.handle; }
-      else if (sortKey === 'postedAt') { av = a.postedAt;      bv = b.postedAt; }
+      if (sortKey === 'baselineScore') { av = a.baselineScore;                  bv = b.baselineScore; }
+      else if (sortKey === 'views')       { av = a.views;                         bv = b.views; }
+      else if (sortKey === 'likes')       { av = a.likes;                         bv = b.likes; }
+      else if (sortKey === 'comments')    { av = a.comments;                      bv = b.comments; }
+      else if (sortKey === 'handle')      { av = a.handle;                        bv = b.handle; }
+      else if (sortKey === 'postedAt')    { av = a.postedAt;                      bv = b.postedAt; }
+      else if (sortKey === 'medianViews') { av = a.creatorMedianViews ?? 0;                                            bv = b.creatorMedianViews ?? 0; }
+      else if (sortKey === 'likeRate')    { av = a.views > 0 ? a.likes / a.views : 0; bv = b.views > 0 ? b.likes / b.views : 0; }
       if (av < bv) return sortAsc ? -1 : 1;
       if (av > bv) return sortAsc ? 1 : -1;
       return 0;
     });
-  }, [filtered, sortKey, sortAsc]);
+    if (!groupByCreator) return arr;
+    // When grouping: sort by handle A→Z, then by baselineScore desc within each group
+    return arr.sort((a, b) => {
+      if (a.handle !== b.handle) return a.handle.localeCompare(b.handle);
+      return b.baselineScore - a.baselineScore;
+    });
+  }, [filtered, sortKey, sortAsc, groupByCreator]);
 
-  const rowVirtualizer = useVirtualizer({
-    count: sorted.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => 48,
-    overscan: 8,
-  });
+  // -- Selection helpers ----------------------------------------------------------
+  function toggleSelect(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setSelected(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+  }
 
-  // Column header with sort dropdown
+  const allFilteredIds = sorted.map(p => p._id);
+  const allSelected    = allFilteredIds.length > 0 && allFilteredIds.every(id => selected.has(id));
+  const someSelected   = allFilteredIds.some(id => selected.has(id));
+
+  function toggleSelectAll() {
+    if (allSelected) {
+      setSelected(prev => { const s = new Set(prev); allFilteredIds.forEach(id => s.delete(id)); return s; });
+    } else {
+      setSelected(prev => { const s = new Set(prev); allFilteredIds.forEach(id => s.add(id)); return s; });
+    }
+  }
+
+  // Sort column header (defined inside component so it closes over sortKey/sortAsc/handleSort)
   function SortColumnHeader({ k, label, align = 'left', divider = false }: { k: SortKey; label: string; align?: 'left' | 'right' | 'center'; divider?: boolean }) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const isActive = sortKey === k;
-    const isText = k === 'handle';
-    const opts = isText
+    const isText   = k === 'handle';
+    const opts     = isText
       ? [{ label: 'A → Z', asc: true }, { label: 'Z → A', asc: false }]
       : [{ label: 'High → Low', asc: false }, { label: 'Low → High', asc: true }];
 
@@ -397,14 +597,7 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
           )}
         >
           {label}
-          <ChevronDown
-            size={9}
-            className={cn(
-              'flex-shrink-0 transition-transform duration-150',
-              open && 'rotate-180',
-              isActive ? 'text-neutral-500' : 'text-neutral-300 group-hover/hdr:text-neutral-400',
-            )}
-          />
+          <ChevronDown size={9} className={cn('flex-shrink-0 transition-transform duration-150', open && 'rotate-180', isActive ? 'text-neutral-500' : 'text-neutral-300 group-hover/hdr:text-neutral-400')} />
         </button>
         {open && (
           <div
@@ -432,8 +625,64 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
     );
   }
 
+  function renderHeader() {
+    return (
+      <div
+        className="grid items-center"
+        style={{ gridTemplateColumns: COL, height: 36, borderBottom: '1px solid rgba(0,0,0,0.10)', backgroundColor: '#f9f9f9' }}
+      >
+        {/* Select-all checkbox */}
+        <div
+          className="flex items-center justify-center cursor-pointer h-full"
+          style={{ borderRight: '1px solid rgba(0,0,0,0.06)' }}
+          onClick={toggleSelectAll}
+        >
+          <SelectCheckbox
+            state={allSelected ? 'all' : someSelected ? 'some' : 'none'}
+            tint="violet"
+          />
+        </div>
+
+        <div className="flex items-center justify-center h-full text-neutral-300" style={DIV}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <SortColumnHeader k="handle"        label="Creator"   align="left"   divider />
+        <SortColumnHeader k="postedAt"      label="Posted"    align="center" divider />
+        <SortColumnHeader k="views"         label="Views"     align="center" divider />
+        <SortColumnHeader k="likes"         label="Likes"     align="center" divider />
+        <SortColumnHeader k="comments"      label="Cmts"      align="center" divider />
+        <SortColumnHeader k="likeRate"      label="Like%"     align="center" divider />
+        <SortColumnHeader k="medianViews"   label="Med Views" align="center" divider />
+        <SortColumnHeader k="baselineScore" label="vs Median" align="center" />
+      </div>
+    );
+  }
+
+  const emptyState = (
+    <div className="flex flex-col items-center justify-center py-20 gap-3">
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f5f5f4' }}>
+        <Filter size={20} className="text-neutral-300" />
+      </div>
+      {search || band > 0 ? (
+        <>
+          <p className="text-sm font-semibold text-neutral-600">No reels match your filters</p>
+          <p className="text-xs text-neutral-400">Try a broader search or lower the multiplier threshold</p>
+          <button
+            onClick={() => { setSearch(''); setBand(0); }}
+            className="mt-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+            style={{ backgroundColor: '#f5f5f4', color: '#666' }}
+          >
+            Clear filters
+          </button>
+        </>
+      ) : (
+        <p className="text-sm font-medium text-neutral-400">No reels indexed yet</p>
+      )}
+    </div>
+  );
+
   return (
-    <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}>
+    <TableCard className="relative flex flex-col flex-1 min-h-0">
       <QualifyToolbar
         search={search}
         onSearch={setSearch}
@@ -441,66 +690,98 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
         onBand={setBand}
         total={isLoading ? 0 : sorted.length}
         savedCount={isLoading ? 0 : savedCount}
+        creatorCount={creators.length}
         days={days}
         onDaysChange={onDaysChange}
+        groupByCreator={groupByCreator}
+        onGroupByCreator={setGroupByCreator}
+        creatorFilter={creatorFilter}
+        onCreatorFilter={setCreatorFilter}
+        creators={creators}
       />
 
-      {/* Header row */}
-      <div
-        className="grid items-center"
-        style={{
-          gridTemplateColumns: COL,
-          height: 36,
-          borderBottom: '1px solid rgba(0,0,0,0.10)',
-          backgroundColor: '#f9f9f9',
-        }}
-      >
-        <div className="flex items-center justify-center h-full text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400" style={DIV}>#</div>
-        <SortColumnHeader k="handle"        label="Creator"  align="left"   divider />
-        <SortColumnHeader k="postedAt"      label="Posted"   align="center" divider />
-        <SortColumnHeader k="views"         label="Views"    align="center" divider />
-        <SortColumnHeader k="likes"         label="Likes"    align="center" divider />
-        <SortColumnHeader k="comments"      label="Comments" align="center" divider />
-        <SortColumnHeader k="baselineScore" label="vs Median" align="center" />
-      </div>
+      <VirtualTable
+        data={sorted}
+        isLoading={isLoading}
+        keyExtractor={p => p._id}
+        gridCols={COL}
+        tableWidth={TABLE_WIDTH}
+        rowHeight={48}
+        renderHeader={renderHeader}
+        renderRow={(post, idx) => (
+          <QualifyRow
+            post={post}
+            rowIdx={idx}
+            isSelected={selected.has(post._id)}
+            anySelected={selected.size > 0}
+            onSelect={e => toggleSelect(post._id, e)}
+            avatarByHandle={avatarByHandle}
+            isFirstInGroup={groupByCreator && idx > 0 && sorted[idx - 1]?.handle !== post.handle}
+          />
+        )}
+        loadingState={<TableSkeleton />}
+        emptyState={emptyState}
+      />
 
-      {isLoading ? (
-        <TableSkeleton />
-      ) : sorted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f5f5f4' }}>
-            <Filter size={20} className="text-neutral-300" />
-          </div>
-          {search || band > 0 ? (
-            <>
-              <p className="text-sm font-semibold text-neutral-600">No reels match your filters</p>
-              <p className="text-xs text-neutral-400">Try a broader search or lower the multiplier threshold</p>
-              <button
-                onClick={() => { setSearch(''); setBand(0); }}
-                className="mt-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                style={{ backgroundColor: '#f5f5f4', color: '#666' }}
-              >
-                Clear filters
-              </button>
-            </>
-          ) : (
-            <p className="text-sm font-medium text-neutral-400">No reels indexed yet</p>
-          )}
-        </div>
-      ) : (
-        <div ref={scrollRef} style={{ height: 'calc(100vh - 380px)', overflowY: 'auto' }}>
-          <div style={{ height: rowVirtualizer.getTotalSize(), position: 'relative' }}>
-            {rowVirtualizer.getVirtualItems().map(vRow => {
-              const post = sorted[vRow.index];
-              return (
-                <div key={post._id} style={{ position: 'absolute', top: 0, left: 0, right: 0, transform: `translateY(${vRow.start}px)` }}>
-                  <QualifyRow post={post} rowIdx={vRow.index} />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Floating bulk action bar */}
+      <AnimatePresence>
+        {selected.size > 0 && (
+          <motion.div
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0,  opacity: 1 }}
+            exit={{    y: 24, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-2 py-1.5 rounded-2xl shadow-xl"
+            style={{ backgroundColor: '#1a1a2e', border: '1px solid rgba(255,255,255,0.08)', minWidth: 340 }}
+          >
+            {/* Count pill */}
+            <div className="flex items-center gap-2 px-2 mr-1">
+              <div className="w-5 h-5 rounded-full bg-violet-500 flex items-center justify-center">
+                <span className="text-[10px] font-bold text-white tabular-nums">{selected.size}</span>
+              </div>
+              <span className="text-[12px] font-medium text-white/70">
+                {selected.size === 1 ? '1 post selected' : `${selected.size} posts selected`}
+              </span>
+            </div>
+
+            <div className="w-px h-5 bg-white/10 mx-1" />
+
+            {/* Save to pipeline */}
+            <button
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all"
+              style={{ backgroundColor: 'rgba(139,92,246,0.20)', color: '#d8b4fe' }}
+              title="Save to pipeline"
+              onClick={() => { /* TODO: wire bulk save mutation */ }}
+            >
+              <BookmarkPlus size={11} />
+              Save to pipeline
+            </button>
+
+            {/* Dismiss */}
+            <button
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all"
+              style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.45)' }}
+              title="Dismiss"
+              onClick={() => { /* TODO: wire bulk dismiss mutation */ }}
+            >
+              <X size={11} />
+              Dismiss
+            </button>
+
+            <div className="w-px h-5 bg-white/10 mx-1" />
+
+            {/* Clear selection */}
+            <button
+              className="flex items-center gap-1 px-2 py-1.5 rounded-xl text-[12px] transition-all"
+              style={{ color: 'rgba(255,255,255,0.35)' }}
+              title="Clear selection"
+              onClick={() => setSelected(new Set())}
+            >
+              <X size={12} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </TableCard>
   );
 }

@@ -3,27 +3,122 @@
 import { useQuery, useMutation } from 'convex/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useMemo } from 'react';
-import { Sparkles, ImageOff, Brain } from 'lucide-react';
+import { Sparkles, ImageOff, Brain, TrendingUp, Hash, ArrowRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { api } from '../../../../../convex/_generated/api';
 import { RatingSummaryBar } from './RatingSummaryBar';
 import { LearningSignal }   from './LearningSignal';
-import { AIChatPanel }      from '../trends/AIChatPanel';
 import { PostDetailDrawer }  from '../drawer/PostDetailDrawer';
 import { cn }                from '@/lib/utils';
 import type { InsightsData, TrendsData } from '../../types';
 import type { DrawerPost }  from '../../types';
 
+const GRAD = 'linear-gradient(135deg, #ff0069, #833ab4)';
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function MiniBar({ label, value, max, color = '#ff0069' }: { label: string; value: number; max: number; color?: string }) {
+  const pct = max > 0 ? (value / max) * 100 : 0;
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[10px] text-neutral-500 w-16 shrink-0 truncate">{label}</span>
+      <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: color }} />
+      </div>
+      <span className="text-[10px] font-semibold text-neutral-700 w-10 text-right shrink-0">{(pct).toFixed(0)}%</span>
+    </div>
+  );
+}
+
+// ── Sub-components ──────────────────────────────────────────────────────────
+
+function NichePerf({ trends }: { trends: TrendsData }) {
+  const niches = trends.nicheStats.slice(0, 6);
+  const max = niches[0]?.avgER ?? 1;
+  return (
+    <div className="flex flex-col gap-1.5">
+      {niches.map(n => (
+        <MiniBar
+          key={n.niche}
+          label={n.niche}
+          value={n.avgER}
+          max={max}
+          color="var(--pink)"
+        />
+      ))}
+    </div>
+  );
+}
+
+function FormatPerf({ trends }: { trends: TrendsData }) {
+  const formats = trends.formatStats;
+  const max = formats[0]?.avgER ?? 1;
+  return (
+    <div className="flex flex-col gap-1.5">
+      {formats.map(f => (
+        <MiniBar
+          key={f.format}
+          label={f.format}
+          value={f.avgER}
+          max={max}
+          color="#833ab4"
+        />
+      ))}
+    </div>
+  );
+}
+
+function OutlierPosts({ trends }: { trends: TrendsData }) {
+  const outliers = trends.outlierPosts.slice(0, 3);
+  if (!outliers.length) return null;
+  return (
+    <div className="flex flex-col gap-1.5">
+      {outliers.map(p => (
+        <div key={p._id} className="flex items-center gap-2 py-1">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-medium text-neutral-800 truncate">@{p.handle}</p>
+            <p className="text-[9px] text-neutral-400">{p.niche} · {p.contentType}</p>
+          </div>
+          <span
+            className="text-[9px] font-bold px-1.5 py-0.5 rounded text-white shrink-0"
+            style={{ background: GRAD }}
+          >
+            {p.outlierRatio.toFixed(1)}x
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TopHashtags({ hashtags }: { hashtags: any[] }) {
+  const top = hashtags.slice(0, 5);
+  if (!top.length) return null;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {top.map(h => (
+        <span
+          key={h.hashtag}
+          className="text-[10px] px-2 py-0.5 rounded-full"
+          style={{ backgroundColor: 'rgba(255,0,105,0.08)', color: '#ff0069' }}
+        >
+          #{h.hashtag}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ── Main ────────────────────────────────────────────────────────────────────
+
 export function InsightsView() {
-  const [chatOpen,           setChatOpen]           = useState(false);
-  const [highlightedPostId,  setHighlightedPostId]  = useState<string | null>(null);
-  const [drawerIndex,        setDrawerIndex]        = useState<number | null>(null);
+  const router = useRouter();
 
   const data        = useQuery(api.insights.getInsights, {}) as InsightsData | undefined;
   const trends      = useQuery(api.intelligence.getTrends, { days: 30 }) as TrendsData | undefined;
-  const hookStats   = useQuery(api.intelligence.getHookStats, { days: 30 });
+  const hashtags    = useQuery(api.intelligence.getHashtagCorrelation, { days: 30 });
   const seedRatings = useMutation(api.insightsSeed.seedSwipeRatings);
 
-  // Full posts for drawer — fetched by id so likes/views/saves are real
   const postIds   = useMemo(() => (data?.topRatedPosts ?? []).map(p => p._id as any), [data?.topRatedPosts]);
   const fullPosts = useQuery(api.intelligence.getPostsByIds, { ids: postIds });
 
@@ -41,9 +136,9 @@ export function InsightsView() {
   }, [data?.topRatedPosts]);
 
   // Build drawer posts from fullPosts (real likes/views/saves)
-  const drawerPosts: DrawerPost[] = useMemo(() => {
+  const drawerPosts = useMemo(() => {
     if (!fullPosts) return [];
-    return fullPosts.map(p => ({
+    return (fullPosts as any[]).map((p: any) => ({
       _id:            p._id,
       externalId:     p.externalId ?? '',
       handle:         p.handle,
@@ -65,50 +160,34 @@ export function InsightsView() {
     }));
   }, [fullPosts]);
 
+  const [drawerIndex, setDrawerIndex] = useState<number | null>(null);
+
   function openDrawer(postId: string) {
     const idx = (data?.topRatedPosts ?? []).findIndex(p => p._id === postId);
     if (idx !== -1) setDrawerIndex(idx);
   }
 
-  // Derive insight bullets from trends + insights data
-  function deriveInsights(): string[] {
-    const bullets: string[] = [];
-    if (!trends) return bullets;
-    const topNiche = trends.nicheStats[0];
-    if (topNiche) {
-      bullets.push(
-        `${topNiche.niche} leads with ${(topNiche.avgER * 100).toFixed(1)}% avg ER across ${topNiche.count} posts`
-      );
-    }
-    const topFormat = trends.formatStats[0];
-    const nextFormat = trends.formatStats[1];
-    if (topFormat && nextFormat) {
-      const lift = topFormat.avgER / (nextFormat.avgER || 1);
-      bullets.push(
-        `${topFormat.format.charAt(0).toUpperCase() + topFormat.format.slice(1)}s outperform by ${((lift - 1) * 100).toFixed(0)}% vs ${nextFormat.format}`
-      );
-    }
-    const topOutlier = trends.outlierPosts[0];
-    if (topOutlier) {
-      bullets.push(
-        `@${topOutlier.handle} hit ${topOutlier.outlierRatio.toFixed(1)}x baseline ER - best outlier this window`
-      );
-    }
-    if (data && data.summary.totalRatings > 0) {
-      const saveRate = Math.round((data.summary.saveCount / data.summary.totalRatings) * 100);
-      bullets.push(
-        saveRate >= 50
-          ? `${saveRate}% team save rate - strong curation signal`
-          : `${saveRate}% save rate - tighten the feed for better signal`
-      );
-    }
-    return bullets;
-  }
-
-  const insights = deriveInsights();
   const topRater = data?.raterActivity[0];
-  const hookCount = hookStats?.hookLines?.length ?? 0;
   const postCount = data?.topRatedPosts?.length ?? 0;
+
+  // Trend alerts
+  const trendAlerts = useMemo(() => {
+    const alerts: string[] = [];
+    if (!trends || !data) return alerts;
+    const { stats } = trends as any;
+    if (stats?.postsThisWeek !== undefined && stats?.postsLastWeek !== undefined) {
+      const diff = stats.postsThisWeek - stats.postsLastWeek;
+      if (diff > 0) alerts.push(`+${diff} posts scraped this week vs last`);
+      else if (diff < 0) alerts.push(`${diff} posts scraped this week vs last`);
+    }
+    const topNiche = trends.nicheStats[0];
+    if (topNiche && trends.nicheStats.length > 1) {
+      const runnerUp = trends.nicheStats[1];
+      const lift = (topNiche.avgER / (runnerUp?.avgER || 1) - 1) * 100;
+      if (lift > 20) alerts.push(`${topNiche.niche} outperforms ${runnerUp.niche} by ${lift.toFixed(0)}%`);
+    }
+    return alerts;
+  }, [trends, data]);
 
   // Loading skeleton
   if (data === undefined) {
@@ -128,8 +207,6 @@ export function InsightsView() {
     );
   }
 
-  const GRAD = 'linear-gradient(135deg, #ff0069, #833ab4)';
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -137,108 +214,102 @@ export function InsightsView() {
       transition={{ duration: 0.3 }}
       className="space-y-4"
     >
-
       {/* KPI strip */}
       <RatingSummaryBar summary={data.summary} topRater={topRater} />
 
       {/* 3-column layout */}
       <div className="grid grid-cols-12 gap-4">
 
-        {/* LEFT (24%) - Winning Hooks */}
-        <div className="col-span-3 flex flex-col gap-2">
-          {/* Section header */}
+        {/* LEFT (24%) - Team Curation */}
+        <div className="col-span-3 flex flex-col gap-3">
+          {/* Rating breakdown */}
           <div
-            className="flex items-center justify-between px-3 py-2.5 rounded-xl"
-            style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))', border: '1px solid rgba(0,0,0,0.06)' }}
+            className="rounded-xl overflow-hidden"
+            style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
           >
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
-                <Sparkles size={11} className="text-white" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold text-neutral-900">Winning Hooks</p>
-                <p className="text-[9px] text-neutral-400">Top hooks by score</p>
-              </div>
-            </div>
-            {hookCount > 0 && (
-              <span
-                className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md text-white"
-                style={{ background: GRAD }}
-              >
-                {hookCount}
-              </span>
-            )}
-          </div>
-
-          {/* Hook rows - loading skeleton */}
-          {hookStats === undefined ? (
             <div
-              className="flex flex-col rounded-xl overflow-hidden"
-              style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
+              className="flex items-center gap-2 px-3 py-2.5"
+              style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))' }}
             >
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="flex flex-col gap-1.5 py-3 px-3 border-b border-black/5 last:border-0">
-                  <div className="h-3 rounded-md animate-pulse" style={{ width: '80%', backgroundColor: 'rgba(0,0,0,0.06)' }} />
-                  <div className="h-2.5 rounded-md animate-pulse mt-0.5" style={{ width: '33%', backgroundColor: 'rgba(0,0,0,0.05)' }} />
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
+                <TrendingUp size={11} className="text-white" />
+              </div>
+              <p className="text-[11px] font-semibold text-neutral-900">Team Signal</p>
+            </div>
+            <div className="px-3 py-3 space-y-2">
+              {data.nichePreferences.slice(0, 4).map(n => (
+                <div key={n.niche} className="flex items-center justify-between">
+                  <span className="text-[11px] text-neutral-700">{n.niche}</span>
+                  <span className="text-[10px] font-bold" style={{ color: '#ff0069' }}>
+                    {(n.upRate * 100).toFixed(0)}% ↑
+                  </span>
                 </div>
               ))}
-            </div>
-          ) : (
-            <div
-              className="flex flex-col rounded-xl overflow-hidden"
-              style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
-            >
-              {hookCount === 0 && (
-                <div className="flex flex-col items-center justify-center gap-2 py-10">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
-                    <ImageOff size={14} className="text-neutral-300" />
-                  </div>
-                  <p className="text-[11px] text-neutral-400">No hook data yet</p>
-                  <p className="text-[10px] text-neutral-300 text-center px-4">Run analysis on posts to surface winning hooks</p>
-                </div>
+              {(!data.nichePreferences || data.nichePreferences.length === 0) && (
+                <p className="text-[11px] text-neutral-400">Rate posts to see niche signal</p>
               )}
-              {(hookStats?.hookLines ?? []).map((hook, i) => {
-                const mappedId = postIdMap.get(`${hook.handle}|${hook.niche}`);
-                const isHighlighted = highlightedPostId === mappedId;
-                return (
-                  <div
-                    key={i}
-                    className={cn(
-                      "relative flex flex-col gap-1 py-2.5 px-3 border-b border-black/5 cursor-pointer transition-all last:border-0",
-                      isHighlighted
-                        ? "bg-[#ff006908]"
-                        : "hover:bg-black/[0.02] hover:translate-x-0.5"
-                    )}
-                    onMouseEnter={() => mappedId && setHighlightedPostId(mappedId)}
-                    onMouseLeave={() => setHighlightedPostId(null)}
-                  >
-                    {/* Left accent bar — visible only when highlighted */}
-                    {isHighlighted && (
-                      <motion.div
-                        className="absolute left-0 top-0 bottom-0 w-0.5 rounded-r"
-                        style={{ background: GRAD }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.15 }}
-                      />
-                    )}
-                    <p className="text-[11px] font-medium text-neutral-800 leading-relaxed line-clamp-2 pr-3">
-                      &ldquo;{hook.hookLine}&rdquo;
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-neutral-400">@{hook.handle}</span>
-                      <span className="text-[10px] font-bold" style={{ color: '#ff0069' }}>
-                        {hook.hookScore.toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
-          )}
+          </div>
+
+          {/* Format preferences */}
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
+          >
+            <div
+              className="flex items-center gap-2 px-3 py-2.5"
+              style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))' }}
+            >
+              <p className="text-[11px] font-semibold text-neutral-900">Format Signal</p>
+            </div>
+            <div className="px-3 py-3 space-y-2">
+              {data.formatPreferences.slice(0, 3).map(f => (
+                <div key={f.format} className="flex items-center justify-between">
+                  <span className="text-[11px] text-neutral-700 capitalize">{f.format}</span>
+                  <span className="text-[10px] font-bold" style={{ color: '#833ab4' }}>
+                    {(f.upRate * 100).toFixed(0)}% ↑
+                  </span>
+                </div>
+              ))}
+              {(!data.formatPreferences || data.formatPreferences.length === 0) && (
+                <p className="text-[11px] text-neutral-400">No format signal yet</p>
+              )}
+            </div>
+          </div>
+
+          {/* Rater leaderboard */}
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
+          >
+            <div
+              className="flex items-center gap-2 px-3 py-2.5"
+              style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))' }}
+            >
+              <p className="text-[11px] font-semibold text-neutral-900">Top Raters</p>
+            </div>
+            <div className="px-3 py-3 space-y-2">
+              {data.raterActivity.slice(0, 5).map((r, i) => (
+                <div key={r.ratedBy} className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    {i < 3 && (
+                      <span className="text-[9px] font-bold" style={{ color: i === 0 ? '#ff0069' : i === 1 ? '#833ab4' : '#06b6d4' }}>
+                        #{i + 1}
+                      </span>
+                    )}
+                    <span className="text-[11px] text-neutral-700">{r.ratedBy}</span>
+                  </div>
+                  <span className="text-[10px] text-neutral-400">{r.total} ratings</span>
+                </div>
+              ))}
+              {(!data.raterActivity || data.raterActivity.length === 0) && (
+                <p className="text-[11px] text-neutral-400">No ratings yet</p>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* CENTER (50%) - Top Rated Posts + Patterns */}
+        {/* CENTER (50%) - Performance Intelligence */}
         <div className="col-span-6 flex flex-col gap-3">
 
           {/* Section header */}
@@ -256,7 +327,7 @@ export function InsightsView() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[11px] font-semibold text-neutral-900">Top Rated Posts</p>
-              <p className="text-[9px] text-neutral-400 truncate">Saves count double - hover hooks to highlight</p>
+              <p className="text-[9px] text-neutral-400 truncate">Click any post to open detail drawer</p>
             </div>
             {postCount > 0 && (
               <span
@@ -268,7 +339,7 @@ export function InsightsView() {
             )}
           </div>
 
-          {/* Horizontal scrollable post strip — fixed height, no aspect-ratio crop */}
+          {/* Horizontal scrollable post strip */}
           <div className="overflow-x-auto flex gap-3 pb-2 -mx-1 px-1 items-start">
             {data.topRatedPosts.map((post, i) => (
               <motion.div
@@ -279,9 +350,7 @@ export function InsightsView() {
                 onClick={() => openDrawer(post._id)}
                 className={cn(
                   "relative shrink-0 w-32 rounded-xl overflow-hidden cursor-pointer transition-all duration-200",
-                  highlightedPostId === post._id
-                    ? "ring-2 ring-[#ff0069] scale-105 z-10 shadow-lg shadow-[#ff0069]/20"
-                    : "hover:scale-[1.04] hover:shadow-md hover:shadow-black/10"
+                  "hover:scale-[1.04] hover:shadow-md hover:shadow-black/10"
                 )}
                 style={{ height: '176px' }}
               >
@@ -291,13 +360,11 @@ export function InsightsView() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={post.thumbnailUrl} alt={post.handle} className="w-full h-full object-cover" />
                 )}
-                {/* Bottom gradient + ER */}
                 <div className="absolute bottom-0 inset-x-0 p-1.5 bg-gradient-to-t from-black/70 to-transparent">
                   <p className="text-[9px] text-white font-bold">
                     {post.engagementRate > 0 ? `${(post.engagementRate * 100).toFixed(1)}%` : '-'}
                   </p>
                 </div>
-                {/* Score badge */}
                 <div className="absolute top-1.5 right-1.5">
                   <span
                     className="text-[8px] font-bold px-1 py-0.5 rounded text-white"
@@ -306,7 +373,6 @@ export function InsightsView() {
                     ★ {post.upCount + post.saveCount * 2}
                   </span>
                 </div>
-                {/* Niche tag */}
                 <div className="absolute top-1.5 left-1.5">
                   <span
                     className="text-[8px] font-semibold px-1 py-0.5 rounded text-white"
@@ -326,116 +392,124 @@ export function InsightsView() {
                   <ImageOff size={14} className="text-neutral-300" />
                 </div>
                 <p className="text-xs text-neutral-400">No rated posts yet</p>
-                <p className="text-[10px] text-neutral-300">Rate posts to see your top picks here</p>
               </div>
             )}
           </div>
 
-          {/* Patterns / Signals section */}
-          {trends === undefined ? (
-            <div
-              className="rounded-xl px-4 py-3 space-y-2"
-              style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}
-            >
-              <div className="h-3 rounded-md animate-pulse w-20" style={{ backgroundColor: 'rgba(0,0,0,0.06)' }} />
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-start gap-2.5">
-                  <div className="w-1 h-1 rounded-full mt-1.5 shrink-0 animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} />
-                  <div className="h-3 rounded-md animate-pulse flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.06)' }} />
-                </div>
-              ))}
-            </div>
-          ) : (
+          {/* Niche performance */}
+          {trends ? (
             <div
               className="rounded-xl px-4 py-3"
               style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}
             >
-              <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2.5">
-                Signals
-              </p>
-              {insights.length === 0 ? (
-                <p className="text-[11px] text-neutral-400 leading-relaxed">
-                  Rate posts to surface signals - patterns appear as your team curates content
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {insights.map((insight, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-[11px] text-neutral-700">
-                      <span className="mt-1.5 shrink-0 w-1 h-1 rounded-full" style={{ backgroundColor: '#ff0069' }} />
-                      <span className="leading-relaxed">{insight}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2.5">Niche ER</p>
+              <NichePerf trends={trends} />
+            </div>
+          ) : (
+            <div className="rounded-xl px-4 py-3 space-y-2" style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <div className="h-3 rounded-md animate-pulse w-20" style={{ backgroundColor: 'rgba(0,0,0,0.06)' }} />
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-2 rounded-md animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }} />
+              ))}
             </div>
           )}
+
+          {/* Format performance */}
+          {trends ? (
+            <div
+              className="rounded-xl px-4 py-3"
+              style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}
+            >
+              <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2.5">Format ER</p>
+              <FormatPerf trends={trends} />
+            </div>
+          ) : null}
+
+          {/* Outlier posts + Hashtag correlation in 2-col grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Outliers */}
+            {trends ? (
+              <div
+                className="rounded-xl px-3 py-3"
+                style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}
+              >
+                <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2">Top Outliers</p>
+                <OutlierPosts trends={trends} />
+              </div>
+            ) : null}
+
+            {/* Hashtag correlation */}
+            {hashtags && hashtags.length > 0 ? (
+              <div
+                className="rounded-xl px-3 py-3"
+                style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}
+              >
+                <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2">
+                  <Hash size={9} className="inline mr-1" />
+                  Top Tags
+                </p>
+                <TopHashtags hashtags={hashtags} />
+              </div>
+            ) : null}
+          </div>
         </div>
 
-        {/* RIGHT (26%) - AI Chat + Learning */}
+        {/* RIGHT (26%) - Actions + Learning */}
         <div className="col-span-3 flex flex-col gap-3">
 
-          {/* Ask Intelligence - compact card */}
+          {/* Ask Intelligence */}
           <div
-            className={cn(
-              "rounded-xl overflow-hidden border border-black/[0.07]",
-              !chatOpen && "shadow-sm shadow-black/5"
-            )}
+            className="rounded-xl overflow-hidden border border-black/[0.07] shadow-sm shadow-black/5"
             style={{ backgroundColor: '#fff' }}
           >
-            {/* Card header */}
             <div
-              className="flex items-center justify-between px-3 py-2.5"
-              style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))' }}
+              className="flex items-center gap-2 px-3 py-3"
+              style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.06), rgba(131,58,180,0.06))' }}
             >
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
-                  <Sparkles size={11} className="text-white" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-neutral-900">Ask Intelligence</p>
-                  <p className="text-[9px] text-neutral-400">MiniMax - full context</p>
-                </div>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
+                <Sparkles size={12} className="text-white" />
               </div>
-              {!chatOpen ? (
-                <button
-                  onClick={() => setChatOpen(true)}
-                  className="text-[10px] font-semibold px-2.5 py-1 rounded-lg text-white shadow-sm transition-all hover:shadow hover:opacity-90 active:scale-95"
-                  style={{ background: GRAD }}
-                >
-                  Open
-                </button>
-              ) : (
-                <button
-                  onClick={() => setChatOpen(false)}
-                  className="text-[10px] font-semibold px-2.5 py-1 rounded-lg text-[#ff0069] hover:bg-[#ff006908] transition-colors active:scale-95"
-                >
-                  Close
-                </button>
-              )}
+              <div className="flex-1">
+                <p className="text-[11px] font-semibold text-neutral-900">Ask Intelligence</p>
+                <p className="text-[9px] text-neutral-400">Chat with all your data</p>
+              </div>
             </div>
-
-            {/* Expanded AI chat */}
-            <AnimatePresence>
-              {chatOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="overflow-hidden"
-                >
-                  <AIChatPanel
-                    data={trends}
-                    insightsData={data}
-                    onClose={() => setChatOpen(false)}
-                    embedded
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className="px-3 py-3">
+              <button
+                onClick={() => router.push('/isso/intelligence?tab=assistant')}
+                className="w-full py-2.5 rounded-xl text-[11px] font-semibold text-white transition-all hover:brightness-105 active:scale-[0.98] flex items-center justify-center gap-2"
+                style={{ background: GRAD }}
+              >
+                Open Assistant
+                <ArrowRight size={12} />
+              </button>
+              <p className="text-[9px] text-neutral-400 text-center mt-2">
+                30-day trends, patterns, hook scores, team signal
+              </p>
+            </div>
           </div>
 
-          {/* Learning Signal — wrapped in consistent card header */}
+          {/* Trend alerts */}
+          <div
+            className="rounded-xl px-3 py-3"
+            style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.07)' }}
+          >
+            <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide mb-2.5">Alerts</p>
+            {trendAlerts.length > 0 ? (
+              <div className="space-y-2">
+                {trendAlerts.map((alert, i) => (
+                  <div key={i} className="flex items-start gap-2 text-[11px] text-neutral-700">
+                    <span className="mt-1 shrink-0 w-1 h-1 rounded-full" style={{ backgroundColor: '#ff0069' }} />
+                    <span>{alert}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[11px] text-neutral-400">No alerts yet</p>
+            )}
+          </div>
+
+          {/* Learning Signal */}
           <div
             className="rounded-xl overflow-hidden border border-black/[0.07]"
             style={{ backgroundColor: '#fff' }}
@@ -464,7 +538,7 @@ export function InsightsView() {
       <AnimatePresence>
         {drawerIndex !== null && (
           <PostDetailDrawer
-            posts={drawerPosts}
+            posts={drawerPosts as DrawerPost[]}
             initialIndex={drawerIndex}
             onClose={() => setDrawerIndex(null)}
           />

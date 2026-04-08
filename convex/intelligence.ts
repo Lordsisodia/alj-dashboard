@@ -72,6 +72,17 @@ export const getFeed = query({
   },
 });
 
+// ── Fetch posts by ids  -  used by InsightsView drawer ──────────────────────────
+
+export const getPostsByIds = query({
+  args: { ids: v.array(v.id("scrapedPosts")) },
+  handler: async (ctx, args) => {
+    if (args.ids.length === 0) return [];
+    const posts = await Promise.all(args.ids.map(id => ctx.db.get(id)));
+    return posts.filter(p => p != null);
+  },
+});
+
 // ── Search posts by caption ───────────────────────────────────────────────────
 
 export const searchPosts = query({
@@ -636,22 +647,76 @@ export const importScrapedPost = mutation({
 
 // ── Qualify tab — all scraped posts ordered by baseline score ──────────────────
 
+function median(nums: number[]): number {
+  if (nums.length === 0) return 0;
+  const sorted = [...nums].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+}
+
 export const getQualifyPosts = query({
   args: { minBaseline: v.optional(v.number()) },
   handler: async (ctx, { minBaseline }) => {
     let posts = await ctx.db.query("scrapedPosts").collect();
     // Exclude seed posts
     posts = posts.filter(p => !p.externalId?.startsWith('seed_'));
-    if (minBaseline !== undefined) {
-      posts = posts.filter(p => (p.baselineScore ?? 0) >= minBaseline);
+
+    // Fetch trackedAccounts for avgViews fallback
+    const accounts = await ctx.db.query("trackedAccounts").collect();
+    const accountAvgViews = new Map(
+      accounts
+        .filter(a => (a.avgViews ?? 0) > 0)
+        .map(a => [a.handle, a.avgViews!] as [string, number])
+    );
+
+    // Compute per-creator medians from ALL posts before any filtering
+    const viewsByHandle:    Map<string, number[]> = new Map();
+    const likesByHandle:    Map<string, number[]> = new Map();
+    const commentsByHandle: Map<string, number[]> = new Map();
+
+    for (const p of posts) {
+      const h = p.handle;
+      if (!viewsByHandle.has(h)) {
+        viewsByHandle.set(h, []);
+        likesByHandle.set(h, []);
+        commentsByHandle.set(h, []);
+      }
+      // Only include posts with actual views (Reels) so regular posts/carousels
+      // don't drag the median to 0. Likes/comments are available on all types.
+      if ((p.views ?? 0) > 0) viewsByHandle.get(h)!.push(p.views!);
+      likesByHandle.get(h)!.push(p.likes ?? 0);
+      commentsByHandle.get(h)!.push(p.comments ?? 0);
     }
-    // Use outlierRatio as baselineScore proxy; fall back to engagementRate * 10
-    return posts
-      .map(p => ({
+
+    const medViews:    Map<string, number> = new Map();
+    const medLikes:    Map<string, number> = new Map();
+    const medComments: Map<string, number> = new Map();
+    for (const [h, v2] of viewsByHandle)    medViews.set(h, median(v2));
+    for (const [h, v2] of likesByHandle)    medLikes.set(h, median(v2));
+    for (const [h, v2] of commentsByHandle) medComments.set(h, median(v2));
+
+    const mapped = posts.map(p => {
+      const mv = medViews.get(p.handle) ?? 0;
+      const sampleCount = viewsByHandle.get(p.handle)?.length ?? 0;
+      // Use account-level avgViews when we have < 5 reel samples (more accurate baseline)
+      const effectiveMedian = sampleCount >= 5 ? mv : (accountAvgViews.get(p.handle) ?? mv);
+      const baseline = effectiveMedian > 0
+        ? parseFloat(((p.views ?? 0) / effectiveMedian).toFixed(2))
+        : parseFloat(((p.engagementRate ?? 0) * 10).toFixed(2));
+      return {
         ...p,
-        baselineScore: p.baselineScore ?? p.outlierRatio ?? parseFloat(((p.engagementRate ?? 0) * 10).toFixed(2)),
-      }))
-      .sort((a, b) => (b.baselineScore ?? 0) - (a.baselineScore ?? 0));
+        baselineScore:         baseline,
+        creatorMedianViews:    Math.round(effectiveMedian),
+        creatorMedianLikes:    Math.round(medLikes.get(p.handle)    ?? 0),
+        creatorMedianComments: Math.round(medComments.get(p.handle) ?? 0),
+      };
+    });
+
+    const result = minBaseline !== undefined
+      ? mapped.filter(p => p.baselineScore >= minBaseline)
+      : mapped;
+
+    return result.sort((a, b) => b.baselineScore - a.baselineScore);
   },
 });
 
@@ -733,6 +798,12 @@ export const getCreatorStats = query({
         isPrivate:             acc.isPrivate             ?? null,
         igtvVideoCount:        acc.igtvVideoCount        ?? null,
         instagramId:           acc.instagramId           ?? null,
+        // ScoreableCreator fields (Phase 1 + stale profile)
+        avgViews:              acc.avgViews              ?? null,
+        outlierRatio:          acc.outlierRatio          ?? null,
+        highlightReelCount:    acc.highlightReelCount    ?? null,
+        avgEngagementRate:     acc.avgEngagementRate     ?? null,
+        ...(acc.creatorScore != null && { creatorScore: acc.creatorScore }),
       };
     });
   },
@@ -756,9 +827,10 @@ export const getReconDashboardStats = query({
     const active  = accounts.filter(a => a.status === 'active');
     const lastRun = accounts.reduce((m, a) => Math.max(m, a.lastScrapedAt ?? 0), 0);
 
-    const postsToday = real.filter(p => p.scrapedAt >= todayStart.getTime()).length;
-    const refined    = real.filter(p => p.saved).length;
-    const generated  = real.filter(p => !!p.aiAnalysis).length;
+    const postsToday    = real.filter(p => p.scrapedAt >= todayStart.getTime()).length;
+    const postsThisWeek = real.filter(p => p.scrapedAt >= weekStart).length;
+    const refined       = real.filter(p => p.saved).length;
+    const generated     = real.filter(p => !!p.aiAnalysis).length;
 
     let posted = 0;
     try {
@@ -768,6 +840,7 @@ export const getReconDashboardStats = query({
 
     return {
       postsToday,
+      postsThisWeek,
       activeCreators:  active.length,
       totalCreators:   accounts.length,
       totalInLibrary:  real.length,
@@ -788,11 +861,19 @@ export const getReconDashboardStats = query({
 export const getRecentActivity = query({
   args: {},
   handler: async (ctx) => {
-    const posts = await ctx.db.query("scrapedPosts").collect();
-    const real  = posts
+    const [posts, accounts] = await Promise.all([
+      ctx.db.query("scrapedPosts").collect(),
+      ctx.db.query("trackedAccounts").collect(),
+    ]);
+
+    const real = posts
       .filter(p => !p.externalId?.startsWith('seed_'))
       .sort((a, b) => b.scrapedAt - a.scrapedAt)
       .slice(0, 100);
+
+    const accountMap = new Map(
+      accounts.map(a => [a.handle, { avatarUrl: a.avatarUrl ?? null, followerCount: a.followerCount ?? null }])
+    );
 
     // Group posts into scrape "events": same handle within a 2-hour window
     const events: { handle: string; count: number; contentType: string; ts: number }[] = [];
@@ -806,13 +887,15 @@ export const getRecentActivity = query({
       else events.push({ handle: post.handle, count: 1, contentType: post.contentType, ts: post.scrapedAt });
     }
 
-    return events.slice(0, 12).map((e, id) => ({
+    return events.slice(0, 20).map((e, id) => ({
       id,
-      handle:      `@${e.handle}`,
-      count:       e.count,
-      contentType: e.contentType,
-      ts:          e.ts,
-      status:      'success' as const,
+      handle:        `@${e.handle}`,
+      count:         e.count,
+      contentType:   e.contentType,
+      ts:            e.ts,
+      status:        'success' as const,
+      avatarUrl:     accountMap.get(e.handle)?.avatarUrl     ?? null,
+      followerCount: accountMap.get(e.handle)?.followerCount ?? null,
     }));
   },
 });
@@ -1129,6 +1212,28 @@ export const getHookStats = query({
       }));
 
     return { scoreDistribution, emotionFrequency, hookLines };
+  },
+});
+
+// ── Scrape progress — live post count per handle since a given timestamp ─────
+
+export const getScrapeProgress = query({
+  args: {
+    handles: v.array(v.string()),
+    since:   v.number(), // timestamp ms
+  },
+  handler: async (ctx, { handles, since }) => {
+    if (handles.length === 0) return [];
+    const handleSet = new Set(handles);
+    const allPosts = await ctx.db.query("scrapedPosts").collect();
+    const counts = new Map<string, number>();
+    for (const h of handles) counts.set(h, 0);
+    for (const p of allPosts) {
+      if (handleSet.has(p.handle) && (p.scrapedAt ?? 0) >= since) {
+        counts.set(p.handle, (counts.get(p.handle) ?? 0) + 1);
+      }
+    }
+    return handles.map(h => ({ handle: h, postsScraped: counts.get(h) ?? 0 }));
   },
 });
 

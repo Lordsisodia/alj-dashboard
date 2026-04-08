@@ -227,7 +227,7 @@ export default defineSchema({
     followerCount: v.number(),
     avatarUrl: v.optional(v.string()),
     avatarColor: v.optional(v.string()),
-    status: v.union(v.literal("active"), v.literal("paused")),
+    status: v.union(v.literal("active"), v.literal("paused"), v.literal("failed")),
     lastScrapedAt: v.optional(v.number()),
     postsScraped: v.optional(v.number()),
     avgEngagementRate: v.optional(v.number()),
@@ -247,6 +247,14 @@ export default defineSchema({
     isPrivate:             v.optional(v.boolean()),
     igtvVideoCount:        v.optional(v.number()),
     instagramId:           v.optional(v.string()),
+    // signals lost at approval hand-off
+    avgViews:              v.optional(v.number()),
+    outlierRatio:          v.optional(v.number()),
+    highlightReelCount:    v.optional(v.number()),
+    postsPerWeek:          v.optional(v.number()),
+    // computed score (persisted snapshot; live value lives in getCreatorStats)
+    creatorScore:          v.optional(v.number()),
+    creatorScoreUpdatedAt: v.optional(v.number()),
   }).index("by_handle", ["handle"])
     .index("by_status", ["status"])
     .index("by_niche", ["niche"]),
@@ -361,6 +369,58 @@ export default defineSchema({
   }).index("by_status",  ["status"])
     .index("by_created", ["createdAt"])
     .index("by_model",   ["modelId"]),
+
+  // ── Scenes (approved video ideas waiting to be generated) ────────
+  scenes: defineTable({
+    modelId: v.id("models"),
+    modelName: v.string(), // denormalised for fast display
+    sourceType: v.union(
+      v.literal("saved_post"),  // from scrapedPosts.savedForPipeline
+      v.literal("idea"),         // from ideas table
+      v.literal("manual")        // created in Scenes tab
+    ),
+    sourceId: v.optional(v.string()), // _id of the source record
+    sceneDescription: v.string(), // the prompt / what to recreate
+    referenceVideoUrl: v.optional(v.string()),     // the post being recreated
+    referenceThumbnailUrl: v.optional(v.string()),
+    startingImageUrl: v.optional(v.string()),
+    startingImageStatus: v.union(
+      v.literal("missing"),
+      v.literal("generating"),
+      v.literal("ready"),
+      v.literal("failed")
+    ),
+    startingImageError: v.optional(v.string()),
+    priorityScore: v.number(), // 0-100, higher = higher priority
+    provider: v.union(
+      v.literal("FLUX"),
+      v.literal("Kling"),
+      v.literal("Higgsfield")
+    ),
+    status: v.union(
+      v.literal("Pending"),    // awaiting starting image or approval
+      v.literal("Queued"),     // approved + ready, waiting for generation slot
+      v.literal("Generating"), // active generation job
+      v.literal("Done")        // job finished
+    ),
+    approvalState: v.union(
+      v.literal("draft"),
+      v.literal("pending_review"),
+      v.literal("approved"),
+      v.literal("rejected")
+    ),
+    approvedBy: v.optional(v.string()),
+    approvedAt: v.optional(v.number()),
+    rejectionReason: v.optional(v.string()),
+    generatedJobId: v.optional(v.id("contentGenJobs")),
+    createdBy: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_approval", ["approvalState"])
+    .index("by_model", ["modelId"])
+    .index("by_priority", ["priorityScore"])
+    .index("by_created", ["createdAt"]),
 
   // ── Feature Requests ─────────────────────────────────────────────
   featureRequests: defineTable({

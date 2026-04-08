@@ -1,8 +1,9 @@
 'use client';
 
-import { Play, Zap, Film, Waves, ArrowRight } from 'lucide-react';
+import { Play, Zap, Film, Waves, ArrowRight, Loader2, ImageOff, RefreshCw, ImagePlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Scene, SceneProvider } from './types';
+import type { Doc } from '@/convex/_generated/dataModel';
+import type { SceneProvider, SceneStatus } from './types';
 import { PROVIDER_COLORS, STATUS_COLORS } from './types';
 
 const PROVIDER_ICON: Record<SceneProvider, React.ReactNode> = {
@@ -10,6 +11,17 @@ const PROVIDER_ICON: Record<SceneProvider, React.ReactNode> = {
   Kling:      <Film size={9} />,
   Higgsfield: <Waves size={9} />,
 };
+
+// Stable color derived from scene _id — used when no referenceThumbnailUrl present
+const ID_COLORS = [
+  '#fed7aa', '#99f6e4', '#bfdbfe', '#fde68a',
+  '#f5d0fe', '#a7f3d0', '#fecaca', '#e0e7ff',
+];
+function idColor(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return ID_COLORS[hash % ID_COLORS.length];
+}
 
 function ScoreRing({ score }: { score: number }) {
   const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#9ca3af';
@@ -24,14 +36,15 @@ function ScoreRing({ score }: { score: number }) {
 }
 
 interface Props {
-  scene: Scene;
+  scene: Doc<'scenes'>;
   rank: number;
 }
 
 export function SceneCard({ scene, rank }: Props) {
-  const providerStyle = PROVIDER_COLORS[scene.provider];
-  const statusStyle   = STATUS_COLORS[scene.status];
+  const providerStyle = PROVIDER_COLORS[scene.provider as SceneProvider];
+  const statusStyle   = STATUS_COLORS[scene.status as SceneStatus] ?? { bg: '#f3f4f6', text: '#6b7280' };
   const isActive      = scene.status === 'Generating';
+  const thumbBg       = idColor(scene._id);
 
   return (
     <div
@@ -51,29 +64,73 @@ export function SceneCard({ scene, rank }: Props) {
         <div className="w-px flex-1 min-h-0" style={{ backgroundColor: 'rgba(0,0,0,0.07)' }} />
       </div>
 
-      {/* Reference video thumb (9:16 mini) */}
+      {/* Reference video thumbnail (9:16 mini) */}
       <div
         className="w-10 flex-shrink-0 rounded-xl overflow-hidden flex items-center justify-center relative"
-        style={{
-          aspectRatio: '9/16',
-          background: `linear-gradient(160deg, ${scene.referenceThumbColor}80, ${scene.referenceThumbColor}30)`,
-        }}
+        style={{ aspectRatio: '9/16' }}
       >
-        <Play size={10} className="text-white/70" fill="white" />
-        <div className="absolute bottom-0 left-0 right-0 h-1" style={{ backgroundColor: scene.modelColor, opacity: 0.7 }} />
+        {scene.referenceThumbnailUrl ? (
+          <img
+            src={scene.referenceThumbnailUrl}
+            alt="Reference"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ background: `linear-gradient(160deg, ${thumbBg}80, ${thumbBg}30)` }}
+          >
+            <Play size={10} className="text-white/70" fill="white" />
+          </div>
+        )}
       </div>
 
-      {/* Arrow + Model ref image */}
+      {/* Arrow + Starting image slot */}
       <div className="flex items-center gap-1.5 flex-shrink-0 self-center">
         <ArrowRight size={12} className="text-neutral-300" />
+
+        {/* Starting image slot */}
         <div
-          className="w-10 flex-shrink-0 rounded-xl overflow-hidden flex items-center justify-center"
-          style={{
-            aspectRatio: '9/16',
-            background: `linear-gradient(160deg, ${scene.referenceImageColor}80, ${scene.referenceImageColor}30)`,
-          }}
+          className="w-10 flex-shrink-0 rounded-xl overflow-hidden flex items-center justify-center relative"
+          style={{ aspectRatio: '9/16' }}
         >
-          <span className="text-[9px] font-black text-white/70">{scene.modelName.slice(0, 2).toUpperCase()}</span>
+          {scene.startingImageStatus === 'ready' && scene.startingImageUrl ? (
+            <img
+              src={scene.startingImageUrl}
+              alt="Starting image"
+              className="w-full h-full object-cover"
+            />
+          ) : scene.startingImageStatus === 'generating' ? (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-0.5 bg-blue-50">
+              <Loader2 size={10} className="text-blue-400 animate-spin" />
+              <span className="text-[7px] text-blue-400 font-medium leading-none">Gen...</span>
+            </div>
+          ) : scene.startingImageStatus === 'failed' ? (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-0.5 bg-red-50">
+              <ImageOff size={10} className="text-red-400" />
+              <button
+                className="text-[7px] text-red-400 font-medium leading-none hover:text-red-600 flex items-center gap-0.5"
+                onClick={() => { /* TODO: Phase 2 Replicate wiring */ }}
+              >
+                <RefreshCw size={6} />
+                Retry
+              </button>
+            </div>
+          ) : (
+            /* missing */
+            <div
+              className="w-full h-full flex flex-col items-center justify-center gap-0.5"
+              style={{ border: '1.5px dashed rgba(0,0,0,0.15)', borderRadius: '0.75rem', background: '#fafafa' }}
+            >
+              <ImagePlus size={10} className="text-neutral-300" />
+              <button
+                className="text-[7px] text-neutral-400 font-medium leading-none hover:text-neutral-600"
+                onClick={() => { /* TODO: Phase 2 Replicate wiring */ }}
+              >
+                Generate
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -88,19 +145,16 @@ export function SceneCard({ scene, rank }: Props) {
 
         <div className="flex items-center gap-1.5 flex-wrap">
           {/* Model chip */}
-          <span
-            className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md text-white"
-            style={{ backgroundColor: scene.modelColor }}
-          >
+          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md text-white bg-neutral-500">
             {scene.modelName}
           </span>
 
           {/* Provider badge */}
           <span
             className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
-            style={{ backgroundColor: providerStyle.bg, color: providerStyle.text }}
+            style={{ backgroundColor: providerStyle?.bg ?? '#f3f4f6', color: providerStyle?.text ?? '#6b7280' }}
           >
-            {PROVIDER_ICON[scene.provider]}
+            {PROVIDER_ICON[scene.provider as SceneProvider]}
             {scene.provider}
           </span>
 

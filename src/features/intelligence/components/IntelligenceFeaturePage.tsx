@@ -1,20 +1,29 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useQuery, useMutation } from 'convex/react';
-import { Plus, LayoutDashboard, UserPlus, Table2, Columns } from 'lucide-react';
+import { Sparkles, UserPlus, Table2, LayoutGrid, X } from 'lucide-react';
 import { ViewToggle } from '@/components/ui/view-toggle';
 
 import { api } from '../../../../convex/_generated/api';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon }      from '@/isso/layout/ProductIcon';
-import { QualifyView }   from './trends';
-import { AnalysisView }  from './analysis';
+import { AnalysisView, AnalysisKanbanView }  from './analysis';
 import { InsightsView }  from './insights';
-import { DashboardView } from './dashboard';
+import dynamic from 'next/dynamic';
 import { ANALYSIS_FILTERS } from './IntelligenceControls';
+
+const IntelligenceAssistantPage = dynamic(() =>
+  import('./assistant/IntelligenceAssistantPage')
+);
+
+const ReconFeedTab = dynamic(
+  () => import('@/features/recon/components/feed/ReconFeedTab').then(m => ({ default: m.ReconFeedTab })),
+  { ssr: false }
+);
 import type { Days } from './IntelligenceControls';
 import type { Tab } from '../types';
 
@@ -122,12 +131,15 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
 
 // ── Main Page ──────────────────────────────────────────────────────────────────
 export default function IntelligenceFeaturePage() {
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const searchParams = useSearchParams() ?? new URLSearchParams();
+  const initialTab = (searchParams.get('tab') as Tab) || 'analysis';
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [days,      setDays]      = useState<Days>(30);
   const [niche,     setNiche]     = useState('all');
   const [platform,  setPlatform]  = useState('all');
   const [addLeadOpen, setAddLeadOpen] = useState(false);
-  const [qualifyView, setQualifyView] = useState<'table' | 'kanban'>('table');
+  const [analysisView, setAnalysisView] = useState<'default' | 'kanban'>('default');
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const stats = useQuery(api.intelligence.getStats, {});
   const indexedCount = stats?.totalIndexed ?? 0;
 
@@ -158,41 +170,72 @@ export default function IntelligenceFeaturePage() {
           },
         ]}
         tabs={[
-          { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={12} /> },
-          { id: 'qualify',   label: 'Qualify',   icon: <StepNum n={1} /> },
-          { id: 'analysis',  label: 'Analysis',  icon: <StepNum n={2} /> },
-          { id: 'insights',  label: 'Insights',  icon: <StepNum n={3} /> },
+          { id: 'analysis',  label: 'Analysis',       icon: <StepNum n={1} /> },
+          { id: 'feed',      label: 'Community Feed', icon: <StepNum n={2} /> },
+          { id: 'insights',  label: 'Insights',       icon: <StepNum n={3} /> },
+          { id: 'assistant', label: 'Assistant',      icon: <Sparkles size={12} /> },
         ]}
         activeTab={activeTab}
         onTabChange={id => { setActiveTab(id as Tab); setNiche('all'); setPlatform('all'); }}
         nextProduct={{ label: 'Hub', icon: <ProductIcon product="hub" size={16} />, href: '/isso/community' }}
         filterCategories={filterCategories}
         onFilterSelect={handleFilterSelect}
-        filterRightSlot={activeTab === 'qualify' ? (
+        filterRightSlot={activeTab === 'analysis' ? (
           <ViewToggle
-            value={qualifyView}
-            onChange={setQualifyView}
+            value={analysisView}
+            onChange={setAnalysisView}
             options={[
-              { value: 'table',  icon: <Table2  size={11} />, label: 'Table' },
-              { value: 'kanban', icon: <Columns size={11} />, label: 'Kanban' },
+              { value: 'default', icon: <Table2    size={11} />, label: 'Default' },
+              { value: 'kanban',  icon: <LayoutGrid size={11} />, label: 'Kanban' },
             ]}
             size="md"
           />
         ) : undefined}
       >
-        <div className="px-6 py-6 w-full">
+        <div className="px-6 py-6 w-full flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
-              {activeTab === 'dashboard' && <DashboardView />}
-              {activeTab === 'qualify'   && <QualifyView  days={days} metric="er" niche={niche} platform={platform} view={qualifyView} onViewChange={setQualifyView} />}
-              {activeTab === 'analysis'  && <AnalysisView days={days} niche={niche} />}
+              {activeTab === 'feed'      && <ReconFeedTab onPostClick={() => {}} onAnalyzeClick={() => {}} sortBy="newest" visibility={{ brandDetails: true, likeCount: true, viewCount: true, saveCount: true }} viewMode="grid" columns={3} creatorStatsMap={{}} nicheERMap={{}} />}
+              {activeTab === 'analysis'  && (analysisView === 'kanban'
+                ? <AnalysisKanbanView days={days} niche={niche} />
+                : <AnalysisView days={days} niche={niche} />)}
               {activeTab === 'insights'  && <InsightsView />}
+              {activeTab === 'assistant' && <IntelligenceAssistantPage onClose={() => setActiveTab('analysis')} />}
             </motion.div>
           </AnimatePresence>
         </div>
       </ContentPageShell>
 
       {addLeadOpen && <AddLeadModal onClose={() => setAddLeadOpen(false)} />}
+
+      <AnimatePresence>
+        {assistantOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            onClick={e => { if (e.target === e.currentTarget) setAssistantOpen(false); }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              className="relative w-[min(720px,95vw)] h-[min(680px,90vh)] bg-white rounded-2xl overflow-hidden shadow-2xl"
+            >
+              <button
+                onClick={() => setAssistantOpen(false)}
+                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-black/[0.04] transition-colors"
+              >
+                <X size={16} />
+              </button>
+              <IntelligenceAssistantPage onClose={() => setAssistantOpen(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

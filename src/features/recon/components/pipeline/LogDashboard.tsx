@@ -4,16 +4,15 @@ import { useState, useEffect } from 'react';
 import { Database, Clock, FileStack, Users } from 'lucide-react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { COMPETITORS, DAILY_VOLUME } from '../../constants'; // COMPETITORS seeds initial state
+import { COMPETITORS } from '../../constants'; // COMPETITORS seeds initial state
 import type { Competitor } from '../../types';
 import { useLogDashboard } from '../../hooks/useLogDashboard';
-import { PostsScrapedChart } from './PostsScrapedChart';
-import { PipelineFunnel }    from './PipelineFunnel';
-import { ActivityFeed }      from '../detail/widgets/ActivityFeed';
-import { ScrapingReport }    from '@/components/ui/scraping-report';
-import { DashboardMetricCard } from '@/components/ui/dashboard-overview';
-
-const TOTAL_IN_LIBRARY = DAILY_VOLUME.reduce((s, d) => s + d.total, 0);
+import IncidentHeatmapReportCard from '@/components/ui/heat-map-xl';
+import { PipelineStatusStrip }  from '@/features/intelligence/components/dashboard/PipelineStatusStrip';
+import { ActivityFeed }         from '../detail/widgets/ActivityFeed';
+import { ScrapingReport }       from '@/components/ui/scraping-report';
+import { PostsScrapedBarChart } from './PostsScrapedBarChart';
+import { DashboardMetricCard }  from '@/components/ui/dashboard-overview';
 
 
 export function LogDashboard({
@@ -54,7 +53,7 @@ export function LogDashboard({
   const postsToday  = dbStats?.postsToday  ?? competitors.filter(c => c.status === 'active').reduce((s, c) => s + c.postsToday, 0);
   const activeCount = dbStats?.activeCreators ?? competitors.filter(c => c.status === 'active').length;
   const totalCount  = dbStats?.totalCreators  ?? competitors.length;
-  const library     = dbStats?.totalInLibrary ?? TOTAL_IN_LIBRARY;
+  const library     = dbStats?.totalInLibrary ?? 0;
   const lastRunAt   = dbStats?.lastRunAt      ?? null;
 
   function fmtLastRun(ts: number | null) {
@@ -69,9 +68,13 @@ export function LogDashboard({
       {/* -- Main content column ------------------------------------- */}
       <div className="flex-1 flex flex-col min-w-0">
 
-        {/* ① Pipeline funnel — first thing you see */}
+        {/* ① Pipeline status strip */}
         <div className="px-3 pt-4">
-          <PipelineFunnel counts={dbStats?.funnel} />
+          <PipelineStatusStrip
+            totalIndexed={library}
+            postsThisWeek={dbStats?.postsThisWeek ?? 0}
+            latestScrapeAt={lastRunAt ?? 0}
+          />
         </div>
 
         {/* ② Metric cards */}
@@ -106,25 +109,25 @@ export function LogDashboard({
           />
         </div>
 
-        {/* ③ Posts scraped chart — full width */}
-        <div className="px-3 pt-3">
-          <PostsScrapedChart data={DAILY_VOLUME} />
-        </div>
-
-        {/* ④ Scraping report */}
-        <div className="px-3 pt-3 pb-6">
-          <ScrapingReport />
+        {/* ③ Heatmap + Scraping report side by side */}
+        <div className="px-3 pt-3 pb-6 grid grid-cols-2 gap-3 items-start">
+          <IncidentHeatmapReportCard />
+          <div className="flex flex-col gap-3">
+            <ScrapingReport />
+            <PostsScrapedBarChart />
+          </div>
         </div>
 
       </div>
 
       {/* -- Right sidebar: Live Activity ---------------------------- */}
       <div
-        className="w-72 flex-shrink-0 sticky top-0 self-start"
+        className="w-72 flex-shrink-0 sticky top-0 self-start flex flex-col relative rounded-2xl overflow-hidden mx-3 mt-4 mb-6"
         style={{
-          borderLeft: '1px solid rgba(0,0,0,0.06)',
-          height: 'calc(100vh - 98px)',
-          overflowY: 'auto',
+          border: '1px solid rgba(0,0,0,0.07)',
+          backgroundColor: '#fff',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+          height: 'calc(100vh - 200px)',
         }}
       >
         <ActivityFeed />

@@ -7,6 +7,28 @@ export interface DiscoveryActionsDeps {
   deleteAndBlock: (args: { id: Id<'creatorCandidates'> }) => Promise<unknown>;
   upsertCandidate: (args: { handle: string; displayName: string; status: string; source: string; suggestedBy?: string }) => Promise<unknown>;
   setEnrichStatus: (args: { id: Id<'creatorCandidates'>; status: string }) => Promise<unknown>;
+  approveTrackedAccount: (args: {
+    handle: string;
+    displayName: string;
+    niche: string;
+    avatarColor: string;
+    followerCount: number;
+    avgEngagementRate: number;
+    avgViews?: number;
+    outlierRatio?: number;
+    highlightReelCount?: number;
+    postsPerWeek?: number;
+    followsCount?: number;
+    postsCount?: number;
+    bio?: string;
+    avatarUrl?: string;
+    verified?: boolean;
+    isPrivate?: boolean;
+    isBusinessAccount?: boolean;
+    externalUrl?: string;
+    igtvVideoCount?: number;
+    instagramId?: string;
+  }) => Promise<unknown>;
   blockedSet: Set<string>;
   idMap: Map<number, string>;
   setApprovedGlow: (fn: (n: number) => number) => void;
@@ -21,12 +43,35 @@ export interface DiscoveryActionsDeps {
 }
 
 export function useDiscoveryActions(deps: DiscoveryActionsDeps) {
-  const { updateStatus, deleteAndBlock, upsertCandidate, setEnrichStatus,
+  const { updateStatus, deleteAndBlock, upsertCandidate, setEnrichStatus, approveTrackedAccount,
     blockedSet, idMap, setApprovedGlow, setScrapingGlow, setScrapedGlow, setScrapingItems } = deps;
 
   async function handleApprove(c: MappedCandidate) {
     await updateStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'approved' }).catch(console.error);
     setApprovedGlow(n => n + 1);
+    await approveTrackedAccount({
+      handle:            c.handle,
+      displayName:       c.displayName,
+      niche:             c.niche || 'Unknown',
+      avatarColor:       c.avatarColor || '#833ab4',
+      followerCount:     c.followersRaw ?? 0,
+      avgEngagementRate: parseFloat(c.engagementRate) || 0,
+      // Extended signals — pass whatever the candidate has
+      ...(c.avgViews           !== undefined && { avgViews:           c.avgViews }),
+      ...(c.outlierRatio       !== undefined && { outlierRatio:       c.outlierRatio }),
+      ...(c.highlightReelCount !== undefined && { highlightReelCount: c.highlightReelCount }),
+      ...(c.postsPerWeek       !== undefined && { postsPerWeek:       c.postsPerWeek }),
+      ...(c.followsCount       !== undefined && { followsCount:       c.followsCount }),
+      ...(c.postsCount         !== undefined && { postsCount:         c.postsCount }),
+      ...(c.bio                !== undefined && { bio:                c.bio }),
+      ...(c.avatarUrl          !== undefined && { avatarUrl:          c.avatarUrl }),
+      ...(c.verified           !== undefined && { verified:           c.verified }),
+      ...(c.isPrivate          !== undefined && { isPrivate:          c.isPrivate }),
+      ...(c.isBusinessAccount  !== undefined && { isBusinessAccount:  c.isBusinessAccount }),
+      ...(c.externalUrl        !== undefined && { externalUrl:        c.externalUrl }),
+      ...(c.igtvVideoCount     !== undefined && { igtvVideoCount:     c.igtvVideoCount }),
+      ...(c.instagramId        !== undefined && { instagramId:        c.instagramId }),
+    }).catch(console.error);
     if (!c.avatarUrl && !c.followersRaw) {
       await setEnrichStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'idle' }).catch(console.error);
     }
@@ -65,7 +110,7 @@ export function useDiscoveryActions(deps: DiscoveryActionsDeps) {
             !blockedSet.has(`@${h.replace('@', '')}`.toLowerCase()),
           );
           await Promise.allSettled(
-            filtered.slice(0, 10).map((h: string) =>
+            filtered.slice(0, 30).map((h: string) =>
               upsertCandidate({
                 handle: `@${h.replace('@', '')}`,
                 displayName: h.replace('@', ''),

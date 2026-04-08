@@ -45,7 +45,7 @@ export function DragGhost({ c }: { c: MappedCandidate }) {
     >
       {c.avatarUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={c.avatarUrl.includes('r2.dev') ? c.avatarUrl : `/api/recon/avatar?url=${encodeURIComponent(c.avatarUrl)}`} alt="" className="w-5 h-5 rounded flex-shrink-0 object-cover" />
+        <img src={c.avatarUrl} alt="" className="w-5 h-5 rounded flex-shrink-0 object-cover" />
       ) : (
         <span className="text-[9px] font-bold flex-shrink-0 w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: 'rgba(153,27,27,0.08)', color: '#991b1b' }}>
           {c.initials}

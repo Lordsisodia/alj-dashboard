@@ -8,6 +8,8 @@ import CountUp from 'react-countup';
 import {
   Heatmap,
   HeatmapSeries,
+  HeatmapCell,
+  ChartTooltip,
   LinearYAxis,
   LinearYAxisTickSeries,
   LinearYAxisTickLabel,
@@ -20,7 +22,7 @@ import {
 
 interface HeatmapPoint {
   key: string | number;
-  data: number | null;
+  data: number;
 }
 
 interface HeatmapRow {
@@ -78,6 +80,28 @@ const LikesIcon: React.FC<{ fill?: string }> = ({ fill = "currentColor" }) => (
   </svg>
 );
 
+// ── Custom tooltip cell ─────────────────────────────────────────────────────────
+
+const HeatmapCellWithTooltip: typeof HeatmapCell = (props: any) => {
+  const { data, ...rest } = props;
+  return (
+    <HeatmapCell
+      {...rest}
+      data={data}
+      tooltip={
+        <ChartTooltip
+          content={() => (
+            <div className="px-2 py-1 text-xs">
+              <div className="font-medium text-gray-900 dark:text-white">{data.key}</div>
+              <div className="text-gray-600 dark:text-gray-300">{data.data}% engagement</div>
+            </div>
+          )}
+        />
+      }
+    />
+  );
+};
+
 // ── Colours ─────────────────────────────────────────────────────────────────────
 
 const HEATMAP_SERIES_COLOR_SCHEME = [
@@ -134,31 +158,29 @@ const IncidentHeatmapReportCard: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col justify-between pt-4 pb-4 bg-white dark:bg-black rounded-3xl shadow-[11px_21px_3px_rgba(0,0,0,0.06),14px_27px_7px_rgba(0,0,0,0.10),19px_38px_14px_rgba(0,0,0,0.13),27px_54px_27px_rgba(0,0,0,0.16),39px_78px_50px_rgba(0,0,0,0.20),55px_110px_86px_rgba(0,0,0,0.26)] w-full overflow-hidden text-black dark:text-white transition-colors duration-300">
+    <div className="font-sans flex flex-col justify-between pt-3 pb-3 bg-white dark:bg-black rounded-3xl w-full overflow-hidden text-black dark:text-white transition-colors duration-300" style={{ border: '1px solid rgba(0,0,0,0.10)' }}>
 
       {/* Header */}
-      <div className="flex justify-between items-center p-7 pt-6 pb-8">
+      <div className="flex justify-between items-center px-6 pt-4 pb-4">
         <div>
-          <h3 className="text-3xl text-left font-bold">Engagement Heatmap</h3>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Avg engagement rate by day &amp; hour · last 30 days</p>
+          <h3 className="text-xl text-left font-bold tracking-tight">Engagement Heatmap</h3>
+          <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">Avg engagement rate by day &amp; hour · last 30 days</p>
         </div>
         <select
           aria-label="Select time range"
-          className="p-3 pt-2 pb-2 rounded-md bg-gray-100 text-gray-800 dark:bg-[#262631] dark:text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-1.5 rounded-lg text-xs bg-gray-100 text-gray-800 dark:bg-[#262631] dark:text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="last-7-days">Last 7 Days</option>
-          <option value="last-30-days" selected>Last 30 Days</option>
+          <option value="last-30-days">Last 30 Days</option>
           <option value="last-90-days">Last 90 Days</option>
         </select>
       </div>
 
       {/* Heatmap + Legend */}
-      <div className="flex w-full flex-grow px-2 min-h-0">
+      <div className="flex w-full px-2" style={{ height: 200 }}>
         <div className="flex-grow h-full min-w-0">
           <Heatmap
-            height="100%"
-            width="100%"
-            data={heatmapData as HeatmapData}
+            data={heatmapData as any}
             yAxis={
               <LinearYAxis
                 type="category"
@@ -187,44 +209,45 @@ const IncidentHeatmapReportCard: React.FC = () => {
               <HeatmapSeries
                 colorScheme={HEATMAP_SERIES_COLOR_SCHEME as any}
                 padding={0.12}
+                cell={<HeatmapCellWithTooltip />}
               />
             }
           />
         </div>
         <SequentialLegend
-          data={heatmapData as HeatmapData}
+          data={heatmapData as any}
           colorScheme={LEGEND_COLOR_SCHEME}
           gradientClassName="!w-[20px]"
-          className="pl-1 pr-1 mt-8 !h-[180px] text-gray-600 dark:text-gray-400 transition-colors duration-300 text-xs"
+          className="pl-1 pr-1 mt-6 !h-[160px] text-gray-600 dark:text-gray-400 transition-colors duration-300 text-xs"
         />
       </div>
 
       {/* Stats row */}
-      <div className="flex w-full pl-8 pr-8 justify-between pb-2 pt-8">
-        <div className="flex flex-col gap-2 w-1/2">
-          <span className="text-xl">Posts Scraped</span>
+      <div className="flex w-full px-6 justify-between pb-2 pt-4">
+        <div className="flex flex-col gap-1.5 w-1/2">
+          <span className="text-sm font-medium text-gray-500">Posts Scraped</span>
           <div className="flex items-center gap-2">
             <CountUp
-              className="font-mono text-4xl font-semibold"
+              className="text-3xl font-bold tabular-nums"
               start={0}
               end={stats.totalPosts}
               duration={2.5}
             />
-            <div className={`flex p-1 pl-2 pr-2 items-center rounded-full ${trend === 'up' ? 'bg-red-500/30 dark:bg-[rgb(232,64,69)]/40 text-red-700 dark:text-[#F08083]' : 'bg-teal-500/30 dark:bg-[rgb(64,229,209)]/40 text-teal-700 dark:text-[#40E5D1]'} transition-colors duration-300`}>
-              <StatTrendIcon trend={trend} />
+            <div className={`flex px-2 py-0.5 items-center gap-0.5 rounded-full text-xs font-medium ${trend === 'up' ? 'bg-red-500/20 text-red-600 dark:text-[#F08083]' : 'bg-teal-500/20 text-teal-600 dark:text-[#40E5D1]'} transition-colors duration-300`}>
+              <StatTrendIcon trend={trend} className="w-3.5 h-3.5" />
               {pctDisplay}
             </div>
           </div>
-          <span className="text-gray-500 dark:text-[#9A9AAF] text-sm transition-colors duration-300">
+          <span className="text-gray-400 dark:text-[#9A9AAF] text-xs transition-colors duration-300">
             {stats.postsThisWeek} this week vs {stats.postsLastWeek} last week
           </span>
         </div>
 
-        <div className="flex flex-col gap-2 w-1/2">
-          <span className="text-xl">Avg Engagement</span>
+        <div className="flex flex-col gap-1.5 w-1/2">
+          <span className="text-sm font-medium text-gray-500">Avg Engagement</span>
           <div className="flex items-center gap-2">
             <CountUp
-              className="font-mono text-4xl font-semibold"
+              className="text-3xl font-bold tabular-nums"
               start={0}
               end={stats.avgEngagementRate}
               duration={2.5}
@@ -232,30 +255,30 @@ const IncidentHeatmapReportCard: React.FC = () => {
               suffix="%"
             />
           </div>
-          <span className="text-gray-500 dark:text-[#9A9AAF] text-sm transition-colors duration-300">
+          <span className="text-gray-400 dark:text-[#9A9AAF] text-xs transition-colors duration-300">
             Top niche: {stats.topNiche}
           </span>
         </div>
       </div>
 
       {/* Metric list */}
-      <div className="flex flex-col pl-8 pr-8 font-mono divide-y divide-gray-200 dark:divide-[#262631] transition-colors duration-300">
+      <div className="flex flex-col px-6 divide-y divide-gray-100 dark:divide-[#262631] transition-colors duration-300">
         {metricItems.map((item, index) => (
           <motion.div
             key={item.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="flex w-full py-3 items-center gap-2"
+            className="flex w-full py-2 items-center gap-2"
           >
-            <div className="flex flex-row gap-2 items-center text-base w-1/2 text-gray-500 dark:text-[#9A9AAF] transition-colors duration-300">
+            <div className="flex flex-row gap-2 items-center text-xs w-1/2 text-gray-500 dark:text-[#9A9AAF] transition-colors duration-300">
               {item.icon}
               <span className="truncate" title={item.label}>
                 {item.label}
               </span>
             </div>
             <div className="flex gap-2 w-1/2 justify-end items-center">
-              <span className="font-semibold text-xl">{item.value}</span>
+              <span className="font-semibold text-base tabular-nums">{item.value}</span>
               <MetricTrendIndicatorIcon
                 direction={item.trendDirection}
                 baseColor={item.trendColor}

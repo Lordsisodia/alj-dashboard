@@ -31,7 +31,7 @@ export function AvatarCell({ c, isActive, imgErr, setImgErr }: AvatarCellProps) 
           <div className="absolute inset-0 rounded-full z-10" style={{ background: 'linear-gradient(135deg, #ff0069, #dc2626)', padding: '2px', borderRadius: '50%', margin: '-2px' }} />
         )}
         {c.profilePicUrl && !imgErr
-          ? <Image src={c.profilePicUrl} alt={c.displayName} width={34} height={34} className="rounded-full object-cover relative z-10" onError={() => setImgErr(true)} />
+          ? <Image src={c.profilePicUrl} alt={c.displayName} width={34} height={34} unoptimized className="rounded-full object-cover relative z-10" onError={() => setImgErr(true)} />
           : <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white relative z-10" style={{ backgroundColor: c.avatarColor }}>{c.initials}</div>
         }
       </div>

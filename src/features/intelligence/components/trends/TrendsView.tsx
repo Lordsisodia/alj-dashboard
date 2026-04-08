@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { containerVariants } from '../../constants';
-import { StatsBar }          from './StatsBar';
 import { QualifyTableView }  from '../qualify/QualifyTableView';
 import { QualifyKanbanView } from '../qualify/QualifyKanbanView';
 import { OutlierPanel }      from '../qualify/OutlierPanel';
+import { TrendsLoadingSkeleton } from './TrendsLoadingSkeleton';
 
 interface Props {
   days:          number;
@@ -28,12 +29,10 @@ export function TrendsView({ niche = 'all', platform = 'all', view: viewProp, on
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col flex-1 min-w-0 min-h-0 gap-3"
+      className="flex flex-col flex-1 min-w-0 min-h-0 px-4 py-4"
     >
-      <StatsBar days={days} niche={niche} platform={platform} />
-
-      <div className="relative flex-1 min-h-0">
-        <div className={activeView === 'kanban' ? '' : 'pr-80'}>
+      <div className="relative flex-1 min-h-0 flex flex-col">
+        <div className={cn(activeView === 'kanban' ? 'flex flex-col flex-1 min-h-0' : 'flex flex-col flex-1 min-h-0 pr-80')}>
           {activeView === 'table' ? (
             <QualifyTableView
               days={days}
