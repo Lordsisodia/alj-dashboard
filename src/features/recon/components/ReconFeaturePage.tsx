@@ -96,6 +96,8 @@ export default function ReconFeaturePage() {
   const [scrapeAllTrigger, setScrapeAllTrigger] = useState<number>(0);
   const { showFavorites, setShowFavorites, creatorsStatusView, setCreatorsStatusView, viewMode: creatorsViewMode, setViewMode: setCreatorsViewMode, colVis, handleColVisChange } = useCreatorsTab();
   const [creatorsStatusCounts, setCreatorsStatusCounts] = useState<Record<StatusView, number>>({ all: 0, raw: 0, enriched: 0, scraped: 0, failed: 0 });
+  const [showCreatorsAnalytics, setShowCreatorsAnalytics] = useState(false);
+  const [showQualifyAnalytics,  setShowQualifyAnalytics]  = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<Competitor | null>(null);
 
   const dashboardStats   = useQuery(api.intelligence.getReconDashboardStats);
@@ -129,7 +131,7 @@ export default function ReconFeaturePage() {
       { id: 'add-handle',     label: 'Add Handle Manually', icon: <UserPlus size={13} />,   onClick: () => setModal('add-handle') },
       { id: 'bulk-import',    label: 'Bulk Import CSV',     icon: <Upload size={13} />,     onClick: () => setModal('bulk-import') },
       { id: 'export-cands',   label: 'Export Candidates',   icon: <FileDown size={13} />,   onClick: () => {} },
-      { id: 'clear-rejected', label: 'Clear Rejected',      icon: <XCircle size={13} />,    onClick: () => {} },
+      { id: 'clear-rejected', label: 'Clear Rejected',      icon: <XCircle size={13} />,    onClick: () => console.log('TODO: clear rejected') },
     ],
     creators: [
       { id: 'track-profile',     label: 'Track Profile',       icon: <Radar size={13} />,    onClick: () => setModal('track-profile') },
@@ -139,7 +141,10 @@ export default function ReconFeaturePage() {
       { id: 'scrape-all-posts',  label: 'Scrape All Posts',    icon: <Download size={13} />, onClick: () => setScrapeAllTrigger(n => n + 1) },
       { id: 'export-csv',        label: 'Export CSV',          icon: <FileDown size={13} />, onClick: () => {} },
     ],
-    qualify: [],
+    qualify: [
+      { id: 'scrape-all', label: 'Scrape All Posts', icon: <Download size={13} />, onClick: () => setScrapeAllTrigger(n => n + 1) },
+      { id: 'export-qualify', label: 'Export to CSV', icon: <FileDown size={13} />, onClick: () => {} },
+    ],
   };
 
   return (
@@ -154,19 +159,19 @@ export default function ReconFeaturePage() {
           activeTab === 'log'       ? 'Generate'          :
           activeTab === 'discovery' ? 'Run Discovery' :
           activeTab === 'creators'  ? 'Add Creator'   :
-          'Refresh'
+          'Scrape Posts'
         }
         actionIcon={
           activeTab === 'log'       ? <Sparkles size={14} />  :
           activeTab === 'discovery' ? <Zap size={14} />       :
           activeTab === 'creators'  ? <UserPlus size={14} />  :
-          <RefreshCw size={14} />
+          <ScanSearch size={14} />
         }
         onAction={
           activeTab === 'log'       ? () => setRunAllTrigger(n => n + 1) :
           activeTab === 'discovery' ? () => setRunDiscoveryTrigger(n => n + 1) :
           activeTab === 'creators'  ? () => setModal('track-profile')    :
-          () => {}
+          () => setScrapeAllTrigger(n => n + 1)
         }
         actionDropdownItems={dropdownItems[activeTab]}
         tabs={[
@@ -178,7 +183,16 @@ export default function ReconFeaturePage() {
         activeTab={activeTab}
         onTabChange={(id) => { const t = id as Tab; setActiveTab(t); try { localStorage.setItem('recon-active-tab', t); } catch {} setShowFavorites(false); setSelectedCreator(null); setSearchQuery(''); }}
         nextProduct={{ label: 'Intelligence', icon: <ProductIcon product="intelligence" size={16} />, href: '/isso/intelligence' }}
-        filterRightSlot={activeTab === 'discovery' ? (
+        filterRightSlot={activeTab === 'qualify' ? (
+          <button
+            onClick={() => setShowQualifyAnalytics(v => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-black/[0.04] transition-colors"
+            style={{ border: '1px solid rgba(0,0,0,0.09)' }}
+          >
+            <BarChart2 size={12} />
+            {showQualifyAnalytics ? 'Hide' : 'Show'} analytics
+          </button>
+        ) : activeTab === 'discovery' ? (
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowAnalytics(v => !v)}
@@ -192,6 +206,14 @@ export default function ReconFeaturePage() {
           </div>
         ) : activeTab === 'creators' ? (
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowCreatorsAnalytics(v => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-black/[0.04] transition-colors"
+              style={{ border: '1px solid rgba(0,0,0,0.09)' }}
+            >
+              <BarChart2 size={12} />
+              {showCreatorsAnalytics ? 'Hide' : 'Show'} analytics
+            </button>
             <StatusDropdown value={creatorsStatusView} onChange={setCreatorsStatusView} counts={creatorsStatusCounts} />
             <button
               onClick={() => setShowFavorites(v => !v)}
@@ -242,6 +264,7 @@ export default function ReconFeaturePage() {
                         />
                       </div>
                       <div className="px-4 py-4">
+                        {/* TODO: pass showAnalytics={showCreatorsAnalytics} once CreatorsTable accepts the prop */}
                         <CreatorsTable
                           onOpen={setSelectedCreator}
                           extraCreators={extraCreators}
@@ -256,6 +279,7 @@ export default function ReconFeaturePage() {
                       </div>
                     </div>
               )}
+              {/* TODO: pass showAnalytics={showQualifyAnalytics} once QualifyView (TrendsView) accepts the prop */}
               {activeTab === 'qualify' && <QualifyView days={30} metric="er" niche="all" platform="all" view="table" onViewChange={() => {}} />}
             </motion.div>
           </AnimatePresence>
