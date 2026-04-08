@@ -1,0 +1,32 @@
+[
+  {
+    "name": "App shell (client entry)",
+    "path": ".next/static/chunks/main-*.js",
+    "limit": "120 kB",
+    "gzip": true
+  },
+  {
+    "name": "Framework chunk",
+    "path": ".next/static/chunks/framework-*.js",
+    "limit": "50 kB",
+    "gzip": true
+  },
+  {
+    "name": "Isso Recon page",
+    "path": ".next/static/chunks/app/isso/recon/page-*.js",
+    "limit": "120 kB",
+    "gzip": true
+  },
+  {
+    "name": "Isso Intelligence page",
+    "path": ".next/static/chunks/app/isso/intelligence/page-*.js",
+    "limit": "120 kB",
+    "gzip": true
+  },
+  {
+    "name": "Marketing home",
+    "path": ".next/static/chunks/app/(marketing)/page-*.js",
+    "limit": "120 kB",
+    "gzip": true
+  }
+]
