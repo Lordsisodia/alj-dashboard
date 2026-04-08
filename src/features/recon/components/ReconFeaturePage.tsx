@@ -79,7 +79,9 @@ function SchedulePicker({ value, onChange }: { value: number; onChange: (v: numb
 }
 
 export default function ReconFeaturePage() {
-  const [activeTab, setActiveTab]             = useState<Tab>('log');
+  const [activeTab, setActiveTab]             = useState<Tab>(() => {
+    try { return (localStorage.getItem('recon-active-tab') as Tab) ?? 'log'; } catch { return 'log'; }
+  });
   const [modal, setModal]                     = useState<ModalId>(null);
   const [extraCandidates, setExtraCandidates] = useState<Candidate[]>([]);
   const [extraCreators, setExtraCreators]     = useState<Competitor[]>([]);
@@ -159,7 +161,7 @@ export default function ReconFeaturePage() {
           { id: 'feed',      label: <span className="flex items-center gap-1.5">Community Feed <span className="inline-flex items-center justify-center w-4 h-4 rounded-[4px] text-[9px] font-semibold" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}>3</span></span>, icon: null },
         ]}
         activeTab={activeTab}
-        onTabChange={(id) => { setActiveTab(id as Tab); setShowFavorites(false); setSelectedCreator(null); setSearchQuery(''); }}
+        onTabChange={(id) => { const t = id as Tab; setActiveTab(t); try { localStorage.setItem('recon-active-tab', t); } catch {} setShowFavorites(false); setSelectedCreator(null); setSearchQuery(''); }}
         nextProduct={{ label: 'Intelligence', icon: <ProductIcon product="intelligence" size={16} />, href: '/isso/intelligence' }}
         filterCategories={activeTab === 'feed' ? [] : undefined}
         filterRightSlot={activeTab === 'discovery' ? (
