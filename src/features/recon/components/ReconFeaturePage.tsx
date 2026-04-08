@@ -9,20 +9,20 @@ import { DensityPill, type DensityId } from '@/isso/ui/FeedControls';
 import { Radar, UserPlus, Upload, Play, Clock, Globe, LayoutDashboard, Zap, FileDown, XCircle, Pause, RefreshCw, Filter, Save, CalendarClock, ChevronDown, BarChart2, Sparkles, Star, Target } from 'lucide-react';
 import type { Tab, Competitor, Candidate } from '../types';
 import { COMPETITORS } from '../constants';
-import { DiscoveryTab } from './creators';
+import { DiscoveryTab } from './discovery/DiscoveryTab';
 import { ReconModals, type ModalId, type DrawerState } from './ReconModals';
-import { StatusDropdown } from './creators/TableToolbar';
-import { STATUS_VIEWS, type StatusView } from './creators/tableUtils';
+import { StatusDropdown } from './table/TableToolbar';
+import { STATUS_VIEWS, type StatusView } from './table/tableUtils';
 import SuggestiveSearch from '@/components/ui/suggestive-search';
 import { useDiscoveryTab } from '../hooks/useDiscoveryTab';
 import { useLogDashboard } from '../hooks/useLogDashboard';
 import { useFeedTab } from '../hooks/useFeedTab';
 import { useCreatorsTab } from '../hooks/useCreatorsTab';
 
-const LogDashboard      = dynamic(() => import('./creators/LogDashboard').then(m => ({ default: m.LogDashboard })),           { ssr: false });
-const CreatorsTable     = dynamic(() => import('./creators/CreatorsTable').then(m => ({ default: m.CreatorsTable })),         { ssr: false });
-const CreatorDetailView = dynamic(() => import('./creators/CreatorDetailView').then(m => ({ default: m.CreatorDetailView })), { ssr: false });
-const ReconFeedTab      = dynamic(() => import('./ReconFeedTab').then(m => ({ default: m.ReconFeedTab })),                    { ssr: false });
+const LogDashboard      = dynamic(() => import('./pipeline/LogDashboard').then(m => ({ default: m.LogDashboard })),           { ssr: false });
+const CreatorsTable     = dynamic(() => import('./table/CreatorsTable').then(m => ({ default: m.CreatorsTable })),             { ssr: false });
+const CreatorDetailView = dynamic(() => import('./detail/CreatorDetailView').then(m => ({ default: m.CreatorDetailView })),    { ssr: false });
+const ReconFeedTab      = dynamic(() => import('./feed/ReconFeedTab').then(m => ({ default: m.ReconFeedTab })),                { ssr: false });
 
 const SCHEDULE_OPTIONS = [
   { value: 3,  label: 'Every 3h'  },

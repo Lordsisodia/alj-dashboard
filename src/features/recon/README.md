@@ -20,16 +20,26 @@ src/features/recon/
 ├── types.ts                       ← Candidate, MappedCandidate, ConvexCandidate, Tab, DrawerState
 ├── constants.ts                   ← animation variants, PRE_APPROVED list, re-exports from creatorData
 ├── creatorData.ts                 ← computeProfileHealth, COMPETITORS, DAILY_VOLUME, LOG_ENTRIES
-├── hooks/                        ← reserved for per-tab useQuery/useMutation hooks
+├── hooks/                        ← per-tab useQuery/useMutation hooks
 └── components/
     ├── ReconFeaturePage.tsx       ← root shell: tab routing, modal orchestration
-    ├── ReconFeedTab.tsx           ← Community Feed tab
-    ├── ReconModals.tsx           ← modal state bridge
+    ├── shared/                   ← shared recon primitives (RatioBadge, MiniStat, Sparkline, etc.)
+    ├── discovery/                ← Kanban triage board (CandidateRow, ApprovedRow, DetailPanel, etc.)
+    │   ├── charts/               ← NicheDonut, DiscoveryFunnel widgets
+    │   ├── detail/               ← candidate detail panel
+    │   ├── hooks/                ← discovery-specific hooks
+    │   └── rows/                 ← CandidateRow, ApprovedRow row components
+    ├── table/                    ← Creators tracking table
+    │   ├── cards/                ← card variants
+    │   ├── filters/              ← filter bar components
+    │   ├── hooks/                ← table-specific hooks
+    │   └── rows/                 ← table row components
+    ├── detail/                   ← right-side candidate detail drawer
+    │   └── widgets/              ← detail panel widgets
+    ├── pipeline/                 ← Pipeline/LogDashboard tab
+    │   └── funnel/               ← funnel stage components
+    ├── feed/                     ← Community Feed tab
     ├── modals/                   ← AddCandidateModal, BulkImportModal, TrackProfileModal, TrackNicheModal
-    ├── shared/                   ← shared recon primitives (promoted to components/ui where app-wide)
-    ├── detail/                   ← DetailPanel: right-side candidate detail drawer
-    ├── creators/                 ← Creators table, Pipeline/LogDashboard, DiscoveryTab
-    │   └── discovery/            ← Discovery pill components: CandidateRow, ApprovedRow, MiniStat, etc.
     └── icons/                   ← IgIcon
 ```
 
