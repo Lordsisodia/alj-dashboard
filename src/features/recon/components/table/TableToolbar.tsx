@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Heart, LayoutGrid, List, ChevronDown, X } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { hasActiveFilters, type CreatorFilters } from './filters/CreatorsFilterBar';
-import { ColumnVisibilityPill } from './filters/ColumnVisibilityPill';
-import { STATUS_VIEWS, type ColVisibility, type StatusView } from './tableUtils';
+import { STATUS_VIEWS, type StatusView } from './tableUtils';
 
 export { StatusDropdown };
 
@@ -79,76 +78,32 @@ function StatusDropdown({ value, onChange, counts }: {
 // -- Main toolbar ---------------------------------------------------------------
 
 interface Props {
-  count:               number;
-  total:               number;
-  filters:             CreatorFilters;
-  onClearFilters:      () => void;
-  showFavoritesOnly:   boolean;
-  onToggleFavorites:   () => void;
-  viewMode:            'list' | 'grid';
-  onViewModeChange:    (v: 'list' | 'grid') => void;
-  colVis:              ColVisibility;
-  onColVisChange:      (v: ColVisibility) => void;
+  count:          number;
+  total:          number;
+  filters:        CreatorFilters;
+  onClearFilters: () => void;
 }
 
-export function TableToolbar({ count, total, filters, onClearFilters, showFavoritesOnly, onToggleFavorites, viewMode, onViewModeChange, colVis, onColVisChange }: Props) {
+export function TableToolbar({ count, total, filters, onClearFilters }: Props) {
   const active = hasActiveFilters(filters);
+  if (!active && count >= total) return null;
 
   return (
     <div
-      className="flex items-center justify-between px-4 py-2 border-b"
+      className="flex items-center gap-2 px-4 py-1.5 border-b"
       style={{ borderColor: 'rgba(0,0,0,0.06)', backgroundColor: '#fafafa' }}
     >
-      {/* Left: status dropdown + filter indicator */}
-      <div className="flex items-center gap-2">
-        {active && (
-          <button
-            onClick={onClearFilters}
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
-          >
-            <X size={10} /> clear filters
-          </button>
-        )}
-        {count < total && (
-          <span className="text-[11px] text-neutral-400 tabular-nums">{count} shown</span>
-        )}
-      </div>
-
-      {/* Right: controls */}
-      <div className="flex items-center gap-2">
+      {active && (
         <button
-          onClick={onToggleFavorites}
-          className={cn(
-            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border',
-            showFavoritesOnly
-              ? 'text-[#ff0069] border-[#ff006930] bg-[#ff006908]'
-              : 'text-neutral-500 border-transparent hover:border-neutral-200 hover:bg-white',
-          )}
+          onClick={onClearFilters}
+          className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
         >
-          <Heart size={12} fill={showFavoritesOnly ? '#ff0069' : 'none'} /> Favorites
+          <X size={10} /> clear filters
         </button>
-
-        {viewMode === 'list' && (
-          <ColumnVisibilityPill value={colVis} onChange={onColVisChange} />
-        )}
-
-        <div className="flex items-center rounded-lg overflow-hidden border" style={{ borderColor: 'rgba(0,0,0,0.09)' }}>
-          <button
-            onClick={() => onViewModeChange('list')}
-            className={cn('flex items-center justify-center w-7 h-7 transition-colors', viewMode === 'list' ? 'bg-violet-50 text-violet-600' : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50')}
-            title="List view"
-          >
-            <List size={12} />
-          </button>
-          <button
-            onClick={() => onViewModeChange('grid')}
-            className={cn('flex items-center justify-center w-7 h-7 transition-colors', viewMode === 'grid' ? 'bg-violet-50 text-violet-600' : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50')}
-            title="Grid view"
-          >
-            <LayoutGrid size={12} />
-          </button>
-        </div>
-      </div>
+      )}
+      {count < total && (
+        <span className="text-[11px] text-neutral-400 tabular-nums">{count} of {total} shown</span>
+      )}
     </div>
   );
 }
