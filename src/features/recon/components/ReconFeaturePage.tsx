@@ -5,7 +5,8 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
-import { DensityPill, type DensityId } from '@/isso/ui/FeedControls';
+import { type DensityId } from '@/isso/ui/FeedControls';
+import { ViewToggle } from '@/components/ui/view-toggle';
 import { Radar, UserPlus, Upload, Play, Clock, Globe, LayoutDashboard, Zap, FileDown, XCircle, Pause, RefreshCw, Filter, Save, CalendarClock, ChevronDown, BarChart2, Sparkles, Star, Target, Heart, List, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityPill } from './table/filters/ColumnVisibilityPill';
@@ -212,7 +213,16 @@ export default function ReconFeaturePage() {
           </div>
         ) : activeTab === 'feed' ? (
           <div className="flex items-center gap-1.5">
-            <DensityPill value={columns} onChange={setColumns} />
+            <ViewToggle
+              value={String(columns)}
+              onChange={(v) => setColumns(Number(v) as DensityId)}
+              options={[
+                { value: '2', icon: null, label: '2' },
+                { value: '3', icon: null, label: '3' },
+                { value: '4', icon: null, label: '4' },
+              ]}
+              size="sm"
+            />
           </div>
         ) : undefined}
         showViewToggle={activeTab === 'feed'}
