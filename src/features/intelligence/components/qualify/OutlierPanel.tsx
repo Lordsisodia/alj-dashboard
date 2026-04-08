@@ -1,9 +1,10 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Flame } from 'lucide-react';
 import { OutlierFeed } from '../trends/OutlierFeed';
-import type { TrendsData } from '../../types';
+import type { OutlierPost } from '../../types';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { GRAD } from '../../constants';
@@ -13,13 +14,45 @@ interface Props {
   niche?: string;
 }
 
-export function OutlierPanel({ days, niche = 'all' }: Props) {
-  const raw = useQuery(api.intelligence.getTrends, {
-    days,
-    niche: niche !== 'all' ? niche : undefined,
-  }) as TrendsData | undefined;
+export function OutlierPanel({ niche = 'all' }: Props) {
+  const raw = useQuery(api.intelligence.getQualifyPosts, {}) as
+    | Array<{
+        _id: string;
+        handle: string;
+        niche: string;
+        contentType: string;
+        caption: string;
+        thumbnailUrl: string;
+        likes: number;
+        views: number;
+        saves: number;
+        engagementRate: number;
+        baselineScore: number;
+        postedAt: number;
+      }>
+    | undefined;
 
-  const count = raw?.outlierPosts?.length ?? 0;
+  const outlierPosts: OutlierPost[] = useMemo(() => {
+    if (!raw) return [];
+    return raw
+      .filter(p => p.views > 0 && p.baselineScore > 1)
+      .sort((a, b) => b.baselineScore - a.baselineScore)
+      .slice(0, 20)
+      .map(p => ({
+        _id:            p._id,
+        handle:         p.handle,
+        niche:          p.niche,
+        contentType:    p.contentType,
+        hook:           (p.caption ?? '').split('\n')[0].slice(0, 120),
+        thumbnailUrl:   p.thumbnailUrl,
+        likes:          p.likes,
+        views:          p.views,
+        saves:          p.saves,
+        engagementRate: p.engagementRate,
+        outlierRatio:   p.baselineScore,
+        postedAt:       p.postedAt,
+      }));
+  }, [raw]);
 
   return (
     <motion.div
@@ -40,7 +73,7 @@ export function OutlierPanel({ days, niche = 'all' }: Props) {
           </div>
           <div>
             <p className="text-[11px] font-semibold text-neutral-700">Outlier Alert Feed</p>
-            <p className="text-[9px] text-neutral-400">{count} signals · outperforming baseline</p>
+            <p className="text-[9px] text-neutral-400">{outlierPosts.length} signals · outperforming baseline</p>
           </div>
         </div>
       </div>
@@ -48,7 +81,7 @@ export function OutlierPanel({ days, niche = 'all' }: Props) {
       {/* Scrollable feed */}
       <div className="flex-1 overflow-y-auto p-3">
         <OutlierFeed
-          posts={raw?.outlierPosts ?? []}
+          posts={outlierPosts}
           hideHeader
           vertical
         />
