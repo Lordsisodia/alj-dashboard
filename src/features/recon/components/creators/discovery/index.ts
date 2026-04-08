@@ -11,10 +11,10 @@ export { DiscoveryFunnel } from './DiscoveryFunnel';
 export { DiscoveryHeader } from './DiscoveryHeader';
 export { DetailPanel }     from './DetailPanel';
 export { InfoTooltip }     from './InfoTooltip';
-export { EmptyState }      from './EmptyState';
-export { SkeletonRow }     from './SkeletonRow';
-export { RatioBadge }      from './RatioBadge';
-export { MiniStat }        from './MiniStat';
+export { EmptyState }      from '../../shared/EmptyState';
+export { SkeletonRow }     from '../../shared/SkeletonRow';
+export { RatioBadge }      from '../../shared/RatioBadge';
+export { MiniStat }        from '../../shared/MiniStat';
 export { PipelineStats }   from './PipelineStats';
 export { SourceChart }     from './SourceChart';
 export { FollowerScaleChart } from './FollowerScaleChart';
@@ -29,6 +29,14 @@ export type { ConvexCandidate, MappedCandidate } from './data';
 
 // -- Seed data ------------------------------------------------------------------
 export { PRE_APPROVED } from '../../../constants';
+
+// -- Extracted hooks ------------------------------------------------------------
+export { useDiscoveryActions } from './useDiscoveryActions';
+export type { DiscoveryActionsDeps } from './useDiscoveryActions';
+export { useDndHandlers } from './useDndHandlers';
+export type { DndHandlersDeps } from './useDndHandlers';
+export { computeDiscoveryStats } from './DiscoveryStats';
+export type { DiscoveryStatsData } from './DiscoveryStats';
 
 // -- Utilities -----------------------------------------------------------------
 export { fmtViews, getRatioColor } from './discoveryUtils';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Competitor } from '../types';
-import type { StatusView } from './creators/tableUtils';
+import type { StatusView } from '../components/creators/tableUtils';
 
 export function useCreatorsTab() {
   const [showFavorites, setShowFavorites]         = useState(false);

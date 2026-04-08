@@ -1,0 +1,7 @@
+{
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"/Users/shaansisodia/SISO_Agency/apps/isso-dashboard/src/features/recon/components/creators/DiscoveryTab.tsx\",\"limit\":35}",
+  "error": "File does not exist. Note: your current working directory is /Users/shaansisodia/SISO_Workspace/SISO_Agency/apps/isso-dashboard.",
+  "timestamp": "2026-04-08T00:56:41.320Z",
+  "retry_count": 1
+}

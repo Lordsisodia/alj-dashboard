@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, Loader2, ChevronDown, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface Brief {
+export interface Brief {
   _id: string;
   contentScore: number;
   consistencyScore: number;
