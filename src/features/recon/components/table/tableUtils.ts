@@ -4,8 +4,8 @@ import type { CreatorFilters } from './filters/CreatorsFilterBar';
 
 // -- Column definitions ---------------------------------------------------------
 export type ColKey =
-  | 'health' | 'niche' | 'followers' | 'following' | 'posts'
-  | 'engRate' | 'score' | 'category' | 'linkInBio' | 'email'
+  | 'health' | 'niche' | 'followers' | 'avgViews' | 'following' | 'posts'
+  | 'engRate' | 'score' | 'outlierRatio' | 'category' | 'bio' | 'linkInBio'
   | 'verified' | 'private' | 'enrichStatus' | 'source' | 'postsThisWeek' | 'igtvVideoCount' | 'highlightReels';
 
 export interface ColDef {
@@ -13,27 +13,29 @@ export interface ColDef {
   label:          string;
   width:          string;
   defaultVisible: boolean;
-  enrichOnly:     boolean;
+  badge?:         string;
 }
 
 export const COLUMN_DEFS: ColDef[] = [
-  { key: 'health',         label: 'Profile',      width: '120px', defaultVisible: true,  enrichOnly: false },
-  { key: 'niche',          label: 'Niche',       width: '100px', defaultVisible: true,  enrichOnly: false },
-  { key: 'followers',      label: 'Followers',   width: '110px', defaultVisible: true,  enrichOnly: false },
-  { key: 'following',      label: 'Following',   width: '100px', defaultVisible: false, enrichOnly: true  },
-  { key: 'posts',          label: 'Posts',       width: '80px',  defaultVisible: false, enrichOnly: true  },
-  { key: 'engRate',        label: 'Eng. Rate',   width: '100px', defaultVisible: true,  enrichOnly: false },
-  { key: 'score',          label: 'Score',       width: '100px', defaultVisible: true,  enrichOnly: false },
-  { key: 'postsThisWeek',  label: 'Posts/Wk',   width: '80px',  defaultVisible: true,  enrichOnly: false },
-  { key: 'category',       label: 'IG Category',  width: '130px', defaultVisible: false, enrichOnly: true  },
-  { key: 'linkInBio',      label: 'Link',        width: '60px',  defaultVisible: false, enrichOnly: true  },
-  { key: 'email',          label: 'Email',       width: '160px', defaultVisible: false, enrichOnly: true  },
-  { key: 'verified',        label: 'Verified',    width: '80px',  defaultVisible: false, enrichOnly: true  },
-  { key: 'private',         label: 'Private',     width: '80px',  defaultVisible: false, enrichOnly: true  },
-  { key: 'enrichStatus',    label: 'Enrich',     width: '80px',  defaultVisible: false, enrichOnly: true  },
-  { key: 'source',          label: 'Source',     width: '110px', defaultVisible: false, enrichOnly: false },
-  { key: 'igtvVideoCount', label: 'IGTV',       width: '80px',  defaultVisible: false, enrichOnly: true  },
-  { key: 'highlightReels',  label: 'Highlights',  width: '90px',  defaultVisible: false, enrichOnly: true  },
+  { key: 'health',         label: 'Profile',     width: '120px', defaultVisible: true  },
+  { key: 'niche',          label: 'Niche',       width: '100px', defaultVisible: true  },
+  { key: 'followers',      label: 'Followers',   width: '130px', defaultVisible: true  },
+  { key: 'avgViews',       label: 'Latest Views', width: '90px',  defaultVisible: true  },
+  { key: 'following',      label: 'Following',   width: '120px', defaultVisible: false, badge: 'Enriched' },
+  { key: 'posts',          label: 'Posts',       width: '100px', defaultVisible: false, badge: 'Enriched' },
+  { key: 'engRate',        label: 'Eng. Rate',   width: '120px', defaultVisible: true  },
+  { key: 'score',          label: 'Score',       width: '110px', defaultVisible: true  },
+  { key: 'outlierRatio',   label: 'Outlier',     width: '90px',  defaultVisible: true  },
+  { key: 'postsThisWeek',  label: 'Posts/Wk',   width: '90px',  defaultVisible: true  },
+  { key: 'category',       label: 'IG Category', width: '130px', defaultVisible: false, badge: 'Enriched' },
+  { key: 'bio',            label: 'Bio',         width: '200px', defaultVisible: false },
+  { key: 'linkInBio',      label: 'Link',        width: '80px',  defaultVisible: false, badge: 'Enriched' },
+  { key: 'verified',       label: 'Verified',    width: '90px',  defaultVisible: false, badge: 'Enriched' },
+  { key: 'private',        label: 'Private',     width: '80px',  defaultVisible: false, badge: 'Enriched' },
+  { key: 'enrichStatus',   label: 'Enrich',      width: '80px',  defaultVisible: false, badge: 'Enriched' },
+  { key: 'source',         label: 'Source',      width: '110px', defaultVisible: true  },
+  { key: 'igtvVideoCount', label: 'IGTV',        width: '80px',  defaultVisible: false, badge: 'Enriched' },
+  { key: 'highlightReels', label: 'Highlights',  width: '90px',  defaultVisible: false, badge: 'Enriched' },
 ];
 
 export type ColVisibility = Record<ColKey, boolean>;
@@ -89,16 +91,17 @@ export const STATUS_VIEWS: StatusViewDef[] = [
 type EnrichedCompetitor = Competitor & { _totalPosts?: number; _enrichStatus?: string | null };
 
 export function applyStatusFilter(creators: EnrichedCompetitor[], view: StatusView): EnrichedCompetitor[] {
-  if (view === 'all') return creators;
+  if (view === 'all') return creators.filter(c => (c as any).status !== 'failed');
   return creators.filter(c => {
     const health     = computeProfileHealth(c);
     const isEnriched = c._enrichStatus === 'done';
     const isScraped  = (c._totalPosts ?? 0) > 0;
+    const isFailed   = (c as any).status === 'failed';
     switch (view) {
-      case 'raw':      return health < 50 && !isEnriched && !isScraped;
-      case 'enriched': return isEnriched;
-      case 'scraped':  return isScraped;
-      case 'failed':   return (isEnriched || isScraped) && health < 50;
+      case 'raw':      return health < 50 && !isEnriched && !isScraped && !isFailed;
+      case 'enriched': return isEnriched && !isFailed;
+      case 'scraped':  return isScraped && !isFailed;
+      case 'failed':   return isFailed || ((isEnriched || isScraped) && health < 50);
       default:         return true;
     }
   });

@@ -8,12 +8,13 @@ import { fadeUp, computeProfileHealth } from '../../../constants';
 import type { Competitor } from '../../../types';
 import { COL_BORDER } from '../tableUtils';
 import type { ColVisibility } from '../tableUtils';
+import { SelectCheckbox } from '../shared/SelectCheckbox';
 import { AvatarCell } from './CreatorRowAvatarCell';
 import { HealthCell } from './CreatorRowHealthCell';
 import { ActionsCell } from './CreatorRowActionsCell';
 import {
-  NicheCell, FollowersCell, FollowingCell, PostsCell, EngRateCell,
-  ScoreCell, PostsThisWeekCell, CategoryCell, LinkInBioCell, EmailCell,
+  NicheCell, FollowersCell, AvgViewsCell, FollowingCell, PostsCell, EngRateCell,
+  ScoreCell, OutlierRatioCell, PostsThisWeekCell, CategoryCell, BioCell, LinkInBioCell,
   VerifiedCell, PrivateCell, EnrichStatusCell, SourceCell,
   IgTvVideoCountCell, HighlightReelsCell,
 } from './CreatorRowCells';
@@ -28,11 +29,13 @@ interface CreatorRowProps {
     aiReason?: string;
     highlightReelCount?: number;
     source?: 'pre_approved' | 'scraper' | 'manual';
+    _creatorScore?: number;
   };
   rowIdx: number;
   isSelected: boolean;
   anySelected: boolean;
   isEnriching: boolean;
+  isScraping: boolean;
   colVis: ColVisibility;
   gridCols: string;
   onOpen: () => void;
@@ -40,9 +43,10 @@ interface CreatorRowProps {
   onFavorite: (e: React.MouseEvent) => void;
   onToggleStatus: (e: React.MouseEvent) => void;
   onEnrich: (e: React.MouseEvent) => void;
+  onScrape: () => void;
 }
 
-export function CreatorRow({ creator: c, rowIdx, isSelected, anySelected, isEnriching, colVis, gridCols, onOpen, onSelect, onFavorite, onToggleStatus, onEnrich }: CreatorRowProps) {
+export function CreatorRow({ creator: c, rowIdx, isSelected, anySelected, isEnriching, isScraping, colVis, gridCols, onOpen, onSelect, onFavorite, onToggleStatus, onEnrich, onScrape }: CreatorRowProps) {
   const isActive = c.status === 'active';
   const health   = computeProfileHealth(c);
   const [imgErr, setImgErr] = useState(false);
@@ -65,16 +69,11 @@ export function CreatorRow({ creator: c, rowIdx, isSelected, anySelected, isEnri
 
       {/* Checkbox */}
       <div className="flex items-center justify-center" style={{ borderRight: COL_BORDER }} onClick={onSelect}>
-        <div className={cn(
-          'w-3.5 h-3.5 rounded flex items-center justify-center border transition-all',
-          isSelected
-            ? 'bg-violet-500 border-violet-500 opacity-100'
-            : anySelected
-              ? 'border-neutral-300 bg-white opacity-100'
-              : 'border-neutral-300 bg-white opacity-0 group-hover:opacity-100',
-        )}>
-          {isSelected && <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-        </div>
+        <SelectCheckbox
+          state={isSelected ? 'all' : 'none'}
+          tint="violet"
+          visible={anySelected || isSelected}
+        />
       </div>
 
       {/* Row # */}
@@ -89,14 +88,16 @@ export function CreatorRow({ creator: c, rowIdx, isSelected, anySelected, isEnri
       {/* Meta cells */}
       {colVis.niche          && <NicheCell c={c} />}
       {colVis.followers      && <FollowersCell c={c} />}
+      {colVis.avgViews       && <AvgViewsCell c={c} />}
       {colVis.following      && <FollowingCell c={c} />}
       {colVis.posts          && <PostsCell c={c} />}
       {colVis.engRate        && <EngRateCell c={c} />}
       {colVis.score          && <ScoreCell c={c} />}
+      {colVis.outlierRatio   && <OutlierRatioCell c={c} />}
       {colVis.postsThisWeek  && <PostsThisWeekCell c={c} />}
       {colVis.category       && <CategoryCell c={c} />}
+      {colVis.bio            && <BioCell c={c} />}
       {colVis.linkInBio      && <LinkInBioCell c={c} />}
-      {colVis.email          && <EmailCell c={c} />}
       {colVis.verified       && <VerifiedCell c={c} />}
       {colVis.private        && <PrivateCell c={c} />}
       {colVis.enrichStatus   && <EnrichStatusCell c={c} />}
@@ -110,7 +111,7 @@ export function CreatorRow({ creator: c, rowIdx, isSelected, anySelected, isEnri
       </div>
 
       {/* Actions */}
-      <ActionsCell c={c} isActive={isActive} isEnriching={isEnriching} onToggleStatus={onToggleStatus} onEnrich={onEnrich} />
+      <ActionsCell c={c} isActive={isActive} isEnriching={isEnriching} isScraping={isScraping} onToggleStatus={onToggleStatus} onEnrich={onEnrich} onScrape={onScrape} />
     </motion.div>
   );
 }

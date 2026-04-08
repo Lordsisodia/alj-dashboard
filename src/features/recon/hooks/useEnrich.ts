@@ -7,6 +7,7 @@ export function useEnrich() {
   const [enrichingSet, setEnrichingSet] = useState<Set<string>>(new Set());
   const upsertEnriched  = useMutation(api.trackedAccounts.upsertEnriched);
   const setEnrichStatus = useMutation(api.trackedAccounts.setEnrichStatus);
+  const upsertCandidate = useMutation(api.candidates.upsert);
 
   const enrich = useCallback(async (handle: string) => {
     if (enrichingSet.has(handle)) return;
@@ -50,12 +51,26 @@ export function useEnrich() {
         igtvVideoCount:        data.igtvVideoCount        ?? undefined,
         instagramId:           data.instagramId           ?? undefined,
       });
+
+      if (data.relatedHandles?.length > 0) {
+        await Promise.allSettled(
+          data.relatedHandles.slice(0, 30).map((h: string) =>
+            upsertCandidate({
+              handle:      `@${h.replace('@', '')}`,
+              displayName: h.replace('@', ''),
+              status:      'pending',
+              source:      'scraper',
+              suggestedBy: data.handle,
+            }).catch(() => {/* dedup - ignore */})
+          )
+        );
+      }
     } catch {
       await setEnrichStatus({ handle, status: 'error' });
     } finally {
       setEnrichingSet(s => { const n = new Set(s); n.delete(handle); return n; });
     }
-  }, [enrichingSet, upsertEnriched, setEnrichStatus]);
+  }, [enrichingSet, upsertEnriched, setEnrichStatus, upsertCandidate]);
 
   return { enrich, isEnriching: (handle: string) => enrichingSet.has(handle) };
 }

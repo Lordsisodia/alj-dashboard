@@ -43,6 +43,8 @@ async function writeToConvex(enriched: Record<string, unknown>) {
     const n = (v: unknown) => (v != null ? (v as number) : undefined);
     const s = (v: unknown) => (v != null ? (v as string) : undefined);
     const b = (v: unknown) => (v != null ? (v as boolean) : undefined);
+
+    // 1. Upsert into creatorCandidates (discovery pipeline)
     await convex.mutation(api.candidates.upsert, {
       handle:             enriched.handle as string,
       displayName:        enriched.displayName as string,
@@ -66,6 +68,27 @@ async function writeToConvex(enriched: Record<string, unknown>) {
     });
     // Always patch enrichStatus=done directly — upsert INSERT path overrides it with 'idle'
     await convex.mutation(api.candidates.markEnriched, { handle: enriched.handle as string });
+
+    // 2. Push enriched data to trackedAccounts — overwrites placeholder values with real Apify data
+    await convex.mutation(api.trackedAccounts.syncEnrichedToTracked, {
+      handle:             enriched.handle as string,
+      displayName:        s(enriched.displayName),
+      followerCount:      n(enriched.followerCount),
+      avgEngagementRate:  n(enriched.avgEngagementRate),
+      avgViews:           n(enriched.avgViews),
+      outlierRatio:       n(enriched.outlierRatio),
+      highlightReelCount: n(enriched.highlightReelCount),
+      followsCount:       n(enriched.followsCount),
+      postsCount:         n(enriched.postsCount),
+      bio:                s(enriched.bio),
+      avatarUrl:          s(enriched.avatarUrl),
+      verified:           b(enriched.verified),
+      isPrivate:          b(enriched.isPrivate),
+      isBusinessAccount:  b(enriched.isBusinessAccount),
+      externalUrl:        s(enriched.externalUrl),
+      igtvVideoCount:     n(enriched.igtvVideoCount),
+      instagramId:        s(enriched.instagramId),
+    });
   } catch (e) {
     console.error('[enrich-candidate] Convex write failed:', e);
     throw e;

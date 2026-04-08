@@ -11,7 +11,7 @@ import type { Competitor } from '../../../types';
 type ColVisibility = {
   niche: boolean; followers: boolean; following: boolean; posts: boolean;
   engRate: boolean; score: boolean; postsThisWeek: boolean; category: boolean;
-  linkInBio: boolean; email: boolean; verified: boolean; private: boolean;
+  linkInBio: boolean; verified: boolean; private: boolean;
   enrichStatus: boolean; source: boolean; igtvVideoCount: boolean; highlightReels: boolean;
   health: boolean;
 };
@@ -70,7 +70,31 @@ export function EngRateCell({ c }: CellProps) {
   );
 }
 
-export function ScoreCell({ c }: CellProps) {
+function scorePillColor(s: number): string {
+  if (s >= 80) return '#16a34a';
+  if (s >= 60) return '#84cc16';
+  if (s >= 40) return '#eab308';
+  if (s >= 20) return '#f97316';
+  return '#dc2626';
+}
+
+interface ScoreCellProps {
+  c: CellProps['c'] & { _creatorScore?: number };
+}
+
+export function ScoreCell({ c }: ScoreCellProps) {
+  if (c._creatorScore != null) {
+    return (
+      <div className="flex items-center justify-center px-2" style={{ borderRight: COL_BORDER }}>
+        <div
+          className="inline-flex items-center justify-center min-w-[34px] px-2 h-[18px] rounded text-[10px] font-bold tabular-nums text-white"
+          style={{ backgroundColor: scorePillColor(c._creatorScore) }}
+        >
+          {c._creatorScore}
+        </div>
+      </div>
+    );
+  }
   return (
     <MetaCellLeft>
       <ScoreBadge score={c.aiScore ?? c.score} aiVerdict={c.aiVerdict} />
@@ -165,5 +189,57 @@ export function HighlightReelsCell({ c }: CellProps) {
     <MetaCellRight>
       {c.highlightReelCount != null ? <span className="text-[12px] tabular-nums text-neutral-500">{c.highlightReelCount}</span> : <EmptyCell />}
     </MetaCellRight>
+  );
+}
+
+function fmtCompact(n: number): string {
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000)     return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000)         return `${Math.round(n / 1_000)}K`;
+  return String(n);
+}
+
+export function AvgViewsCell({ c }: CellProps) {
+  return (
+    <MetaCellRight>
+      <span className="text-[12px] tabular-nums text-neutral-600">
+        {c.avgViews != null && c.avgViews > 0 ? fmtCompact(c.avgViews) : <EmptyCell />}
+      </span>
+    </MetaCellRight>
+  );
+}
+
+function outlierColor(r: number): string {
+  if (r >= 3)   return '#16a34a';
+  if (r >= 2)   return '#84cc16';
+  if (r >= 1)   return '#eab308';
+  if (r >= 0.5) return '#f97316';
+  return '#dc2626';
+}
+
+export function OutlierRatioCell({ c }: CellProps) {
+  if (c.outlierRatio == null || c.outlierRatio <= 0) {
+    return <MetaCell><EmptyCell /></MetaCell>;
+  }
+  return (
+    <MetaCell>
+      <div
+        className="inline-flex items-center justify-center px-1.5 h-[18px] rounded text-[10px] font-semibold tabular-nums text-white"
+        style={{ backgroundColor: outlierColor(c.outlierRatio) }}
+      >
+        {c.outlierRatio.toFixed(1)}&times;
+      </div>
+    </MetaCell>
+  );
+}
+
+export function BioCell({ c }: CellProps) {
+  if (!c.bio) return <MetaCellLeft><EmptyCell /></MetaCellLeft>;
+  return (
+    <MetaCellLeft>
+      <span className="text-[11px] text-neutral-500 truncate block" title={c.bio}>
+        {c.bio}
+      </span>
+    </MetaCellLeft>
   );
 }

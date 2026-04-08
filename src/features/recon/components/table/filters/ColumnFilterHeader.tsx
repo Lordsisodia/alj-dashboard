@@ -14,9 +14,10 @@ interface Props {
   multi?: boolean;
   onChange?: (v: string | string[]) => void;
   style?: React.CSSProperties;
+  icon?: React.ReactNode;
 }
 
-export function ColumnFilterHeader({ label, align = 'left', options, value, multi, onChange, style }: Props) {
+export function ColumnFilterHeader({ label, align = 'left', options, value, multi, onChange, style, icon }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const isActive = Array.isArray(value) ? value.length > 0 : !!value;
@@ -54,6 +55,7 @@ export function ColumnFilterHeader({ label, align = 'left', options, value, mult
           isActive ? 'text-blue-600' : 'text-neutral-400',
         )}
       >
+        {icon && <span className="flex-shrink-0">{icon}</span>}
         {label}
         {hasFilter && (
           <ChevronDown

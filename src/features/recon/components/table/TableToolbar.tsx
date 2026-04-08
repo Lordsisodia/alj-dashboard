@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, X, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { hasActiveFilters, type CreatorFilters } from './filters/CreatorsFilterBar';
 import { STATUS_VIEWS, type StatusView } from './tableUtils';
@@ -75,18 +75,31 @@ function StatusDropdown({ value, onChange, counts }: {
   );
 }
 
+// -- Percentile pill group ------------------------------------------------------
+
+const PERCENTILES = [
+  { label: 'Top 10%', value: 10  },
+  { label: 'Top 25%', value: 25  },
+  { label: 'Top 50%', value: 50  },
+  { label: 'All',     value: 100 },
+] as const;
+
 // -- Main toolbar ---------------------------------------------------------------
 
 interface Props {
-  count:          number;
-  total:          number;
-  filters:        CreatorFilters;
-  onClearFilters: () => void;
+  count:              number;
+  total:              number;
+  filters:            CreatorFilters;
+  onClearFilters:     () => void;
+  percentile:         number;
+  onPercentileChange: (n: number) => void;
+  onOpenWeights:      () => void;
 }
 
-export function TableToolbar({ count, total, filters, onClearFilters }: Props) {
+export function TableToolbar({ count, total, filters, onClearFilters, percentile, onPercentileChange, onOpenWeights }: Props) {
   const active = hasActiveFilters(filters);
-  if (!active && count >= total) return null;
+  const showBar = active || count < total || percentile < 100;
+  if (!showBar) return null;
 
   return (
     <div
@@ -104,6 +117,36 @@ export function TableToolbar({ count, total, filters, onClearFilters }: Props) {
       {count < total && (
         <span className="text-[11px] text-neutral-400 tabular-nums">{count} of {total} shown</span>
       )}
+
+      <div className="flex-1" />
+
+      {/* Percentile pill group */}
+      <div className="flex items-center gap-0.5 rounded-lg p-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
+        {PERCENTILES.map(p => (
+          <button
+            key={p.value}
+            onClick={() => onPercentileChange(p.value)}
+            className="px-2 py-0.5 rounded-md text-[11px] font-medium transition-all"
+            style={percentile === p.value
+              ? { backgroundColor: '#7c3aed', color: '#fff' }
+              : { backgroundColor: 'transparent', color: '#9ca3af' }
+            }
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Weights button */}
+      <button
+        onClick={onOpenWeights}
+        className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium transition-all"
+        style={{ backgroundColor: 'rgba(124,58,237,0.08)', color: '#7c3aed', border: '1px solid rgba(124,58,237,0.18)' }}
+        title="Score weights"
+      >
+        <SlidersHorizontal size={11} />
+        Weights
+      </button>
     </div>
   );
 }

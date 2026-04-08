@@ -10,6 +10,7 @@ interface CreatorRowRendererProps {
   tableWidth:    number;
   selected:      Set<number>;
   isEnriching:   (handle: string) => boolean;
+  isScraping:    (handle: string) => boolean;
   colVis:        ColVisibility;
   gridCols:      string;
   onOpen:        (c: Competitor) => void;
@@ -17,11 +18,12 @@ interface CreatorRowRendererProps {
   toggleFavorite: (id: number, e: React.MouseEvent) => void;
   toggleStatus:  (id: number, e: React.MouseEvent) => void;
   enrich:         (handle: string) => void;
+  scrapeMany:     (handles: string[]) => void;
 }
 
 export function CreatorRowRenderer({
-  creators, rowVirtualizer, tableWidth, selected, isEnriching, colVis, gridCols,
-  onOpen, toggleSelect, toggleFavorite, toggleStatus, enrich,
+  creators, rowVirtualizer, tableWidth, selected, isEnriching, isScraping, colVis, gridCols,
+  onOpen, toggleSelect, toggleFavorite, toggleStatus, enrich, scrapeMany,
 }: CreatorRowRendererProps) {
   return (
     <>
@@ -37,6 +39,7 @@ export function CreatorRowRenderer({
               rowIdx={vRow.index}
               isSelected={selected.has(c.id)}
               isEnriching={isEnriching(c.handle)}
+              isScraping={isScraping(c.handle)}
               anySelected={selected.size > 0}
               colVis={colVis}
               gridCols={gridCols}
@@ -45,6 +48,7 @@ export function CreatorRowRenderer({
               onFavorite={e => toggleFavorite(c.id, e)}
               onToggleStatus={e => toggleStatus(c.id, e)}
               onEnrich={e => { e.stopPropagation(); enrich(c.handle); }}
+              onScrape={() => scrapeMany([c.handle])}
             />
           </div>
         );
