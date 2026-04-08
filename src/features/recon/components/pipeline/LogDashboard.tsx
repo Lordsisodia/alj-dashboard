@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Database, Radar, Library, Clock, FileStack, Users, Zap, Play, List, SlidersHorizontal } from 'lucide-react';
+import { Database, Clock, FileStack, Users } from 'lucide-react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { COMPETITORS, DAILY_VOLUME } from '../../constants'; // COMPETITORS seeds initial state
@@ -10,22 +10,11 @@ import { useLogDashboard } from '../../hooks/useLogDashboard';
 import { PostsScrapedChart } from './PostsScrapedChart';
 import { PipelineFunnel }    from './PipelineFunnel';
 import { ActivityFeed }      from '../detail/widgets/ActivityFeed';
-import { WeeklyDigestCard }      from '../detail/widgets/WeeklyDigestCard';
-import { ViralAlertCard }        from '../detail/widgets/ViralAlertCard';
-import { CreatorSpotlightCard }  from '../table/cards/CreatorSpotlightCard';
-import { EngagementBenchmarkCard } from '../detail/widgets/EngagementBenchmarkCard';
 import { ScrapingReport }    from '@/components/ui/scraping-report';
 import { DashboardMetricCard } from '@/components/ui/dashboard-overview';
-import IncidentHeatmapReportCard from '@/components/ui/heat-map-xl';
 
 const TOTAL_IN_LIBRARY = DAILY_VOLUME.reduce((s, d) => s + d.total, 0);
 
-const STATS = (postsToday: number, activeCount: number, total: number, totalCreators: number, lastRun: string) => [
-  { label: 'Posts today',      value: String(postsToday),                  sub: 'across all active creators',         icon: <Database size={14} />, color: '#4a9eff' },
-  { label: 'Active creators',  value: `${activeCount} / ${totalCreators}`, sub: `${totalCreators - activeCount} paused`, icon: <Radar size={14} />, color: '#833ab4' },
-  { label: 'Total in library', value: total.toLocaleString(),              sub: 'posts scraped all-time',             icon: <Library size={14} />,  color: '#ff0069' },
-  { label: 'Last run',         value: lastRun,                             sub: 'Next: ~6:00 PM · every 3h',          icon: <Clock size={14} />,    color: '#78c257' },
-];
 
 export function LogDashboard({
   extraCreators = [],
@@ -73,7 +62,6 @@ export function LogDashboard({
     return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
 
-  const stats = STATS(postsToday, activeCount, library, totalCount, fmtLastRun(lastRunAt));
 
   return (
     <div className="flex items-start w-full">
@@ -81,24 +69,12 @@ export function LogDashboard({
       {/* -- Main content column ------------------------------------- */}
       <div className="flex-1 flex flex-col min-w-0">
 
-        {/* ① AI insight cards — 2×2 grid (heatmap spans full width as row 3) */}
-        <div className="grid grid-cols-2 gap-3 px-3 mt-4">
-          <WeeklyDigestCard />
-          <ViralAlertCard />
-          <CreatorSpotlightCard />
-          <EngagementBenchmarkCard />
-          {/* Heatmap spans both columns — real engagement data by day×hour */}
-          <div className="col-span-2">
-            <IncidentHeatmapReportCard />
-          </div>
-        </div>
-
-        {/* ② Pipeline funnel - inset card */}
-        <div className="px-3 pt-3">
+        {/* ① Pipeline funnel — first thing you see */}
+        <div className="px-3 pt-4">
           <PipelineFunnel counts={dbStats?.funnel} />
         </div>
 
-        {/* ③ Metric cards */}
+        {/* ② Metric cards */}
         <div className="grid grid-cols-4 gap-3 px-3 mt-3">
           <DashboardMetricCard
             title="Posts today"
@@ -130,30 +106,15 @@ export function LogDashboard({
           />
         </div>
 
-        {/* ④ Volume chart + Scraping Report - side by side */}
-        <div className="grid grid-cols-[2fr_1fr] gap-3 px-3 pt-4 pb-2">
+        {/* ③ Posts scraped chart — full width */}
+        <div className="px-3 pt-3">
           <PostsScrapedChart data={DAILY_VOLUME} />
+        </div>
+
+        {/* ④ Scraping report */}
+        <div className="px-3 pt-3 pb-6">
           <ScrapingReport />
         </div>
-
-        {/* ⑤ Quick-action row — desktop only */}
-        <div className="hidden md:flex items-center gap-2 px-3 pt-2 pb-1">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white/70 hover:text-white hover:bg-white/8 border border-white/8 hover:border-white/15 transition-colors">
-            <Play size={11} className="text-emerald-400" />
-            Scrape Now
-          </button>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white/70 hover:text-white hover:bg-white/8 border border-white/8 hover:border-white/15 transition-colors">
-            <List size={11} className="text-blue-400" />
-            View Full Log
-          </button>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white/70 hover:text-white hover:bg-white/8 border border-white/8 hover:border-white/15 transition-colors">
-            <SlidersHorizontal size={11} className="text-purple-400" />
-            Filter by Niche
-          </button>
-        </div>
-
-        {/* bottom clearance */}
-        <div className="pb-6" />
 
       </div>
 
