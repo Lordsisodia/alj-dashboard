@@ -6,7 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
 import { DensityPill, type DensityId } from '@/isso/ui/FeedControls';
-import { Radar, UserPlus, Upload, Play, Clock, Globe, LayoutDashboard, Zap, FileDown, XCircle, Pause, RefreshCw, Filter, Save, CalendarClock, ChevronDown, BarChart2, Sparkles, Star, Target } from 'lucide-react';
+import { Radar, UserPlus, Upload, Play, Clock, Globe, LayoutDashboard, Zap, FileDown, XCircle, Pause, RefreshCw, Filter, Save, CalendarClock, ChevronDown, BarChart2, Sparkles, Star, Target, Heart, List, LayoutGrid } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { ColumnVisibilityPill } from './table/filters/ColumnVisibilityPill';
 import type { Tab, Competitor, Candidate } from '../types';
 import { COMPETITORS } from '../constants';
 import { ReconModals, type ModalId, type DrawerState } from './ReconModals';
@@ -87,7 +89,7 @@ export default function ReconFeaturePage() {
   const { viewMode, setViewMode, columns, setColumns } = useFeedTab();
   const { searchQuery, setSearchQuery, runDiscoveryTrigger, setRunDiscoveryTrigger, scheduleHours, setScheduleHours, showAnalytics, setShowAnalytics } = useDiscoveryTab();
   const { runAllTrigger, setRunAllTrigger } = useLogDashboard();
-  const { showFavorites, setShowFavorites, creatorsStatusView, setCreatorsStatusView } = useCreatorsTab();
+  const { showFavorites, setShowFavorites, creatorsStatusView, setCreatorsStatusView, viewMode: creatorsViewMode, setViewMode: setCreatorsViewMode, colVis, handleColVisChange } = useCreatorsTab();
   const [creatorsStatusCounts, setCreatorsStatusCounts] = useState<Record<StatusView, number>>({ all: 0, raw: 0, enriched: 0, scraped: 0, failed: 0 });
   const [selectedCreator, setSelectedCreator] = useState<Competitor | null>(null);
 
@@ -175,6 +177,36 @@ export default function ReconFeaturePage() {
         ) : activeTab === 'creators' ? (
           <div className="flex items-center gap-2">
             <StatusDropdown value={creatorsStatusView} onChange={setCreatorsStatusView} counts={creatorsStatusCounts} />
+            <button
+              onClick={() => setShowFavorites(v => !v)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border',
+                showFavorites
+                  ? 'text-[#ff0069] border-[#ff006930] bg-[#ff006908]'
+                  : 'text-neutral-500 border-transparent hover:border-neutral-200 hover:bg-white',
+              )}
+            >
+              <Heart size={12} fill={showFavorites ? '#ff0069' : 'none'} /> Favorites
+            </button>
+            {creatorsViewMode === 'list' && (
+              <ColumnVisibilityPill value={colVis} onChange={handleColVisChange} />
+            )}
+            <div className="flex items-center rounded-lg overflow-hidden border" style={{ borderColor: 'rgba(0,0,0,0.09)' }}>
+              <button
+                onClick={() => setCreatorsViewMode('list')}
+                className={cn('flex items-center justify-center w-7 h-7 transition-colors', creatorsViewMode === 'list' ? 'bg-violet-50 text-violet-600' : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50')}
+                title="List view"
+              >
+                <List size={12} />
+              </button>
+              <button
+                onClick={() => setCreatorsViewMode('grid')}
+                className={cn('flex items-center justify-center w-7 h-7 transition-colors', creatorsViewMode === 'grid' ? 'bg-violet-50 text-violet-600' : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50')}
+                title="Grid view"
+              >
+                <LayoutGrid size={12} />
+              </button>
+            </div>
           </div>
         ) : activeTab === 'feed' ? (
           <div className="flex items-center gap-1.5">
@@ -199,6 +231,9 @@ export default function ReconFeaturePage() {
                       searchQuery={searchQuery}
                       statusCounts={creatorsStatusCounts}
                       onStatusCountsChange={setCreatorsStatusCounts}
+                      viewMode={creatorsViewMode}
+                      colVis={colVis}
+                      onColVisChange={handleColVisChange}
                     />
               )}
               {activeTab === 'feed' && (

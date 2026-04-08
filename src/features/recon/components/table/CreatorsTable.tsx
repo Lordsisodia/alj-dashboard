@@ -24,34 +24,22 @@ interface CreatorsTableProps {
   searchQuery?: string;
   statusCounts: Record<StatusView, number>;
   onStatusCountsChange: (c: Record<StatusView, number>) => void;
+  viewMode: 'list' | 'grid';
+  colVis: ColVisibility;
+  onColVisChange: (v: ColVisibility) => void;
 }
 
-export function CreatorsTable({ onOpen, extraCreators = [], searchQuery = '', statusCounts, onStatusCountsChange }: CreatorsTableProps) {
-  const { showFavorites, setShowFavorites, creatorsStatusView, setCreatorsStatusView, selectedCreator, setSelectedCreator } = useCreatorsTab();
+export function CreatorsTable({ onOpen, extraCreators = [], searchQuery = '', statusCounts, onStatusCountsChange, viewMode, colVis, onColVisChange }: CreatorsTableProps) {
+  const { showFavorites, setShowFavorites, creatorsStatusView, setCreatorsStatusView } = useCreatorsTab();
   const [creators, setCreators]     = useState<Competitor[]>([...extraCreators, ...COMPETITORS]);
   const [filters, setFilters]       = useState<CreatorFilters>(DEFAULT_FILTERS);
   const [selected, setSelected]     = useState<Set<number>>(new Set());
-  const [viewMode, setViewMode]     = useState<'list' | 'grid'>('list');
   const showFavoritesOnly = showFavorites;
-  const onToggleFavorites = () => setShowFavorites(v => !v);
   const statusView = creatorsStatusView;
-  const onStatusViewChange = setCreatorsStatusView;
-  const [colVis, setColVis]         = useState<ColVisibility>(() => {
-    if (typeof window === 'undefined') return DEFAULT_COL_VISIBILITY;
-    try {
-      const saved = localStorage.getItem('recon-col-vis');
-      return saved ? { ...DEFAULT_COL_VISIBILITY, ...JSON.parse(saved) } : DEFAULT_COL_VISIBILITY;
-    } catch { return DEFAULT_COL_VISIBILITY; }
-  });
   const { enrich, isEnriching }     = useEnrich();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const set = <K extends keyof CreatorFilters>(key: K, val: CreatorFilters[K]) => setFilters(f => ({ ...f, [key]: val }));
-
-  function handleColVisChange(v: ColVisibility) {
-    setColVis(v);
-    try { localStorage.setItem('recon-col-vis', JSON.stringify(v)); } catch {}
-  }
 
   useEffect(() => {
     if (extraCreators.length > 0) {
@@ -188,15 +176,6 @@ export function CreatorsTable({ onOpen, extraCreators = [], searchQuery = '', st
         total={merged.length}
         filters={filters}
         onClearFilters={() => setFilters(DEFAULT_FILTERS)}
-        showFavoritesOnly={showFavoritesOnly}
-        onToggleFavorites={onToggleFavorites}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        colVis={colVis}
-        onColVisChange={handleColVisChange}
-        statusView={statusView}
-        onStatusViewChange={onStatusViewChange}
-        statusCounts={statusCounts}
       />
 
       {/* GRID VIEW */}
