@@ -17,6 +17,8 @@
     "perf:media": "node scripts/perf/check-hero-media.mjs",
     "perf:tti": "node scripts/perf/check-tti.mjs",
     "perf:lighthouse-budgets": "node scripts/perf/check-lighthouse-budgets.mjs",
+    "perf:lhci": "lhci autorun",
+    "size": "size-limit",
     "start": "next start",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint .",
     "lint:warnings": "node scripts/check-lint-warnings.mjs",
@@ -86,7 +88,9 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^16.0.2",
+    "@size-limit/esbuild": "^12.0.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^22.10.5",
@@ -104,6 +108,8 @@
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
     "puppeteer": "^24.15.0",
+    "react-scan": "^0.5.3",
+    "size-limit": "^12.0.1",
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",

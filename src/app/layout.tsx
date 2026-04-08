@@ -23,6 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        {process.env.NODE_ENV === 'development' && (
+          <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
+        )}
         <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
         {/* Preload the most-used font weights so they're ready before CSS is parsed */}
         <link rel="preload" href="/fonts/CircularXX-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
