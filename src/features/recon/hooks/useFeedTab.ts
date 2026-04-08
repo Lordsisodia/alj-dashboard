@@ -5,12 +5,12 @@ import type { DensityId } from '@/isso/ui/FeedControls';
 import type { DrawerState } from '../types';
 import type { NicheERMap } from '@/features/intelligence/utils';
 import type { CreatorStats } from '@/features/intelligence/utils';
-
-export type SortId = 'newest' | 'oldest' | 'most-likes' | 'most-views' | 'most-comments' | 'least-views' | 'most-saved' | 'viral';
+import type { SortId, VisibilityState } from '@/features/intelligence/types';
+import { DEFAULT_VISIBILITY } from '@/features/intelligence/types';
 
 export function useFeedTab() {
   const [sortBy, setSortBy]                 = useState<SortId>('newest');
-  const [visibility, setVisibility]         = useState({ posts: true, reels: true, stories: true, broadcasts: true });
+  const [visibility, setVisibility]         = useState<VisibilityState>(DEFAULT_VISIBILITY);
   const [viewMode, setViewMode]             = useState<'grid' | 'list'>('grid');
   const [columns, setColumns]               = useState<DensityId>(4);
   const [drawer, setDrawer]                 = useState<DrawerState | null>(null);

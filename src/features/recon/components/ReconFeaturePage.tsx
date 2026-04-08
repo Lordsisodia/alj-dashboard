@@ -5,9 +5,7 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon } from '@/isso/layout/ProductIcon';
-import { FILTER_CATEGORIES } from '@/features/intelligence/filterConfig';
-import { SortPill, VisibilityPill, DensityPill, DEFAULT_VISIBILITY, DENSITY_OPTIONS, type SortId, type VisibilityState, type DensityId } from '@/isso/ui/FeedControls';
-import { DateRangePill } from '@/isso/ui/DateRangePill';
+import { DensityPill, type DensityId } from '@/isso/ui/FeedControls';
 import { Radar, UserPlus, Upload, Play, Clock, Globe, LayoutDashboard, Zap, FileDown, XCircle, Pause, RefreshCw, Filter, Save, CalendarClock, ChevronDown, BarChart2, Sparkles, Star, Target } from 'lucide-react';
 import type { Tab, Competitor, Candidate } from '../types';
 import { COMPETITORS } from '../constants';
@@ -85,10 +83,10 @@ export default function ReconFeaturePage() {
   const [drawer, setDrawer]                   = useState<DrawerState | null>(null);
   function fireOnce<T>(set: (v: T[]) => void, value: T[]) { set(value); setTimeout(() => set([]), 0); }
 
-  const { sortBy, setSortBy, visibility, setVisibility, viewMode, setViewMode, columns, setColumns } = useFeedTab();
+  const { viewMode, setViewMode, columns, setColumns } = useFeedTab();
   const { searchQuery, setSearchQuery, runDiscoveryTrigger, setRunDiscoveryTrigger, scheduleHours, setScheduleHours, showAnalytics, setShowAnalytics } = useDiscoveryTab();
   const { runAllTrigger, setRunAllTrigger } = useLogDashboard();
-  const { creatorsStatusView, setCreatorsStatusView } = useCreatorsTab();
+  const { showFavorites, setShowFavorites, creatorsStatusView, setCreatorsStatusView } = useCreatorsTab();
   const [creatorsStatusCounts, setCreatorsStatusCounts] = useState<Record<StatusView, number>>({ all: 0, raw: 0, enriched: 0, scraped: 0, failed: 0 });
   const [selectedCreator, setSelectedCreator] = useState<Competitor | null>(null);
 
@@ -160,7 +158,7 @@ export default function ReconFeaturePage() {
         activeTab={activeTab}
         onTabChange={(id) => { setActiveTab(id as Tab); setShowFavorites(false); setSelectedCreator(null); setSearchQuery(''); }}
         nextProduct={{ label: 'Intelligence', icon: <ProductIcon product="intelligence" size={16} />, href: '/isso/intelligence' }}
-        filterCategories={activeTab === 'feed' ? FILTER_CATEGORIES : undefined}
+        filterCategories={activeTab === 'feed' ? [] : undefined}
         filterRightSlot={activeTab === 'discovery' ? (
           <div className="flex items-center gap-2">
             <button
@@ -179,9 +177,6 @@ export default function ReconFeaturePage() {
           </div>
         ) : activeTab === 'feed' ? (
           <div className="flex items-center gap-1.5">
-            <SortPill value={sortBy} onChange={setSortBy} />
-            <DateRangePill />
-            <VisibilityPill value={visibility} onChange={setVisibility} />
             <DensityPill value={columns} onChange={setColumns} />
           </div>
         ) : undefined}
@@ -193,8 +188,8 @@ export default function ReconFeaturePage() {
           <AnimatePresence>
             <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
               {activeTab === 'discovery' && <DiscoveryTab extraCandidates={extraCandidates} showAnalytics={showAnalytics} />}
-              {activeTab === 'log'       && <LogDashboard extraCreators={extraCreators} />}
-              {activeTab === 'creators'  && (
+              {activeTab === 'log' && <LogDashboard extraCreators={extraCreators} />}
+              {activeTab === 'creators' && (
                 selectedCreator
                   ? <CreatorDetailView creator={selectedCreator} onBack={() => setSelectedCreator(null)} />
                   : <CreatorsTable
@@ -204,7 +199,6 @@ export default function ReconFeaturePage() {
                       statusCounts={creatorsStatusCounts}
                       onStatusCountsChange={setCreatorsStatusCounts}
                     />
-                  )}
               )}
               {activeTab === 'feed' && (
                 <ReconFeedTab onPostClick={(index, posts) => setDrawer({ index, posts })} onAnalyzeClick={(index, posts) => setDrawer({ index, posts, initialTab: 'ai' })} />
