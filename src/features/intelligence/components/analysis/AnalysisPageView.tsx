@@ -343,7 +343,14 @@ function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () =
   const thumb    = post.thumbnailUrl ?? '';
   const showGrad = !thumb || thumb.startsWith('linear-gradient') || imgFailed;
 
-  if (!post?.aiAnalysis) return null;
+  // Defensive: aiAnalysis should always be present (query filters it), but if temporarily
+  // absent during a Convex subscription tick, show a neutral placeholder rather than
+  // silently unmounting the panel (which looks like the selection was cleared).
+  if (!post?.aiAnalysis) return (
+    <div className="flex flex-1 items-center justify-center text-neutral-300 text-[11px] font-medium">
+      Loading…
+    </div>
+  );
 
   const score      = post.aiAnalysis.hookScore ?? 0;
   const scoreColor = score >= 8 ? '#059669' : score >= 6 ? '#6d28d9' : score >= 4 ? '#ea580c' : '#dc2626';
@@ -672,6 +679,19 @@ export function AnalysisPageView() {
 
   const activePrompt = useQuery(api.analysisPrompts.getActivePromptForType, { typeKey: selectedTypeKey });
 
+  // Diagnostic: fires whenever panel would unexpectedly hide — open DevTools to see why
+  useEffect(() => {
+    if (selectedPostId && !selectedPost) {
+      console.warn('[analysis-panel] selectedPostId set but selectedPost is null', {
+        selectedPostId,
+        snapshotId:    selectedPostSnapshot?._id ?? 'null',
+        freshPostId:   freshPost?._id   ?? 'null',
+        analysedCount: analysed?.length ?? 'undefined',
+        persistedId:   _persistedPostId ?? 'null',
+      });
+    }
+  });
+
   const runAllBusyRef = useRef(false);
   const [runAllBusy,  setRunAllBusy] = useState(false);
 
@@ -847,7 +867,7 @@ export function AnalysisPageView() {
         />
 
         {/* ── Auto pipeline view ── */}
-        <div className="flex gap-3 flex-1 min-h-0">
+        <div className="flex gap-3 flex-1 min-h-0 min-w-0">
 
             {/* Queue column */}
             <LeftSection
@@ -898,7 +918,7 @@ export function AnalysisPageView() {
             </LeftSection>
 
             {/* Middle: 3-row stack (Analyzing | Prompts | Analyzed) */}
-            <div className="flex-1 min-h-0 flex flex-col gap-3">
+            <div className="flex-1 min-h-0 min-w-0 flex flex-col gap-3">
 
               {/* Row 1: Analyzing pills strip */}
               <div
