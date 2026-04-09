@@ -112,50 +112,36 @@ function QueuePostCard({ post, isExpired, onAnalyse }: { post: QueuePost; isExpi
   );
 }
 
-// ── Analyzing card (horizontal, with scan animation) ─────────────────────────
+// ── Analyzing pill (horizontal compact) ──────────────────────────────────────
 
 function AnalyzingCard({ post, phase }: { post: QueuePost; phase: Phase }) {
-  const thumb    = post.thumbnailUrl ?? '';
-  const isGrad   = !thumb || thumb.startsWith('linear-gradient');
   const progress = phase === 'downloading' ? '35%' : '72%';
-
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.92 }}
+      initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-      className="flex-shrink-0 w-28 rounded-xl overflow-hidden"
-      style={{ border: '1px solid rgba(109,40,217,0.2)', backgroundColor: '#fff' }}
+      exit={{ opacity: 0, scale: 0.88, transition: { duration: 0.15 } }}
+      className="flex-shrink-0 flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
+      style={{ width: 168, backgroundColor: '#fff', border: '1px solid rgba(109,40,217,0.18)' }}
     >
-      {/* Thumbnail with scan overlay */}
-      <div className="relative w-full bg-neutral-100" style={{ height: 130 }}>
-        {isGrad
-          ? <div className="w-full h-full" style={{ background: thumb || PURPLE_GRAD }} />
-          // eslint-disable-next-line @next/next/no-img-element
-          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" />}
-
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/25" />
-
-        {/* Scan line sweep */}
+      {/* Pulsing orb */}
+      <div className="relative flex items-center justify-center shrink-0 w-8 h-8">
         <motion.div
-          className="absolute top-0 bottom-0 w-8 pointer-events-none"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(167,139,250,0.6), transparent)' }}
-          animate={{ x: ['-32px', '120px'] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: 'linear' }}
+          className="absolute inset-0 rounded-full"
+          style={{ background: PURPLE_GRAD }}
+          animate={{ scale: [1, 1.6, 1], opacity: [0.3, 0, 0.3] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
         />
-
-        {/* Spinner */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Loader2 size={16} className="animate-spin text-white/90" />
+        <div className="w-8 h-8 rounded-full flex items-center justify-center relative z-10" style={{ background: PURPLE_GRAD }}>
+          <Loader2 size={13} className="animate-spin text-white" />
         </div>
       </div>
 
-      {/* Info + progress bar */}
-      <div className="px-2 pt-1.5 pb-2">
-        <p className="text-[9px] font-semibold text-neutral-800 truncate">{post.handle}</p>
-        <p className="text-[8px] text-purple-500 mt-0.5">{phase === 'downloading' ? 'Downloading...' : 'Analysing...'}</p>
-        <div className="mt-1.5 h-1 rounded-full bg-neutral-100 overflow-hidden">
+      {/* Text + progress */}
+      <div className="flex-1 min-w-0">
+        <p className="text-[9px] font-semibold text-neutral-700 truncate">{post.handle}</p>
+        <p className="text-[8px] text-purple-500 mb-1.5">{phase === 'downloading' ? 'Downloading...' : 'Analysing...'}</p>
+        <div className="w-full h-1 rounded-full bg-neutral-100 overflow-hidden">
           <motion.div
             className="h-full rounded-full"
             style={{ background: PURPLE_GRAD }}
@@ -185,7 +171,7 @@ function AnalyzedPortraitCard({ post, isSelected, onClick }: { post: any; isSele
       whileHover={{ scale: 1.02 }}
       className="relative flex-shrink-0 h-full rounded-xl overflow-hidden cursor-pointer"
       style={{
-        width: 88,
+        width: 98,
         border: isSelected ? '2px solid #6d28d9' : '1px solid rgba(0,0,0,0.08)',
         boxShadow: isSelected ? '0 0 0 2px rgba(109,40,217,0.2)' : undefined,
       }}
@@ -242,8 +228,8 @@ function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () =
       animate={{ opacity: 1, x: 0 }}
       className="flex h-full"
     >
-      {/* Left: thumbnail column  -  fixed portrait width */}
-      <div className="relative shrink-0 bg-neutral-100" style={{ width: 180 }}>
+      {/* Left: thumbnail column  -  9:16 portrait width */}
+      <div className="relative shrink-0 bg-neutral-100" style={{ width: 290 }}>
         {showGrad
           ? <div className="w-full h-full" style={{ background: PURPLE_GRAD }} />
           // eslint-disable-next-line @next/next/no-img-element
@@ -647,58 +633,55 @@ export function AnalysisPageView({ viewMode }: { viewMode: ViewMode }) {
                   )}
             </LeftSection>
 
-            {/* Middle: Analyzing (top) + Analyzed (bottom)  -  fixed width, pushed left */}
-            <div className="flex flex-col gap-3 min-h-0" style={{ width: 360, flexShrink: 0 }}>
+            {/* Middle: 3-row stack (Analyzing | Prompts | Analyzed) */}
+            <div className="flex-1 min-h-0 flex flex-col gap-3">
 
-              {/* Analyzing  -  top section with system prompt panel */}
+              {/* Row 1: Analyzing pills strip */}
               <div
-                className="rounded-xl overflow-hidden flex"
+                className="shrink-0 rounded-xl overflow-hidden flex flex-col"
                 style={{
-                  flex: '0 0 46%',
+                  height: 120,
                   border: '1px solid rgba(0,0,0,0.07)',
                   borderLeft: '2px solid #7c3aed',
                   backgroundColor: 'rgba(124,58,237,0.04)',
                 }}
               >
-                {/* Left: cards */}
-                <div className="flex flex-col" style={{ width: '38%', borderRight: '1px solid rgba(109,40,217,0.1)' }}>
-                  <ColHeader title="Analyzing" count={inFlightPosts.length} accentColor="#7c3aed" />
-                  <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-start gap-2 px-2 py-2">
-                    {/* TEST MOCK  -  remove when real data flows */}
-                    <AnalyzingCard
-                      post={{ _id: '__mock__', handle: '@test.creator', niche: 'lifestyle', contentType: 'reel', thumbnailUrl: 'linear-gradient(135deg, #6d28d9, #4c1d95)', caption: '', engagementRate: 0.08, outlierRatio: 3.2, postedAt: Date.now() }}
-                      phase="analysing"
-                    />
-                    <AnimatePresence>
-                      {inFlightPosts.map(post => (
-                        <AnalyzingCard key={post._id} post={post} phase={inFlight.get(post._id) ?? 'analysing'} />
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                </div>
-
-                {/* Right: system prompt panel */}
-                <div className="flex-1 min-w-0 p-2">
-                  <SystemPromptPanel
-                    selectedTypeKey={selectedTypeKey}
-                    onTypeChange={setSelectedTypeKey}
+                <ColHeader title="Analyzing" count={inFlightPosts.length} accentColor="#7c3aed" />
+                <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-center gap-2 px-2 py-1.5">
+                  <AnalyzingCard
+                    post={{ _id: '__mock__', handle: '@test.creator', niche: 'lifestyle', contentType: 'reel', thumbnailUrl: 'linear-gradient(135deg, #6d28d9, #4c1d95)', caption: '', engagementRate: 0.08, outlierRatio: 3.2, postedAt: Date.now() }}
+                    phase="analysing"
                   />
+                  <AnimatePresence>
+                    {inFlightPosts.map(post => (
+                      <AnalyzingCard key={post._id} post={post} phase={inFlight.get(post._id) ?? 'analysing'} />
+                    ))}
+                  </AnimatePresence>
                 </div>
               </div>
 
-              {/* Analyzed  -  portrait card gallery */}
+              {/* Row 2: Analysis Prompts panel */}
+              <div className="flex-1 min-h-0">
+                <SystemPromptPanel
+                  selectedTypeKey={selectedTypeKey}
+                  onTypeChange={setSelectedTypeKey}
+                />
+              </div>
+
+              {/* Row 3: Analyzed portrait gallery */}
               <div
-                className="flex-1 min-h-0 rounded-xl overflow-hidden flex flex-col"
+                className="shrink-0 rounded-xl overflow-hidden flex flex-col"
                 style={{
+                  height: 220,
                   border: '1px solid rgba(0,0,0,0.07)',
                   borderLeft: '2px solid #059669',
                   backgroundColor: 'rgba(5,150,105,0.03)',
                 }}
               >
                 <ColHeader title="Analyzed" count={analysed?.length ?? 0} accentColor="#059669" />
-                <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden flex items-stretch gap-2 px-2 py-2">
+                <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-stretch gap-2 px-2 py-2">
                   {analysed === undefined
-                    ? [0,1,2].map(i => <div key={i} className="flex-shrink-0 w-[88px] h-full rounded-xl animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }} />)
+                    ? [0,1,2].map(i => <div key={i} className="flex-shrink-0 h-full rounded-xl animate-pulse" style={{ width: 98, backgroundColor: 'rgba(0,0,0,0.05)' }} />)
                     : analysed.length === 0
                       ? <div className="flex flex-1 items-center justify-center gap-2 text-neutral-300"><Sparkles size={16} /><p className="text-[11px] font-medium">No analyses yet</p></div>
                       : (
@@ -717,10 +700,10 @@ export function AnalysisPageView({ viewMode }: { viewMode: ViewMode }) {
               </div>
             </div>
 
-            {/* Right detail panel  -  flex-1, takes remaining space */}
+            {/* Right detail panel  -  fixed width */}
             <div
-              className="flex-1 min-w-0 rounded-xl overflow-hidden flex flex-col"
-              style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
+              className="shrink-0 rounded-xl overflow-hidden flex flex-col"
+              style={{ width: 600, border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
             >
               <AnimatePresence mode="wait">
                 {selectedPost ? (
