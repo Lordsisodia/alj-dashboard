@@ -8,9 +8,9 @@ import type { Id } from '@/convex/_generated/dataModel';
 import {
   Upload, Loader2, X, Play,
   Sparkles, Zap, Send, RotateCcw, Film, Plus,
-  MessageSquare,
+  MessageSquare, Clock,
 } from 'lucide-react';
-import { StatusStrip } from '@/components/ui/status-strip';
+import { StatusStrip, timeAgo } from '@/components/ui/status-strip';
 import { DEFAULT_ANALYSIS_PROMPT } from '../constants';
 import { SystemPromptPanel } from '@/features/intelligence/components/analysis/SystemPromptPanel';
 
@@ -481,6 +481,9 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
     ? Math.max(...analyzedSessions.map(s => s.hookScore))
     : 0;
   const sessionsWithChat = sessions?.filter(s => (s.chatHistory?.length ?? 0) > 0).length ?? 0;
+  const lastSessionAt = sessions && sessions.length > 0
+    ? Math.max(...sessions.map(s => s.analyzedAt))
+    : 0;
 
   return (
     <div className={`flex flex-col ${className ?? ''}`} style={containerStyle}>
@@ -497,6 +500,12 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
             ...(sessionsWithChat > 0 ? [{ value: sessionsWithChat, label: 'with chat' }] : []),
           ]}
           status={{ label: analyzedSessions.length > 0 ? 'Analyser ready' : 'No analyses yet', active: analyzedSessions.length > 0 }}
+          rightSlot={lastSessionAt > 0 ? (
+            <>
+              <Clock size={10} className="text-violet-600" />
+              <span>Last session: <span className="font-medium text-neutral-700">{timeAgo(lastSessionAt)}</span></span>
+            </>
+          ) : undefined}
         />
       </div>
 
