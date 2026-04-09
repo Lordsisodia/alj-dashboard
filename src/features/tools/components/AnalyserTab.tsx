@@ -8,10 +8,11 @@ import type { Id } from '@/convex/_generated/dataModel';
 import {
   Upload, Loader2, X, Play,
   Sparkles, Zap, Send, RotateCcw, Film, Plus,
-  ChevronRight, MessageSquare,
+  MessageSquare,
 } from 'lucide-react';
 import { StatusStrip } from '@/components/ui/status-strip';
 import { DEFAULT_ANALYSIS_PROMPT } from '../constants';
+import { SystemPromptPanel } from '@/features/intelligence/components/analysis/SystemPromptPanel';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -313,9 +314,14 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
   const [selectedId,  setSelectedId]  = useState<Id<'toolAnalyses'> | null>(null);
   const [showNew,     setShowNew]     = useState(true);
 
+  const [selectedTypeKey, setSelectedTypeKey] = useState('standard');
+  const promptVersions = useQuery(api.analysisPrompts.listVersionsForType, { typeKey: selectedTypeKey });
+  const activePrompt = promptVersions?.find(v => v.isActive)?.prompt
+    ?? promptVersions?.[0]?.prompt
+    ?? DEFAULT_ANALYSIS_PROMPT;
+
   const [file,      setFile]      = useState<File | null>(null);
   const [preview,   setPreview]   = useState<string | null>(null);
-  const [prompt,    setPrompt]    = useState(DEFAULT_ANALYSIS_PROMPT);
   const [label,     setLabel]     = useState('');
   const [uploading, setUploading] = useState(false);
   const [analysing, setAnalysing] = useState(false);
@@ -370,7 +376,7 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
 
       const anRes = await fetch('/api/tools/analyze', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: url, systemPrompt: prompt, label: label || undefined }),
+        body: JSON.stringify({ videoUrl: url, systemPrompt: activePrompt, label: label || undefined }),
       });
       if (!anRes.ok) { const e = await anRes.json(); throw new Error(e.error ?? 'Analysis failed'); }
       const data = await anRes.json();
@@ -381,7 +387,7 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
         setFile(null); setPreview(null); setLabel('');
         const analysisSummary = `Hook score: ${data.hookScore}/10. Hook line: "${data.hookLine}". ${data.breakdown ? `What's happening: ${data.breakdown}.` : ''} ${data.emotions?.length ? `Emotions: ${data.emotions.join(', ')}.` : ''} ${data.suggestions?.length ? `Tips: ${data.suggestions.join('; ')}.` : ''}`.trim();
         setApiMessages([
-          { role: 'user',      content: `[Video: ${url}]\n\n${prompt}` },
+          { role: 'user',      content: `[Video: ${url}]\n\n${activePrompt}` },
           { role: 'assistant', content: analysisSummary },
         ]);
       } else {
@@ -389,7 +395,7 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
         setLocalMessages([analysisMsg]);
         const analysisSummaryFallback = `Hook score: ${data.hookScore}/10. Hook line: "${data.hookLine}". ${data.breakdown ? `What's happening: ${data.breakdown}.` : ''} ${data.emotions?.length ? `Emotions: ${data.emotions.join(', ')}.` : ''} ${data.suggestions?.length ? `Tips: ${data.suggestions.join('; ')}.` : ''}`.trim();
         setApiMessages([
-          { role: 'user',      content: `[Video: ${url}]\n\n${prompt}` },
+          { role: 'user',      content: `[Video: ${url}]\n\n${activePrompt}` },
           { role: 'assistant', content: analysisSummaryFallback },
         ]);
       }
@@ -557,14 +563,12 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
 
           {error && <p className="text-xs text-red-500 px-1">{error}</p>}
 
-          <details>
-            <summary className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 cursor-pointer select-none hover:text-neutral-600 transition-colors flex items-center gap-1 list-none">
-              <ChevronRight size={10} /> System Prompt
-            </summary>
-            <textarea value={prompt} onChange={e => setPrompt(e.target.value)}
-              className="mt-2 w-full px-3 py-2 text-xs rounded-xl outline-none resize-none leading-relaxed font-mono text-neutral-900"
-              style={{ border: '1px solid rgba(0,0,0,0.1)', backgroundColor: 'rgba(0,0,0,0.02)', minHeight: 120 }} />
-          </details>
+          <div className="flex-1 min-h-0">
+            <SystemPromptPanel
+              selectedTypeKey={selectedTypeKey}
+              onTypeChange={setSelectedTypeKey}
+            />
+          </div>
         </div>
 
       ) : (
