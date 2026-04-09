@@ -137,7 +137,9 @@ export async function POST(req: NextRequest) {
       .slice(0, 30);
 
     const rawAvatarUrl = p.profilePicUrlHD ?? p.profilePicUrl ?? null;
-    console.log(`[enrich] ${username} - rawAvatarUrl: ${rawAvatarUrl ? 'found' : 'MISSING'}`);
+    // No profile pic from Apify = strong signal the account is private
+    const likelyPrivate = !rawAvatarUrl || (p.private ?? false);
+    console.log(`[enrich] ${username} - rawAvatarUrl: ${rawAvatarUrl ? 'found' : 'MISSING'}, likelyPrivate: ${likelyPrivate}`);
 
     // Kick off R2 upload + Convex write in parallel — don't await them
     const avatarUpload = rawAvatarUrl
@@ -153,7 +155,7 @@ export async function POST(req: NextRequest) {
       bio:              p.biography           ?? null,
       avatarUrl:        null, // filled below after R2 upload
       verified:         p.verified            ?? false,
-      isPrivate:        p.private             ?? false,
+      isPrivate:        likelyPrivate,
       isBusinessAccount: p.isBusinessAccount   ?? false,
       instagramId:      p.id ? String(p.id)   : null,
       externalUrl:      p.externalUrl           ?? p.externalUrls?.[0]?.url ?? null,

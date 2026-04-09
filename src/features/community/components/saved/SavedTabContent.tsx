@@ -2,50 +2,55 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Bookmark, ArrowRight, Clock, Search, SlidersHorizontal } from 'lucide-react';
 import { NICHE_COLORS } from '@/features/intelligence/constants';
-import { PostCard } from '@/features/intelligence/components/feed/PostCard';
 import { PostDetailDrawer } from '@/features/intelligence/components/drawer/PostDetailDrawer';
 import type { DrawerPost } from '@/features/intelligence/types';
 import { timeAgo } from '@/features/intelligence/utils';
+import { SavedCard } from './SavedCard';
+import { SendToPipelineModal } from './SendToPipelineModal';
 
 const SORT_OPTIONS = [
-  { value: 'newest',          label: 'Newest' },
+  { value: 'newest',         label: 'Newest' },
   { value: 'most-likes',     label: 'Most Likes' },
   { value: 'most-views',     label: 'Most Views' },
   { value: 'most-saves',     label: 'Most Saves' },
-  { value: 'top-engagement',  label: 'Top Engagement' },
+  { value: 'top-engagement', label: 'Top Engagement' },
 ] as const;
 
 type SortId = typeof SORT_OPTIONS[number]['value'];
+type PipelineStatus = 'all' | 'unassigned' | 'sent';
 
 interface SavedTabContentProps {
   onBrowseVault: () => void;
 }
 
 export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
-  const [searchQuery,  setSearchQuery]  = useState('');
-  const [niche,        setNiche]        = useState<string>('all');
-  const [contentType,  setContentType]  = useState<string>('all');
-  const [sortBy,       setSortBy]       = useState<SortId>('newest');
-  const [drawerIndex,  setDrawerIndex]  = useState<number | null>(null);
+  const [searchQuery,     setSearchQuery]     = useState('');
+  const [niche,           setNiche]           = useState<string>('all');
+  const [sortBy,          setSortBy]          = useState<SortId>('newest');
+  const [pipelineStatus,  setPipelineStatus]  = useState<PipelineStatus>('all');
+  const [drawerIndex,     setDrawerIndex]     = useState<number | null>(null);
+  const [modalPost,       setModalPost]       = useState<any | null>(null);
 
-  const savedPosts = useQuery(api.intelligence.getSavedPosts, {
-    niche:       niche       === 'all' ? undefined : niche,
-    contentType: contentType === 'all' ? undefined : contentType,
+  const toggleSave = useMutation(api.intelligence.toggleSave);
+
+  const savedPosts = useQuery(api.intelligence.getSavedPostsWithPipelineState, {
+    niche:          niche === 'all' ? undefined : niche,
     sortBy,
-    search:      searchQuery || undefined,
+    search:         searchQuery || undefined,
+    pipelineStatus: pipelineStatus === 'all' ? undefined : pipelineStatus,
   });
 
-  const stats = useQuery(api.intelligence.getSavedStats);
+  const stats = useQuery(api.intelligence.getSavedStatsV2);
 
-  // Dynamically derive available niches from real data
+  // Dynamic niches from real data
   const availableNiches = useMemo(() => {
-    if (!savedPosts) return ['all'] as const;
-    const niches = new Set(savedPosts.map(p => p.niche));
-    return ['all', ...Array.from(niches).sort()] as const;
+    if (!savedPosts) return ['all'];
+    const niches = new Set(savedPosts.map((p: any) => p.niche));
+    return ['all', ...Array.from(niches).sort()];
   }, [savedPosts]);
 
   const drawerPosts: DrawerPost[] = (savedPosts ?? []) as DrawerPost[];
@@ -54,31 +59,40 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ backgroundColor: '#fafafa' }}>
 
-      {/* ── Status strip ──────────────────────────────────────── */}
+      {/* ── Status strip ──────────────────────────────────────────── */}
       <div className="flex-shrink-0 px-4 pt-4 pb-2">
         <div
-          className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+          className="flex items-center gap-3 px-4 py-3 rounded-2xl flex-wrap"
           style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
         >
           {/* Pulsing active dot */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: '#ff0069' }} />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: '#ff0069' }} />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: '#2563eb' }} />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: '#2563eb' }} />
             </span>
             <span className="text-xs font-semibold text-neutral-800">Saved</span>
           </div>
 
           <div className="w-px h-4 flex-shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} />
 
-          <StatPill value={stats?.total  ?? '-'} label="posts"    accent="#ff0069" />
-          <StatPill value={stats?.creators ?? '-'} label="creators" accent="#833ab4" />
+          <StatPill value={stats?.total      ?? '-'} label="reels"    />
+          <StatPill value={stats?.unassigned ?? '-'} label="awaiting" accent="#d97706" />
+          <StatPill value={stats?.sentToPipeline ?? '-'} label="sent" accent="#2563eb" />
+          <StatPill value={stats?.creators   ?? '-'} label="creators" accent="#7c3aed" />
+
+          {(stats?.sentThisWeek ?? 0) > 0 && (
+            <>
+              <div className="w-px h-4 flex-shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} />
+              <span className="text-[11px] font-semibold" style={{ color: '#2563eb' }}>+{stats!.sentThisWeek} this week</span>
+            </>
+          )}
 
           <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
             {stats?.lastSavedAt ? (
               <>
                 <Clock size={10} className="text-neutral-400" />
-                <span className="text-[11px] text-neutral-400">Saved {timeAgo(stats.lastSavedAt)}</span>
+                <span className="text-[11px] text-neutral-400">Last saved {timeAgo(stats.lastSavedAt)}</span>
               </>
             ) : (
               <span className="text-[11px] text-neutral-400">No saves yet</span>
@@ -87,7 +101,7 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
         </div>
       </div>
 
-      {/* ── Search + filters ───────────────────────────────────── */}
+      {/* ── Search + filters ───────────────────────────────────────── */}
       <div className="flex-shrink-0 px-4 pb-3 space-y-2">
         {/* Search bar */}
         <div className="relative">
@@ -96,7 +110,7 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
             type="search"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search saved posts..."
+            placeholder="Search saved reels..."
             className="w-full pl-9 pr-4 py-2 rounded-xl text-xs text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
             style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.09)' }}
           />
@@ -106,10 +120,10 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <SlidersHorizontal size={11} className="text-neutral-400 flex-shrink-0" />
 
-          {/* Niche pills — dynamic from real data */}
+          {/* Niche pills */}
           {availableNiches.map(n => {
             const active = niche === n;
-            const color  = n === 'all' ? '#ff0069' : (NICHE_COLORS[n] ?? '#833ab4');
+            const color  = n === 'all' ? '#2563eb' : (NICHE_COLORS[n] ?? '#2563eb');
             return (
               <button
                 key={n}
@@ -128,21 +142,22 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
 
           <div className="w-px h-4 mx-1" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} />
 
-          {/* Content type pills */}
-          {(['all', 'reel', 'post', 'carousel'] as const).map(t => {
-            const active = contentType === t;
+          {/* Pipeline status 3-state segment */}
+          {(['unassigned', 'sent', 'all'] as PipelineStatus[]).map(s => {
+            const active = pipelineStatus === s;
+            const labels: Record<PipelineStatus, string> = { unassigned: 'Unassigned', sent: 'Sent', all: 'All' };
             return (
               <button
-                key={t}
-                onClick={() => setContentType(t)}
-                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all capitalize"
+                key={s}
+                onClick={() => setPipelineStatus(s)}
+                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all"
                 style={
                   active
                     ? { background: '#171717', color: '#fff' }
                     : { backgroundColor: '#fff', color: '#737373', border: '1px solid rgba(0,0,0,0.09)' }
                 }
               >
-                {t === 'all' ? 'All' : `${t}s`}
+                {labels[s]}
               </button>
             );
           })}
@@ -153,7 +168,7 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
         </div>
       </div>
 
-      {/* ── Content area ───────────────────────────────────────── */}
+      {/* ── Content area ───────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto px-4 pb-4">
         <AnimatePresence mode="wait">
           {savedPosts === undefined ? (
@@ -163,20 +178,14 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="gap-4"
-              style={{ columns: '1 180px, 2 280px, 3 360px, 4 480px' }}
+              className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
             >
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="break-inside-avoid mb-4">
-                  <div
-                    className="rounded-2xl overflow-hidden animate-pulse"
-                    style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.07)' }}
-                  >
-                    <div className="aspect-[4/5]" style={{ backgroundColor: '#f0f0f0' }} />
-                    <div className="p-3 space-y-2">
-                      <div className="h-3 rounded-full" style={{ backgroundColor: '#f0f0f0', width: '75%' }} />
-                      <div className="h-3 rounded-full" style={{ backgroundColor: '#f0f0f0', width: '50%' }} />
-                    </div>
+                <div key={i} className="rounded-2xl overflow-hidden animate-pulse" style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.07)' }}>
+                  <div className="aspect-[4/5]" style={{ backgroundColor: '#f0f0f0' }} />
+                  <div className="p-3 space-y-2">
+                    <div className="h-3 rounded-full" style={{ backgroundColor: '#f0f0f0', width: '75%' }} />
+                    <div className="h-3 rounded-full" style={{ backgroundColor: '#f0f0f0', width: '50%' }} />
                   </div>
                 </div>
               ))}
@@ -197,16 +206,16 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
                 <Bookmark size={24} className="text-neutral-300" />
               </div>
               <p className="text-sm font-medium text-neutral-500">
-                {searchQuery ? 'No posts match your search' : 'Nothing saved yet'}
+                {searchQuery ? 'No reels match your search' : 'Nothing saved yet'}
               </p>
               <p className="text-xs text-neutral-400 mt-0.5 mb-4">
-                {searchQuery ? 'Try a different keyword or clear the search' : 'Bookmark content from the Vault to build your library'}
+                {searchQuery ? 'Try a different keyword or clear the search' : 'Bookmark reels from the Vault to build your library'}
               </p>
               {!searchQuery && (
                 <button
                   onClick={onBrowseVault}
                   className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-opacity hover:opacity-80"
-                  style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)', color: '#fff' }}
+                  style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff' }}
                 >
                   Browse the Vault
                   <ArrowRight size={12} />
@@ -214,28 +223,27 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
               )}
             </motion.div>
           ) : (
-            // Masonry grid — keys change on filter to trigger fade
+            // Grid
             <motion.div
-              key={`${niche}-${contentType}-${sortBy}`}
+              key={`${niche}-${pipelineStatus}-${sortBy}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="gap-4"
-              style={{ columns: '1 180px, 2 280px, 3 360px, 4 480px' }}
+              className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
             >
-              {savedPosts.map((post, i) => (
+              {savedPosts.map((post: any, i: number) => (
                 <motion.div
                   key={post._id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.03, 0.3) }}
-                  className="break-inside-avoid mb-4"
                 >
-                  <PostCard
-                    post={post as any}
-                    visibility={{ brandDetails: true, likeCount: true, viewCount: true, saveCount: true }}
-                    onPostClick={() => setDrawerIndex(i)}
+                  <SavedCard
+                    post={post}
+                    onSendToPipeline={() => setModalPost(post)}
+                    onUnsave={() => toggleSave({ postId: post._id })}
+                    onOpenDrawer={() => setDrawerIndex(i)}
                   />
                 </motion.div>
               ))}
@@ -244,7 +252,7 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
         </AnimatePresence>
       </div>
 
-      {/* ── Post detail drawer ─────────────────────────────────── */}
+      {/* ── Post detail drawer ─────────────────────────────────────── */}
       <AnimatePresence>
         {drawerIndex !== null && (
           <PostDetailDrawer
@@ -255,6 +263,14 @@ export function SavedTabContent({ onBrowseVault }: SavedTabContentProps) {
           />
         )}
       </AnimatePresence>
+
+      {/* ── Send to Pipeline modal ────────────────────────────────── */}
+      <SendToPipelineModal
+        open={modalPost !== null}
+        post={modalPost}
+        onClose={() => setModalPost(null)}
+        onSuccess={() => setModalPost(null)}
+      />
     </div>
   );
 }
@@ -298,8 +314,8 @@ function SortDropdown({ value, onChange, label }: { value: SortId; onChange: (v:
                 onClick={() => { onChange(opt.value); setOpen(false); }}
                 className="w-full text-left px-3 py-2 text-[11px] font-medium transition-colors"
                 style={{
-                  color:        value === opt.value ? '#ff0069' : '#555',
-                  backgroundColor: value === opt.value ? 'rgba(255,0,105,0.06)' : 'transparent',
+                  color:           value === opt.value ? '#2563eb' : '#555',
+                  backgroundColor: value === opt.value ? 'rgba(37,99,235,0.06)' : 'transparent',
                 }}
               >
                 {opt.label}

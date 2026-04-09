@@ -12,7 +12,7 @@ import { MotionCriteria, ViralityCriteria } from './CriteriaChecklist';
 import { SwipeSessionSummary } from './SwipeSessionSummary';
 import { SwipeAuditLog } from './SwipeAuditLog';
 import { SendToModelModal } from './SendToModelModal';
-import { SEED_REELS, MODELS } from '../constants';
+import { MODELS } from '../constants';
 import type { TagSelection, RatingRecord, SwipeSession } from '../types';
 
 function fmtK(n: number) {
@@ -24,9 +24,6 @@ export type ViewMode = 'swipe' | 'grid' | 'log';
 function newSession(): SwipeSession {
   return { rated: 0, passed: 0, sent: 0, startedAt: new Date(), log: [] };
 }
-
-// Pre-computed fallback — stable reference, never recreated
-const SEED_ADAPTED = SEED_REELS.map((r) => ({ ...r, postId: r.id }));
 
 // Adapter: scrapedPosts → SwipeReel (adds postId field for Convex mutation)
 function adaptPostToReel(post: any) {
@@ -42,12 +39,12 @@ function adaptPostToReel(post: any) {
       displayName: account?.displayName,
       avatarUrl:   account?.avatarUrl,
       initials:    post.handle?.replace('@', '').slice(0, 2).toUpperCase() ?? '?',
-      color:       account?.avatarColor ?? '#833ab4',
+      color:       account?.avatarColor ?? '#2563eb',
     },
     views:          post.views          ?? 0,
     caption:        post.caption        ?? '',
     type:           post.contentType    ?? 'post',
-    aiAnalysis:     post.aiAnalysis     ?? null,
+    aiAnalysis:     post.aiAnalysis ?? post.derivedAnalysis ?? null,
     engagementRate: post.engagementRate ?? null,
     likes:          post.likes          ?? null,
     comments:       post.comments       ?? null,
@@ -61,7 +58,7 @@ function adaptHistoryToRecord(h: any): RatingRecord {
     id: h._id,
     reel: h.post
       ? adaptPostToReel(h.post)
-      : ({ id: h.postId, gradient: '#833ab4', isVideo: false, creator: { handle: '', initials: '?', color: '#833ab4' }, views: 0, caption: '', type: 'post' } as any),
+      : ({ id: h.postId, gradient: '#2563eb', isVideo: false, creator: { handle: '', initials: '?', color: '#2563eb' }, views: 0, caption: '', type: 'post' } as any),
     decision: (h.rating === 'up' ? 'like' : h.rating === 'down' ? 'pass' : 'sent') as RatingRecord['decision'],
     tags: {},
     timestamp: new Date(h.ratedAt),
@@ -72,7 +69,7 @@ function adaptHistoryToRecord(h: any): RatingRecord {
 const DECISION_CONFIG: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
   like: { icon: <Heart size={11} className="fill-current" />, color: '#f43f5e', label: 'Rated' },
   pass: { icon: <X size={11} />, color: '#a3a3a3', label: 'Passed' },
-  sent: { icon: <Send size={11} />, color: '#833ab4', label: 'Sent' },
+  sent: { icon: <Send size={11} />, color: '#7c3aed', label: 'Sent' },
 };
 
 interface SwipeTabContentProps {
@@ -96,12 +93,7 @@ export function SwipeTabContent({ mode: controlledMode, onModeChange, onSessionC
 
   const isLoading = convexQueue === undefined;
 
-  // Fall back to SEED_REELS if Convex is empty (dev convenience)
-  const queue = convexQueue !== undefined
-    ? convexQueue.length > 0
-      ? convexQueue.map(adaptPostToReel)
-      : SEED_ADAPTED
-    : SEED_ADAPTED;
+  const queue = (convexQueue ?? []).map(adaptPostToReel);
 
   const historyRecords = useMemo(
     () => (history ?? []).map(adaptHistoryToRecord),
@@ -109,8 +101,7 @@ export function SwipeTabContent({ mode: controlledMode, onModeChange, onSessionC
   );
 
   function currentReel() {
-    const idx = session.rated + session.passed + session.sent;
-    return queue[idx];
+    return queue[0];
   }
 
   function appendRecord(decision: RatingRecord['decision'], sentToModel?: string, note?: string) {
@@ -199,7 +190,7 @@ export function SwipeTabContent({ mode: controlledMode, onModeChange, onSessionC
             {historyRecords.length > 0 && (
               <span
                 className="ml-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)', color: '#fff' }}
+                style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff' }}
               >
                 {historyRecords.length}
               </span>
@@ -261,14 +252,20 @@ export function SwipeTabContent({ mode: controlledMode, onModeChange, onSessionC
             <div className="grid gap-5" style={{ gridTemplateColumns: '240px 1fr 340px' }}>
               {/* Col A: SwipeStack */}
               <div className="flex flex-col items-center justify-start pt-2">
-                <SwipeStack
-                  queue={queue}
-                  tags={tags}
-                  onLike={handleLike}
-                  onPass={handlePass}
-                  onSendToModel={handleSendOpen}
-                  onEmpty={() => {}}
-                />
+                {isLoading ? (
+                  <div className="flex flex-col items-center justify-center h-full py-16 text-neutral-400">
+                    <p className="text-xs">Loading queue…</p>
+                  </div>
+                ) : (
+                  <SwipeStack
+                    queue={queue}
+                    tags={tags}
+                    onLike={handleLike}
+                    onPass={handlePass}
+                    onSendToModel={handleSendOpen}
+                    onEmpty={() => {}}
+                  />
+                )}
               </div>
 
               {/* Col B: AI Analysis */}
@@ -326,7 +323,7 @@ function ModeButton({
       className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all"
       style={
         active
-          ? { background: 'linear-gradient(135deg, #ff0069, #833ab4)', color: '#fff' }
+          ? { background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff' }
           : { background: '#f5f5f4', color: '#737373' }
       }
     >
@@ -341,7 +338,7 @@ function GridMode({
   onPass,
   onSend,
 }: {
-  reels: typeof SEED_REELS;
+  reels: ReturnType<typeof adaptPostToReel>[];
   onLike: () => void;
   onPass: () => void;
   onSend: () => void;
@@ -388,10 +385,10 @@ function GridMode({
               <ActionBtn onClick={onPass} color="#ef4444">
                 <X size={12} />
               </ActionBtn>
-              <ActionBtn onClick={onLike} color="#ff0069" gradient>
+              <ActionBtn onClick={onLike} color="#2563eb" gradient>
                 <Heart size={12} className="fill-white" />
               </ActionBtn>
-              <ActionBtn onClick={onSend} color="#833ab4">
+              <ActionBtn onClick={onSend} color="#7c3aed">
                 <Send size={12} />
               </ActionBtn>
             </div>
@@ -429,7 +426,7 @@ function ActionBtn({
       className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-transform hover:scale-110 active:scale-95"
       style={
         gradient
-          ? { background: 'linear-gradient(135deg, #ff0069, #833ab4)' }
+          ? { background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }
           : { background: color }
       }
     >

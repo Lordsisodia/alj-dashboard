@@ -1,10 +1,9 @@
 'use client';
 
 import { BarChart2 } from 'lucide-react';
-import { POSTS, NICHE_CONFIG, MOCK_NICHE_TARGETS } from '../../constants';
-import type { Niche } from '../../types';
-
-const NICHES: Niche[] = ['fitness', 'lifestyle', 'fashion', 'wellness'];
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { NICHE_CONFIG, MOCK_NICHE_TARGETS } from '../../constants';
 
 const VAULT_NICHE_COLORS: Record<string, { color: string; bg: string }> = {
   fitness:   { color: '#f43f5e', bg: 'rgba(244,63,94,0.08)' },
@@ -36,18 +35,17 @@ function StatusChip({ fillPct }: { fillPct: number }) {
 }
 
 export function VaultHealthBar() {
-  const total = POSTS.length;
-  const counts = NICHES.reduce<Record<Niche, number>>((acc, n) => {
-    acc[n] = POSTS.filter(p => p.niche === n).length;
-    return acc;
-  }, {} as Record<Niche, number>);
+  const nicheCounts = useQuery(api.hub.getNicheQueueCounts);
 
-  const nicheData = NICHES.map(niche => {
-    const count  = counts[niche];
-    const target = MOCK_NICHE_TARGETS[niche] ?? 20;
+  // Build niche data from real queue counts vs config targets
+  const nicheData = Object.entries(MOCK_NICHE_TARGETS).map(([niche, target]) => {
+    const entry   = nicheCounts?.find((n) => n.niche.toLowerCase() === niche.toLowerCase());
+    const count   = entry?.count ?? 0;
     const fillPct = Math.min(100, Math.round((count / target) * 100));
     return { niche, count, fillPct };
-  }).sort((a, b) => a.fillPct - b.fillPct); // lowest fill first (urgency at top)
+  }).sort((a, b) => a.fillPct - b.fillPct);
+
+  const total = nicheData.reduce((sum, n) => sum + n.count, 0);
 
   return (
     <div

@@ -62,39 +62,71 @@ async function uploadToR2(username, picUrl) {
   return `${R2_PUBLIC_BASE}/${key}`;
 }
 
-async function main() {
-  console.log('Fetching approved candidates...');
-  const candidates = await convexQuery('candidates:list', { status: 'approved' });
+const APP_BASE = env.APP_BASE ?? env.NEXTAUTH_URL ?? 'http://localhost:3000';
 
+async function enrichViaApi(handle) {
+  const res = await fetch(`${APP_BASE}/api/recon/enrich-candidate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ handle }),
+    signal: AbortSignal.timeout(40_000),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().catch(() => '')}`);
+  return res.json();
+}
+
+async function main() {
+  // ── 1. trackedAccounts with missing or CDN avatars ──────────────────
+  console.log('\n── trackedAccounts ─────────────────────────────────────────');
+  const needingAvatar = await convexQuery('trackedAccounts:getAccountsNeedingAvatar', {});
+  console.log(`Found ${needingAvatar.length} accounts with missing/CDN avatars\n`);
+
+  let ok = 0, fail = 0;
+  for (const a of needingAvatar) {
+    process.stdout.write(`  ${a.handle} ... `);
+    try {
+      await enrichViaApi(a.handle);
+      console.log('✓');
+      ok++;
+    } catch (e) {
+      console.log(`✗  ${e.message}`);
+      fail++;
+    }
+    // small pause to avoid hammering Apify
+    await new Promise(r => setTimeout(r, 500));
+  }
+  console.log(`\ntrackedAccounts: ${ok} fixed, ${fail} failed`);
+
+  // ── 2. creatorCandidates with non-R2 avatars (existing behaviour) ──
+  console.log('\n── creatorCandidates ───────────────────────────────────────');
+  const candidates = await convexQuery('candidates:list', { status: 'approved' });
   const needsUpload = candidates.filter(c =>
     c.avatarUrl && !c.avatarUrl.includes('r2.dev')
   );
+  console.log(`Found ${needsUpload.length} candidates with non-R2 avatars\n`);
 
-  console.log(`Found ${needsUpload.length} profiles with non-R2 avatars\n`);
-
-  let ok = 0, fail = 0;
+  let ok2 = 0, fail2 = 0;
   for (const c of needsUpload) {
     const username = c.handle.replace('@', '');
     process.stdout.write(`  ${c.handle} ... `);
     try {
       const r2Url = await uploadToR2(username, c.avatarUrl);
       await convexMutation('candidates:upsert', {
-        handle:      c.handle,
-        displayName: c.displayName,
-        status:      c.status,
-        source:      c.source,
-        avatarUrl:   r2Url,
+        handle:       c.handle,
+        displayName:  c.displayName,
+        status:       c.status,
+        source:       c.source,
+        avatarUrl:    r2Url,
         enrichStatus: 'done',
       });
       console.log(`✓  ${r2Url}`);
-      ok++;
+      ok2++;
     } catch (e) {
       console.log(`✗  ${e.message}`);
-      fail++;
+      fail2++;
     }
   }
-
-  console.log(`\nDone: ${ok} uploaded, ${fail} failed`);
+  console.log(`\ncreatorCandidates: ${ok2} uploaded, ${fail2} failed`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

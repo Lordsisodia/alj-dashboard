@@ -160,6 +160,18 @@ export const setFailed = mutation({
   },
 });
 
+// Mark account as likely private — visible but excluded from active pipeline
+export const setPaused = mutation({
+  args: { handle: v.string() },
+  handler: async (ctx, { handle }) => {
+    const acc = await ctx.db
+      .query("trackedAccounts")
+      .withIndex("by_handle", q => q.eq("handle", handle))
+      .first();
+    if (acc) await ctx.db.patch(acc._id, { status: "paused", isPrivate: true });
+  },
+});
+
 export const remove = mutation({
   args: { handle: v.string() },
   handler: async (ctx, { handle }) => {
@@ -241,6 +253,21 @@ export const upsertEnriched = mutation({
 // Called after enrich-candidate API succeeds — overwrites ALL provided fields so placeholder
 // values (0, empty string) get replaced with real Apify data.
 
+// Returns handles that have no avatar or still have a raw CDN URL (not yet on R2)
+export const getAccountsNeedingAvatar = query({
+  args: {},
+  handler: async (ctx) => {
+    const accounts = await ctx.db.query("trackedAccounts").collect();
+    return accounts
+      .filter(a => {
+        if (!a.avatarUrl) return true;
+        const u = a.avatarUrl;
+        return u.includes('cdninstagram.com') || u.includes('fbcdn.net') || u.includes('instagram.com');
+      })
+      .map(a => ({ handle: a.handle, avatarUrl: a.avatarUrl ?? null }));
+  },
+});
+
 export const syncEnrichedToTracked = mutation({
   args: {
     handle:             v.string(),
@@ -276,5 +303,29 @@ export const syncEnrichedToTracked = mutation({
     }
     await ctx.db.patch(acc._id, patch);
     return acc._id;
+  },
+});
+
+// Recompute avgEngagementRate for all accounts from their actual scraped posts
+export const recomputeEngagementRates = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const accounts = await ctx.db.query("trackedAccounts").collect();
+    const posts    = await ctx.db.query("scrapedPosts").collect();
+
+    let updated = 0;
+    for (const acc of accounts) {
+      const accPosts = posts.filter(p => p.handle === acc.handle && p.engagementRate > 0);
+      if (accPosts.length === 0) continue;
+
+      const avgER = parseFloat(
+        (accPosts.reduce((s, p) => s + p.engagementRate, 0) / accPosts.length).toFixed(6)
+      );
+      if (Math.abs(avgER - (acc.avgEngagementRate ?? 0)) > 0.0001) {
+        await ctx.db.patch(acc._id, { avgEngagementRate: avgER });
+        updated++;
+      }
+    }
+    return { checked: accounts.length, updated };
   },
 });

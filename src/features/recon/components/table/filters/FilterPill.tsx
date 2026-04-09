@@ -12,12 +12,14 @@ interface FilterPillProps {
   value: string[] | string;
   multi?: boolean;
   onChange: (v: string[] | string) => void;
+  accentColor?: string;
+  neutral?: boolean;
 }
 
-export function FilterPill({ label, options, value, multi = false, onChange }: FilterPillProps) {
+export function FilterPill({ label, options, value, multi = false, onChange, accentColor = '#ff0069', neutral = false }: FilterPillProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const isActive = Array.isArray(value) ? value.length > 0 : !!value;
+  const isActive = neutral ? false : (Array.isArray(value) ? value.length > 0 : !!value);
 
   useEffect(() => {
     function onDown(e: MouseEvent) {
@@ -49,9 +51,14 @@ export function FilterPill({ label, options, value, multi = false, onChange }: F
         className={cn(
           'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all select-none whitespace-nowrap',
           isActive
-            ? 'bg-[#ff006910] text-[#ff0069] border border-[#ff006930]'
+            ? 'border'
             : 'text-neutral-600 hover:text-neutral-800 hover:bg-black/[0.04] border border-transparent hover:border-neutral-200',
         )}
+        style={isActive ? {
+          backgroundColor: `${accentColor}10`,
+          color: accentColor,
+          borderColor: `${accentColor}30`,
+        } : undefined}
       >
         {displayLabel}
         <ChevronDown size={10} className={cn('transition-transform duration-150', open && 'rotate-180')} />
@@ -71,7 +78,7 @@ export function FilterPill({ label, options, value, multi = false, onChange }: F
                 className="w-full flex items-center justify-between px-3 py-2 text-xs text-neutral-700 hover:bg-black/[0.04] transition-colors"
               >
                 {opt.label ?? opt.value}
-                {sel && <Check size={11} className="text-[#ff0069] flex-shrink-0" />}
+                {sel && <Check size={11} className="flex-shrink-0" style={{ color: accentColor }} />}
               </button>
             );
           })}
