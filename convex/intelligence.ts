@@ -132,11 +132,20 @@ export const getStats = query({
     // Latest scrape time across all posts
     const latestScrape = posts.reduce((max, p) => Math.max(max, p.scrapedAt ?? 0), 0);
 
+    // Analysis stats
+    const analysedPosts = posts.filter(p => p.aiAnalysis != null);
+    const analysedCount = analysedPosts.length;
+    const avgHookScore  = analysedCount > 0
+      ? analysedPosts.reduce((sum, p) => sum + (p.aiAnalysis?.hookScore ?? 0), 0) / analysedCount
+      : 0;
+
     return {
       totalIndexed:    posts.length,
       postsThisWeek,
       postsLastWeek,
       unanalysedCount,
+      analysedCount,
+      avgHookScore,
       latestScrapeAt:  latestScrape,
     };
   },

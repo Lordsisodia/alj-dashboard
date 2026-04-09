@@ -1,12 +1,15 @@
 'use client';
 
-import { Radio, Clock } from 'lucide-react';
+import { Radio, Clock, Inbox, CheckCircle2, Zap } from 'lucide-react';
 import { StatusStrip } from '@/components/ui/status-strip';
 
 interface Props {
   totalIndexed:   number;
   postsThisWeek:  number;
   latestScrapeAt: number;
+  inQueue?:       number;
+  analysedCount?: number;
+  avgHookScore?:  number;
 }
 
 function timeAgo(ts: number): string {
@@ -19,7 +22,7 @@ function timeAgo(ts: number): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export function PipelineStatusStrip({ totalIndexed, postsThisWeek, latestScrapeAt }: Props) {
+export function PipelineStatusStrip({ totalIndexed, postsThisWeek, latestScrapeAt, inQueue, analysedCount, avgHookScore }: Props) {
   const isRecent = latestScrapeAt > Date.now() - 24 * 60 * 60 * 1000;
   return (
     <StatusStrip
@@ -27,6 +30,9 @@ export function PipelineStatusStrip({ totalIndexed, postsThisWeek, latestScrapeA
       stats={[
         { icon: <Radio size={11} />, value: totalIndexed, label: 'posts indexed' },
         { value: `+${postsThisWeek}`, label: 'this week' },
+        ...(inQueue      != null ? [{ icon: <Inbox        size={11} />, value: inQueue,                              label: 'in queue'  }] : []),
+        ...(analysedCount != null ? [{ icon: <CheckCircle2 size={11} />, value: analysedCount,                        label: 'analyzed'  }] : []),
+        ...(avgHookScore  != null && avgHookScore > 0 ? [{ icon: <Zap size={11} />, value: avgHookScore.toFixed(1),  label: 'avg hook'  }] : []),
       ]}
       iconColor="text-purple-600"
       rightSlot={
