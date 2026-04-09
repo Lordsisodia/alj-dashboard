@@ -552,7 +552,7 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
 
           <div className="flex gap-2 items-center">
             <input type="text" value={label} onChange={e => setLabel(e.target.value)}
-              placeholder="Label (optional)"
+              placeholder="Title session..."
               className="flex-1 px-3 py-2.5 text-sm rounded-xl outline-none text-neutral-900 placeholder:text-neutral-400"
               style={{ border: '1px solid rgba(0,0,0,0.1)', backgroundColor: 'rgba(0,0,0,0.02)' }} />
             <button onClick={runAnalysis} disabled={!file || isLoading}
@@ -704,44 +704,66 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
       )}
 
       {/* ── Chat panel ── */}
-      <div className="w-96 flex-shrink-0 flex flex-col min-h-0 overflow-hidden pl-5 pr-2 py-1">
-        <div className="flex items-center gap-2 mb-3 flex-shrink-0">
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.1)' }}>
-            <Sparkles size={12} className="text-violet-600" />
+      <div className="flex-1 min-w-0 flex flex-col rounded-xl overflow-hidden min-h-0"
+        style={{
+          border: '1px solid rgba(0,0,0,0.07)',
+          borderTop: `2px solid ${COL_ACCENT}`,
+          background: `${COL_ACCENT}04`,
+        }}>
+
+        {/* Header */}
+        <div className="flex items-center gap-2 px-3 py-2.5 flex-shrink-0"
+          style={{ borderBottom: `1px solid ${COL_ACCENT}18` }}>
+          <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}>
+            <Sparkles size={9} className="text-white" />
           </div>
-          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-widest">Conversation</p>
-          {selectedSession && (
-            <span className="ml-1 text-[10px] text-neutral-400 truncate max-w-[140px]">
-              - {selectedSession.label || 'Untitled'}
-            </span>
-          )}
+          <p className="text-[10px] font-semibold uppercase tracking-wider flex-1" style={{ color: COL_ACCENT }}>
+            {selectedSession?.label ? selectedSession.label : 'Conversation'}
+          </p>
+          <span className="text-[9px] text-neutral-400 flex-shrink-0">Gemini AI</span>
           {hasMessages && !hasSession && (
             <button onClick={() => setLocalMessages([])}
-              className="ml-auto flex items-center gap-1 text-[11px] text-neutral-400 hover:text-neutral-600 transition-colors">
-              <RotateCcw size={10} /> Clear
+              className="flex items-center gap-1 text-[9px] text-neutral-400 hover:text-neutral-600 transition-colors ml-1">
+              <RotateCcw size={8} /> Clear
             </button>
           )}
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-4 pr-1">
+        {/* Messages */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-4 min-h-0">
           {!hasMessages && !isLoading && (
-            <div className="flex flex-col items-center justify-center h-full gap-3">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.06)' }}>
-                <Sparkles size={20} className="text-violet-400" />
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+              {/* AI avatar */}
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
+                <Sparkles size={22} className="text-white" />
               </div>
-              <p className="text-sm font-medium text-neutral-500 text-center">
-                {hasSession ? 'Start a follow-up' : 'Upload a video to begin'}
-              </p>
-              <p className="text-xs text-neutral-400 text-center">
-                {hasSession ? 'Ask anything about this video' : 'Drop a clip, run analysis, then chat'}
-              </p>
+              <div className="text-center">
+                <p className="text-[11px] font-semibold text-neutral-700 mb-0.5">Gemini Video Intelligence</p>
+                <p className="text-[10px] text-neutral-400">
+                  {hasSession ? 'Ask me anything about this video' : 'Ready when you are'}
+                </p>
+              </div>
+              {/* Intro bubble */}
+              <div className="max-w-[240px] px-3.5 py-2.5 rounded-2xl rounded-tl-sm text-[11px] text-neutral-600 leading-relaxed"
+                style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                {hasSession
+                  ? `I've analysed "${selectedSession?.label || 'this video'}". Ask me anything - hooks, emotions, captions, ideas.`
+                  : 'Drop a video clip and run analysis. I\'ll break down the hook, emotions and engagement patterns — then we can chat about it.'}
+              </div>
             </div>
           )}
 
           {isLoading && (
             <div className="flex flex-col items-center justify-center h-full gap-3">
-              <Loader2 size={20} className="animate-spin text-violet-400" />
-              <p className="text-sm text-neutral-500">{uploading ? 'Uploading to R2...' : 'Gemini is watching...'}</p>
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}>
+                <Loader2 size={18} className="animate-spin text-white" />
+              </div>
+              <p className="text-sm font-medium text-neutral-600">
+                {uploading ? 'Uploading to R2...' : 'Gemini is watching...'}
+              </p>
             </div>
           )}
 
@@ -750,34 +772,37 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
           </AnimatePresence>
 
           {chatLoading && (
-            <div className="flex gap-2">
-              <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+            <div className="flex gap-2 items-start">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                 style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}>
-                <Sparkles size={10} className="text-white" />
+                <Sparkles size={9} className="text-white" />
               </div>
-              <div className="px-3 py-2 rounded-2xl rounded-tl-sm" style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
-                <Loader2 size={14} className="animate-spin text-neutral-400" />
+              <div className="px-3 py-2 rounded-2xl rounded-tl-sm"
+                style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                <Loader2 size={13} className="animate-spin text-violet-400" />
               </div>
             </div>
           )}
         </div>
 
+        {/* Input */}
         {canChat && (
-          <div className="flex-shrink-0 mt-3 flex gap-2">
+          <div className="flex-shrink-0 px-3 pb-3 pt-2 flex gap-2"
+            style={{ borderTop: `1px solid ${COL_ACCENT}12` }}>
             <input
               type="text"
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendFollowUp(); } }}
-              placeholder="Ask a follow-up... e.g. write me a GFE caption"
+              placeholder="Ask a follow-up..."
               className="flex-1 px-3 py-2.5 text-sm rounded-xl outline-none text-neutral-900 placeholder:text-neutral-400"
-              style={{ border: '1px solid rgba(0,0,0,0.1)', backgroundColor: 'rgba(0,0,0,0.02)' }}
+              style={{ border: '1px solid rgba(0,0,0,0.09)', backgroundColor: '#fff' }}
               disabled={chatLoading}
             />
             <button onClick={sendFollowUp} disabled={!chatInput.trim() || chatLoading}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all hover:brightness-110 disabled:opacity-40 flex-shrink-0"
               style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}>
-              <Send size={15} />
+              <Send size={14} />
             </button>
           </div>
         )}
