@@ -221,6 +221,30 @@ function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () =
   const thumb    = post.thumbnailUrl ?? '';
   const showGrad = !thumb || thumb.startsWith('linear-gradient') || imgFailed;
 
+  const score      = post.aiAnalysis.hookScore ?? 0;
+  const scoreColor = score >= 8 ? '#059669' : score >= 6 ? '#6d28d9' : score >= 4 ? '#ea580c' : '#dc2626';
+
+  function fmt(n: number) {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
+    return `${n}`;
+  }
+
+  function emotionStyle(e: string): { bg: string; color: string; border: string } {
+    const lower = e.toLowerCase();
+    if (['confident', 'bold', 'powerful', 'strong'].some(k => lower.includes(k)))
+      return { bg: 'rgba(5,150,105,0.08)',  color: '#059669', border: 'rgba(5,150,105,0.2)'  };
+    if (['playful', 'fun', 'happy', 'excited', 'joy'].some(k => lower.includes(k)))
+      return { bg: 'rgba(251,146,60,0.1)',   color: '#ea580c', border: 'rgba(251,146,60,0.2)' };
+    if (['curious', 'intrigued', 'interested'].some(k => lower.includes(k)))
+      return { bg: 'rgba(59,130,246,0.1)',   color: '#2563eb', border: 'rgba(59,130,246,0.2)' };
+    if (['desire', 'want', 'aspire', 'lust', 'appeal'].some(k => lower.includes(k)))
+      return { bg: 'rgba(236,72,153,0.1)',   color: '#db2777', border: 'rgba(236,72,153,0.2)' };
+    return { bg: 'rgba(109,40,217,0.08)',  color: '#6d28d9', border: 'rgba(109,40,217,0.15)' };
+  }
+
+  const hasEngagement = (post.likes ?? 0) > 0 || (post.views ?? 0) > 0 || (post.saves ?? 0) > 0;
+
   return (
     <motion.div
       key={post._id}
@@ -228,7 +252,7 @@ function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () =
       animate={{ opacity: 1, x: 0 }}
       className="flex h-full"
     >
-      {/* Left: thumbnail column  -  9:16 portrait width */}
+      {/* Left: thumbnail column  -  9:16 portrait */}
       <div className="relative shrink-0 bg-neutral-100" style={{ width: 290 }}>
         {showGrad
           ? <div className="w-full h-full" style={{ background: PURPLE_GRAD }} />
@@ -236,9 +260,8 @@ function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () =
           : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" onError={() => setImgFailed(true)} />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         <div className="absolute bottom-3 left-3 right-3">
-          <ScoreRing score={post.aiAnalysis.hookScore} size={44} />
-          <p className="text-[12px] font-bold text-white leading-tight mt-1.5">{post.handle}</p>
-          <p className="text-[9px] text-white/70 capitalize">{post.niche} · {post.contentType}</p>
+          <p className="text-[13px] font-bold text-white leading-tight">{post.handle}</p>
+          <p className="text-[9px] text-white/70 capitalize mt-0.5">{post.niche} · {post.contentType}</p>
         </div>
       </div>
 
@@ -246,21 +269,51 @@ function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () =
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4">
 
-          {/* Hook line */}
-          <div className="rounded-xl px-4 py-3" style={{ backgroundColor: 'rgba(109,40,217,0.05)', border: '1px solid rgba(109,40,217,0.12)' }}>
-            <p className="text-[9px] font-semibold text-purple-600 uppercase tracking-wider mb-1.5">Hook Line</p>
-            <p className="text-[13px] text-neutral-700 italic leading-relaxed">"{post.aiAnalysis.hookLine}"</p>
+          {/* Hook score + hook line side by side */}
+          <div className="flex gap-3 items-stretch">
+            <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-2xl"
+              style={{ backgroundColor: `${scoreColor}12`, border: `1.5px solid ${scoreColor}30` }}>
+              <span className="text-[22px] font-black leading-none" style={{ color: scoreColor }}>{score.toFixed(1)}</span>
+              <span className="text-[7px] font-bold uppercase tracking-wide mt-0.5" style={{ color: scoreColor }}>Hook</span>
+            </div>
+            <div className="flex-1 min-w-0 rounded-xl px-3 py-2.5" style={{ backgroundColor: 'rgba(109,40,217,0.05)', border: '1px solid rgba(109,40,217,0.12)' }}>
+              <p className="text-[8px] font-semibold text-purple-500 uppercase tracking-wider mb-1">Hook Line</p>
+              <p className="text-[11px] text-neutral-700 italic leading-snug">"{post.aiAnalysis.hookLine}"</p>
+            </div>
           </div>
 
-          {/* Emotions */}
+          {/* Engagement stats row */}
+          {hasEngagement && (
+            <div className="grid grid-cols-4 gap-1.5">
+              {[
+                { label: 'Likes', value: fmt(post.likes ?? 0) },
+                { label: 'Views', value: fmt(post.views ?? 0) },
+                { label: 'Saves', value: fmt(post.saves ?? 0) },
+                { label: 'ER',    value: `${((post.engagementRate ?? 0) * 100).toFixed(1)}%` },
+              ].map(({ label, value }) => (
+                <div key={label} className="rounded-lg px-2 py-2 text-center"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}>
+                  <p className="text-[13px] font-bold text-neutral-700 leading-none">{value}</p>
+                  <p className="text-[8px] text-neutral-400 mt-1 uppercase tracking-wide">{label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Emotions — color-coded by type */}
           {post.aiAnalysis.emotions?.length > 0 && (
             <div>
               <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-2">Emotions</p>
               <div className="flex flex-wrap gap-1.5">
-                {post.aiAnalysis.emotions.map((e: string) => (
-                  <span key={e} className="text-[10px] font-semibold px-2.5 py-1 rounded-full text-white capitalize"
-                    style={{ background: PURPLE_GRAD }}>{e}</span>
-                ))}
+                {post.aiAnalysis.emotions.map((e: string) => {
+                  const s = emotionStyle(e);
+                  return (
+                    <span key={e} className="text-[10px] font-semibold px-2.5 py-1 rounded-full capitalize"
+                      style={{ backgroundColor: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
+                      {e}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -273,15 +326,17 @@ function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () =
             </div>
           )}
 
-          {/* Suggestions */}
+          {/* Suggestions  -  numbered action cards */}
           {post.aiAnalysis.suggestions?.length > 0 && (
             <div>
               <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-2">Suggestions</p>
               <div className="space-y-2">
                 {post.aiAnalysis.suggestions.map((s: string, i: number) => (
-                  <div key={i} className="flex gap-2.5 text-[11px] text-neutral-600 leading-relaxed">
-                    <span className="shrink-0 mt-2 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#6d28d9' }} />
-                    {s}
+                  <div key={i} className="flex gap-2.5 rounded-xl px-3 py-2.5"
+                    style={{ backgroundColor: 'rgba(109,40,217,0.04)', border: '1px solid rgba(109,40,217,0.1)' }}>
+                    <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white mt-0.5"
+                      style={{ background: PURPLE_GRAD }}>{i + 1}</span>
+                    <p className="text-[11px] text-neutral-600 leading-relaxed">{s}</p>
                   </div>
                 ))}
               </div>
@@ -581,6 +636,9 @@ export function AnalysisPageView({ viewMode }: { viewMode: ViewMode }) {
           totalIndexed={stats?.totalIndexed ?? 0}
           postsThisWeek={stats?.postsThisWeek ?? 0}
           latestScrapeAt={stats?.latestScrapeAt ?? 0}
+          inQueue={stats?.unanalysedCount}
+          analysedCount={stats?.analysedCount}
+          avgHookScore={stats?.avgHookScore}
         />
 
         {/* ── Kanban view ── */}
