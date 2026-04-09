@@ -176,6 +176,8 @@ type Session = {
   chatHistory?:   { role: 'user' | 'assistant'; content: string; ts: number }[] | null;
 };
 
+const COL_ACCENT = '#7c3aed';
+
 function SessionsSidebar({
   sessions, selectedId, onSelect, onNew,
 }: {
@@ -187,29 +189,29 @@ function SessionsSidebar({
   const count = sessions?.length ?? 0;
 
   return (
-    <div className="w-56 flex-shrink-0 flex flex-col border-r overflow-hidden" style={{ borderColor: 'rgba(0,0,0,0.07)' }}>
+    <div className="w-56 flex-shrink-0 flex flex-col rounded-xl overflow-hidden"
+      style={{
+        border: '1px solid rgba(0,0,0,0.07)',
+        borderTop: `2px solid ${COL_ACCENT}`,
+        background: `${COL_ACCENT}04`,
+      }}>
 
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 pt-3 pb-2 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Sessions</p>
-          {count > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold leading-none"
-              style={{ background: 'rgba(124,58,237,0.1)', color: '#7c3aed' }}>
-              {count}
-            </span>
-          )}
-        </div>
-        <button onClick={onNew}
-          className="w-7 h-7 rounded-xl flex items-center justify-center text-white transition-all hover:brightness-110 active:scale-95 flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
-          title="New session">
-          <Plus size={13} />
-        </button>
+      {/* Column header */}
+      <div className="flex items-center gap-2 px-3 py-2.5 flex-shrink-0"
+        style={{ borderBottom: `1px solid ${COL_ACCENT}18` }}>
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: COL_ACCENT }}>
+          Sessions
+        </p>
+        {count > 0 && (
+          <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold leading-none"
+            style={{ background: `${COL_ACCENT}18`, color: COL_ACCENT }}>
+            {count}
+          </span>
+        )}
       </div>
 
       {/* Session list */}
-      <div className="flex-1 overflow-y-auto py-2 px-2 space-y-1.5">
+      <div className="flex-1 overflow-y-auto py-2 px-1.5 space-y-1.5 min-h-0">
         {!sessions && (
           <div className="flex justify-center pt-8">
             <Loader2 size={14} className="animate-spin text-neutral-300" />
@@ -228,61 +230,70 @@ function SessionsSidebar({
           const chatCount = s.chatHistory?.length ?? 0;
           const date = new Date(s.analyzedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
           const hasScore = s.hookScore > 0;
-          const accentColor = !hasScore
-            ? 'rgba(0,0,0,0.12)'
+          const topAccent = !hasScore
+            ? 'rgba(0,0,0,0.1)'
             : s.hookScore >= 8 ? '#22c55e'
             : s.hookScore >= 6 ? '#f59e0b'
             : '#ef4444';
 
           return (
             <button key={s._id} onClick={() => onSelect(s._id)}
-              className="w-full flex items-center gap-2.5 pr-2 py-2 rounded-xl transition-all text-left relative overflow-hidden"
+              className="w-full text-left rounded-xl overflow-hidden transition-all hover:-translate-y-px"
               style={{
-                background: isSelected ? 'rgba(124,58,237,0.07)' : '#fff',
-                border: isSelected ? '1px solid rgba(124,58,237,0.2)' : '1px solid rgba(0,0,0,0.07)',
-                boxShadow: isSelected ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
+                background: isSelected ? `${COL_ACCENT}0d` : '#fff',
+                border: isSelected ? `1px solid ${COL_ACCENT}30` : '1px solid rgba(0,0,0,0.07)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
+                borderTop: `2px solid ${topAccent}`,
               }}>
-
-              {/* Left accent bar */}
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl flex-shrink-0"
-                style={{ backgroundColor: accentColor }} />
-
-              {/* Thumbnail */}
-              <div className="flex-shrink-0 rounded-lg overflow-hidden bg-neutral-900 ml-2"
-                style={{ width: 32, height: 56 }}>
-                <video src={s.videoUrl} preload="metadata" muted playsInline
-                  className="w-full h-full object-cover" />
-              </div>
-
-              {/* Meta */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-1 mb-1">
-                  <p className="text-[11px] font-semibold text-neutral-800 truncate flex-1 leading-tight">
-                    {s.label || 'Untitled'}
-                  </p>
-                  {hasScore && (
-                    <span className="text-[9px] font-bold flex-shrink-0 px-1.5 py-0.5 rounded-md leading-none"
-                      style={{ color: c, background: `${c}1a` }}>
-                      {s.hookScore.toFixed(1)}
-                    </span>
-                  )}
+              <div className="flex items-center gap-2.5 px-2 py-2">
+                {/* Thumbnail */}
+                <div className="flex-shrink-0 rounded-lg overflow-hidden bg-neutral-900"
+                  style={{ width: 32, height: 56 }}>
+                  <video src={s.videoUrl} preload="metadata" muted playsInline
+                    className="w-full h-full object-cover" />
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] text-neutral-400">{date}</span>
-                  {chatCount > 0 && (
-                    <>
-                      <span className="text-neutral-300 text-[9px]">·</span>
-                      <div className="flex items-center gap-0.5">
-                        <MessageSquare size={7} className="text-neutral-400" />
-                        <span className="text-[9px] text-neutral-400">{chatCount}</span>
-                      </div>
-                    </>
-                  )}
+
+                {/* Meta */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-1 mb-1">
+                    <p className="text-[11px] font-semibold text-neutral-800 truncate flex-1 leading-tight">
+                      {s.label || 'Untitled'}
+                    </p>
+                    {hasScore && (
+                      <span className="text-[9px] font-bold flex-shrink-0 px-1.5 py-0.5 rounded-md leading-none"
+                        style={{ color: c, background: `${c}18` }}>
+                        {s.hookScore.toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] text-neutral-400">{date}</span>
+                    {chatCount > 0 && (
+                      <>
+                        <span className="text-neutral-300 text-[9px]">·</span>
+                        <div className="flex items-center gap-0.5">
+                          <MessageSquare size={7} className="text-neutral-400" />
+                          <span className="text-[9px] text-neutral-400">{chatCount}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </button>
           );
         })}
+      </div>
+
+      {/* Footer: New Session button */}
+      <div className="flex-shrink-0 px-2 pb-2 pt-1.5"
+        style={{ borderTop: `1px solid ${COL_ACCENT}18` }}>
+        <button onClick={onNew}
+          className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98]"
+          style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}>
+          <Plus size={12} />
+          New Session
+        </button>
       </div>
     </div>
   );
@@ -475,7 +486,7 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
       </div>
 
       {/* ── Main row ── */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden px-4 pb-4 pt-2 gap-3">
 
       {/* ── Sessions rail ── */}
       <SessionsSidebar
@@ -487,7 +498,7 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
 
       {/* ── Center panel ── */}
       {showNew || !hasSession ? (
-        <div className="flex-1 min-w-0 flex flex-col border-r gap-3 p-4" style={{ borderColor: 'rgba(0,0,0,0.07)', maxWidth: 380 }}>
+        <div className="flex-1 min-w-0 flex flex-col gap-3 p-4" style={{ maxWidth: 380 }}>
 
           {!file ? (
             <div
@@ -558,7 +569,7 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
 
       ) : (
 
-        <div className="flex-1 min-w-0 flex border-r overflow-hidden" style={{ borderColor: 'rgba(0,0,0,0.07)' }}>
+        <div className="flex-1 min-w-0 flex overflow-hidden" style={{ borderColor: 'rgba(0,0,0,0.07)' }}>
 
           <div className="flex-shrink-0 bg-neutral-950 flex items-start border-r overflow-hidden"
             style={{ width: 220, borderColor: 'rgba(255,255,255,0.05)' }}>
