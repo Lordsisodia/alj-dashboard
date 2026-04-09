@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Database, Clock, FileStack, Users } from 'lucide-react';
+import { Radar } from 'lucide-react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { COMPETITORS } from '../../constants'; // COMPETITORS seeds initial state
@@ -12,14 +12,22 @@ import { PipelineStatusStrip }  from '@/features/intelligence/components/dashboa
 import { ActivityFeed }         from '../detail/widgets/ActivityFeed';
 import { ScrapingReport }       from '@/components/ui/scraping-report';
 import { PostsScrapedBarChart } from './PostsScrapedBarChart';
-import { DashboardMetricCard }  from '@/components/ui/dashboard-overview';
+import { HubQuickActions }      from '@/features/community/components/dashboard/HubQuickActions';
 
+
+interface LogDashboardProps {
+  extraCreators?:      Competitor[];
+  onStartDiscovery?:   () => void;
+  onAddCreator?:       () => void;
+  onRunAll?:           () => void;
+}
 
 export function LogDashboard({
   extraCreators = [],
-}: {
-  extraCreators?: Competitor[];
-} = {}) {
+  onStartDiscovery,
+  onAddCreator,
+  onRunAll,
+}: LogDashboardProps = {}) {
   const { runAllTrigger } = useLogDashboard();
   const [competitors, setCompetitors] = useState<Competitor[]>(COMPETITORS);
 
@@ -61,61 +69,41 @@ export function LogDashboard({
     return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
 
-
   return (
     <div className="flex items-start w-full">
 
       {/* -- Main content column ------------------------------------- */}
       <div className="flex-1 flex flex-col min-w-0">
 
-        {/* ① Pipeline status strip */}
+        {/* ① Pipeline status strip — all metrics inlined */}
         <div className="px-3 pt-4">
           <PipelineStatusStrip
             totalIndexed={library}
             postsThisWeek={dbStats?.postsThisWeek ?? 0}
             latestScrapeAt={lastRunAt ?? 0}
+            postsToday={postsToday}
+            activeCreators={activeCount}
+            totalCreators={totalCount}
+            lastRunFormatted={fmtLastRun(lastRunAt)}
           />
         </div>
 
-        {/* ② Metric cards */}
-        <div className="grid grid-cols-4 gap-3 px-3 mt-3">
-          <DashboardMetricCard
-            title="Posts today"
-            value={String(postsToday)}
-            icon={Database}
-            trendChange="+23% vs yesterday"
-            trendType="up"
-          />
-          <DashboardMetricCard
-            title="Active creators"
-            value={`${activeCount} / ${totalCount}`}
-            icon={Users}
-            trendChange={`${totalCount - activeCount} paused`}
-            trendType="neutral"
-          />
-          <DashboardMetricCard
-            title="Total in library"
-            value={library.toLocaleString()}
-            icon={FileStack}
-            trendChange="posts scraped all-time"
-            trendType="up"
-          />
-          <DashboardMetricCard
-            title="Last run"
-            value={fmtLastRun(lastRunAt)}
-            icon={Clock}
-            trendChange="Next: ~6:00 PM · every 3h"
-            trendType="neutral"
-          />
-        </div>
-
-        {/* ③ Heatmap + Scraping report side by side */}
-        <div className="px-3 pt-3 pb-6 grid grid-cols-2 gap-3 items-start">
+        {/* ② Heatmap + Scraping report side by side */}
+        <div className="px-3 pt-3 grid grid-cols-2 gap-3 items-start">
           <IncidentHeatmapReportCard />
           <div className="flex flex-col gap-3">
             <ScrapingReport />
             <PostsScrapedBarChart />
           </div>
+        </div>
+
+        {/* ③ Quick actions */}
+        <div className="px-3 mt-3 pb-6">
+          <HubQuickActions
+            onStartSession={onStartDiscovery ?? (() => {})}
+            onBrowseVault={onAddCreator ?? (() => {})}
+            onViewSaved={onRunAll ?? (() => {})}
+          />
         </div>
 
       </div>

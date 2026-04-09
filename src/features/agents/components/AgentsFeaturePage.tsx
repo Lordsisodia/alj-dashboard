@@ -10,16 +10,26 @@ import type { Tab } from '../types';
 import { useAgentTasks } from '../hooks';
 
 // All sub-views are lazy — only the active tab's code ships to the client
-const OverviewView = dynamic(() => import('./overview/OverviewView'), { ssr: false });
-const OrgChartView = dynamic(() => import('./orgchart/OrgChartView'), { ssr: false });
-const ActivityView = dynamic(() => import('./activity'), { ssr: false });
-const ActivityLogView = dynamic(() => import('./log/ActivityLogView'), { ssr: false });
-const RoutinesView = dynamic(() => import('./routines/RoutinesView'), { ssr: false });
-const IssuesView = dynamic(() => import('./issues/IssuesView'), { ssr: false });
-const InboxView = dynamic(() => import('./inbox/InboxView'), { ssr: false });
-const CostsView = dynamic(() => import('./costs/CostsView'), { ssr: false });
-const ReportsView = dynamic(() => import('./reports'), { ssr: false });
-const RequestsView = dynamic(() => import('./requests'), { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const OverviewView = dynamic(() => import('./overview/OverviewView') as any, { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const OrgChartView = dynamic(() => import('./orgchart/OrgChartView') as any, { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ActivityView = dynamic(() => import('./activity') as any, { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ActivityLogView = dynamic(() => import('./log/ActivityLogView') as any, { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const RoutinesView = dynamic(() => import('./routines/RoutinesView') as any, { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const IssuesView = dynamic(() => import('./issues/IssuesView') as any, { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const InboxView = dynamic(() => import('./inbox/InboxView') as any, { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CostsView = dynamic(() => import('./costs/CostsView') as any, { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ReportsView = dynamic(() => import('./reports') as any, { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const RequestsView = dynamic(() => import('./requests') as any, { ssr: false });
 
 function StepNum({ n }: { n: number }) {
   return (
@@ -76,7 +86,7 @@ export default function AgentsFeaturePage() {
             transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
             {activeTab === 'overview'  && <OverviewView />}
             {activeTab === 'orgchart'  && <OrgChartView />}
-            {activeTab === 'activity'  && <ActivityView tasks={tasks} filter={activeFilter} onRetry={retryTask} />}
+            {activeTab === 'activity'  && <ActivityView {...{ tasks, filter: activeFilter, onRetry: retryTask } as any} />}
             {activeTab === 'log'       && <ActivityLogView />}
             {activeTab === 'routines'  && <RoutinesView />}
             {activeTab === 'issues'    && <IssuesView />}

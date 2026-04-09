@@ -180,14 +180,16 @@ type Session = {
 const COL_ACCENT = '#7c3aed';
 
 function SessionsSidebar({
-  sessions, selectedId, onSelect, onNew,
+  sessions, selectedId, onSelect, onNew, onDelete,
 }: {
   sessions: Session[] | undefined;
   selectedId: Id<'toolAnalyses'> | null;
   onSelect: (id: Id<'toolAnalyses'>) => void;
   onNew: () => void;
+  onDelete: (id: Id<'toolAnalyses'>) => void;
 }) {
   const count = sessions?.length ?? 0;
+  const [hoveredId, setHoveredId] = useState<Id<'toolAnalyses'> | null>(null);
 
   return (
     <div className="w-56 flex-shrink-0 flex flex-col rounded-xl overflow-hidden"
@@ -237,51 +239,67 @@ function SessionsSidebar({
             : s.hookScore >= 6 ? '#f59e0b'
             : '#ef4444';
 
+          const isHovered = hoveredId === s._id;
           return (
-            <button key={s._id} onClick={() => onSelect(s._id)}
-              className="w-full text-left rounded-xl overflow-hidden transition-all hover:-translate-y-px"
-              style={{
-                background: isSelected ? `${COL_ACCENT}0d` : '#fff',
-                border: isSelected ? `1px solid ${COL_ACCENT}30` : '1px solid rgba(0,0,0,0.07)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
-                borderTop: `2px solid ${topAccent}`,
-              }}>
-              <div className="flex items-center gap-2.5 px-2 py-2">
-                {/* Thumbnail */}
-                <div className="flex-shrink-0 rounded-lg overflow-hidden bg-neutral-900"
-                  style={{ width: 32, height: 56 }}>
-                  <video src={s.videoUrl} preload="metadata" muted playsInline
-                    className="w-full h-full object-cover" />
-                </div>
+            <div key={s._id} className="relative"
+              onMouseEnter={() => setHoveredId(s._id)}
+              onMouseLeave={() => setHoveredId(null)}>
+              <button onClick={() => onSelect(s._id)}
+                className="w-full text-left rounded-xl overflow-hidden transition-all hover:-translate-y-px"
+                style={{
+                  background: isSelected ? `${COL_ACCENT}0d` : '#fff',
+                  border: isSelected ? `1px solid ${COL_ACCENT}30` : '1px solid rgba(0,0,0,0.07)',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
+                  borderTop: `2px solid ${topAccent}`,
+                }}>
+                <div className="flex items-center gap-2.5 px-2 py-2">
+                  {/* Thumbnail */}
+                  <div className="flex-shrink-0 rounded-lg overflow-hidden bg-neutral-900"
+                    style={{ width: 32, height: 56 }}>
+                    <video src={s.videoUrl} preload="metadata" muted playsInline
+                      className="w-full h-full object-cover" />
+                  </div>
 
-                {/* Meta */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-1 mb-1">
-                    <p className="text-[11px] font-semibold text-neutral-800 truncate flex-1 leading-tight">
-                      {s.label || 'Untitled'}
-                    </p>
-                    {hasScore && (
-                      <span className="text-[9px] font-bold flex-shrink-0 px-1.5 py-0.5 rounded-md leading-none"
-                        style={{ color: c, background: `${c}18` }}>
-                        {s.hookScore.toFixed(1)}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] text-neutral-400">{date}</span>
-                    {chatCount > 0 && (
-                      <>
-                        <span className="text-neutral-300 text-[9px]">·</span>
-                        <div className="flex items-center gap-0.5">
-                          <MessageSquare size={7} className="text-neutral-400" />
-                          <span className="text-[9px] text-neutral-400">{chatCount}</span>
-                        </div>
-                      </>
-                    )}
+                  {/* Meta */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-1 mb-1">
+                      <p className="text-[11px] font-semibold text-neutral-800 truncate flex-1 leading-tight">
+                        {s.label || 'Untitled'}
+                      </p>
+                      {hasScore && (
+                        <span className="text-[9px] font-bold flex-shrink-0 px-1.5 py-0.5 rounded-md leading-none"
+                          style={{ color: c, background: `${c}18` }}>
+                          {s.hookScore.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[9px] text-neutral-400">{date}</span>
+                      {chatCount > 0 && (
+                        <>
+                          <span className="text-neutral-300 text-[9px]">·</span>
+                          <div className="flex items-center gap-0.5">
+                            <MessageSquare size={7} className="text-neutral-400" />
+                            <span className="text-[9px] text-neutral-400">{chatCount}</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </button>
+              </button>
+
+              {/* Delete button on hover */}
+              {isHovered && (
+                <button
+                  onClick={e => { e.stopPropagation(); onDelete(s._id); }}
+                  className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center transition-colors z-10"
+                  style={{ background: '#ef444490', color: '#fff' }}
+                  title="Delete session">
+                  <X size={8} />
+                </button>
+              )}
+            </div>
           );
         })}
       </div>
@@ -310,6 +328,8 @@ interface AnalyserTabProps {
 export function AnalyserTab({ className }: AnalyserTabProps = {}) {
   const sessions = useQuery(api.toolAnalyses.list, { limit: 50 });
   const appendChatMessage = useMutation(api.toolAnalyses.appendChatMessage);
+  const removeSession     = useMutation(api.toolAnalyses.remove);
+  const setSessionLabel   = useMutation(api.toolAnalyses.setLabel);
 
   const [selectedId,  setSelectedId]  = useState<Id<'toolAnalyses'> | null>(null);
   const [showNew,     setShowNew]     = useState(true);
@@ -385,9 +405,16 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
       const data = await anRes.json();
 
       if (data.analysisId) {
-        setSelectedId(data.analysisId as Id<'toolAnalyses'>);
+        const analysisId = data.analysisId as Id<'toolAnalyses'>;
+        setSelectedId(analysisId);
         setShowNew(false);
-        setFile(null); setPreview(null); setLabel('');
+        setFile(null); setPreview(null);
+        // Auto-label from hook line if user left title blank
+        if (!label.trim() && data.hookLine) {
+          const autoLabel = data.hookLine.split(' ').slice(0, 5).join(' ');
+          setSessionLabel({ id: analysisId, label: autoLabel }).catch(() => {});
+        }
+        setLabel('');
         const analysisSummary = `Hook score: ${data.hookScore}/10. Hook line: "${data.hookLine}". ${data.breakdown ? `What's happening: ${data.breakdown}.` : ''} ${data.emotions?.length ? `Emotions: ${data.emotions.join(', ')}.` : ''} ${data.suggestions?.length ? `Tips: ${data.suggestions.join('; ')}.` : ''}`.trim();
         setApiMessages([
           { role: 'user',      content: `[Video: ${url}]\n\n${activePrompt}` },
@@ -518,6 +545,10 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
         selectedId={selectedId}
         onSelect={id => { setSelectedId(id); setShowNew(false); }}
         onNew={() => { setSelectedId(null); setShowNew(true); setFile(null); setPreview(null); setLocalMessages([]); setError(null); }}
+        onDelete={id => {
+          removeSession({ id }).catch(() => {});
+          if (selectedId === id) { setSelectedId(null); setShowNew(true); }
+        }}
       />
 
       {/* ── Center panel ── */}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface FilterOption { value: string; label?: string; }
@@ -15,9 +15,10 @@ interface Props {
   onChange?: (v: string | string[]) => void;
   style?: React.CSSProperties;
   icon?: React.ReactNode;
+  tooltip?: string;
 }
 
-export function ColumnFilterHeader({ label, align = 'left', options, value, multi, onChange, style, icon }: Props) {
+export function ColumnFilterHeader({ label, align = 'left', options, value, multi, onChange, style, icon, tooltip }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const isActive = Array.isArray(value) ? value.length > 0 : !!value;
@@ -57,6 +58,14 @@ export function ColumnFilterHeader({ label, align = 'left', options, value, mult
       >
         {icon && <span className="flex-shrink-0">{icon}</span>}
         {label}
+        {tooltip && (
+          <span className="relative group/tip flex-shrink-0" onClick={e => e.stopPropagation()}>
+            <Info size={8} className="text-neutral-300 hover:text-neutral-500 cursor-default" />
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 px-2.5 py-2 rounded-lg text-[10px] text-neutral-600 leading-relaxed bg-white shadow-lg border border-neutral-100 opacity-0 group-hover/tip:opacity-100 pointer-events-none z-[200] whitespace-normal text-left font-normal normal-case tracking-normal">
+              {tooltip}
+            </div>
+          </span>
+        )}
         {hasFilter && (
           <ChevronDown
             size={9}

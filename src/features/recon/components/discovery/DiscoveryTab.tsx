@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Zap, Trash2 } from 'lucide-react';
+import { Loader2, Zap, Trash2, Users, CheckCircle, Database, XCircle, TrendingUp, Tag, Clock } from 'lucide-react';
 import { groupScrapedByDate } from './scrapedGrouping';
 import {
   DndContext,
@@ -20,7 +20,6 @@ import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import type { CandidateStatus } from '../../types';
 import {
-  DiscoveryHeader,
   CandidateRow,
   EmptyState,
   ApprovedRow,
@@ -42,6 +41,7 @@ import {
 } from '.';
 import { COMPETITORS } from '../../creatorData';
 import { useDiscoveryTab } from '../../hooks/useDiscoveryTab';
+import { StatusStrip, timeAgo } from '@/components/ui/status-strip';
 
 // -- Main component ---------------------------------------------------------------
 
@@ -79,6 +79,7 @@ export function DiscoveryTab({
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   // Convex
+  const pipelineStats  = useQuery(api.intelligence.getStats, {});
   const rawCandidates  = useQuery(api.candidates.list, {}) ?? undefined;
   const blockedHandles = useQuery(api.candidates.listBlocked, {}) ?? [];
   const seedPreApproved = useMutation(api.candidates.seedPreApproved);
@@ -274,7 +275,23 @@ export function DiscoveryTab({
 
   return (
     <div className="px-6 py-6 w-full space-y-4 overflow-visible">
-      <DiscoveryHeader pending={pending.length} scraped={scraped.length} rejected={rejected.length} totalTracked={approved.length} avgViews={avgViews} avgEngagement={avgEngagement} avgFollowers={avgFollowers} topNiche={topNiche} />
+      <StatusStrip
+        status={{ label: scrapingItems.length > 0 ? 'Scraping active' : 'Pipeline idle', active: scrapingItems.length > 0 }}
+        stats={[
+          { icon: <Users       size={10} />, value: pending.length,                   label: 'pending'  },
+          { icon: <CheckCircle size={10} />, value: approved.length,                  label: 'approved' },
+          { icon: <Database    size={10} />, value: scraped.length,                   label: 'scraped'  },
+          { icon: <XCircle     size={10} />, value: rejected.length,                  label: 'rejected' },
+          ...(topNiche       ? [{ icon: <Tag        size={10} />, value: topNiche,                         label: 'top niche' }] : []),
+          ...(scraped.length > 0 ? [{ icon: <TrendingUp size={10} />, value: avgEngagement.toFixed(1) + '%', label: 'avg ER'   }] : []),
+        ]}
+        rightSlot={
+          <>
+            <Clock size={10} className="text-red-600" />
+            <span>Last scrape: <span className="font-medium text-neutral-700">{timeAgo(pipelineStats?.latestScrapeAt ?? 0)}</span></span>
+          </>
+        }
+      />
 
       <AnimatePresence>
         {showAnalytics && (
@@ -343,7 +360,7 @@ export function DiscoveryTab({
                           marginTop: groupIdx > 0 ? 8 : 0,
                         }}
                       >
-                        <span>{group.label}</span>
+                        <span className="text-red-600">{group.label}</span>
                         <span className="text-neutral-300">·</span>
                         <span className="text-neutral-300">{group.items.length}</span>
                       </div>

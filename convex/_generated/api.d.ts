@@ -22,6 +22,7 @@ import type * as featureRequests from "../featureRequests.js";
 import type * as insights from "../insights.js";
 import type * as insightsSeed from "../insightsSeed.js";
 import type * as intelligence from "../intelligence.js";
+import type * as intelligenceNode from "../intelligenceNode.js";
 import type * as issues from "../issues.js";
 import type * as mediaUploads from "../mediaUploads.js";
 import type * as models from "../models.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   insights: typeof insights;
   insightsSeed: typeof insightsSeed;
   intelligence: typeof intelligence;
+  intelligenceNode: typeof intelligenceNode;
   issues: typeof issues;
   mediaUploads: typeof mediaUploads;
   models: typeof models;

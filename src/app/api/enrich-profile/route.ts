@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import sharp from 'sharp';
 
 // Actor: apify/instagram-profile-scraper (dSCLg0C3YEZ83HzYX)
 const APIFY_ACTOR = 'apify~instagram-profile-scraper';
@@ -22,11 +23,13 @@ async function uploadAvatarToR2(username: string, picUrl: string): Promise<strin
       signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) return null;
-    const buffer      = Buffer.from(await res.arrayBuffer());
-    const contentType = res.headers.get('content-type') ?? 'image/jpeg';
-    const ext         = contentType.includes('png') ? 'png' : 'jpg';
-    const key         = `avatars/ig/${username}.${ext}`;
-    await R2.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: buffer, ContentType: contentType }));
+    const raw = Buffer.from(await res.arrayBuffer());
+    const compressed = await sharp(raw)
+      .resize(400, 400, { fit: 'cover', position: 'centre' })
+      .webp({ quality: 82 })
+      .toBuffer();
+    const key = `avatars/ig/${username}.webp`;
+    await R2.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: compressed, ContentType: 'image/webp' }));
     return `${PUBLIC_BASE}/${key}`;
   } catch (e) {
     console.warn('[enrich-profile] R2 upload failed:', e);

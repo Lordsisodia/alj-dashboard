@@ -46,6 +46,27 @@ export const appendChatMessage = mutation({
   },
 });
 
+// ── Update session label ──────────────────────────────────────────────────────
+
+export const setLabel = mutation({
+  args: {
+    id:    v.id("toolAnalyses"),
+    label: v.string(),
+  },
+  handler: async (ctx, { id, label }) => {
+    await ctx.db.patch(id, { label });
+  },
+});
+
+// ── Delete a session ──────────────────────────────────────────────────────────
+
+export const remove = mutation({
+  args: { id: v.id("toolAnalyses") },
+  handler: async (ctx, { id }) => {
+    await ctx.db.delete(id);
+  },
+});
+
 // ── List sessions, most recently active first ─────────────────────────────────
 
 export const list = query({
