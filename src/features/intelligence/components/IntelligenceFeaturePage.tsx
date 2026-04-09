@@ -5,12 +5,12 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useQuery, useMutation } from 'convex/react';
-import { Sparkles, UserPlus, LayoutDashboard, FileDown, LayoutGrid, List } from 'lucide-react';
+import { Sparkles, UserPlus, LayoutDashboard, FileDown, Zap, SlidersHorizontal } from 'lucide-react';
 
 import { api } from '../../../../convex/_generated/api';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon }      from '@/isso/layout/ProductIcon';
-import { AnalysisPageView } from './analysis';
+import { AnalysisPageView, AnalysisKanbanView } from './analysis';
 import { InsightsView }  from './insights';
 import { ViewToggle } from '@/components/ui/view-toggle';
 import { LiveActivityButton } from '@/components/ui/live-activity-button';
@@ -135,7 +135,7 @@ export default function IntelligenceFeaturePage() {
   const searchParams = useSearchParams() ?? new URLSearchParams();
   const initialTab = (searchParams.get('tab') as Tab) || 'dashboard';
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
-  const [analysisViewMode, setAnalysisViewMode] = useState<'kanban' | 'list'>('kanban');
+  const [analysisViewMode, setAnalysisViewMode] = useState<'auto' | 'manual'>('auto');
   const [addLeadOpen, setAddLeadOpen] = useState(false);
   const stats = useQuery(api.intelligence.getStats, {});
   const indexedCount = stats?.totalIndexed ?? 0;
@@ -208,10 +208,10 @@ export default function IntelligenceFeaturePage() {
             {activeTab === 'analysis' && (
               <ViewToggle
                 value={analysisViewMode}
-                onChange={v => setAnalysisViewMode(v as 'kanban' | 'list')}
+                onChange={v => setAnalysisViewMode(v as 'auto' | 'manual')}
                 options={[
-                  { value: 'kanban', icon: <LayoutGrid size={11} />, label: 'Kanban' },
-                  { value: 'list',   icon: <List        size={11} />, label: 'List'   },
+                  { value: 'auto',   icon: <Zap              size={11} />, label: 'Auto'   },
+                  { value: 'manual', icon: <SlidersHorizontal size={11} />, label: 'Manual' },
                 ]}
                 size="md"
               />
@@ -232,7 +232,8 @@ export default function IntelligenceFeaturePage() {
             >
               {activeTab === 'dashboard' && <DashboardView />}
               {activeTab === 'feed'      && <ReconFeedTab onPostClick={() => {}} onAnalyzeClick={() => {}} sortBy="newest" visibility={{ brandDetails: true, likeCount: true, viewCount: true, saveCount: true }} viewMode="grid" columns={3} creatorStatsMap={{}} nicheERMap={{}} />}
-              {activeTab === 'analysis'  && <AnalysisPageView viewMode={analysisViewMode} />}
+              {activeTab === 'analysis' && analysisViewMode === 'auto'   && <AnalysisPageView />}
+              {activeTab === 'analysis' && analysisViewMode === 'manual' && <AnalysisKanbanView days={90} niche="all" />}
               {activeTab === 'insights'  && <InsightsView />}
             </motion.div>
           </AnimatePresence>
