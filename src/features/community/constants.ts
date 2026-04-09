@@ -1,9 +1,9 @@
 import type { Creator, Post, ContentType, Niche } from './types';
 
 export const CREATORS: Creator[] = [
-  { handle: '@abg.ricebunny', initials: 'AB', color: '#ff0069',  followers: 245000, engagementRate: 4.2 },
+  { handle: '@abg.ricebunny', initials: 'AB', color: '#2563eb',  followers: 245000, engagementRate: 4.2 },
   { handle: '@onlytylerrex',  initials: 'OT', color: '#fcaf45',  followers: 189000, engagementRate: 3.8 },
-  { handle: '@rhinxrenx',     initials: 'RR', color: '#833ab4',  followers: 312000, engagementRate: 5.1 },
+  { handle: '@rhinxrenx',     initials: 'RR', color: '#2563eb',  followers: 312000, engagementRate: 5.1 },
   { handle: '@ellamira',      initials: 'EM', color: '#78c257',  followers: 97000,  engagementRate: 6.3 },
 ];
 
@@ -15,12 +15,12 @@ export const LEADERBOARD_ENTRIES = [
 ];
 
 export const GRADIENTS: Record<string, string> = {
-  pink:   'linear-gradient(135deg, #ff0069 0%, #fd1d1d 50%, #fcaf45 100%)',
-  purple: 'linear-gradient(135deg, #833ab4 0%, #ff0069 100%)',
-  amber:  'linear-gradient(135deg, #fcaf45 0%, #ff0069 100%)',
+  pink:   'linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #3b82f6 100%)',
+  purple: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+  amber:  'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
   green:  'linear-gradient(135deg, #78c257 0%, #00f4e2 100%)',
-  indigo: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 100%)',
-  teal:   'linear-gradient(135deg, #00f4e2 0%, #833ab4 100%)',
+  indigo: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+  teal:   'linear-gradient(135deg, #00f4e2 0%, #2563eb 100%)',
 };
 
 export const POSTS: Post[] = [
@@ -154,16 +154,16 @@ export const POSTS: Post[] = [
 ];
 
 export const TYPE_COLORS: Record<ContentType, { color: string; bg: string }> = {
-  Reel:     { color: '#ff0069', bg: 'rgba(255,0,105,0.12)' },
-  Post:     { color: '#7c3aed', bg: 'rgba(124,58,237,0.12)' },
-  Carousel: { color: '#d97706', bg: 'rgba(217,119,6,0.12)' },
+  Reel:     { color: '#2563eb', bg: 'rgba(37,99,235,0.12)' },
+  Post:     { color: '#2563eb', bg: 'rgba(37,99,235,0.12)' },
+  Carousel: { color: '#2563eb', bg: 'rgba(37,99,235,0.12)' },
 };
 
 export const NICHE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  fitness:   { label: 'Fitness',   color: '#ff0069', bg: 'rgba(255,0,105,0.08)' },
-  lifestyle: { label: 'Lifestyle', color: '#833ab4', bg: 'rgba(131,58,180,0.08)' },
-  fashion:   { label: 'Fashion',   color: '#d97706', bg: 'rgba(217,119,6,0.08)'  },
-  wellness:  { label: 'Wellness',  color: '#16a34a', bg: 'rgba(22,163,74,0.08)'  },
+  fitness:   { label: 'Fitness',   color: '#2563eb', bg: 'rgba(37,99,235,0.08)' },
+  lifestyle: { label: 'Lifestyle', color: '#2563eb', bg: 'rgba(37,99,235,0.08)' },
+  fashion:   { label: 'Fashion',   color: '#2563eb', bg: 'rgba(37,99,235,0.08)' },
+  wellness:  { label: 'Wellness',  color: '#2563eb', bg: 'rgba(37,99,235,0.08)' },
 };
 
 // Seed data for the Hub Dashboard tab - mock recent swipe decisions
@@ -182,4 +182,43 @@ export const MOCK_LAST_SESSION = {
   sent: 2,
   durationMs: 252000, // 4m 12s
   date: 'Today, 9:14 AM',
+  previousSession: { rated: 18, passed: 9, sent: 3 },
+  streakDays: 5,
+  dailyTarget: 10,
+  paceVsAvgPct: 12,
 };
+
+export const MOCK_SENT_THIS_WEEK = 14;
+export const MOCK_IN_QUEUE = 7;
+export const MOCK_PACE = 1.2; // posts/sec
+
+export const MOCK_NICHE_TARGETS: Record<string, number> = {
+  fitness: 15, lifestyle: 10, fashion: 12, wellness: 8,
+};
+
+export const MOCK_SEND_QUEUE = [
+  {
+    id: 'q1',
+    handle: '@rhinxrenx',
+    caption: 'Vibes only. That aesthetic everyone keeps trying to copy.',
+    gradient: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+    niche: 'lifestyle',
+    approvedAt: '2h ago',
+  },
+  {
+    id: 'q2',
+    handle: '@ellamira',
+    caption: 'Transformation Tuesday. 12 weeks in. Same mirror, different energy.',
+    gradient: 'linear-gradient(135deg, #78c257 0%, #00f4e2 100%)',
+    niche: 'fitness',
+    approvedAt: '4h ago',
+  },
+  {
+    id: 'q3',
+    handle: '@abg.ricebunny',
+    caption: 'Monday grind starts early. No excuses, just results.',
+    gradient: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #3b82f6 100%)',
+    niche: 'fitness',
+    approvedAt: '6h ago',
+  },
+];

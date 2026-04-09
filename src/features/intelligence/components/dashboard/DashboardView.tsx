@@ -1,23 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Link        from 'next/link';
 import { motion }  from 'framer-motion';
 import { useQuery } from 'convex/react';
-import { ArrowRight } from 'lucide-react';
+import { Zap, Radio, Flame, Brain, LayoutGrid } from 'lucide-react';
 import { api }      from '../../../../../convex/_generated/api';
 import { containerVariants, fadeUp } from '../../constants';
-import { FileText, TrendingUp, Flame, Sparkles } from 'lucide-react';
 import { PipelineStatusStrip } from './PipelineStatusStrip';
-import { KPIDeltaTile }        from './KPIDeltaTile';
 import { OutlierRow }          from './OutlierRow';
-import { ActionQueue }         from './ActionQueue';
-import { LearningSignal }       from '../insights/LearningSignal';
-import { FormatChart }         from '../trends/FormatChart';
-import { NicheLeaderboard }    from '../trends/NicheLeaderboard';
-import { IntelligenceBrief }    from './IntelligenceBrief';
+import { IntelligenceBrief }   from './IntelligenceBrief';
 import { PulseReportCard }     from './PulseReportCard';
-import type { TrendsData }  from '../../types';
+import { IntelligenceActivityFeed } from './IntelligenceActivityFeed';
+import { StatCard } from '@/features/analytics/components/stats';
+import type { TrendsData }   from '../../types';
 import type { InsightsData } from '../../types';
 
 export function DashboardView() {
@@ -27,130 +22,176 @@ export function DashboardView() {
   const trends   = useQuery(api.intelligence.getTrends, { days: 7 }) as TrendsData  | undefined;
   const insights = useQuery(api.insights.getInsights, {})            as InsightsData | undefined;
 
-  const isLoading = stats === undefined || trends === undefined;
-
-  // Delta calcs
-  const weekDelta    = (stats?.postsThisWeek ?? 0) - (stats?.postsLastWeek ?? 0);
   const outlierCount = trends?.outlierPosts.length ?? 0;
 
+  const weekChange = stats && (stats as any).postsLastWeek > 0
+    ? Math.round((((stats.postsThisWeek - (stats as any).postsLastWeek) / (stats as any).postsLastWeek) * 100))
+    : undefined;
+
+  const kpis = [
+    {
+      label: 'Posts Indexed',
+      value: stats?.totalIndexed ?? 0,
+      icon:  <Radio size={15} />,
+      iconColor: '#7c3aed',
+      delay: 0,
+    },
+    {
+      label: 'This Week',
+      value: stats?.postsThisWeek ?? 0,
+      icon:  <Zap size={15} />,
+      iconColor: '#7c3aed',
+      change: weekChange,
+      changeLabel: 'vs last week',
+      delay: 0.07,
+    },
+    {
+      label: 'Outliers',
+      value: outlierCount,
+      icon:  <Flame size={15} />,
+      iconColor: '#ff0069',
+      delay: 0.14,
+    },
+    {
+      label: 'Avg ER',
+      value: parseFloat(((trends?.avgER ?? 0) * 100).toFixed(1)),
+      suffix: '%',
+      icon:  <Brain size={15} />,
+      iconColor: '#7c3aed',
+      delay: 0.21,
+    },
+  ];
+
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex gap-5 h-full"
+    >
 
-      {/* ── 1. Pipeline status ── */}
-      <PipelineStatusStrip
-        totalIndexed={stats?.totalIndexed   ?? 0}
-        postsThisWeek={stats?.postsThisWeek ?? 0}
-        latestScrapeAt={stats?.latestScrapeAt ?? 0}
-      />
+      {/* ── Main column ─────────────────────────────────────────── */}
+      <div className="flex-1 min-w-0 space-y-5 overflow-y-auto pb-4 px-4">
 
-      {/* ── 2. KPI tiles ── */}
-      <motion.div variants={fadeUp} className="grid grid-cols-4 gap-3">
-        <KPIDeltaTile
-          label="Posts this week"
-          value={stats?.postsThisWeek ?? '-'}
-          delta={weekDelta}
-          icon={<FileText size={14} />}
-          iconBg="rgba(131,58,180,0.09)"
-          iconColor="#833ab4"
+        {/* ── 1. Pipeline status ── */}
+        <PipelineStatusStrip
+          totalIndexed={stats?.totalIndexed   ?? 0}
+          postsThisWeek={stats?.postsThisWeek ?? 0}
+          latestScrapeAt={stats?.latestScrapeAt ?? 0}
+          inQueue={stats?.unanalysedCount}
+          avgER={trends?.avgER}
+          outlierCount={outlierCount}
         />
-        <KPIDeltaTile
-          label="Avg engagement (7d)"
-          value={trends ? `${(trends.avgER * 100).toFixed(2)}%` : '-'}
-          icon={<TrendingUp size={14} />}
-          iconBg="rgba(34,197,94,0.09)"
-          iconColor="#22c55e"
-        />
-        <KPIDeltaTile
-          label="Outliers this week"
-          value={isLoading ? '-' : outlierCount}
-          icon={<Flame size={14} />}
-          iconBg="rgba(255,0,105,0.09)"
-          iconColor="#ff0069"
-          cta={outlierCount > 0 ? { label: 'View in Qualify', onClick: () => {} } : undefined}
-        />
-        <KPIDeltaTile
-          label="Needs analysis"
-          value={stats?.unanalysedCount ?? '-'}
-          icon={<Sparkles size={14} />}
-          iconBg="rgba(74,158,255,0.09)"
-          iconColor="#4a9eff"
-          cta={(stats?.unanalysedCount ?? 0) > 0 ? { label: 'Go to Analysis', onClick: () => router.push('/isso/intelligence') } : undefined}
-        />
-      </motion.div>
 
-      {/* ── 3. Top outliers row ── */}
-      <motion.div variants={fadeUp} className="space-y-2">
-        <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide">Top outliers this week</p>
-        <OutlierRow posts={trends?.outlierPosts ?? []} />
-      </motion.div>
+        {/* ── 2. KPI row ── */}
+        <div className="grid grid-cols-4 gap-3">
+          {kpis.map(k => (
+            <StatCard key={k.label} {...k} />
+          ))}
+        </div>
 
-      {/* ── 4. Intelligence Brief + Learning Signal (companion row) ── */}
-      {trends && insights && (
-        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
-          {/* Intelligence Brief — ~65% */}
-          <div className="col-span-2">
-            <IntelligenceBrief trends={trends} />
+        {/* ── 3. Top outliers card ── */}
+        <motion.div
+          variants={fadeUp}
+          className="rounded-xl overflow-hidden"
+          style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)' }}
+        >
+          <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+            <Flame size={13} style={{ color: '#ff0069' }} />
+            <p className="text-[11px] font-bold text-neutral-800">Top Outliers This Week</p>
           </div>
-          {/* Learning Signal — ~35% */}
-          <LearningSignal data={insights} />
+          <div className="p-3">
+            <OutlierRow posts={trends?.outlierPosts ?? []} />
+          </div>
         </motion.div>
-      )}
 
-      {/* ── 5. Pulse Report ── */}
-      <PulseReportCard
-        stats={stats ?? null}
-        trends={trends ?? null}
-        hookStats={null}
-        insights={insights ?? null}
-      />
+        {/* ── 4. Pulse Report + Quick Actions ── */}
+        <div className="grid grid-cols-2 gap-4">
+          <PulseReportCard
+            stats={stats ?? null}
+            trends={trends ?? null}
+            hookStats={null}
+            insights={insights ?? null}
+          />
 
-      {/* ── 6. Action queue ── */}
-      <ActionQueue
-        unanalysedCount={stats?.unanalysedCount ?? 0}
-        unratedCount={0}
-        onGoAnalysis={() => {}}
-        onGoHub={() => router.push('/isso/community')}
-      />
+          {/* Quick Actions */}
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)' }}
+          >
+            <div
+              className="px-4 py-3 flex items-center gap-2"
+              style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
+            >
+              <LayoutGrid size={13} className="text-neutral-400" />
+              <p className="text-[11px] font-bold text-neutral-800">Quick Actions</p>
+            </div>
+            <div className="grid grid-cols-3 divide-x" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+              <button
+                onClick={() => router.push('/isso/intelligence?tab=analysis')}
+                className="flex flex-col items-center gap-2 px-4 py-4 transition-colors hover:bg-neutral-50 text-center"
+              >
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #7c3aed, #4c1d95)' }}
+                >
+                  <Zap size={16} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-neutral-800">Run Analysis</p>
+                  <p className="text-[10px] text-neutral-400 mt-0.5">Process content</p>
+                </div>
+              </button>
+              <button
+                onClick={() => router.push('/isso/intelligence?tab=feed')}
+                className="flex flex-col items-center gap-2 px-4 py-4 transition-colors hover:bg-neutral-50 text-center"
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#f5f5f4' }}>
+                  <Radio size={16} className="text-violet-500" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-neutral-800">Browse Feed</p>
+                  <p className="text-[10px] text-neutral-400 mt-0.5">Community posts</p>
+                </div>
+              </button>
+              <button
+                onClick={() => router.push('/isso/intelligence?tab=insights')}
+                className="flex flex-col items-center gap-2 px-4 py-4 transition-colors hover:bg-neutral-50 text-center"
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#f5f5f4' }}>
+                  <Brain size={16} className="text-amber-500" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-neutral-800">View Insights</p>
+                  <p className="text-[10px] text-neutral-400 mt-0.5">System learnings</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
 
-      {/* ── 7. Format & Niche row (with section label) ── */}
-      {trends && (
-        <>
-          <motion.p variants={fadeUp} className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide">
-            Format &amp; Niche breakdown
-          </motion.p>
-          <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4">
-            <FormatChart formats={trends.formatStats} metric={'er'} />
-            <NicheLeaderboard niches={trends.nicheStats} />
+        {/* ── 5. Intelligence Brief ── */}
+        {trends && (
+          <motion.div variants={fadeUp}>
+            <IntelligenceBrief trends={trends} />
           </motion.div>
-        </>
-      )}
+        )}
 
-      {/* ── 8. Summary links strip ── */}
-      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
-        <Link
-          href="/isso/intelligence?tab=qualify"
-          className="flex items-center justify-between px-4 py-3 rounded-xl border border-black/[0.07] hover:border-purple-400/30 transition-colors group"
-        >
-          <div>
-            <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide">Top hooks</p>
-            <p className="text-xs font-medium text-neutral-700 mt-0.5">
-              {trends?.topHooks?.[0]?.hook?.slice(0, 48) ?? 'No hooks yet'}
-              {(trends?.topHooks?.[0]?.hook?.length ?? 0) > 48 ? '...' : ''}
-            </p>
-          </div>
-          <ArrowRight size={12} className="text-neutral-300 group-hover:text-purple-500 transition-colors shrink-0" />
-        </Link>
-        <Link
-          href="/isso/intelligence?tab=analysis"
-          className="flex items-center justify-between px-4 py-3 rounded-xl border border-black/[0.07] hover:border-purple-400/30 transition-colors group"
-        >
-          <div>
-            <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide">Hashtag patterns</p>
-            <p className="text-xs font-medium text-neutral-700 mt-0.5">View correlation analysis →</p>
-          </div>
-          <ArrowRight size={12} className="text-neutral-300 group-hover:text-purple-500 transition-colors shrink-0" />
-        </Link>
-      </motion.div>
+      </div>
+
+      {/* ── Right sidebar (280px) ─────────────────────────── */}
+      <div
+        className="w-[280px] flex-shrink-0 rounded-xl overflow-hidden"
+        style={{
+          backgroundColor: '#fff',
+          border: '1px solid rgba(0,0,0,0.07)',
+          height: 'calc(100vh - 180px)',
+          position: 'sticky',
+          top: 0,
+        }}
+      >
+        {trends && <IntelligenceActivityFeed trends={trends} />}
+      </div>
 
     </motion.div>
   );

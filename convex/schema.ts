@@ -272,7 +272,16 @@ export default defineSchema({
       v.literal("story")
     ),
     niche: v.string(),
-    thumbnailUrl: v.string(),     // CDN url - no video stored
+    thumbnailUrl: v.string(),          // R2 permanent URL after download; original CDN url until then
+    thumbnailSourceUrl:      v.optional(v.string()),   // original Instagram CDN url (ephemeral)
+    thumbnailDownloadStatus: v.optional(v.union(
+      v.literal("pending"),
+      v.literal("downloading"),
+      v.literal("ready"),
+      v.literal("expired"),
+      v.literal("failed")
+    )),
+    thumbnailDownloadError:  v.optional(v.string()),
     caption: v.string(),
     hashtags: v.array(v.string()),
     likes: v.number(),

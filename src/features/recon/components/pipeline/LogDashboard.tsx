@@ -102,7 +102,7 @@ export function LogDashboard({
           <HubQuickActions
             onStartSession={onStartDiscovery ?? (() => {})}
             onBrowseVault={onAddCreator ?? (() => {})}
-            onViewSaved={onRunAll ?? (() => {})}
+            onSendToClient={onRunAll ?? (() => {})}
           />
         </div>
 

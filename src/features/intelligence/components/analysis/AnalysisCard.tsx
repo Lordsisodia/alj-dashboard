@@ -37,7 +37,7 @@ export function AnalysisCard({ post, onAnalyse }: Props) {
           <div className="w-full h-full" style={{ background: post.thumbnailUrl }} />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.thumbnailUrl} alt={post.handle} className="w-full h-full object-cover" />
+          <img src={post.thumbnailUrl} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
         )}
         {/* Outlier badge */}
         <div className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white" style={{ background: GRAD }}>
