@@ -315,10 +315,13 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
   const [showNew,     setShowNew]     = useState(true);
 
   const [selectedTypeKey, setSelectedTypeKey] = useState('standard');
+  const [promptMode,      setPromptMode]      = useState<'saved' | 'custom'>('saved');
+  const [customText,      setCustomText]      = useState(DEFAULT_ANALYSIS_PROMPT);
   const promptVersions = useQuery(api.analysisPrompts.listVersionsForType, { typeKey: selectedTypeKey });
-  const activePrompt = promptVersions?.find(v => v.isActive)?.prompt
+  const savedPrompt = promptVersions?.find(v => v.isActive)?.prompt
     ?? promptVersions?.[0]?.prompt
     ?? DEFAULT_ANALYSIS_PROMPT;
+  const activePrompt = promptMode === 'custom' ? customText : savedPrompt;
 
   const [file,      setFile]      = useState<File | null>(null);
   const [preview,   setPreview]   = useState<string | null>(null);
@@ -563,11 +566,43 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
 
           {error && <p className="text-xs text-red-500 px-1">{error}</p>}
 
+          {/* Prompt mode toggle */}
+          <div className="flex items-center gap-1 flex-shrink-0 p-0.5 rounded-lg self-start"
+            style={{ background: 'rgba(0,0,0,0.05)' }}>
+            {(['saved', 'custom'] as const).map(mode => (
+              <button key={mode} onClick={() => setPromptMode(mode)}
+                className="px-3 py-1 rounded-md text-[10px] font-semibold capitalize transition-all"
+                style={promptMode === mode
+                  ? { background: '#fff', color: '#7c3aed', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
+                  : { color: '#9ca3af' }}>
+                {mode === 'saved' ? 'Saved Prompts' : 'Custom'}
+              </button>
+            ))}
+          </div>
+
           <div className="flex-1 min-h-0">
-            <SystemPromptPanel
-              selectedTypeKey={selectedTypeKey}
-              onTypeChange={setSelectedTypeKey}
-            />
+            {promptMode === 'saved' ? (
+              <SystemPromptPanel
+                selectedTypeKey={selectedTypeKey}
+                onTypeChange={setSelectedTypeKey}
+              />
+            ) : (
+              <div className="flex flex-col h-full rounded-xl overflow-hidden"
+                style={{ border: '1px solid rgba(109,40,217,0.15)', backgroundColor: '#faf9ff' }}>
+                <div className="shrink-0 px-3 pt-2.5 pb-2 flex items-center gap-1.5"
+                  style={{ borderBottom: '1px solid rgba(109,40,217,0.1)' }}>
+                  <Sparkles size={10} className="text-purple-500" />
+                  <p className="text-[9px] font-bold text-purple-700 uppercase tracking-wider">Custom Prompt</p>
+                </div>
+                <textarea
+                  value={customText}
+                  onChange={e => setCustomText(e.target.value)}
+                  placeholder="Write your own system prompt..."
+                  className="flex-1 min-h-0 w-full px-3 py-2.5 text-[10px] outline-none resize-none font-mono leading-relaxed text-neutral-800"
+                  style={{ backgroundColor: '#faf9ff' }}
+                />
+              </div>
+            )}
           </div>
         </div>
 
