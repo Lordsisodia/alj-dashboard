@@ -967,6 +967,7 @@ export const getAnalysisQueue = query({
       engagementRate: p.engagementRate ?? 0,
       outlierRatio:   p.outlierRatio ?? parseFloat(((p.engagementRate ?? 0) * 10).toFixed(2)),
       videoUrl:       p.videoUrl,
+      postedAt:       p.postedAt ?? 0,
     }));
   },
 });
@@ -1005,6 +1006,7 @@ export const getAnalysedPosts = query({
       likes:          p.likes ?? 0,
       views:          p.views ?? 0,
       saves:          p.saves ?? 0,
+      comments:       p.comments ?? 0,
       engagementRate: p.engagementRate ?? 0,
       outlierRatio:   p.outlierRatio,
       postedAt:       p.postedAt ?? 0,

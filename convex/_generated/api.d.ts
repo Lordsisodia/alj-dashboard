@@ -11,6 +11,7 @@
 import type * as agentDebugLogs from "../agentDebugLogs.js";
 import type * as agentReports from "../agentReports.js";
 import type * as agents from "../agents.js";
+import type * as analysisPrompts from "../analysisPrompts.js";
 import type * as approvals from "../approvals.js";
 import type * as backfill from "../backfill.js";
 import type * as candidates from "../candidates.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   agentDebugLogs: typeof agentDebugLogs;
   agentReports: typeof agentReports;
   agents: typeof agents;
+  analysisPrompts: typeof analysisPrompts;
   approvals: typeof approvals;
   backfill: typeof backfill;
   candidates: typeof candidates;
