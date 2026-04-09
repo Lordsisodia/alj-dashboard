@@ -10,7 +10,8 @@ import { Sparkles, UserPlus, LayoutDashboard, FileDown, Zap, SlidersHorizontal }
 import { api } from '../../../../convex/_generated/api';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon }      from '@/isso/layout/ProductIcon';
-import { AnalysisPageView, AnalysisKanbanView } from './analysis';
+import { AnalysisPageView } from './analysis';
+import { AnalyserTab } from '@/features/tools/components/AnalyserTab';
 import { InsightsView }  from './insights';
 import { ViewToggle } from '@/components/ui/view-toggle';
 import { LiveActivityButton } from '@/components/ui/live-activity-button';
@@ -233,7 +234,7 @@ export default function IntelligenceFeaturePage() {
               {activeTab === 'dashboard' && <DashboardView />}
               {activeTab === 'feed'      && <ReconFeedTab onPostClick={() => {}} onAnalyzeClick={() => {}} sortBy="newest" visibility={{ brandDetails: true, likeCount: true, viewCount: true, saveCount: true }} viewMode="grid" columns={3} creatorStatsMap={{}} nicheERMap={{}} />}
               {activeTab === 'analysis' && analysisViewMode === 'auto'   && <AnalysisPageView />}
-              {activeTab === 'analysis' && analysisViewMode === 'manual' && <AnalysisKanbanView days={90} niche="all" />}
+              {activeTab === 'analysis' && analysisViewMode === 'manual' && <AnalyserTab className="flex-1 min-h-0" />}
               {activeTab === 'insights'  && <InsightsView />}
             </motion.div>
           </AnimatePresence>
