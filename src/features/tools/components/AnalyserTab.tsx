@@ -473,8 +473,12 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
 
   // Strip stats
   const analyzedSessions = sessions?.filter(s => s.hookScore > 0) ?? [];
+  const unscoredCount    = (sessions?.length ?? 0) - analyzedSessions.length;
   const avgScore = analyzedSessions.length > 0
     ? analyzedSessions.reduce((sum, s) => sum + s.hookScore, 0) / analyzedSessions.length
+    : 0;
+  const topScore = analyzedSessions.length > 0
+    ? Math.max(...analyzedSessions.map(s => s.hookScore))
     : 0;
   const sessionsWithChat = sessions?.filter(s => (s.chatHistory?.length ?? 0) > 0).length ?? 0;
 
@@ -487,7 +491,9 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
           iconColor="text-violet-600"
           stats={[
             { value: sessions?.length ?? 0, label: 'sessions' },
-            ...(avgScore > 0 ? [{ value: avgScore.toFixed(1), label: 'avg hook score', accent: avgScore >= 8 ? '#16a34a' : avgScore >= 6 ? '#ca8a04' : '#dc2626' }] : []),
+            ...(unscoredCount > 0 ? [{ value: unscoredCount, label: 'unscored', accent: '#f59e0b' }] : []),
+            ...(avgScore > 0 ? [{ value: avgScore.toFixed(1), label: 'avg hook', accent: avgScore >= 8 ? '#16a34a' : avgScore >= 6 ? '#ca8a04' : '#dc2626' }] : []),
+            ...(topScore > 0 ? [{ value: topScore.toFixed(1), label: 'top score', accent: '#16a34a' }] : []),
             ...(sessionsWithChat > 0 ? [{ value: sessionsWithChat, label: 'with chat' }] : []),
           ]}
           status={{ label: analyzedSessions.length > 0 ? 'Analyser ready' : 'No analyses yet', active: analyzedSessions.length > 0 }}

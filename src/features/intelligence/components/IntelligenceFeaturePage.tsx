@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useQuery, useMutation } from 'convex/react';
-import { Sparkles, UserPlus, LayoutDashboard, FileDown, Zap, SlidersHorizontal } from 'lucide-react';
+import { Sparkles, UserPlus, LayoutDashboard, FileDown, Zap, SlidersHorizontal, Video, Play } from 'lucide-react';
 
 import { api } from '../../../../convex/_generated/api';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
@@ -149,9 +149,12 @@ export default function IntelligenceFeaturePage() {
       { id: 'gen-viral',     label: 'Generate Viral Alert',       icon: <Sparkles size={13} />, onClick: () => {} },
       { id: 'gen-spotlight', label: 'Generate Creator Spotlight', icon: <Sparkles size={13} />, onClick: () => {} },
     ],
-    analysis: [
-      { id: 'analyse-all',     label: 'Analyse All Posts', icon: <Sparkles size={13} />, onClick: () => {} },
-      { id: 'export-analysis', label: 'Export Analysis',   icon: <FileDown size={13} />,  onClick: () => {} },
+    analysis: analysisViewMode === 'auto' ? [
+      { id: 'run-pipeline',    label: 'Run Full Pipeline',  icon: <Play     size={13} />, onClick: () => {} },
+      { id: 'export-analysis', label: 'Export Analysis',    icon: <FileDown size={13} />, onClick: () => {} },
+    ] : [
+      { id: 'new-session',      label: 'New Session',       icon: <Video    size={13} />, onClick: () => {} },
+      { id: 'export-sessions',  label: 'Export Sessions',   icon: <FileDown size={13} />, onClick: () => {} },
     ],
     feed: [
       { id: 'add-lead', label: 'Add creator handle', icon: <UserPlus size={13} />, onClick: () => setAddLeadOpen(true) },
@@ -164,14 +167,14 @@ export default function IntelligenceFeaturePage() {
 
   const actionLabel: Record<Tab, string> = {
     dashboard: 'Generate',
-    analysis:  'Analyse',
+    analysis:  analysisViewMode === 'auto' ? 'Analyse' : 'New Session',
     feed:      'Add Lead',
     insights:  'Export',
   };
 
   const actionIcon: Record<Tab, React.ReactNode> = {
     dashboard: <Sparkles size={14} />,
-    analysis:  <Sparkles size={14} />,
+    analysis:  analysisViewMode === 'auto' ? <Sparkles size={14} /> : <Video size={14} />,
     feed:      <UserPlus size={14} />,
     insights:  <FileDown size={14} />,
   };
