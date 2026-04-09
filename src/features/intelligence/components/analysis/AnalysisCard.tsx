@@ -32,7 +32,7 @@ export function AnalysisCard({ post, onAnalyse }: Props) {
       style={{ border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
     >
       {/* Thumbnail */}
-      <div className="relative w-full" style={{ aspectRatio: '9/16', maxHeight: 100, overflow: 'hidden' }}>
+      <div className="relative w-full" style={{ aspectRatio: '9/16', overflow: 'hidden' }}>
         {isGrad ? (
           <div className="w-full h-full" style={{ background: post.thumbnailUrl }} />
         ) : (

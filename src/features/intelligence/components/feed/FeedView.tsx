@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { containerVariants } from '../../constants';
 import { useFeed } from '../../hooks/useFeed';
@@ -11,21 +11,22 @@ import type { DensityId, SortId, VisibilityState, DrawerPost } from '../../types
 import type { CreatorStats, NicheERMap } from '../../utils';
 
 interface Props {
-  sortBy:          SortId;
-  visibility:      VisibilityState;
-  viewMode:        'grid' | 'list';
-  columns:         DensityId;
-  handle?:        string;
-  niche?:         string;
-  contentType?:   string;
-  onPostClick:    (index: number, posts: DrawerPost[]) => void;
-  onAnalyzeClick?: (index: number, posts: DrawerPost[]) => void;
-  creatorStatsMap?: Record<string, CreatorStats>;
-  nicheERMap?:     NicheERMap;
+  sortBy:           SortId;
+  visibility:       VisibilityState;
+  viewMode:         'grid' | 'list';
+  columns:          DensityId;
+  handle?:          string;
+  niche?:           string;
+  contentType?:     string;
+  onlyAnalyzed?:    boolean;
+  onPostClick:      (index: number, posts: DrawerPost[]) => void;
+  onAnalyzeClick?:  (index: number, posts: DrawerPost[]) => void;
+  creatorStatsMap?:  Record<string, CreatorStats>;
+  nicheERMap?:      NicheERMap;
 }
 
-export function FeedView({ sortBy, visibility, viewMode, columns, handle, niche, contentType, onPostClick, onAnalyzeClick, creatorStatsMap, nicheERMap }: Props) {
-  const { posts, isLoading, isEmpty } = useFeed({ sortBy, handle, niche, contentType });
+export function FeedView({ sortBy, visibility, viewMode, columns, handle, niche, contentType, onlyAnalyzed, onPostClick, onAnalyzeClick, creatorStatsMap, nicheERMap }: Props) {
+  const { posts, isLoading, isEmpty } = useFeed({ sortBy, handle, niche, contentType, onlyAnalyzed });
 
   if (isLoading) {
     return (
@@ -38,6 +39,15 @@ export function FeedView({ sortBy, visibility, viewMode, columns, handle, niche,
   }
 
   if (isEmpty) {
+    if (onlyAnalyzed) {
+      return (
+        <div className="flex flex-col items-center justify-center py-24 gap-3">
+          <Sparkles size={28} className="text-neutral-300" />
+          <p className="text-sm font-medium text-neutral-500">No analyzed posts yet</p>
+          <p className="text-xs text-neutral-400">Run analysis on qualified posts to populate this feed</p>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
         <Loader2 size={28} className="animate-spin text-neutral-300" />
@@ -74,6 +84,7 @@ export function FeedView({ sortBy, visibility, viewMode, columns, handle, niche,
           <PostCard
             post={post as any}
             visibility={visibility}
+            columns={columns}
             onPostClick={() => onPostClick(i, drawerPosts)}
             onAnalyzeClick={onAnalyzeClick ? () => onAnalyzeClick(i, drawerPosts) : undefined}
             creatorStatsMap={creatorStatsMap}

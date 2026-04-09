@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { SlidersHorizontal, ChevronDown, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NumericRange } from './CreatorsFilterBar';
 
@@ -21,10 +21,11 @@ interface RangeFilterHeaderProps {
   align?: 'left' | 'right';
   onChange: (range: NumericRange) => void;
   style?: React.CSSProperties;
+  tooltip?: string;
 }
 
 export function RangeFilterHeader({
-  label, icon, min: glMin, max: glMax, step, suffix = '', align = 'left', onChange, style,
+  label, icon, min: glMin, max: glMax, step, suffix = '', align = 'left', onChange, style, tooltip,
 }: RangeFilterHeaderProps) {
   const [open, setOpen] = useState(false);
   const [lo, setLo]     = useState(glMin);
@@ -66,6 +67,14 @@ export function RangeFilterHeader({
       >
         {icon && <span className="flex-shrink-0">{icon}</span>}
         {label}
+        {tooltip && (
+          <span className="relative group/tip flex-shrink-0" onClick={e => e.stopPropagation()}>
+            <Info size={8} className="text-neutral-300 hover:text-neutral-500 cursor-default" />
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 px-2.5 py-2 rounded-lg text-[10px] text-neutral-600 leading-relaxed bg-white shadow-lg border border-neutral-100 opacity-0 group-hover/tip:opacity-100 pointer-events-none z-[200] whitespace-normal text-left font-normal normal-case tracking-normal">
+              {tooltip}
+            </div>
+          </span>
+        )}
         <ChevronDown size={9} className={cn('flex-shrink-0 transition-transform duration-150', open && 'rotate-180', isActive ? 'text-blue-500' : 'text-neutral-300 group-hover/hdr:text-neutral-400')} />
       </button>
 

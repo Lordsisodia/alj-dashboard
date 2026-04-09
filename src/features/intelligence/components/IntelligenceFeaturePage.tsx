@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useQuery, useMutation } from 'convex/react';
-import { Sparkles, UserPlus, LayoutDashboard, FileDown, Zap, SlidersHorizontal, Video, Play } from 'lucide-react';
+import { Sparkles, UserPlus, LayoutDashboard, FileDown, Zap, SlidersHorizontal, Video, Play, BarChart2, ChevronDown } from 'lucide-react';
 
 import { api } from '../../../../convex/_generated/api';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
@@ -22,8 +22,8 @@ const DashboardView = dynamic(
   { ssr: false }
 );
 
-const ReconFeedTab = dynamic(
-  () => import('@/features/recon/components/feed/ReconFeedTab').then(m => ({ default: m.ReconFeedTab })),
+const CommunityFeedTab = dynamic(
+  () => import('./feed/CommunityFeedTab').then(m => ({ default: m.CommunityFeedTab })),
   { ssr: false }
 );
 
@@ -220,6 +220,16 @@ export default function IntelligenceFeaturePage() {
                 size="md"
               />
             )}
+            {activeTab === 'feed' && (
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-black/[0.04] transition-colors"
+                style={{ border: '1px solid rgba(0,0,0,0.09)' }}
+              >
+                <BarChart2 size={12} style={{ color: '#7c3aed' }} />
+                Analytics
+                <ChevronDown size={11} />
+              </button>
+            )}
             <LiveActivityButton accentColor="#7c3aed" />
           </div>
         ) : undefined}
@@ -235,10 +245,14 @@ export default function IntelligenceFeaturePage() {
               className={activeTab === 'analysis' ? 'flex-1 min-h-0 flex flex-col pb-6' : ''}
             >
               {activeTab === 'dashboard' && <DashboardView />}
-              {activeTab === 'feed'      && <ReconFeedTab onPostClick={() => {}} onAnalyzeClick={() => {}} sortBy="newest" visibility={{ brandDetails: true, likeCount: true, viewCount: true, saveCount: true }} viewMode="grid" columns={3} creatorStatsMap={{}} nicheERMap={{}} />}
+              {activeTab === 'feed'      && <CommunityFeedTab />}
               {activeTab === 'analysis' && analysisViewMode === 'auto'   && <AnalysisPageView />}
               {activeTab === 'analysis' && analysisViewMode === 'manual' && <AnalyserTab className="flex-1 min-h-0" />}
-              {activeTab === 'insights'  && <InsightsView />}
+              {activeTab === 'insights'  && (
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                  <InsightsView />
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>

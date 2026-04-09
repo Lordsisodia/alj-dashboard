@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useRef, useMemo, useEffect } from 'react';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Search, Filter, ChevronDown, BookmarkPlus, X, Layers, Eye } from 'lucide-react';
+import type { Id } from '@/convex/_generated/dataModel';
+import { toast } from 'sonner';
+import { Search, Filter, ChevronDown, BookmarkPlus, X, Layers, Eye, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { GRAD } from '../../constants';
@@ -40,10 +42,9 @@ type QualifyPost = {
 };
 
 interface Props {
-  days:        number;
-  onDaysChange: (d: number) => void;
-  niche?:      string;
-  platform?:   string;
+  days:      number;
+  niche?:    string;
+  platform?: string;
 }
 
 // ── Column layout ──────────────────────────────────────────────────────────────
@@ -125,13 +126,12 @@ function TableSkeleton() {
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 
 function QualifyToolbar({
-  search, onSearch, band, onBand, total, savedCount, creatorCount, days, onDaysChange, groupByCreator, onGroupByCreator,
+  search, onSearch, band, onBand, total, savedCount, creatorCount, groupByCreator, onGroupByCreator,
   creatorFilter, onCreatorFilter, creators,
 }: {
   search: string; onSearch: (s: string) => void;
   band: number;   onBand: (b: number) => void;
   total: number;  savedCount: number; creatorCount: number;
-  days: number;   onDaysChange: (d: number) => void;
   groupByCreator: boolean; onGroupByCreator: (v: boolean) => void;
   creatorFilter: string; onCreatorFilter: (h: string) => void;
   creators: Array<{ handle: string; count: number }>;
@@ -159,12 +159,6 @@ function QualifyToolbar({
     { label: '5×+',  value: 5 },
     { label: '10×+', value: 10 },
     { label: '20×+', value: 20 },
-  ];
-
-  const DAYS_OPTIONS = [
-    { label: '7d',  value: 7 },
-    { label: '30d', value: 30 },
-    { label: '90d', value: 90 },
   ];
 
   return (
@@ -316,18 +310,6 @@ function QualifyToolbar({
             </div>
           )}
         </div>
-        <div className="flex items-center rounded-lg overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.09)' }}>
-          {DAYS_OPTIONS.map(d => (
-            <button
-              key={d.value}
-              onClick={() => onDaysChange(d.value)}
-              className="px-2.5 py-1.5 text-[10px] font-semibold transition-all active:scale-95"
-              style={days === d.value ? { background: GRAD, color: '#fff' } : { color: '#9ca3af' }}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -477,7 +459,7 @@ function QualifyRow({
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export function QualifyTableView({ days, onDaysChange, niche = 'all', platform = 'all' }: Props) {
+export function QualifyTableView({ days, niche = 'all', platform = 'all' }: Props) {
   const [search,         setSearch]         = useState('');
   const [band,           setBand]           = useState(0);
   const [sortKey,        setSortKey]        = useState<SortKey>('baselineScore');
@@ -486,8 +468,9 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
   const [groupByCreator, setGroupByCreator] = useState(false);
   const [creatorFilter,  setCreatorFilter]  = useState('');
 
-  const raw             = useQuery(api.intelligence.getQualifyPosts, {}) as QualifyPost[] | undefined;
-  const trackedAccounts = useQuery(api.trackedAccounts.list, {}) ?? [];
+  const raw               = useQuery(api.intelligence.getQualifyPosts, {}) as QualifyPost[] | undefined;
+  const trackedAccounts   = useQuery(api.trackedAccounts.list, {}) ?? [];
+  const saveForPipeline   = useMutation(api.intelligence.saveTopPostsForPipeline);
 
   const avatarByHandle = useMemo(
     () => new Map(trackedAccounts.map(a => [a.handle, a.avatarUrl as string | undefined])),
@@ -568,7 +551,7 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
   }
 
   // Sort column header (defined inside component so it closes over sortKey/sortAsc/handleSort)
-  function SortColumnHeader({ k, label, align = 'left', divider = false }: { k: SortKey; label: string; align?: 'left' | 'right' | 'center'; divider?: boolean }) {
+  function SortColumnHeader({ k, label, align = 'left', divider = false, tooltip }: { k: SortKey; label: string; align?: 'left' | 'right' | 'center'; divider?: boolean; tooltip?: string }) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const isActive = sortKey === k;
@@ -597,6 +580,14 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
           )}
         >
           {label}
+          {tooltip && (
+            <span className="relative group/tip flex-shrink-0" onClick={e => e.stopPropagation()}>
+              <Info size={8} className="text-neutral-300 hover:text-neutral-500 cursor-default" />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 px-2.5 py-2 rounded-lg text-[10px] text-neutral-600 leading-relaxed bg-white shadow-lg border border-neutral-100 opacity-0 group-hover/tip:opacity-100 pointer-events-none z-[200] whitespace-normal text-left font-normal normal-case tracking-normal">
+                {tooltip}
+              </div>
+            </span>
+          )}
           <ChevronDown size={9} className={cn('flex-shrink-0 transition-transform duration-150', open && 'rotate-180', isActive ? 'text-neutral-500' : 'text-neutral-300 group-hover/hdr:text-neutral-400')} />
         </button>
         {open && (
@@ -646,14 +637,14 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
         <div className="flex items-center justify-center h-full text-neutral-300" style={DIV}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
         </div>
-        <SortColumnHeader k="handle"        label="Creator"   align="left"   divider />
-        <SortColumnHeader k="postedAt"      label="Posted"    align="center" divider />
-        <SortColumnHeader k="views"         label="Views"     align="center" divider />
-        <SortColumnHeader k="likes"         label="Likes"     align="center" divider />
-        <SortColumnHeader k="comments"      label="Cmts"      align="center" divider />
-        <SortColumnHeader k="likeRate"      label="Like%"     align="center" divider />
-        <SortColumnHeader k="medianViews"   label="Med Views" align="center" divider />
-        <SortColumnHeader k="baselineScore" label="vs Median" align="center" />
+        <SortColumnHeader k="handle"        label="Creator"   align="left"   divider tooltip="Account handle and niche tag." />
+        <SortColumnHeader k="postedAt"      label="Posted"    align="center" divider tooltip="Time since the post was published." />
+        <SortColumnHeader k="views"         label="Views"     align="center" divider tooltip="Total video plays. Reels only - photos and carousels show 0 since Instagram doesn't expose view counts on non-video posts." />
+        <SortColumnHeader k="likes"         label="Likes"     align="center" divider tooltip="Total likes received on the post." />
+        <SortColumnHeader k="comments"      label="Cmts"      align="center" divider tooltip="Comment count - measures audience conversation depth." />
+        <SortColumnHeader k="likeRate"      label="Like%"     align="center" divider tooltip="Likes ÷ Views. Quality signal independent of reach. Green ≥5%, yellow ≥2%, grey <2%." />
+        <SortColumnHeader k="medianViews"   label="Med Views" align="center" divider tooltip="This creator's median reel views across all scraped posts with views > 0." />
+        <SortColumnHeader k="baselineScore" label="vs Median" align="center" tooltip="This post's views ÷ creator median. 2.0× = double the creator's typical views." />
       </div>
     );
   }
@@ -691,8 +682,6 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
         total={isLoading ? 0 : sorted.length}
         savedCount={isLoading ? 0 : savedCount}
         creatorCount={creators.length}
-        days={days}
-        onDaysChange={onDaysChange}
         groupByCreator={groupByCreator}
         onGroupByCreator={setGroupByCreator}
         creatorFilter={creatorFilter}
@@ -751,7 +740,15 @@ export function QualifyTableView({ days, onDaysChange, niche = 'all', platform =
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all"
               style={{ backgroundColor: 'rgba(139,92,246,0.20)', color: '#d8b4fe' }}
               title="Save to pipeline"
-              onClick={() => { /* TODO: wire bulk save mutation */ }}
+              onClick={async () => {
+                try {
+                  await saveForPipeline({ postIds: [...selected] as Id<'scrapedPosts'>[] });
+                  toast.success(`${selected.size} post${selected.size === 1 ? '' : 's'} saved to pipeline`);
+                  setSelected(new Set());
+                } catch {
+                  toast.error('Failed to save posts to pipeline');
+                }
+              }}
             >
               <BookmarkPlus size={11} />
               Save to pipeline

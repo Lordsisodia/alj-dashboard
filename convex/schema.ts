@@ -286,6 +286,16 @@ export default defineSchema({
     firstComment: v.optional(v.string()), // top comment - sentiment signal
     outlierRatio: v.optional(v.number()), // views / followerCount - virality signal
     videoUrl: v.optional(v.string()),     // R2 permanent video URL (mp4)
+    videoSourceUrl:      v.optional(v.string()),   // original IG CDN url (ephemeral)
+    videoDownloadStatus: v.optional(v.union(
+      v.literal("pending"),
+      v.literal("downloading"),
+      v.literal("ready"),
+      v.literal("expired"),
+      v.literal("failed")
+    )),
+    videoDownloadError:  v.optional(v.string()),
+    videoDownloadedAt:   v.optional(v.number()),
     saved: v.optional(v.boolean()),           // user saved to swipe file
     boardIds: v.optional(v.array(v.string())), // which boards it's saved to
     baselineScore: v.optional(v.number()), // viral multiplier vs account average
@@ -305,6 +315,7 @@ export default defineSchema({
     .index("by_content_type", ["contentType"])
     .index("by_posted_at", ["postedAt"])
     .index("by_engagement", ["engagementRate"])
+    .index("by_download_status", ["videoDownloadStatus"])
     .searchIndex("search_caption", {
       searchField: "caption",
       filterFields: ["niche", "contentType"],
@@ -661,6 +672,121 @@ export default defineSchema({
     createdAt: v.number(),
   }).index('by_type', ['typeKey'])
     .index('by_type_active', ['typeKey', 'isActive']),
+
+  // ── Post analyses V2 — structured feature vector per video ──────────────────────────
+  postAnalyses: defineTable({
+    postId:         v.id("scrapedPosts"),
+    handle:         v.string(),
+    niche:          v.string(),
+    outlierRatio:   v.optional(v.number()),
+    engagementRate: v.number(),
+    views:          v.number(),
+    saves:          v.number(),
+    likes:          v.number(),
+
+    hookStructure: v.union(
+      v.literal("question"), v.literal("shock_claim"), v.literal("negation"),
+      v.literal("listicle"), v.literal("pov"), v.literal("before_after"),
+      v.literal("visual_hook"), v.literal("transformation_tease"),
+      v.literal("direct_command"), v.literal("storytime"),
+      v.literal("other"), v.literal("unknown"),
+    ),
+    hookModality: v.union(
+      v.literal("spoken"), v.literal("on_screen_text"), v.literal("visual_only"),
+      v.literal("audio_cue"), v.literal("mixed"), v.literal("unknown"),
+    ),
+    firstFrameType: v.union(
+      v.literal("face_closeup"), v.literal("face_medium"), v.literal("body_full"),
+      v.literal("product"), v.literal("environment"), v.literal("text_card"),
+      v.literal("action_in_progress"), v.literal("unknown"),
+    ),
+    spokenFirstWords:        v.optional(v.string()),
+    onScreenTextFirstFrame:  v.optional(v.string()),
+    curiosityGapPresent:     v.boolean(),
+    patternInterruptPresent: v.boolean(),
+    directAddress:           v.boolean(),
+    hookDurationSec:         v.optional(v.number()),
+
+    formatPrimary: v.union(
+      v.literal("talking_head"), v.literal("voiceover_b_roll"), v.literal("pov_action"),
+      v.literal("transition_montage"), v.literal("lipsync"), v.literal("tutorial_demo"),
+      v.literal("reaction"), v.literal("skit_scripted"), v.literal("text_on_screen_silent"),
+      v.literal("product_showcase"), v.literal("thirst_trap_static"),
+      v.literal("before_after_reveal"), v.literal("dance_performance"),
+      v.literal("day_in_life_vlog"), v.literal("other"), v.literal("unknown"),
+    ),
+    setting: v.union(
+      v.literal("home_bedroom"), v.literal("home_other"), v.literal("gym"),
+      v.literal("outdoor_urban"), v.literal("outdoor_nature"), v.literal("studio"),
+      v.literal("car"), v.literal("mirror"), v.literal("other"), v.literal("unknown"),
+    ),
+    creatorOnScreen: v.boolean(),
+    faceVisibility: v.union(
+      v.literal("full"), v.literal("partial"), v.literal("obscured"),
+      v.literal("none"), v.literal("unknown"),
+    ),
+    energyLevel:         v.number(),
+    cutsPerSecondBucket: v.union(
+      v.literal("low"), v.literal("med"), v.literal("high"),
+      v.literal("extreme"), v.literal("unknown"),
+    ),
+    hasJumpCuts:    v.boolean(),
+    hasSpeedRamps:  v.boolean(),
+    hasZoomPunches: v.boolean(),
+
+    hasSpokenWords:      v.boolean(),
+    hasVoiceover:        v.boolean(),
+    musicEnergy: v.union(
+      v.literal("none"), v.literal("low"), v.literal("mid"), v.literal("high"),
+    ),
+    soundEffectsPresent: v.boolean(),
+    speakingPace: v.union(
+      v.literal("slow"), v.literal("normal"), v.literal("fast"),
+      v.literal("rapid"), v.literal("unknown"),
+    ),
+
+    creatorExpressedEmotion: v.union(
+      v.literal("neutral"), v.literal("confident"), v.literal("playful"),
+      v.literal("seductive"), v.literal("intense"), v.literal("vulnerable"),
+      v.literal("excited"), v.literal("deadpan"), v.literal("angry"),
+      v.literal("joyful"), v.literal("unknown"),
+    ),
+    vibeKeyword: v.union(
+      v.literal("aspirational"), v.literal("relatable"), v.literal("educational"),
+      v.literal("provocative"), v.literal("cozy"), v.literal("hype"),
+      v.literal("controversial"), v.literal("wholesome"), v.literal("premium"),
+      v.literal("raw_authentic"), v.literal("humorous"), v.literal("motivational"),
+      v.literal("sensual"), v.literal("unknown"),
+    ),
+
+    captionHasCTA:       v.boolean(),
+    captionAddsContext:  v.boolean(),
+    captionRepeatsVideo: v.boolean(),
+    ctaType: v.union(
+      v.literal("save"), v.literal("comment"), v.literal("share"),
+      v.literal("follow"), v.literal("dm"), v.literal("link_bio"),
+      v.literal("none"), v.literal("unknown"),
+    ),
+    captionLengthBucket: v.union(
+      v.literal("short"), v.literal("medium"), v.literal("long"),
+    ),
+    hashtagCount:     v.optional(v.number()),
+    transcript:       v.optional(v.string()),
+    onScreenTextFull: v.optional(v.string()),
+
+    extractionModel:      v.string(),
+    promptVersion:        v.string(),
+    extractionConfidence: v.number(),
+    extractionFlags:      v.array(v.string()),
+    analyzedAt:           v.number(),
+    rawResponse:          v.optional(v.string()),
+  })
+    .index("by_post_id",        ["postId"])
+    .index("by_niche",          ["niche"])
+    .index("by_niche_format",   ["niche", "formatPrimary"])
+    .index("by_niche_hook",     ["niche", "hookStructure"])
+    .index("by_format_energy",  ["formatPrimary", "energyLevel"])
+    .index("by_prompt_version", ["promptVersion"]),
 
   // -- Creator briefs (Recon — OpenRouter AI-generated profiles) ------------------------
   creatorBriefs: defineTable({

@@ -10,7 +10,7 @@ import { OutlierPanel }      from '../qualify/OutlierPanel';
 import { TrendsLoadingSkeleton } from './TrendsLoadingSkeleton';
 
 interface Props {
-  days:          number;
+  days?:         number;
   metric:        'er' | 'views';
   niche?:        string;
   platform?:     string;
@@ -18,8 +18,9 @@ interface Props {
   onViewChange?: (v: 'table' | 'kanban') => void;
 }
 
-export function TrendsView({ niche = 'all', platform = 'all', view: viewProp, onViewChange }: Props) {
-  const [days, setDays] = useState<number>(30);
+export function TrendsView({ niche = 'all', platform = 'all', view: viewProp, onViewChange, days: daysProp }: Props) {
+  const [daysLocal] = useState<number>(30);
+  const days = daysProp ?? daysLocal;
   const [view, setView] = useState<'table' | 'kanban'>('table');
   const activeView      = viewProp ?? view;
   const setActiveView   = onViewChange ?? setView;
@@ -36,7 +37,6 @@ export function TrendsView({ niche = 'all', platform = 'all', view: viewProp, on
           {activeView === 'table' ? (
             <QualifyTableView
               days={days}
-              onDaysChange={setDays}
               niche={niche}
               platform={platform}
             />

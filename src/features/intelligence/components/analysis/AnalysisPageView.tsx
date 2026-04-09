@@ -20,6 +20,7 @@ type QueuePost = {
   _id: string; handle: string; niche: string; contentType: string;
   thumbnailUrl?: string | null; caption: string; engagementRate: number;
   outlierRatio: number; videoUrl?: string; postedAt: number;
+  views: number; saves: number; likes: number;
 };
 
 const PURPLE_GRAD = 'linear-gradient(135deg, #6d28d9, #4c1d95)';
@@ -37,7 +38,7 @@ function IgIcon({ size = 12 }: { size?: number }) {
 
 // ── Queue post card ───────────────────────────────────────────────────────────
 
-function QueuePostCard({ post, isExpired, onAnalyse }: { post: QueuePost; isExpired: boolean; onAnalyse: () => void }) {
+function QueuePostCard({ post, isExpired, isSelected, onSelect, onAnalyse }: { post: QueuePost; isExpired: boolean; isSelected: boolean; onSelect: () => void; onAnalyse: () => void }) {
   const [imgFailed, setImgFailed] = useState(false);
   const thumb    = post.thumbnailUrl ?? '';
   const showGrad = !thumb || thumb.startsWith('linear-gradient') || imgFailed;
@@ -51,8 +52,9 @@ function QueuePostCard({ post, isExpired, onAnalyse }: { post: QueuePost; isExpi
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -8, transition: { duration: 0.15 } }}
       whileHover={{ y: -2, boxShadow: '0 6px 20px rgba(0,0,0,0.13)' }}
-      className="relative rounded-2xl overflow-hidden"
-      style={{ border: '1px solid rgba(0,0,0,0.07)' }}
+      onClick={onSelect}
+      className="relative rounded-2xl overflow-hidden cursor-pointer"
+      style={{ border: isSelected ? '2px solid #6d28d9' : '1px solid rgba(0,0,0,0.07)', boxShadow: isSelected ? '0 0 0 2px rgba(109,40,217,0.15)' : undefined }}
     >
       {/* Portrait thumbnail */}
       <div className="relative w-full" style={{ height: 200 }}>
@@ -99,7 +101,7 @@ function QueuePostCard({ post, isExpired, onAnalyse }: { post: QueuePost; isExpi
           <span className="inline-flex text-[8px] font-bold px-1.5 py-0.5 rounded-full text-white whitespace-nowrap" style={{ background: PURPLE_GRAD }}>{post.outlierRatio.toFixed(1)}×</span>
           {isExpired && <span title="Posted over 24h ago"><AlertTriangle size={8} className="text-amber-400" /></span>}
           <button
-            onClick={onAnalyse}
+            onClick={e => { e.stopPropagation(); onAnalyse(); }}
             className="ml-auto flex items-center gap-0.5 text-[8px] font-semibold px-1.5 py-0.5 rounded-full text-white whitespace-nowrap hover:brightness-110 transition-all"
             style={{ background: PURPLE_GRAD }}
           >
@@ -213,12 +215,135 @@ function AnalyzedPortraitCard({ post, isSelected, onClick }: { post: any; isSele
   );
 }
 
+// ── Queue post detail panel (right side, before analysis) ─────────────────────
+
+function QueuePostDetailPanel({ post, onAnalyse }: { post: QueuePost; onAnalyse: () => void }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const thumb    = post.thumbnailUrl ?? '';
+  const showGrad = !thumb || thumb.startsWith('linear-gradient') || imgFailed;
+
+  function fmt(n: number) {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
+    return `${n}`;
+  }
+
+  const hasVideo = !!post.videoUrl;
+  const isR2     = post.videoUrl?.startsWith('https://pub-') ?? false;
+  const hasStats = (post.views ?? 0) > 0 || (post.likes ?? 0) > 0 || (post.saves ?? 0) > 0;
+
+  return (
+    <motion.div
+      key={post._id}
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 12 }}
+      className="flex flex-1 min-h-0"
+    >
+      {/* Left: thumbnail column */}
+      <div className="relative shrink-0 bg-neutral-100" style={{ width: 290 }}>
+        {showGrad
+          ? <div className="w-full h-full" style={{ background: PURPLE_GRAD }} />
+          // eslint-disable-next-line @next/next/no-img-element
+          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" onError={() => setImgFailed(true)} />}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        <div className="absolute bottom-3 left-3 right-3">
+          <p className="text-[13px] font-bold text-white leading-tight">{post.handle}</p>
+          <p className="text-[9px] text-white/70 capitalize mt-0.5">{post.niche} · {post.contentType}</p>
+        </div>
+        {/* Video status badge */}
+        <div className="absolute top-3 left-3">
+          <span className={`text-[8px] font-bold px-2 py-1 rounded-full ${isR2 ? 'bg-emerald-500/90 text-white' : hasVideo ? 'bg-amber-400/90 text-white' : 'bg-neutral-500/70 text-white'}`}>
+            {isR2 ? '● R2 Ready' : hasVideo ? '● CDN' : '○ No video'}
+          </span>
+        </div>
+      </div>
+
+      {/* Right: details */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4">
+
+          {/* Outlier ratio + ER */}
+          <div className="flex gap-2">
+            <div className="flex-1 rounded-xl px-3 py-2.5 text-center" style={{ backgroundColor: 'rgba(109,40,217,0.06)', border: '1px solid rgba(109,40,217,0.12)' }}>
+              <p className="text-[22px] font-black text-purple-700 leading-none">{post.outlierRatio.toFixed(1)}×</p>
+              <p className="text-[8px] font-bold text-purple-400 uppercase tracking-wide mt-0.5">Outlier Ratio</p>
+            </div>
+            <div className="flex-1 rounded-xl px-3 py-2.5 text-center" style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)' }}>
+              <p className="text-[22px] font-black text-neutral-700 leading-none">{((post.engagementRate ?? 0) * 100).toFixed(1)}%</p>
+              <p className="text-[8px] font-bold text-neutral-400 uppercase tracking-wide mt-0.5">Eng. Rate</p>
+            </div>
+          </div>
+
+          {/* Engagement stats */}
+          {hasStats && (
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { label: 'Likes',  value: fmt(post.likes  ?? 0) },
+                { label: 'Views',  value: fmt(post.views  ?? 0) },
+                { label: 'Saves',  value: fmt(post.saves  ?? 0) },
+              ].map(({ label, value }) => (
+                <div key={label} className="rounded-lg px-2 py-2 text-center"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}>
+                  <p className="text-[13px] font-bold text-neutral-700 leading-none">{value}</p>
+                  <p className="text-[8px] text-neutral-400 mt-1 uppercase tracking-wide">{label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Caption */}
+          {post.caption && (
+            <div>
+              <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-2">Caption</p>
+              <p className="text-[11px] text-neutral-600 leading-relaxed line-clamp-4">{post.caption}</p>
+            </div>
+          )}
+
+          {/* Video info */}
+          <div>
+            <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-2">Video</p>
+            <div className="rounded-xl px-3 py-2.5 space-y-1"
+              style={{ backgroundColor: isR2 ? 'rgba(5,150,105,0.05)' : 'rgba(0,0,0,0.03)', border: `1px solid ${isR2 ? 'rgba(5,150,105,0.15)' : 'rgba(0,0,0,0.07)'}` }}>
+              {isR2 ? (
+                <>
+                  <p className="text-[10px] font-semibold text-emerald-600">R2 video ready — full analysis available</p>
+                  <p className="text-[9px] text-neutral-400 font-mono truncate">{post.videoUrl}</p>
+                </>
+              ) : hasVideo ? (
+                <>
+                  <p className="text-[10px] font-semibold text-amber-600">Instagram CDN URL — may 403 on server fetch</p>
+                  <p className="text-[9px] text-neutral-400 font-mono truncate">{post.videoUrl?.slice(0, 60)}…</p>
+                </>
+              ) : (
+                <p className="text-[10px] text-neutral-400">No video URL scraped</p>
+              )}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer: Analyse button */}
+        <div className="shrink-0 px-4 pb-4 pt-2" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+          <button onClick={onAnalyse}
+            className="w-full py-2.5 rounded-xl text-[12px] font-semibold text-white transition-opacity hover:opacity-90 flex items-center justify-center gap-2"
+            style={{ background: PURPLE_GRAD }}>
+            <Sparkles size={13} /> Analyse this post
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ── Right detail panel ────────────────────────────────────────────────────────
 
 function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () => void }) {
   const [imgFailed, setImgFailed] = useState(false);
   const thumb    = post.thumbnailUrl ?? '';
   const showGrad = !thumb || thumb.startsWith('linear-gradient') || imgFailed;
+
+  if (!post?.aiAnalysis) return null;
 
   const score      = post.aiAnalysis.hookScore ?? 0;
   const scoreColor = score >= 8 ? '#059669' : score >= 6 ? '#6d28d9' : score >= 4 ? '#ea580c' : '#dc2626';
@@ -249,7 +374,8 @@ function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () =
       key={post._id}
       initial={{ opacity: 0, x: 12 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex h-full"
+      exit={{ opacity: 0, x: 12 }}
+      className="flex flex-1 min-h-0"
     >
       {/* Left: thumbnail column  -  9:16 portrait */}
       <div className="relative shrink-0 bg-neutral-100" style={{ width: 290 }}>
@@ -364,8 +490,8 @@ function EmptyDetailState() {
         <Sparkles size={22} className="text-purple-400" />
       </div>
       <div>
-        <p className="text-sm font-semibold text-neutral-400">Select an analyzed post</p>
-        <p className="text-[11px] text-neutral-300 mt-1">Click a reel card on the left to view its full analysis here</p>
+        <p className="text-sm font-semibold text-neutral-400">Select a post</p>
+        <p className="text-[11px] text-neutral-300 mt-1">Click any card in the Queue or Analyzed gallery to preview it here</p>
       </div>
     </div>
   );
@@ -513,19 +639,36 @@ function EmptyState({ icon: Icon, label }: { icon: React.ElementType; label: str
 
 // ── Main component ────────────────────────────────────────────────────────────
 
+// Module-level: persists selection across React remounts (Strict Mode, parent re-renders, etc.)
+// These vars live for the lifetime of the browser tab, surviving any component unmount/remount.
+let _persistedPostId: string | null = null;
+let _persistedSnapshot: any | null = null;
+
 export function AnalysisPageView() {
   const queue         = useQuery(api.intelligence.getAnalysisQueue, { days: 90, limit: 50 });
   const analysed      = useQuery(api.intelligence.getAnalysedPosts, { days: 90, limit: 40 });
   const stats         = useQuery(api.intelligence.getStats, {});
-  const patchAnalysis = useMutation(api.intelligence.patchAnalysis);
+  const patchAnalysis    = useMutation(api.intelligence.patchAnalysis);
+  const insertAnalysisV2 = useMutation(api.intelligence.insertAnalysisV2);
 
   const [inFlight,  setInFlight]  = useState<Map<string, Phase>>(new Map());
   const [drawerOpen,       setDrawerOpen]       = useState(false);
   const [drawerIndex,      setDrawerIndex]       = useState(0);
   const [justAnalysedPost, setJustAnalysedPost] = useState<DrawerPost | null>(null);
   const [drawerFromResult, setDrawerFromResult] = useState(false);
-  const [selectedPost,     setSelectedPost]     = useState<any | null>(null);
-  const [selectedTypeKey,  setSelectedTypeKey]  = useState('ofm_comprehensive');
+  // ID + snapshot: survives both Convex subscription updates and component remounts
+  const [selectedPostId,       _setPostId]   = useState<string | null>(_persistedPostId);
+  const [selectedPostSnapshot, _setSnapshot] = useState<any | null>(_persistedSnapshot);
+  const [selectedQueuePost,    setSelectedQueuePost]    = useState<QueuePost | null>(null);
+  const [selectedTypeKey,      setSelectedTypeKey]      = useState('ofm_comprehensive');
+
+  // Wrappers keep module-level vars in sync so remounts re-hydrate to the last selection
+  function setSelectedPostId(id: string | null)   { _persistedPostId = id;  _setPostId(id);   }
+  function setSelectedPostSnapshot(p: any | null) { _persistedSnapshot = p; _setSnapshot(p);  }
+
+  // Prefer fresh Convex data; fall back to snapshot when post isn't in the current window
+  const freshPost    = selectedPostId ? (analysed ?? []).find((p: any) => p._id === selectedPostId) ?? null : null;
+  const selectedPost = freshPost ?? selectedPostSnapshot;
 
   const activePrompt = useQuery(api.analysisPrompts.getActivePromptForType, { typeKey: selectedTypeKey });
 
@@ -580,6 +723,69 @@ export function AnalysisPageView() {
         suggestions: data.suggestions ?? [],
       });
 
+      // Fire-and-forget v2 feature vector extraction (non-blocking)
+      (async () => {
+        try {
+          const v2Res = await fetch('/api/intelligence/analyze-v2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ post }),
+          });
+          if (!v2Res.ok) return;
+          const v2 = await v2Res.json();
+          await insertAnalysisV2({
+            postId:                post._id as any,
+            handle:                post.handle,
+            niche:                 post.niche,
+            outlierRatio:          post.outlierRatio,
+            engagementRate:        post.engagementRate,
+            views:                 post.views  ?? 0,
+            saves:                 post.saves  ?? 0,
+            likes:                 post.likes  ?? 0,
+            hookStructure:         v2.hookStructure,
+            hookModality:          v2.hookModality,
+            firstFrameType:        v2.firstFrameType,
+            spokenFirstWords:      v2.spokenFirstWords ?? undefined,
+            onScreenTextFirstFrame: v2.onScreenTextFirstFrame ?? undefined,
+            curiosityGapPresent:   v2.curiosityGapPresent,
+            patternInterruptPresent: v2.patternInterruptPresent,
+            directAddress:         v2.directAddress,
+            hookDurationSec:       v2.hookDurationSec ?? undefined,
+            formatPrimary:         v2.formatPrimary,
+            setting:               v2.setting,
+            creatorOnScreen:       v2.creatorOnScreen,
+            faceVisibility:        v2.faceVisibility,
+            energyLevel:           v2.energyLevel,
+            cutsPerSecondBucket:   v2.cutsPerSecondBucket,
+            hasJumpCuts:           v2.hasJumpCuts,
+            hasSpeedRamps:         v2.hasSpeedRamps,
+            hasZoomPunches:        v2.hasZoomPunches,
+            hasSpokenWords:        v2.hasSpokenWords,
+            hasVoiceover:          v2.hasVoiceover,
+            musicEnergy:           v2.musicEnergy,
+            soundEffectsPresent:   v2.soundEffectsPresent,
+            speakingPace:          v2.speakingPace,
+            creatorExpressedEmotion: v2.creatorExpressedEmotion,
+            vibeKeyword:           v2.vibeKeyword,
+            captionHasCTA:         v2.captionHasCTA,
+            captionAddsContext:     v2.captionAddsContext,
+            captionRepeatsVideo:   v2.captionRepeatsVideo,
+            ctaType:               v2.ctaType,
+            captionLengthBucket:   v2.captionLengthBucket,
+            hashtagCount:          typeof v2.hashtagCount === 'number' ? v2.hashtagCount : undefined,
+            transcript:            v2.transcript ?? undefined,
+            onScreenTextFull:      v2.onScreenTextFull ?? undefined,
+            extractionConfidence:  v2.extractionConfidence,
+            extractionFlags:       v2.extractionFlags ?? [],
+            extractionModel:       v2.extractionModel,
+            promptVersion:         v2.promptVersion,
+            rawResponse:           v2.rawResponse ?? undefined,
+          });
+        } catch (e) {
+          console.warn('[analyze-v2] background extraction failed', e);
+        }
+      })();
+
       if (opts.openDrawer) {
         const snapshot: DrawerPost = {
           ...(post as any),
@@ -607,7 +813,7 @@ export function AnalysisPageView() {
     } finally {
       setInFlight(prev => { const m = new Map(prev); m.delete(post._id); return m; });
     }
-  }, [patchAnalysis, activePrompt]);
+  }, [patchAnalysis, insertAnalysisV2, activePrompt]);
 
   async function handleRunAll() {
     if (runAllBusyRef.current) return;
@@ -682,6 +888,8 @@ export function AnalysisPageView() {
                           key={post._id}
                           post={post}
                           isExpired={isExpired(post)}
+                          isSelected={selectedQueuePost?._id === post._id}
+                          onSelect={() => { setSelectedQueuePost(post); setSelectedPostId(null); setSelectedPostSnapshot(null); }}
                           onAnalyse={() => handleAnalyse(post)}
                         />
                       ))}
@@ -704,14 +912,23 @@ export function AnalysisPageView() {
               >
                 <ColHeader title="Analyzing" count={inFlightPosts.length} accentColor="#7c3aed" />
                 <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-center gap-2 px-2 py-1.5">
-                  <AnalyzingCard
-                    post={{ _id: '__mock__', handle: '@test.creator', niche: 'lifestyle', contentType: 'reel', thumbnailUrl: 'linear-gradient(135deg, #6d28d9, #4c1d95)', caption: '', engagementRate: 0.08, outlierRatio: 3.2, postedAt: Date.now() }}
-                    phase="analysing"
-                  />
                   <AnimatePresence>
-                    {inFlightPosts.map(post => (
-                      <AnalyzingCard key={post._id} post={post} phase={inFlight.get(post._id) ?? 'analysing'} />
-                    ))}
+                    {inFlightPosts.length === 0 ? (
+                      <motion.div
+                        key="idle"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center gap-2 text-neutral-300 px-1"
+                      >
+                        <Loader2 size={13} className="opacity-30" />
+                        <p className="text-[11px] font-medium">Idle — click Analyse on a queued post to start</p>
+                      </motion.div>
+                    ) : (
+                      inFlightPosts.map(post => (
+                        <AnalyzingCard key={post._id} post={post} phase={inFlight.get(post._id) ?? 'analysing'} />
+                      ))
+                    )}
                   </AnimatePresence>
                 </div>
               </div>
@@ -747,7 +964,7 @@ export function AnalysisPageView() {
                               key={post._id}
                               post={post}
                               isSelected={selectedPost?._id === post._id}
-                              onClick={() => setSelectedPost(post)}
+                              onClick={() => { setSelectedPostId(post._id); setSelectedPostSnapshot(post); setSelectedQueuePost(null); }}
                             />
                           ))}
                         </AnimatePresence>
@@ -761,22 +978,25 @@ export function AnalysisPageView() {
               className="shrink-0 rounded-xl overflow-hidden flex flex-col"
               style={{ width: 600, border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
             >
-              <AnimatePresence mode="wait">
-                {selectedPost ? (
-                  <PostDetailPanel
-                    key={selectedPost._id}
-                    post={selectedPost}
-                    onOpenDrawer={() => {
-                      const idx = (analysed ?? []).findIndex((p: any) => p._id === selectedPost._id);
-                      if (idx !== -1) openDrawerFromAnalysed(idx);
-                    }}
-                  />
-                ) : (
-                  <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1">
-                    <EmptyDetailState />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {selectedQueuePost ? (
+                <QueuePostDetailPanel
+                  post={selectedQueuePost}
+                  onAnalyse={() => {
+                    handleAnalyse(selectedQueuePost);
+                    setSelectedQueuePost(null);
+                  }}
+                />
+              ) : selectedPost ? (
+                <PostDetailPanel
+                  post={selectedPost}
+                  onOpenDrawer={() => {
+                    const idx = (analysed ?? []).findIndex((p: any) => p._id === selectedPostId);
+                    if (idx !== -1) openDrawerFromAnalysed(idx);
+                  }}
+                />
+              ) : (
+                <EmptyDetailState />
+              )}
             </div>
 
           </div>
@@ -792,6 +1012,7 @@ export function AnalysisPageView() {
           />
         )}
       </AnimatePresence>
+
     </>
   );
 }

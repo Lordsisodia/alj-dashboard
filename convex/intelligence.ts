@@ -1,13 +1,14 @@
 import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 // ── Feed query  -  powers the Intelligence Community Feed ──────────────────────
 
 export const getFeed = query({
   args: {
-    niche:       v.optional(v.string()),
-    contentType: v.optional(v.string()),
-    sortBy:      v.optional(v.union(
+    niche:        v.optional(v.string()),
+    contentType:  v.optional(v.string()),
+    sortBy:       v.optional(v.union(
       v.literal("newest"),
       v.literal("oldest"),
       v.literal("most-likes"),
@@ -18,13 +19,18 @@ export const getFeed = query({
       v.literal("top"),
       v.literal("viral")
     )),
-    limit:       v.optional(v.number()),
+    limit:        v.optional(v.number()),
+    onlyAnalyzed: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     let posts = await ctx.db.query("scrapedPosts").collect();
 
     // Exclude seed data  -  only show real scraped posts
     posts = posts.filter(p => !p.externalId?.startsWith('seed_'));
+
+    if (args.onlyAnalyzed) {
+      posts = posts.filter(p => p.aiAnalysis != null);
+    }
 
     if (args.niche && args.niche !== "all") {
       posts = posts.filter(p => p.niche === args.niche);
@@ -68,7 +74,49 @@ export const getFeed = query({
         posts.sort((a, b) => (b.postedAt ?? 0) - (a.postedAt ?? 0));
     }
 
-    return posts.slice(0, args.limit ?? 40);
+    const slicedPosts = posts.slice(0, args.limit ?? 40);
+
+    // Join v2 analyses + creator account data in parallel
+    const [v2Analyses, accounts] = await Promise.all([
+      Promise.all(
+        slicedPosts.map(p =>
+          ctx.db
+            .query("postAnalyses")
+            .withIndex("by_post_id", q => q.eq("postId", p._id))
+            .first()
+        )
+      ),
+      Promise.all(
+        slicedPosts.map(p =>
+          ctx.db
+            .query("trackedAccounts")
+            .withIndex("by_handle", q => q.eq("handle", p.handle))
+            .first()
+        )
+      ),
+    ]);
+
+    return slicedPosts.map((p, i) => {
+      const v2  = v2Analyses[i];
+      const acc = accounts[i];
+      return {
+        ...p,
+        avatarUrl:   acc?.avatarUrl   ?? null,
+        avatarColor: acc?.avatarColor ?? null,
+        displayName: acc?.displayName ?? null,
+        verified:    acc?.verified    ?? null,
+        v2Analysis: v2
+          ? {
+              vibeKeyword:             v2.vibeKeyword,
+              hookStructure:           v2.hookStructure,
+              formatPrimary:           v2.formatPrimary,
+              curiosityGapPresent:     v2.curiosityGapPresent,
+              patternInterruptPresent: v2.patternInterruptPresent,
+              energyLevel:             v2.energyLevel,
+            }
+          : null,
+      };
+    });
   },
 });
 
@@ -186,6 +234,101 @@ export const toggleSave = mutation({
     const post = await ctx.db.get(args.postId);
     if (!post) return;
     await ctx.db.patch(args.postId, { saved: !post.saved });
+  },
+});
+
+// ── Saved posts ─────────────────────────────────────────────────────────────
+
+export const getSavedPosts = query({
+  args: {
+    niche:       v.optional(v.string()),
+    contentType: v.optional(v.string()),
+    sortBy:      v.optional(v.union(
+      v.literal("newest"),
+      v.literal("most-likes"),
+      v.literal("most-views"),
+      v.literal("most-saves"),
+      v.literal("top-engagement"),
+    )),
+    search:      v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let posts = await ctx.db
+      .query("scrapedPosts")
+      .filter(q => q.eq(q.field("saved"), true))
+      .collect();
+
+    posts = posts.filter(p => !p.externalId?.startsWith('seed_'));
+
+    if (args.niche && args.niche !== "all") {
+      posts = posts.filter(p => p.niche === args.niche);
+    }
+    if (args.contentType && args.contentType !== "all") {
+      posts = posts.filter(p => p.contentType === args.contentType);
+    }
+    if (args.search) {
+      const q = args.search.toLowerCase();
+      posts = posts.filter(p =>
+        p.handle.toLowerCase().includes(q) ||
+        (p.caption ?? '').toLowerCase().includes(q) ||
+        (p.hashtags ?? []).some((t: string) => t.toLowerCase().includes(q))
+      );
+    }
+
+    switch (args.sortBy) {
+      case "most-likes":
+        posts.sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0));
+        break;
+      case "most-views":
+        posts.sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
+        break;
+      case "most-saves":
+        posts.sort((a, b) => (b.saves ?? 0) - (a.saves ?? 0));
+        break;
+      case "top-engagement":
+        posts.sort((a, b) => (b.engagementRate ?? 0) - (a.engagementRate ?? 0));
+        break;
+      default:
+        posts.sort((a, b) => (b.postedAt ?? 0) - (a.postedAt ?? 0));
+    }
+
+    return posts;
+  },
+});
+
+// ── Saved posts summary stats ────────────────────────────────────────────────
+
+export const getSavedStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const posts = await ctx.db
+      .query("scrapedPosts")
+      .filter(q => q.eq(q.field("saved"), true))
+      .collect();
+
+    const real = posts.filter(p => !p.externalId?.startsWith('seed_'));
+
+    // Latest save time
+    const lastSaved = real.reduce((max, p) => {
+      // Use scrapedAt as a proxy for when it was saved (toggleSave patches savedAt)
+      return Math.max(max, p.scrapedAt ?? 0);
+    }, 0);
+
+    // Unique creators
+    const creators = new Set(real.map(p => p.handle));
+
+    // Niche breakdown
+    const nicheCounts: Record<string, number> = {};
+    for (const p of real) {
+      nicheCounts[p.niche] = (nicheCounts[p.niche] ?? 0) + 1;
+    }
+
+    return {
+      total: real.length,
+      creators: creators.size,
+      lastSavedAt: lastSaved || null,
+      nicheCounts,
+    };
   },
 });
 
@@ -733,8 +876,19 @@ export const saveTopPostsForPipeline = mutation({
   args: { postIds: v.array(v.id("scrapedPosts")) },
   handler: async (ctx, { postIds }) => {
     for (const id of postIds) {
-      await ctx.db.patch(id, { savedForPipeline: true, savedAt: Date.now() });
+      const post = await ctx.db.get(id);
+      if (!post) continue;
+      await ctx.db.patch(id, {
+        savedForPipeline:    true,
+        savedAt:             Date.now(),
+        videoDownloadStatus: post.videoDownloadStatus ?? 'pending',
+      });
+      // Kick off R2 download unless video is already stable
+      if (post.videoDownloadStatus !== 'ready') {
+        await ctx.scheduler.runAfter(0, api.intelligenceNode.downloadPostToR2, { postId: id });
+      }
     }
+    return { scheduled: postIds.length };
   },
 });
 
@@ -950,33 +1104,50 @@ export const getAnalysisQueue = query({
   },
   handler: async (ctx, args) => {
     let posts = await ctx.db.query("scrapedPosts").collect();
-    posts = posts.filter(p => !p.externalId?.startsWith('seed_'));
+    posts = posts.filter(p => !p.externalId?.startsWith('seed_') && p.aiAnalysis == null);
 
     const days   = args.days ?? 90;
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-    posts = posts.filter(p =>
-      (p.postedAt ?? 0) > cutoff &&
-      p.aiAnalysis == null &&
-      (p.outlierRatio != null ? p.outlierRatio >= 1.5 : (p.engagementRate ?? 0) >= 0.05)
+
+    // Two-tier: (a) explicitly saved for pipeline (no day cutoff - user intent),
+    // (b) auto-threshold posts within the day window
+    const qualified = posts.filter(p =>
+      p.savedForPipeline === true ||
+      (
+        (p.postedAt ?? 0) > cutoff &&
+        (p.outlierRatio != null ? p.outlierRatio >= 1.5 : (p.engagementRate ?? 0) >= 0.05)
+      )
     );
 
-    posts.sort((a, b) => {
+    // savedForPipeline first (FIFO by savedAt), then threshold posts by outlierRatio desc
+    qualified.sort((a, b) => {
+      const aSaved = a.savedForPipeline === true;
+      const bSaved = b.savedForPipeline === true;
+      if (aSaved && !bSaved) return -1;
+      if (!aSaved && bSaved) return 1;
+      if (aSaved && bSaved)  return (a.savedAt ?? 0) - (b.savedAt ?? 0);
       const ar = a.outlierRatio ?? (a.engagementRate ?? 0) * 10;
       const br = b.outlierRatio ?? (b.engagementRate ?? 0) * 10;
       return br - ar;
     });
 
-    return posts.slice(0, args.limit ?? 20).map(p => ({
-      _id:            p._id,
-      handle:         p.handle,
-      niche:          p.niche,
-      contentType:    p.contentType,
-      thumbnailUrl:   p.thumbnailUrl,
-      caption:        p.caption ?? '',
-      engagementRate: p.engagementRate ?? 0,
-      outlierRatio:   p.outlierRatio ?? parseFloat(((p.engagementRate ?? 0) * 10).toFixed(2)),
-      videoUrl:       p.videoUrl,
-      postedAt:       p.postedAt ?? 0,
+    return qualified.slice(0, args.limit ?? 20).map(p => ({
+      _id:                 p._id,
+      handle:              p.handle,
+      niche:               p.niche,
+      contentType:         p.contentType,
+      thumbnailUrl:        p.thumbnailUrl,
+      caption:             p.caption ?? '',
+      engagementRate:      p.engagementRate ?? 0,
+      outlierRatio:        p.outlierRatio ?? parseFloat(((p.engagementRate ?? 0) * 10).toFixed(2)),
+      videoUrl:            p.videoUrl,
+      videoDownloadStatus: p.videoDownloadStatus ?? (p.videoUrl ? 'ready' : 'pending'),
+      savedForPipeline:    p.savedForPipeline === true,
+      savedAt:             p.savedAt,
+      postedAt:            p.postedAt ?? 0,
+      views:               p.views  ?? 0,
+      saves:               p.saves  ?? 0,
+      likes:               p.likes  ?? 0,
     }));
   },
 });
@@ -1032,30 +1203,46 @@ export const getAnalysisPipelineStats = query({
   args: {},
   handler: async (ctx) => {
     const posts = await ctx.db.query('scrapedPosts').collect();
-    const real = posts.filter(p => !p.externalId?.startsWith('seed_'));
-    const qualified        = real.filter(p => p.savedForPipeline === true);
-    const downloaded       = qualified.filter(p => !!p.videoUrl);
-    const analyzed         = downloaded.filter(p => !!p.aiAnalysis);
+    const real      = posts.filter(p => !p.externalId?.startsWith('seed_'));
+    const qualified = real.filter(p => p.savedForPipeline === true);
+    const ready     = qualified.filter(p => p.videoDownloadStatus === 'ready');
+    const analyzed  = ready.filter(p => !!p.aiAnalysis);
     return {
       totalQualified:    qualified.length,
-      downloaded:        downloaded.length,
-      pendingDownload:   qualified.length - downloaded.length,
+      downloading:       qualified.filter(p => p.videoDownloadStatus === 'downloading').length,
+      downloaded:        ready.length,
+      pendingDownload:   qualified.filter(p => !p.videoDownloadStatus || p.videoDownloadStatus === 'pending').length,
+      downloadFailed:    qualified.filter(p => p.videoDownloadStatus === 'expired' || p.videoDownloadStatus === 'failed').length,
       analyzed:          analyzed.length,
-      queuedForAnalysis: downloaded.length - analyzed.length,
+      queuedForAnalysis: ready.length - analyzed.length,
     };
   },
 });
 
-// ── Download post to R2 (scaffold — implementation TBD) ──────────────────────
+// ── Patch video download status on a post ─────────────────────────────────────
 
-export const downloadPostToR2 = action({
-  args: { postId: v.id('scrapedPosts') },
-  handler: async (_ctx, _args) => {
-    // TODO: fetch video from source URL, upload to R2, patch videoUrl on post
-    // This will be implemented by the pipeline agent
-    throw new Error('Not implemented yet');
+export const patchVideoDownload = mutation({
+  args: {
+    postId:    v.id("scrapedPosts"),
+    status:    v.union(
+      v.literal("pending"), v.literal("downloading"),
+      v.literal("ready"),   v.literal("expired"),
+      v.literal("failed")
+    ),
+    videoUrl:  v.optional(v.string()),
+    error:     v.optional(v.string()),
+  },
+  handler: async (ctx, { postId, status, videoUrl, error }) => {
+    const patch: Record<string, unknown> = { videoDownloadStatus: status };
+    if (videoUrl)           patch.videoUrl          = videoUrl;
+    if (error)              patch.videoDownloadError = error;
+    if (status === 'ready') patch.videoDownloadedAt  = Date.now();
+    await ctx.db.patch(postId, patch);
   },
 });
+
+// downloadPostToR2 action lives in convex/intelligenceNode.ts ("use node" runtime)
+// It uses @aws-sdk/client-s3 directly to upload to R2.
 
 // ── Heatmap data  -  7-day × 24-hour grid of engagement activity ────────────────
 
@@ -1245,6 +1432,192 @@ export const getScrapeProgress = query({
       }
     }
     return handles.map(h => ({ handle: h, postsScraped: counts.get(h) ?? 0 }));
+  },
+});
+
+// ── V2 analytics: insert/upsert structured feature vector ────────────────────
+
+const ENUM_HOOK_STRUCTURE   = ["question","shock_claim","negation","listicle","pov","before_after","visual_hook","transformation_tease","direct_command","storytime","other","unknown"] as const;
+const ENUM_HOOK_MODALITY    = ["spoken","on_screen_text","visual_only","audio_cue","mixed","unknown"] as const;
+const ENUM_FIRST_FRAME_TYPE = ["face_closeup","face_medium","body_full","product","environment","text_card","action_in_progress","unknown"] as const;
+const ENUM_FORMAT_PRIMARY   = ["talking_head","voiceover_b_roll","pov_action","transition_montage","lipsync","tutorial_demo","reaction","skit_scripted","text_on_screen_silent","product_showcase","thirst_trap_static","before_after_reveal","dance_performance","day_in_life_vlog","other","unknown"] as const;
+const ENUM_SETTING          = ["home_bedroom","home_other","gym","outdoor_urban","outdoor_nature","studio","car","mirror","other","unknown"] as const;
+const ENUM_FACE_VISIBILITY  = ["full","partial","obscured","none","unknown"] as const;
+const ENUM_CUTS_BUCKET      = ["low","med","high","extreme","unknown"] as const;
+const ENUM_MUSIC_ENERGY     = ["none","low","mid","high"] as const;
+const ENUM_SPEAKING_PACE    = ["slow","normal","fast","rapid","unknown"] as const;
+const ENUM_EMOTION          = ["neutral","confident","playful","seductive","intense","vulnerable","excited","deadpan","angry","joyful","unknown"] as const;
+const ENUM_VIBE             = ["aspirational","relatable","educational","provocative","cozy","hype","controversial","wholesome","premium","raw_authentic","humorous","motivational","sensual","unknown"] as const;
+const ENUM_CTA_TYPE         = ["save","comment","share","follow","dm","link_bio","none","unknown"] as const;
+const ENUM_CAPTION_LENGTH   = ["short","medium","long"] as const;
+
+function clamp<T extends string>(val: unknown, valid: readonly T[], fallback: T): T {
+  return valid.includes(val as T) ? (val as T) : fallback;
+}
+
+export const insertAnalysisV2 = mutation({
+  args: {
+    postId:         v.id("scrapedPosts"),
+    handle:         v.string(),
+    niche:          v.string(),
+    outlierRatio:   v.optional(v.number()),
+    engagementRate: v.number(),
+    views:          v.number(),
+    saves:          v.number(),
+    likes:          v.number(),
+    // All enum fields passed as plain strings — clamped to valid values in handler
+    hookStructure:           v.string(),
+    hookModality:            v.string(),
+    firstFrameType:          v.string(),
+    spokenFirstWords:        v.optional(v.string()),
+    onScreenTextFirstFrame:  v.optional(v.string()),
+    curiosityGapPresent:     v.boolean(),
+    patternInterruptPresent: v.boolean(),
+    directAddress:           v.boolean(),
+    hookDurationSec:         v.optional(v.number()),
+    formatPrimary:       v.string(),
+    setting:             v.string(),
+    creatorOnScreen:     v.boolean(),
+    faceVisibility:      v.string(),
+    energyLevel:         v.number(),
+    cutsPerSecondBucket: v.string(),
+    hasJumpCuts:    v.boolean(),
+    hasSpeedRamps:  v.boolean(),
+    hasZoomPunches: v.boolean(),
+    hasSpokenWords:      v.boolean(),
+    hasVoiceover:        v.boolean(),
+    musicEnergy:         v.string(),
+    soundEffectsPresent: v.boolean(),
+    speakingPace:        v.string(),
+    creatorExpressedEmotion: v.string(),
+    vibeKeyword:             v.string(),
+    captionHasCTA:       v.boolean(),
+    captionAddsContext:  v.boolean(),
+    captionRepeatsVideo: v.boolean(),
+    ctaType:             v.string(),
+    captionLengthBucket: v.string(),
+    hashtagCount:        v.optional(v.number()),
+    transcript:          v.optional(v.string()),
+    onScreenTextFull:    v.optional(v.string()),
+    extractionModel:      v.string(),
+    promptVersion:        v.string(),
+    extractionConfidence: v.number(),
+    extractionFlags:      v.array(v.string()),
+    rawResponse:          v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Delete any existing row for same post + prompt version (upsert)
+    const existing = await ctx.db
+      .query("postAnalyses")
+      .withIndex("by_post_id", q => q.eq("postId", args.postId))
+      .collect();
+    for (const old of existing.filter(r => r.promptVersion === args.promptVersion)) {
+      await ctx.db.delete(old._id);
+    }
+
+    await ctx.db.insert("postAnalyses", {
+      postId:         args.postId,
+      handle:         args.handle,
+      niche:          args.niche,
+      outlierRatio:   args.outlierRatio,
+      engagementRate: args.engagementRate,
+      views:          args.views,
+      saves:          args.saves,
+      likes:          args.likes,
+      hookStructure:           clamp(args.hookStructure,           ENUM_HOOK_STRUCTURE,   "unknown"),
+      hookModality:            clamp(args.hookModality,            ENUM_HOOK_MODALITY,    "unknown"),
+      firstFrameType:          clamp(args.firstFrameType,          ENUM_FIRST_FRAME_TYPE, "unknown"),
+      spokenFirstWords:        args.spokenFirstWords,
+      onScreenTextFirstFrame:  args.onScreenTextFirstFrame,
+      curiosityGapPresent:     args.curiosityGapPresent,
+      patternInterruptPresent: args.patternInterruptPresent,
+      directAddress:           args.directAddress,
+      hookDurationSec:         args.hookDurationSec,
+      formatPrimary:       clamp(args.formatPrimary,       ENUM_FORMAT_PRIMARY,  "unknown"),
+      setting:             clamp(args.setting,             ENUM_SETTING,         "unknown"),
+      creatorOnScreen:     args.creatorOnScreen,
+      faceVisibility:      clamp(args.faceVisibility,      ENUM_FACE_VISIBILITY, "unknown"),
+      energyLevel:         Math.min(5, Math.max(1, Math.round(args.energyLevel || 3))),
+      cutsPerSecondBucket: clamp(args.cutsPerSecondBucket, ENUM_CUTS_BUCKET,     "unknown"),
+      hasJumpCuts:    args.hasJumpCuts,
+      hasSpeedRamps:  args.hasSpeedRamps,
+      hasZoomPunches: args.hasZoomPunches,
+      hasSpokenWords:      args.hasSpokenWords,
+      hasVoiceover:        args.hasVoiceover,
+      musicEnergy:         clamp(args.musicEnergy,   ENUM_MUSIC_ENERGY,  "none"),
+      soundEffectsPresent: args.soundEffectsPresent,
+      speakingPace:        clamp(args.speakingPace,  ENUM_SPEAKING_PACE, "unknown"),
+      creatorExpressedEmotion: clamp(args.creatorExpressedEmotion, ENUM_EMOTION, "unknown"),
+      vibeKeyword:             clamp(args.vibeKeyword,             ENUM_VIBE,    "unknown"),
+      captionHasCTA:       args.captionHasCTA,
+      captionAddsContext:  args.captionAddsContext,
+      captionRepeatsVideo: args.captionRepeatsVideo,
+      ctaType:             clamp(args.ctaType,             ENUM_CTA_TYPE,      "unknown"),
+      captionLengthBucket: clamp(args.captionLengthBucket, ENUM_CAPTION_LENGTH, "short"),
+      hashtagCount:        args.hashtagCount,
+      transcript:          args.transcript,
+      onScreenTextFull:    args.onScreenTextFull,
+      extractionModel:      args.extractionModel,
+      promptVersion:        args.promptVersion,
+      extractionConfidence: Math.min(5, Math.max(1, Math.round(args.extractionConfidence || 3))),
+      extractionFlags:      args.extractionFlags,
+      analyzedAt:           Date.now(),
+      rawResponse:          args.rawResponse,
+    });
+  },
+});
+
+export const getAnalysisV2ForPost = query({
+  args: { postId: v.id("scrapedPosts") },
+  handler: async (ctx, args) => {
+    const rows = await ctx.db
+      .query("postAnalyses")
+      .withIndex("by_post_id", q => q.eq("postId", args.postId))
+      .collect();
+    if (rows.length === 0) return null;
+    rows.sort((a, b) => b.analyzedAt - a.analyzedAt);
+    return rows[0];
+  },
+});
+
+export const getRuleLeaderboard = query({
+  args: {
+    groupBy: v.union(v.literal("hook"), v.literal("format"), v.literal("vibe"), v.literal("emotion")),
+    niche:   v.optional(v.string()),
+    limit:   v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    let rows = args.niche && args.niche !== "all"
+      ? await ctx.db.query("postAnalyses").withIndex("by_niche", q => q.eq("niche", args.niche!)).collect()
+      : await ctx.db.query("postAnalyses").collect();
+
+    type Bucket = { key: string; niche: string; count: number; outlierSum: number; erSum: number };
+    const map: Record<string, Bucket> = {};
+
+    for (const r of rows) {
+      const dimension =
+        args.groupBy === "hook"    ? r.hookStructure :
+        args.groupBy === "format"  ? r.formatPrimary :
+        args.groupBy === "vibe"    ? r.vibeKeyword   :
+        r.creatorExpressedEmotion;
+      if (dimension === "unknown") continue;
+      const key = `${r.niche}::${dimension}`;
+      if (!map[key]) map[key] = { key: dimension, niche: r.niche, count: 0, outlierSum: 0, erSum: 0 };
+      map[key].count++;
+      map[key].outlierSum += r.outlierRatio ?? 0;
+      map[key].erSum      += r.engagementRate;
+    }
+
+    return Object.values(map)
+      .map(b => ({
+        niche:      b.niche,
+        dimension:  b.key,
+        count:      b.count,
+        avgOutlier: parseFloat((b.outlierSum / b.count).toFixed(2)),
+        avgER:      parseFloat(((b.erSum / b.count) * 100).toFixed(2)),
+      }))
+      .sort((a, b) => b.avgOutlier - a.avgOutlier)
+      .slice(0, args.limit ?? 20);
   },
 });
 

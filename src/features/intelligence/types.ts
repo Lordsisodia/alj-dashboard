@@ -9,7 +9,8 @@ export type SortId =
   | 'most-views'
   | 'most-saves'
   | 'top-engagement'
-  | 'trending';
+  | 'trending'
+  | 'viral';
 
 export interface VisibilityState {
   brandDetails: boolean;
@@ -47,6 +48,10 @@ export type Post = {
   platform?:       string;
   caption?:        string;
   hashtags?:       string[];
+  avatarUrl?:      string | null;
+  avatarColor?:    string | null;
+  displayName?:    string | null;
+  verified?:       boolean | null;
   aiAnalysis?: {
     hookScore: number;
     hookLine: string;
@@ -55,6 +60,14 @@ export type Post = {
     suggestions: string[];
     analyzedAt: number;
   };
+  v2Analysis?: {
+    vibeKeyword:             string;
+    hookStructure:           string;
+    formatPrimary:           string;
+    curiosityGapPresent:     boolean;
+    patternInterruptPresent: boolean;
+    energyLevel:             number;
+  } | null;
 };
 
 // Full shape for the detail drawer
