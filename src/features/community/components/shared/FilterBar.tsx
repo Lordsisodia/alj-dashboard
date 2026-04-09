@@ -54,7 +54,7 @@ export function NicheFilterBar({ value, onChange }: NicheFilterBarProps) {
                 ? {
                     background: cfg
                       ? cfg.color
-                      : 'linear-gradient(135deg, #ff0069, #833ab4)',
+                      : 'linear-gradient(135deg, #2563eb, #1d4ed8)',
                     color: '#fff',
                   }
                 : { background: '#fff', color: '#737373', border: '1px solid rgba(0,0,0,0.09)' }

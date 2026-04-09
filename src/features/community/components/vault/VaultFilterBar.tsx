@@ -48,7 +48,7 @@ export function VaultFilterBar({
                     ? {
                         background: cfg
                           ? cfg.color
-                          : 'linear-gradient(135deg, #ff0069, #833ab4)',
+                          : 'linear-gradient(135deg, #2563eb, #1d4ed8)',
                         color: '#fff',
                       }
                     : { background: '#fff', color: '#737373', border: '1px solid rgba(0,0,0,0.09)' }
@@ -62,7 +62,7 @@ export function VaultFilterBar({
         <button
           onClick={onStartSession}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white flex-shrink-0 transition-opacity hover:opacity-90"
-          style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
+          style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)' }}
         >
           <Shuffle size={12} />
           Start Swipe Session

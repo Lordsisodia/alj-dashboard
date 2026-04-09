@@ -64,7 +64,7 @@ function QueuePostCard({ post, isExpired, isSelected, onSelect, onAnalyse }: { p
           </div>
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={thumb} alt="" className="w-full h-full object-cover"
+          <img src={thumb} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer"
             onError={() => setImgFailed(true)} />
         )}
 
@@ -185,7 +185,7 @@ function AnalyzedPortraitCard({ post, isSelected, onClick }: { post: any; isSele
           </div>
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={thumb} alt="" className="w-full h-full object-cover" onError={() => setImgFailed(true)} />
+          <img src={thumb} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />
         )}
       </div>
 
@@ -245,7 +245,7 @@ function QueuePostDetailPanel({ post, onAnalyse }: { post: QueuePost; onAnalyse:
         {showGrad
           ? <div className="w-full h-full" style={{ background: PURPLE_GRAD }} />
           // eslint-disable-next-line @next/next/no-img-element
-          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" onError={() => setImgFailed(true)} />}
+          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         <div className="absolute bottom-3 left-3 right-3">
           <p className="text-[13px] font-bold text-white leading-tight">{post.handle}</p>
@@ -389,7 +389,7 @@ function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () =
         {showGrad
           ? <div className="w-full h-full" style={{ background: PURPLE_GRAD }} />
           // eslint-disable-next-line @next/next/no-img-element
-          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" onError={() => setImgFailed(true)} />}
+          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         <div className="absolute bottom-3 left-3 right-3">
           <p className="text-[13px] font-bold text-white leading-tight">{post.handle}</p>
@@ -596,7 +596,7 @@ function QueueListRow({ post, isExpired, onAnalyse }: { post: QueuePost; isExpir
       <div className="w-8 h-[46px] rounded-md overflow-hidden shrink-0 bg-neutral-100">
         {isGrad ? <div className="w-full h-full" style={{ background: thumb || PURPLE_GRAD }} />
           // eslint-disable-next-line @next/next/no-img-element
-          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" />}
+          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" />}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[11px] font-semibold text-neutral-800 truncate">{post.handle}</p>
@@ -618,7 +618,7 @@ function AnalyzedListRow({ post, onClick }: { post: any; onClick: () => void }) 
       <div className="w-8 h-[46px] rounded-md overflow-hidden shrink-0 bg-neutral-100">
         {isGrad ? <div className="w-full h-full" style={{ background: post.thumbnailUrl }} />
           // eslint-disable-next-line @next/next/no-img-element
-          : <img src={post.thumbnailUrl} alt={post.handle} className="w-full h-full object-cover" />}
+          : <img src={post.thumbnailUrl} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" />}
       </div>
       <ScoreRing score={post.aiAnalysis.hookScore} size={30} />
       <div className="flex-1 min-w-0">

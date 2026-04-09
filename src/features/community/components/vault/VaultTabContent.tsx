@@ -70,7 +70,7 @@ export function VaultTabContent({ onStartSession }: VaultTabContentProps) {
           <button
             onClick={onStartSession}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white flex-shrink-0 transition-opacity hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
+            style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)' }}
           >
             <Shuffle size={12} />
             Start Swipe Session

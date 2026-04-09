@@ -26,4 +26,5 @@ export interface Post {
   isVideo: boolean;
   saved?: boolean;
   approved?: boolean;
+  sentAt?: string;
 }

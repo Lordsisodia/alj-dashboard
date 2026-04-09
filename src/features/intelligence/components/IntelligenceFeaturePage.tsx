@@ -234,7 +234,7 @@ export default function IntelligenceFeaturePage() {
           </div>
         ) : undefined}
       >
-        <div className={`w-full flex-1 min-h-0 flex flex-col ${activeTab === 'analysis' ? 'overflow-hidden px-6 pt-6' : 'overflow-y-auto px-6 py-6'}`}>
+        <div className={`w-full flex-1 min-h-0 flex flex-col ${activeTab === 'analysis' ? 'overflow-hidden px-6 pt-6' : activeTab === 'insights' ? 'overflow-hidden px-6 py-6' : 'overflow-y-auto px-6 py-6'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -242,17 +242,13 @@ export default function IntelligenceFeaturePage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-              className={activeTab === 'analysis' ? 'flex-1 min-h-0 flex flex-col pb-6' : ''}
+              className={activeTab === 'analysis' ? 'flex-1 min-h-0 flex flex-col pb-6' : activeTab === 'insights' ? 'flex-1 min-h-0 flex flex-col' : ''}
             >
               {activeTab === 'dashboard' && <DashboardView />}
               {activeTab === 'feed'      && <CommunityFeedTab />}
               {activeTab === 'analysis' && analysisViewMode === 'auto'   && <AnalysisPageView />}
               {activeTab === 'analysis' && analysisViewMode === 'manual' && <AnalyserTab className="flex-1 min-h-0" />}
-              {activeTab === 'insights'  && (
-                <div className="flex-1 min-h-0 overflow-y-auto">
-                  <InsightsView />
-                </div>
-              )}
+              {activeTab === 'insights' && <InsightsView />}
             </motion.div>
           </AnimatePresence>
         </div>

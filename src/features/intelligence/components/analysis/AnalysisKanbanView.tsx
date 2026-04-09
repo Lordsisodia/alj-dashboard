@@ -284,7 +284,7 @@ export function AnalysisKanbanView({ days, niche }: KanbanProps) {
                               <div className="w-full h-full" style={{ background: post.thumbnailUrl }} />
                             ) : (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img src={post.thumbnailUrl} alt={post.handle} className="w-full h-full object-cover" />
+                              <img src={post.thumbnailUrl} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                             )}
                             {/* Hook score badge */}
                             {post.aiAnalysis && (

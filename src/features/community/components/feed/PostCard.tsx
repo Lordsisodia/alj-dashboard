@@ -68,7 +68,7 @@ export function PostCard({ post }: { post: Post }) {
         </div>
 
         <p className="text-xs text-neutral-700 leading-relaxed line-clamp-2 mb-1.5">{post.caption}</p>
-        <p className="text-[10px] mb-3" style={{ color: '#833ab4' }}>
+        <p className="text-[10px] mb-3" style={{ color: '#2563eb' }}>
           {post.hashtags.slice(0, 2).join(' ')}
         </p>
 
@@ -80,7 +80,7 @@ export function PostCard({ post }: { post: Post }) {
             <button
               onClick={() => { if (!liked) { setLiked(true); setLikeCount(c => c + 1); } }}
               className="w-7 h-7 rounded-full flex items-center justify-center transition-all"
-              style={{ color: liked ? '#ff0069' : '#a3a3a3' }}
+              style={{ color: liked ? '#2563eb' : '#a3a3a3' }}
             >
               <Heart size={13} className={liked ? 'fill-current' : ''} />
             </button>

@@ -1241,8 +1241,47 @@ export const patchVideoDownload = mutation({
   },
 });
 
-// downloadPostToR2 action lives in convex/intelligenceNode.ts ("use node" runtime)
-// It uses @aws-sdk/client-s3 directly to upload to R2.
+export const patchThumbnailDownload = mutation({
+  args: {
+    postId:       v.id("scrapedPosts"),
+    status:       v.union(
+      v.literal("pending"), v.literal("downloading"),
+      v.literal("ready"),   v.literal("expired"),
+      v.literal("failed")
+    ),
+    thumbnailUrl: v.optional(v.string()),
+    error:        v.optional(v.string()),
+  },
+  handler: async (ctx, { postId, status, thumbnailUrl, error }) => {
+    const patch: Record<string, unknown> = { thumbnailDownloadStatus: status };
+    if (thumbnailUrl)        patch.thumbnailUrl = thumbnailUrl;
+    if (error)               patch.thumbnailDownloadError = error;
+    await ctx.db.patch(postId, patch);
+  },
+});
+
+export const backfillThumbnailsPending = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const posts = await ctx.db.query("scrapedPosts").collect();
+    const needs = posts.filter(p =>
+      !p.thumbnailDownloadStatus &&
+      p.thumbnailUrl &&
+      !p.thumbnailUrl.startsWith("linear-gradient")
+    );
+    for (const p of needs) {
+      await ctx.db.patch(p._id, {
+        thumbnailSourceUrl:      p.thumbnailUrl,
+        thumbnailDownloadStatus: "pending",
+      });
+      await ctx.scheduler.runAfter(0, api.intelligenceNode.downloadThumbnailToR2, { postId: p._id });
+    }
+    return { scheduled: needs.length };
+  },
+});
+
+// downloadPostToR2 + downloadThumbnailToR2 actions live in convex/intelligenceNode.ts ("use node" runtime)
+// They use @aws-sdk/client-s3 directly to upload to R2.
 
 // ── Heatmap data  -  7-day × 24-hour grid of engagement activity ────────────────
 

@@ -1,5 +1,6 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 // ── Apify Instagram Reel Scraper output formats ───────────────────────────────
 //
@@ -184,14 +185,17 @@ export const importFromScraper = mutation({
               ? 'reel'
               : 'post';
 
-      await ctx.db.insert("scrapedPosts", {
+      const thumbnailCdnUrl = raw.displayUrl ?? "";
+      const postId = await ctx.db.insert("scrapedPosts", {
         externalId:    shortcode,
         accountId:     account!._id,
         handle,
         platform:      "instagram",
         contentType,
         niche,
-        thumbnailUrl:  raw.displayUrl ?? "",
+        thumbnailUrl:            thumbnailCdnUrl,
+        thumbnailSourceUrl:      thumbnailCdnUrl || undefined,
+        thumbnailDownloadStatus: thumbnailCdnUrl ? "pending" : undefined,
         caption,
         hashtags,
         likes,
@@ -208,6 +212,9 @@ export const importFromScraper = mutation({
         saved:         false,
         boardIds:      [],
       });
+      if (thumbnailCdnUrl) {
+        await ctx.scheduler.runAfter(0, api.intelligenceNode.downloadThumbnailToR2, { postId });
+      }
       inserted.posts++;
     }
 
