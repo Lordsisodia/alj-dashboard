@@ -1,6 +1,6 @@
 import type { Id } from '@/convex/_generated/dataModel';
 
-export type Tab = 'analysis' | 'feed' | 'insights' | 'assistant';
+export type Tab = 'dashboard' | 'analysis' | 'feed' | 'insights';
 
 export type SortId =
   | 'newest'

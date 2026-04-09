@@ -650,6 +650,18 @@ export default defineSchema({
     }),
   }),
 
+  // ── Analysis prompts (versioned system prompts for intelligence analysis) ──
+  analysisPrompts: defineTable({
+    typeKey:   v.string(),   // e.g. "ofm_comprehensive", "hook_focus"
+    typeLabel: v.string(),   // display label
+    version:   v.number(),   // auto-incremented per typeKey
+    name:      v.string(),   // user label e.g. "v1", "fashion-focused"
+    prompt:    v.string(),   // system prompt text (user editable)
+    isActive:  v.boolean(),  // one active version per typeKey
+    createdAt: v.number(),
+  }).index('by_type', ['typeKey'])
+    .index('by_type_active', ['typeKey', 'isActive']),
+
   // -- Creator briefs (Recon — OpenRouter AI-generated profiles) ------------------------
   creatorBriefs: defineTable({
     handle:           v.string(),

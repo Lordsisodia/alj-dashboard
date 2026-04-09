@@ -3,13 +3,19 @@
 import { useQuery, useMutation } from 'convex/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useMemo } from 'react';
-import { Sparkles, ImageOff, Brain, TrendingUp, Hash, ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ImageOff, Brain, TrendingUp, Hash } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { api } from '../../../../../convex/_generated/api';
-import { RatingSummaryBar } from './RatingSummaryBar';
-import { LearningSignal }   from './LearningSignal';
-import { PostDetailDrawer }  from '../drawer/PostDetailDrawer';
-import { cn }                from '@/lib/utils';
+
+const IntelligenceAssistant = dynamic(
+  () => import('../assistant/IntelligenceAssistantPage'),
+  { ssr: false }
+);
+import { RatingSummaryBar }    from './RatingSummaryBar';
+import { LearningSignal }      from './LearningSignal';
+import { PostDetailDrawer }    from '../drawer/PostDetailDrawer';
+import { PipelineStatusStrip } from '../dashboard/PipelineStatusStrip';
+import { cn }                  from '@/lib/utils';
 import type { InsightsData, TrendsData } from '../../types';
 import type { DrawerPost }  from '../../types';
 
@@ -112,11 +118,10 @@ function TopHashtags({ hashtags }: { hashtags: any[] }) {
 // ── Main ────────────────────────────────────────────────────────────────────
 
 export function InsightsView() {
-  const router = useRouter();
-
   const data        = useQuery(api.insights.getInsights, {}) as InsightsData | undefined;
   const trends      = useQuery(api.intelligence.getTrends, { days: 30 }) as TrendsData | undefined;
   const hashtags    = useQuery(api.intelligence.getHashtagCorrelation, { days: 30 });
+  const stats       = useQuery(api.intelligence.getStats, {});
   const seedRatings = useMutation(api.insightsSeed.seedSwipeRatings);
 
   const postIds   = useMemo(() => (data?.topRatedPosts ?? []).map(p => p._id as any), [data?.topRatedPosts]);
@@ -214,6 +219,13 @@ export function InsightsView() {
       transition={{ duration: 0.3 }}
       className="space-y-4"
     >
+      {/* Pipeline strip */}
+      <PipelineStatusStrip
+        totalIndexed={stats?.totalIndexed ?? 0}
+        postsThisWeek={stats?.postsThisWeek ?? 0}
+        latestScrapeAt={stats?.latestScrapeAt ?? 0}
+      />
+
       {/* KPI strip */}
       <RatingSummaryBar summary={data.summary} topRater={topRater} />
 
@@ -457,36 +469,12 @@ export function InsightsView() {
         {/* RIGHT (26%) - Actions + Learning */}
         <div className="col-span-3 flex flex-col gap-3">
 
-          {/* Ask Intelligence */}
+          {/* Embedded Intelligence Assistant */}
           <div
-            className="rounded-xl overflow-hidden border border-black/[0.07] shadow-sm shadow-black/5"
-            style={{ backgroundColor: '#fff' }}
+            className="rounded-xl overflow-hidden border border-black/[0.07] flex flex-col"
+            style={{ backgroundColor: '#fff', height: '480px' }}
           >
-            <div
-              className="flex items-center gap-2 px-3 py-3"
-              style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.06), rgba(131,58,180,0.06))' }}
-            >
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
-                <Sparkles size={12} className="text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[11px] font-semibold text-neutral-900">Ask Intelligence</p>
-                <p className="text-[9px] text-neutral-400">Chat with all your data</p>
-              </div>
-            </div>
-            <div className="px-3 py-3">
-              <button
-                onClick={() => router.push('/isso/intelligence?tab=assistant')}
-                className="w-full py-2.5 rounded-xl text-[11px] font-semibold text-white transition-all hover:brightness-105 active:scale-[0.98] flex items-center justify-center gap-2"
-                style={{ background: GRAD }}
-              >
-                Open Assistant
-                <ArrowRight size={12} />
-              </button>
-              <p className="text-[9px] text-neutral-400 text-center mt-2">
-                30-day trends, patterns, hook scores, team signal
-              </p>
-            </div>
+            <IntelligenceAssistant onClose={() => {}} />
           </div>
 
           {/* Trend alerts */}
@@ -499,7 +487,7 @@ export function InsightsView() {
               <div className="space-y-2">
                 {trendAlerts.map((alert, i) => (
                   <div key={i} className="flex items-start gap-2 text-[11px] text-neutral-700">
-                    <span className="mt-1 shrink-0 w-1 h-1 rounded-full" style={{ backgroundColor: '#ff0069' }} />
+                    <span className="mt-1 shrink-0 w-1 h-1 rounded-full" style={{ backgroundColor: '#7c3aed' }} />
                     <span>{alert}</span>
                   </div>
                 ))}

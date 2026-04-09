@@ -5,26 +5,27 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useQuery, useMutation } from 'convex/react';
-import { Sparkles, UserPlus, Table2, LayoutGrid, X } from 'lucide-react';
-import { ViewToggle } from '@/components/ui/view-toggle';
+import { Sparkles, UserPlus, LayoutDashboard, FileDown, LayoutGrid, List } from 'lucide-react';
 
 import { api } from '../../../../convex/_generated/api';
 import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { ProductIcon }      from '@/isso/layout/ProductIcon';
-import { AnalysisView, AnalysisKanbanView }  from './analysis';
+import { AnalysisPageView } from './analysis';
 import { InsightsView }  from './insights';
+import { ViewToggle } from '@/components/ui/view-toggle';
+import { LiveActivityButton } from '@/components/ui/live-activity-button';
 import dynamic from 'next/dynamic';
-import { ANALYSIS_FILTERS } from './IntelligenceControls';
 
-const IntelligenceAssistantPage = dynamic(() =>
-  import('./assistant/IntelligenceAssistantPage')
+const DashboardView = dynamic(
+  () => import('./dashboard/DashboardView').then(m => ({ default: m.DashboardView })),
+  { ssr: false }
 );
 
 const ReconFeedTab = dynamic(
   () => import('@/features/recon/components/feed/ReconFeedTab').then(m => ({ default: m.ReconFeedTab })),
   { ssr: false }
 );
-import type { Days } from './IntelligenceControls';
+
 import type { Tab } from '../types';
 
 function StepNum({ n }: { n: number }) {
@@ -40,7 +41,7 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
   const [handle, setHandle] = useState('');
   const [niche,  setNiche]  = useState('all');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const addAccount = useMutation(api.recon.addTrackedAccount);
+  const addAccount = useMutation(api.trackedAccounts.approveCandidate as any);
 
   const NICHE_OPTIONS = [
     { value: 'all', label: 'All niches' },
@@ -83,7 +84,7 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
         <form onSubmit={onSubmit} className="flex flex-col gap-4 p-6">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-neutral-900">Add creator handle</h3>
-            <button type="button" onClick={onClose} className="text-neutral-400 hover:text-neutral-600 text-lg leading-none">×</button>
+            <button type="button" onClick={onClose} className="text-neutral-400 hover:text-neutral-600 text-lg leading-none">x</button>
           </div>
 
           <div>
@@ -119,7 +120,7 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
             {isSubmitting ? (
               <>
                 <span className="w-3.5 h-3.5 border border-white border-t-transparent rounded-full animate-spin" />
-                Adding…
+                Adding...
               </>
             ) : 'Add Lead'}
           </button>
@@ -132,110 +133,113 @@ function AddLeadModal({ onClose }: { onClose: () => void }) {
 // ── Main Page ──────────────────────────────────────────────────────────────────
 export default function IntelligenceFeaturePage() {
   const searchParams = useSearchParams() ?? new URLSearchParams();
-  const initialTab = (searchParams.get('tab') as Tab) || 'analysis';
+  const initialTab = (searchParams.get('tab') as Tab) || 'dashboard';
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
-  const [days,      setDays]      = useState<Days>(30);
-  const [niche,     setNiche]     = useState('all');
-  const [platform,  setPlatform]  = useState('all');
+  const [analysisViewMode, setAnalysisViewMode] = useState<'kanban' | 'list'>('kanban');
   const [addLeadOpen, setAddLeadOpen] = useState(false);
-  const [analysisView, setAnalysisView] = useState<'default' | 'kanban'>('default');
-  const [assistantOpen, setAssistantOpen] = useState(false);
   const stats = useQuery(api.intelligence.getStats, {});
   const indexedCount = stats?.totalIndexed ?? 0;
 
-  function handleFilterSelect(categoryId: string, value: string) {
-    if (categoryId === 'niche')    setNiche(value);
-    if (categoryId === 'platform') setPlatform(value.toLowerCase());
-  }
+  type DropdownItem = { id: string; label: string; icon: React.ReactNode; onClick: () => void };
 
-  const filterCategories =
-    activeTab === 'analysis' ? ANALYSIS_FILTERS  :
-    undefined;
+  const dropdownItems: Record<Tab, DropdownItem[]> = {
+    dashboard: [
+      { id: 'gen-digest',    label: 'Generate Weekly Digest',     icon: <Sparkles size={13} />, onClick: () => {} },
+      { id: 'gen-viral',     label: 'Generate Viral Alert',       icon: <Sparkles size={13} />, onClick: () => {} },
+      { id: 'gen-spotlight', label: 'Generate Creator Spotlight', icon: <Sparkles size={13} />, onClick: () => {} },
+    ],
+    analysis: [
+      { id: 'analyse-all',     label: 'Analyse All Posts', icon: <Sparkles size={13} />, onClick: () => {} },
+      { id: 'export-analysis', label: 'Export Analysis',   icon: <FileDown size={13} />,  onClick: () => {} },
+    ],
+    feed: [
+      { id: 'add-lead', label: 'Add creator handle', icon: <UserPlus size={13} />, onClick: () => setAddLeadOpen(true) },
+    ],
+    insights: [
+      { id: 'export-insights',  label: 'Export Insights Report', icon: <FileDown size={13} />, onClick: () => {} },
+      { id: 'export-top-posts', label: 'Export Top Posts',       icon: <FileDown size={13} />, onClick: () => {} },
+    ],
+  };
+
+  const actionLabel: Record<Tab, string> = {
+    dashboard: 'Generate',
+    analysis:  'Analyse',
+    feed:      'Add Lead',
+    insights:  'Export',
+  };
+
+  const actionIcon: Record<Tab, React.ReactNode> = {
+    dashboard: <Sparkles size={14} />,
+    analysis:  <Sparkles size={14} />,
+    feed:      <UserPlus size={14} />,
+    insights:  <FileDown size={14} />,
+  };
+
+  const onAction: Record<Tab, () => void> = {
+    dashboard: () => {},
+    analysis:  () => {},
+    feed:      () => setAddLeadOpen(true),
+    insights:  () => {},
+  };
 
   return (
     <>
       <ContentPageShell
         icon={<ProductIcon product="intelligence" size={32} />}
+        accentGradient="linear-gradient(135deg, #6d28d9, #4c1d95)"
         title="Intelligence"
         stat={{ label: 'Posts indexed', value: indexedCount }}
         searchPlaceholder="Search hooks, niches, accounts..."
-        actionLabel="Add Lead"
-        actionIcon={<UserPlus size={14} />}
-        actionDropdownItems={[
-          {
-            id: 'add-lead',
-            label: 'Add creator handle',
-            icon: <UserPlus size={13} />,
-            onClick: () => setAddLeadOpen(true),
-          },
-        ]}
+        actionLabel={actionLabel[activeTab]}
+        actionIcon={actionIcon[activeTab]}
+        onAction={onAction[activeTab]}
+        actionDropdownItems={dropdownItems[activeTab]}
         tabs={[
+          { id: 'dashboard', label: 'Dashboard',      icon: <LayoutDashboard size={13} /> },
           { id: 'analysis',  label: 'Analysis',       icon: <StepNum n={1} /> },
           { id: 'feed',      label: 'Community Feed', icon: <StepNum n={2} /> },
           { id: 'insights',  label: 'Insights',       icon: <StepNum n={3} /> },
-          { id: 'assistant', label: 'Assistant',      icon: <Sparkles size={12} /> },
         ]}
         activeTab={activeTab}
-        onTabChange={id => { setActiveTab(id as Tab); setNiche('all'); setPlatform('all'); }}
+        onTabChange={id => setActiveTab(id as Tab)}
         nextProduct={{ label: 'Hub', icon: <ProductIcon product="hub" size={16} />, href: '/isso/community' }}
-        filterCategories={filterCategories}
-        onFilterSelect={handleFilterSelect}
-        filterRightSlot={activeTab === 'analysis' ? (
-          <ViewToggle
-            value={analysisView}
-            onChange={setAnalysisView}
-            options={[
-              { value: 'default', icon: <Table2    size={11} />, label: 'Default' },
-              { value: 'kanban',  icon: <LayoutGrid size={11} />, label: 'Kanban' },
-            ]}
-            size="md"
-          />
+        filterRightSlot={activeTab !== 'dashboard' ? (
+          <div className="flex items-center gap-2">
+            {activeTab === 'analysis' && (
+              <ViewToggle
+                value={analysisViewMode}
+                onChange={v => setAnalysisViewMode(v as 'kanban' | 'list')}
+                options={[
+                  { value: 'kanban', icon: <LayoutGrid size={11} />, label: 'Kanban' },
+                  { value: 'list',   icon: <List        size={11} />, label: 'List'   },
+                ]}
+                size="md"
+              />
+            )}
+            <LiveActivityButton accentColor="#7c3aed" />
+          </div>
         ) : undefined}
       >
-        <div className="px-6 py-6 w-full flex-1 overflow-y-auto">
+        <div className={`w-full flex-1 min-h-0 flex flex-col ${activeTab === 'analysis' ? 'overflow-hidden px-6 pt-6' : 'overflow-y-auto px-6 py-6'}`}>
           <AnimatePresence mode="wait">
-            <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+              className={activeTab === 'analysis' ? 'flex-1 min-h-0 flex flex-col pb-6' : ''}
+            >
+              {activeTab === 'dashboard' && <DashboardView />}
               {activeTab === 'feed'      && <ReconFeedTab onPostClick={() => {}} onAnalyzeClick={() => {}} sortBy="newest" visibility={{ brandDetails: true, likeCount: true, viewCount: true, saveCount: true }} viewMode="grid" columns={3} creatorStatsMap={{}} nicheERMap={{}} />}
-              {activeTab === 'analysis'  && (analysisView === 'kanban'
-                ? <AnalysisKanbanView days={days} niche={niche} />
-                : <AnalysisView days={days} niche={niche} />)}
+              {activeTab === 'analysis'  && <AnalysisPageView viewMode={analysisViewMode} />}
               {activeTab === 'insights'  && <InsightsView />}
-              {activeTab === 'assistant' && <IntelligenceAssistantPage onClose={() => setActiveTab('analysis')} />}
             </motion.div>
           </AnimatePresence>
         </div>
       </ContentPageShell>
 
       {addLeadOpen && <AddLeadModal onClose={() => setAddLeadOpen(false)} />}
-
-      <AnimatePresence>
-        {assistantOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-            onClick={e => { if (e.target === e.currentTarget) setAssistantOpen(false); }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 16 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 16 }}
-              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              className="relative w-[min(720px,95vw)] h-[min(680px,90vh)] bg-white rounded-2xl overflow-hidden shadow-2xl"
-            >
-              <button
-                onClick={() => setAssistantOpen(false)}
-                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-black/[0.04] transition-colors"
-              >
-                <X size={16} />
-              </button>
-              <IntelligenceAssistantPage onClose={() => setAssistantOpen(false)} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

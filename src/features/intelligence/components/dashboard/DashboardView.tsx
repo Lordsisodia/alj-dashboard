@@ -129,7 +129,7 @@ export function DashboardView() {
       <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
         <Link
           href="/isso/intelligence?tab=qualify"
-          className="flex items-center justify-between px-4 py-3 rounded-xl border border-black/[0.07] hover:border-[#ff0069]/30 transition-colors group"
+          className="flex items-center justify-between px-4 py-3 rounded-xl border border-black/[0.07] hover:border-purple-400/30 transition-colors group"
         >
           <div>
             <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide">Top hooks</p>
@@ -138,17 +138,17 @@ export function DashboardView() {
               {(trends?.topHooks?.[0]?.hook?.length ?? 0) > 48 ? '...' : ''}
             </p>
           </div>
-          <ArrowRight size={12} className="text-neutral-300 group-hover:text-[#ff0069] transition-colors shrink-0" />
+          <ArrowRight size={12} className="text-neutral-300 group-hover:text-purple-500 transition-colors shrink-0" />
         </Link>
         <Link
           href="/isso/intelligence?tab=analysis"
-          className="flex items-center justify-between px-4 py-3 rounded-xl border border-black/[0.07] hover:border-[#ff0069]/30 transition-colors group"
+          className="flex items-center justify-between px-4 py-3 rounded-xl border border-black/[0.07] hover:border-purple-400/30 transition-colors group"
         >
           <div>
             <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide">Hashtag patterns</p>
             <p className="text-xs font-medium text-neutral-700 mt-0.5">View correlation analysis →</p>
           </div>
-          <ArrowRight size={12} className="text-neutral-300 group-hover:text-[#ff0069] transition-colors shrink-0" />
+          <ArrowRight size={12} className="text-neutral-300 group-hover:text-purple-500 transition-colors shrink-0" />
         </Link>
       </motion.div>
 
