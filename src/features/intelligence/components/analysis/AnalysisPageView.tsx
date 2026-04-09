@@ -14,8 +14,7 @@ import { SystemPromptPanel } from './SystemPromptPanel';
 import { GRAD } from '../../constants';
 import type { DrawerPost } from '../../types';
 
-type Phase    = 'downloading' | 'analysing';
-type ViewMode = 'kanban' | 'list';
+type Phase = 'downloading' | 'analysing';
 
 type QueuePost = {
   _id: string; handle: string; niche: string; contentType: string;
@@ -514,7 +513,7 @@ function EmptyState({ icon: Icon, label }: { icon: React.ElementType; label: str
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function AnalysisPageView({ viewMode }: { viewMode: ViewMode }) {
+export function AnalysisPageView() {
   const queue         = useQuery(api.intelligence.getAnalysisQueue, { days: 90, limit: 50 });
   const analysed      = useQuery(api.intelligence.getAnalysedPosts, { days: 90, limit: 40 });
   const stats         = useQuery(api.intelligence.getStats, {});
@@ -641,9 +640,8 @@ export function AnalysisPageView({ viewMode }: { viewMode: ViewMode }) {
           avgHookScore={stats?.avgHookScore}
         />
 
-        {/* ── Kanban view ── */}
-        {viewMode === 'kanban' && (
-          <div className="flex gap-3 flex-1 min-h-0">
+        {/* ── Auto pipeline view ── */}
+        <div className="flex gap-3 flex-1 min-h-0">
 
             {/* Queue column */}
             <LeftSection
@@ -782,35 +780,6 @@ export function AnalysisPageView({ viewMode }: { viewMode: ViewMode }) {
             </div>
 
           </div>
-        )}
-
-        {/* ── List view ── */}
-        {viewMode === 'list' && (
-          <div className="flex-1 min-h-0 flex flex-col">
-            <div className="flex-1 min-h-0 overflow-y-auto space-y-5 pb-4">
-              <div className="space-y-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400">Queue ({queuePosts.length})</p>
-                {queue === undefined
-                  ? <div className="h-10 rounded-xl animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }} />
-                  : queuePosts.length === 0
-                    ? <p className="text-[11px] text-neutral-400 px-1">Queue is empty</p>
-                    : queuePosts.map(post => (
-                      <QueueListRow key={post._id} post={post} isExpired={isExpired(post)} onAnalyse={() => handleAnalyse(post)} />
-                    ))}
-              </div>
-              <div className="space-y-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400">Analyzed ({analysed?.length ?? 0})</p>
-                {analysed === undefined
-                  ? <div className="h-10 rounded-xl animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }} />
-                  : analysed.length === 0
-                    ? <p className="text-[11px] text-neutral-400 px-1">No analyses yet</p>
-                    : (analysed as any[]).map((post, i) => (
-                      <AnalyzedListRow key={post._id} post={post} onClick={() => openDrawerFromAnalysed(i)} />
-                    ))}
-              </div>
-            </div>
-          </div>
-        )}
 
       </div>
 
