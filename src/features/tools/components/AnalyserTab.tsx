@@ -10,6 +10,7 @@ import {
   Sparkles, Zap, Send, RotateCcw, Film, Plus,
   ChevronRight, MessageSquare,
 } from 'lucide-react';
+import { StatusStrip } from '@/components/ui/status-strip';
 import { DEFAULT_ANALYSIS_PROMPT } from '../constants';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -183,19 +184,32 @@ function SessionsSidebar({
   onSelect: (id: Id<'toolAnalyses'>) => void;
   onNew: () => void;
 }) {
+  const count = sessions?.length ?? 0;
+
   return (
-    <div className="w-52 flex-shrink-0 flex flex-col border-r overflow-hidden" style={{ borderColor: 'rgba(0,0,0,0.07)' }}>
-      <div className="flex items-center justify-between px-3 py-3 border-b flex-shrink-0" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Sessions</p>
+    <div className="w-56 flex-shrink-0 flex flex-col border-r overflow-hidden" style={{ borderColor: 'rgba(0,0,0,0.07)' }}>
+
+      {/* Header */}
+      <div className="flex items-center justify-between px-3 pt-3 pb-2 flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Sessions</p>
+          {count > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold leading-none"
+              style={{ background: 'rgba(124,58,237,0.1)', color: '#7c3aed' }}>
+              {count}
+            </span>
+          )}
+        </div>
         <button onClick={onNew}
-          className="w-6 h-6 rounded-lg flex items-center justify-center text-white transition-all hover:brightness-110"
+          className="w-7 h-7 rounded-xl flex items-center justify-center text-white transition-all hover:brightness-110 active:scale-95 flex-shrink-0"
           style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
           title="New session">
-          <Plus size={12} />
+          <Plus size={13} />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
+      {/* Session list */}
+      <div className="flex-1 overflow-y-auto py-2 px-2 space-y-1.5">
         {!sessions && (
           <div className="flex justify-center pt-8">
             <Loader2 size={14} className="animate-spin text-neutral-300" />
@@ -213,34 +227,58 @@ function SessionsSidebar({
           const isSelected = selectedId === s._id;
           const chatCount = s.chatHistory?.length ?? 0;
           const date = new Date(s.analyzedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          const hasScore = s.hookScore > 0;
+          const accentColor = !hasScore
+            ? 'rgba(0,0,0,0.12)'
+            : s.hookScore >= 8 ? '#22c55e'
+            : s.hookScore >= 6 ? '#f59e0b'
+            : '#ef4444';
+
           return (
             <button key={s._id} onClick={() => onSelect(s._id)}
-              className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl transition-all text-left"
+              className="w-full flex items-center gap-2.5 pr-2 py-2 rounded-xl transition-all text-left relative overflow-hidden"
               style={{
-                background: isSelected ? 'rgba(124,58,237,0.08)' : 'transparent',
-                border: isSelected ? '1px solid rgba(124,58,237,0.18)' : '1px solid transparent',
+                background: isSelected ? 'rgba(124,58,237,0.07)' : '#fff',
+                border: isSelected ? '1px solid rgba(124,58,237,0.2)' : '1px solid rgba(0,0,0,0.07)',
+                boxShadow: isSelected ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
               }}>
-              <div className="flex-shrink-0 rounded-lg overflow-hidden bg-neutral-900"
-                style={{ width: 34, height: 60 }}>
+
+              {/* Left accent bar */}
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl flex-shrink-0"
+                style={{ backgroundColor: accentColor }} />
+
+              {/* Thumbnail */}
+              <div className="flex-shrink-0 rounded-lg overflow-hidden bg-neutral-900 ml-2"
+                style={{ width: 32, height: 56 }}>
                 <video src={s.videoUrl} preload="metadata" muted playsInline
                   className="w-full h-full object-cover" />
               </div>
+
+              {/* Meta */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-1 mb-0.5">
-                  <p className="text-[11px] font-semibold text-neutral-800 truncate flex-1">
+                <div className="flex items-start justify-between gap-1 mb-1">
+                  <p className="text-[11px] font-semibold text-neutral-800 truncate flex-1 leading-tight">
                     {s.label || 'Untitled'}
                   </p>
-                  <span className="text-[10px] font-bold flex-shrink-0" style={{ color: c }}>
-                    {s.hookScore.toFixed(1)}
-                  </span>
+                  {hasScore && (
+                    <span className="text-[9px] font-bold flex-shrink-0 px-1.5 py-0.5 rounded-md leading-none"
+                      style={{ color: c, background: `${c}1a` }}>
+                      {s.hookScore.toFixed(1)}
+                    </span>
+                  )}
                 </div>
-                <p className="text-[9px] text-neutral-400">{date}</p>
-                {chatCount > 0 && (
-                  <div className="flex items-center gap-0.5 mt-0.5">
-                    <MessageSquare size={8} className="text-neutral-400" />
-                    <span className="text-[9px] text-neutral-400">{chatCount}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] text-neutral-400">{date}</span>
+                  {chatCount > 0 && (
+                    <>
+                      <span className="text-neutral-300 text-[9px]">·</span>
+                      <div className="flex items-center gap-0.5">
+                        <MessageSquare size={7} className="text-neutral-400" />
+                        <span className="text-[9px] text-neutral-400">{chatCount}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </button>
           );
@@ -413,8 +451,31 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
 
   const containerStyle = className ? undefined : { height: 'calc(100vh - 180px)' };
 
+  // Strip stats
+  const analyzedSessions = sessions?.filter(s => s.hookScore > 0) ?? [];
+  const avgScore = analyzedSessions.length > 0
+    ? analyzedSessions.reduce((sum, s) => sum + s.hookScore, 0) / analyzedSessions.length
+    : 0;
+  const sessionsWithChat = sessions?.filter(s => (s.chatHistory?.length ?? 0) > 0).length ?? 0;
+
   return (
-    <div className={`flex ${className ?? ''}`} style={containerStyle}>
+    <div className={`flex flex-col ${className ?? ''}`} style={containerStyle}>
+
+      {/* ── Stats strip ── */}
+      <div className="flex-shrink-0 px-4 pt-3 pb-2">
+        <StatusStrip
+          iconColor="text-violet-600"
+          stats={[
+            { value: sessions?.length ?? 0, label: 'sessions' },
+            ...(avgScore > 0 ? [{ value: avgScore.toFixed(1), label: 'avg hook score', accent: avgScore >= 8 ? '#16a34a' : avgScore >= 6 ? '#ca8a04' : '#dc2626' }] : []),
+            ...(sessionsWithChat > 0 ? [{ value: sessionsWithChat, label: 'with chat' }] : []),
+          ]}
+          status={{ label: analyzedSessions.length > 0 ? 'Analyser ready' : 'No analyses yet', active: analyzedSessions.length > 0 }}
+        />
+      </div>
+
+      {/* ── Main row ── */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
 
       {/* ── Sessions rail ── */}
       <SessionsSidebar
@@ -671,6 +732,8 @@ export function AnalyserTab({ className }: AnalyserTabProps = {}) {
           </div>
         )}
       </div>
+
+      </div> {/* end main row */}
     </div>
   );
 }
