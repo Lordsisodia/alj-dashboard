@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Heart, X, Send, Play, Eye } from 'lucide-react';
 import type { SwipeReel, TagSelection } from '../types';
+import { igThumb } from '@/features/intelligence/utils';
 
 function fmtK(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
@@ -28,7 +29,6 @@ export function SwipeStack({
   onSendToModel,
   onEmpty,
 }: SwipeStackProps) {
-  const [topIdx, setTopIdx] = useState(0);
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-18, 0, 18]);
   const likeOpacity = useTransform(x, [20, 120], [0, 1]);
@@ -38,7 +38,7 @@ export function SwipeStack({
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      if (topIdx >= queue.length) return;
+      if (queue.length === 0) return;
       if (e.key === 'ArrowLeft')  triggerPass();
       if (e.key === 'ArrowRight') triggerLike();
       if (e.key === 'ArrowUp')    onSendToModel();
@@ -46,15 +46,10 @@ export function SwipeStack({
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topIdx, queue.length]);
+  }, [queue.length]);
 
   function advance() {
     animate(x, 0, { duration: 0 });
-    setTopIdx((i) => {
-      const next = i + 1;
-      if (next >= queue.length) onEmpty();
-      return next;
-    });
   }
 
   function triggerLike() {
@@ -71,7 +66,7 @@ export function SwipeStack({
     });
   }
 
-  if (topIdx >= queue.length) {
+  if (queue.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full py-16 text-neutral-400">
         <div className="text-4xl mb-3">🎉</div>
@@ -81,7 +76,7 @@ export function SwipeStack({
     );
   }
 
-  const visibleCards = queue.slice(topIdx, topIdx + 3);
+  const visibleCards = queue.slice(0, 3);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -144,10 +139,9 @@ export function SwipeStack({
               {reel.thumbnailUrl?.startsWith('http') && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={reel.thumbnailUrl}
+                  src={igThumb(reel.thumbnailUrl)}
                   alt=""
                   className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                  referrerPolicy="no-referrer"
                   draggable={false}
                 />
               )}
@@ -250,21 +244,21 @@ export function SwipeStack({
           className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
           style={{
             background: '#fff',
-            border: '2px solid rgba(131,58,180,0.25)',
-            boxShadow: '0 4px 14px rgba(131,58,180,0.1)',
+            border: '2px solid rgba(37,99,235,0.25)',
+            boxShadow: '0 4px 14px rgba(37,99,235,0.1)',
           }}
           title="Send to model (↑)"
         >
-          <Send size={14} className="text-violet-500" />
+          <Send size={14} className="text-blue-500" />
         </button>
 
         <button
           onClick={triggerLike}
           className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
           style={{
-            background: 'linear-gradient(135deg, #ff0069, #833ab4)',
+            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
             border: '2px solid transparent',
-            boxShadow: '0 4px 18px rgba(255,0,105,0.3)',
+            boxShadow: '0 4px 18px rgba(37,99,235,0.3)',
           }}
           title="Rate (→)"
         >
@@ -274,7 +268,7 @@ export function SwipeStack({
 
       {/* Queue counter */}
       <p className="text-[11px] text-neutral-400">
-        {topIdx + 1} of {queue.length} · {queue.length - topIdx - 1} remaining
+        {queue.length} remaining
       </p>
     </div>
   );

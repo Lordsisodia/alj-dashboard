@@ -85,6 +85,10 @@ export const importFromScraper = mutation({
   handler: async (ctx, args) => {
     const inserted = { accounts: 0, posts: 0, skipped: 0 };
 
+    // Collect existing shortcodes once up-front to avoid O(n²) queries inside the loop
+    const allExisting = await ctx.db.query("scrapedPosts").collect();
+    const existingByShortcode = new Map(allExisting.map(p => [p.externalId, p]));
+
     for (const raw of args.posts) {
       const handle = raw.ownerUsername ? `@${raw.ownerUsername}` : null;
 
@@ -146,10 +150,7 @@ export const importFromScraper = mutation({
       }
 
       // ── Upsert: skip duplicate shortcode, backfill missing fields ──────
-      const existing = await ctx.db
-        .query("scrapedPosts")
-        .collect();
-      const existingPost = existing.find(p => p.externalId === shortcode);
+      const existingPost = existingByShortcode.get(shortcode);
       if (existingPost) {
         const patch: Record<string, unknown> = {};
         if (raw.videoUrl && !existingPost.videoUrl) patch.videoUrl = raw.videoUrl;

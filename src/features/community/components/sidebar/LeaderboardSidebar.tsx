@@ -25,17 +25,17 @@ export function LeaderboardSidebar() {
   const top5 = [...accounts]
     .filter(a => a.avgEngagementRate != null)
     .sort((a, b) => (b.avgEngagementRate ?? 0) - (a.avgEngagementRate ?? 0))
-    .slice(0, 5)
+    .slice(0, 20)
     .map((a, i) => ({ ...a, rank: i + 1 }));
 
   return (
-    <div className="space-y-3">
-      <div className="rounded-xl overflow-hidden bg-white" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
-        <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+    <div className="h-full flex flex-col">
+      <div className="flex-1 flex flex-col rounded-xl overflow-hidden bg-white" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+        <div className="px-4 py-3 flex items-center gap-2 flex-shrink-0" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
           <Award size={14} style={{ color: '#d97706' }} />
           <span className="text-xs font-semibold text-neutral-900">Top Creators</span>
         </div>
-        <div>
+        <div className="flex-1 overflow-y-auto">
           {top5.length === 0 && (
             <div className="px-4 py-6 text-center text-[11px] text-neutral-400">No creator data yet</div>
           )}
@@ -59,7 +59,7 @@ export function LeaderboardSidebar() {
                 />
               ) : (
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+                  className="w-8 h-8 min-w-[2rem] rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
                   style={{ backgroundColor: entry.avatarColor ?? hashColor(entry.handle) }}
                 >
                   {getInitials(entry.handle)}

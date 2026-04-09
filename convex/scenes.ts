@@ -50,6 +50,16 @@ export const createFromPost = mutation({
       sourceType:           "saved_post",
       sourceId:             args.postId,
       sceneDescription:     args.sceneDescription,
+      // Source post snapshot — point-in-time for decision audit
+      sourceHandle:         post?.handle,
+      sourceNiche:          post?.niche,
+      sourceVerified:       undefined,
+      sourceViews:          post?.views,
+      sourceEngagementRate: post?.engagementRate,
+      sourceOutlierRatio:   post?.outlierRatio,
+      sourceCaption:        post?.caption ? post.caption.slice(0, 200) : undefined,
+      sourceHookLine:       post?.aiAnalysis?.hookLine,
+      sourceEmotions:       post?.aiAnalysis?.emotions?.slice(0, 3),
       referenceVideoUrl:    post?.videoUrl,
       referenceThumbnailUrl: post?.thumbnailUrl,
       startingImageStatus:  "missing",
@@ -193,110 +203,7 @@ export const remove = mutation({
 
 export const seed = mutation({
   args: {},
-  handler: async (ctx) => {
-    const existing = await ctx.db.query("scenes").collect();
-    if (existing.length > 0) return { skipped: true };
-
-    const models = await ctx.db.query("models").collect();
-    if (models.length === 0) return { skipped: true, reason: "no models" };
-
-    const now = Date.now();
-    const HOUR = 3_600_000;
-    const pool = models.slice(0, 4);
-    const get  = (i: number) => pool[i % pool.length];
-
-    const PLACEHOLDER_READY = "https://placehold.co/540x960/1a1a1a/fff?text=Ready";
-
-    await ctx.db.insert("scenes", {
-      modelId:              get(0)._id,
-      modelName:            get(0).name,
-      sourceType:           "manual",
-      sceneDescription:     "gym mirror selfie, natural lighting, motivational energy",
-      referenceThumbnailUrl: undefined,
-      startingImageStatus:  "missing",
-      priorityScore:        92,
-      provider:             "Kling",
-      status:               "Pending",
-      approvalState:        "draft",
-      createdAt:            now,
-    });
-
-    await ctx.db.insert("scenes", {
-      modelId:              get(1)._id,
-      modelName:            get(1).name,
-      sourceType:           "manual",
-      sceneDescription:     "beach golden hour walk, candid shoreline",
-      referenceThumbnailUrl: undefined,
-      startingImageStatus:  "ready",
-      startingImageUrl:     PLACEHOLDER_READY,
-      priorityScore:        85,
-      provider:             "Kling",
-      status:               "Pending",
-      approvalState:        "pending_review",
-      createdAt:            now - HOUR,
-    });
-
-    await ctx.db.insert("scenes", {
-      modelId:              get(2)._id,
-      modelName:            get(2).name,
-      sourceType:           "manual",
-      sceneDescription:     "rooftop night, city lights background",
-      referenceThumbnailUrl: undefined,
-      startingImageStatus:  "generating",
-      priorityScore:        71,
-      provider:             "Higgsfield",
-      status:               "Pending",
-      approvalState:        "pending_review",
-      createdAt:            now - 3 * HOUR,
-    });
-
-    await ctx.db.insert("scenes", {
-      modelId:              get(0)._id,
-      modelName:            get(0).name,
-      sourceType:           "manual",
-      sceneDescription:     "studio close-up portrait, soft key light",
-      referenceThumbnailUrl: undefined,
-      startingImageStatus:  "ready",
-      startingImageUrl:     PLACEHOLDER_READY,
-      priorityScore:        63,
-      provider:             "FLUX",
-      status:               "Queued",
-      approvalState:        "approved",
-      approvedBy:           "admin",
-      approvedAt:           now - 5 * HOUR,
-      createdAt:            now - 6 * HOUR,
-    });
-
-    await ctx.db.insert("scenes", {
-      modelId:              get(3)._id,
-      modelName:            get(3).name,
-      sourceType:           "manual",
-      sceneDescription:     "poolside afternoon, relaxed candid",
-      referenceThumbnailUrl: undefined,
-      startingImageStatus:  "failed",
-      startingImageError:   "Replicate timeout",
-      priorityScore:        48,
-      provider:             "Kling",
-      status:               "Pending",
-      approvalState:        "draft",
-      createdAt:            now - 20 * HOUR,
-    });
-
-    await ctx.db.insert("scenes", {
-      modelId:              get(1)._id,
-      modelName:            get(1).name,
-      sourceType:           "manual",
-      sceneDescription:     "cafe window seat, ambient bokeh",
-      referenceThumbnailUrl: undefined,
-      startingImageStatus:  "missing",
-      priorityScore:        30,
-      provider:             "Kling",
-      status:               "Pending",
-      approvalState:        "rejected",
-      rejectionReason:      "Too similar to last week's content",
-      createdAt:            now - 30 * HOUR,
-    });
-
-    return { seeded: 6 };
+  handler: async (_ctx) => {
+    return { skipped: true, reason: "seeding disabled" };
   },
 });

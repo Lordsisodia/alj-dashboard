@@ -1,14 +1,15 @@
 'use client';
 
 import { TrendingUp, Clock, CheckCircle2, Bookmark, Radio, Inbox, Send, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import { StatCard } from '@/features/analytics/components/stats';
 import { StatusStrip } from '@/components/ui/status-strip';
 import { LastSessionCard } from './LastSessionCard';
 import { VaultHealthBar } from './VaultHealthBar';
 import { HubSwipeActivityFeed } from './HubSwipeActivityFeed';
 import { HubQuickActions } from './HubQuickActions';
-import { POSTS, MOCK_SENT_THIS_WEEK, MOCK_PACE } from '../../constants';
+import { timeAgo } from '@/features/intelligence/utils';
 
 interface HubDashboardTabProps {
   onStartSession: () => void;
@@ -18,11 +19,17 @@ interface HubDashboardTabProps {
 }
 
 export function HubDashboardTab({ onStartSession, onBrowseVault, onViewSaved, onSendToClient }: HubDashboardTabProps) {
-  const approved     = POSTS.filter(p => p.approved).length;
-  const saved        = POSTS.filter(p => p.saved).length;
-  const vaultSize    = POSTS.length;
-  const approvalRate = vaultSize > 0 ? Math.round((approved / vaultSize) * 100) : 0;
-  const inQueue      = POSTS.filter(p => !p.approved && !p.saved).length;
+  const kpisData = useQuery(api.hub.getDashboardKpis);
+
+  const inQueue      = kpisData?.inQueue      ?? 0;
+  const sentThisWeek = kpisData?.sentThisWeek ?? 0;
+  const approvalRate = kpisData?.approvalRate ?? 0;
+  const vaulted      = kpisData?.vaulted      ?? 0;
+  const approved     = kpisData?.approved     ?? 0;
+  const saved        = kpisData?.saved        ?? 0;
+  const lastScraped  = kpisData?.lastScrapedAt != null
+    ? `Last scrape: ${timeAgo(kpisData.lastScrapedAt)}`
+    : 'Last scrape: -';
 
   const kpis = [
     {
@@ -34,7 +41,7 @@ export function HubDashboardTab({ onStartSession, onBrowseVault, onViewSaved, on
     },
     {
       label: 'Sent This Week',
-      value: MOCK_SENT_THIS_WEEK,
+      value: sentThisWeek,
       icon: <Send size={15} />,
       iconColor: '#22c55e',
       delay: 0.07,
@@ -49,7 +56,7 @@ export function HubDashboardTab({ onStartSession, onBrowseVault, onViewSaved, on
     },
     {
       label: 'Swipe Pace',
-      value: MOCK_PACE,
+      value: 0,
       suffix: '/s',
       icon: <Zap size={15} />,
       iconColor: '#f59e0b',
@@ -67,13 +74,13 @@ export function HubDashboardTab({ onStartSession, onBrowseVault, onViewSaved, on
         <StatusStrip
           status={{ label: 'Hub active', active: true }}
           stats={[
-            { icon: <Radio size={11} />,       value: vaultSize,    label: 'vaulted',      accent: '#2563eb' },
-            { icon: <CheckCircle2 size={11} />, value: approved,     label: 'approved',     accent: '#2563eb' },
+            { icon: <Radio size={11} />,       value: vaulted,            label: 'vaulted',       accent: '#2563eb' },
+            { icon: <CheckCircle2 size={11} />, value: approved,           label: 'approved',      accent: '#2563eb' },
             { icon: <TrendingUp size={11} />,   value: `${approvalRate}%`, label: 'approval rate', accent: '#22c55e' },
-            { icon: <Bookmark size={11} />,     value: saved,        label: 'saved',        accent: '#2563eb' },
+            { icon: <Bookmark size={11} />,     value: saved,              label: 'saved',         accent: '#2563eb' },
           ]}
           iconColor="text-blue-600"
-          rightSlot={<><Clock size={10} className="text-blue-600" /> Last scrape: just now</>}
+          rightSlot={<><Clock size={10} className="text-blue-600" /> {lastScraped}</>}
         />
 
         {/* ② KPI row */}

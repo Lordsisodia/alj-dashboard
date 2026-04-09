@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, Sparkles } from 'lucide-react';
@@ -26,6 +27,7 @@ function StepNum({ n }: { n: number }) {
 
 export default function ContentGenFeaturePage() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const router = useRouter();
 
   return (
     <ContentPageShell
@@ -34,6 +36,7 @@ export default function ContentGenFeaturePage() {
       searchPlaceholder="Search..."
       actionLabel="New Scene"
       actionIcon={<Sparkles size={14} />}
+      onAction={() => router.push('/isso/community?tab=saved')}
       tabs={[
         { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={12} /> },
         { id: 'scenes',    label: 'Scenes',    icon: <StepNum n={1} /> },

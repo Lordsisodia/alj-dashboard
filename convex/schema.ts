@@ -401,6 +401,16 @@ export default defineSchema({
     ),
     sourceId: v.optional(v.string()), // _id of the source record
     sceneDescription: v.string(), // the prompt / what to recreate
+    // ── Source post snapshot (denormalised at creation for saved_post scenes) ──
+    sourceHandle:         v.optional(v.string()),
+    sourceNiche:          v.optional(v.string()),
+    sourceVerified:       v.optional(v.boolean()),
+    sourceViews:          v.optional(v.number()),
+    sourceEngagementRate: v.optional(v.number()),
+    sourceOutlierRatio:   v.optional(v.number()),
+    sourceCaption:        v.optional(v.string()),
+    sourceHookLine:       v.optional(v.string()),
+    sourceEmotions:       v.optional(v.array(v.string())),
     referenceVideoUrl: v.optional(v.string()),     // the post being recreated
     referenceThumbnailUrl: v.optional(v.string()),
     startingImageUrl: v.optional(v.string()),

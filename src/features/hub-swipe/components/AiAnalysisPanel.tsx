@@ -5,10 +5,10 @@ import { Sparkles, ChevronDown, Eye, Heart, MessageCircle, Bookmark, TrendingUp 
 import type { SwipeReelAiAnalysis } from '../types';
 
 const EMOTION_COLORS: Record<string, string> = {
-  motivational: '#833ab4', energetic: '#ff0069', emotional: '#f97316',
-  funny: '#eab308', sensual: '#ec4899', aspirational: '#06b6d4',
-  relatable: '#22c55e', dramatic: '#ef4444', playful: '#f59e0b',
-  educational: '#3b82f6',
+  motivational: '#2563eb', energetic: '#3b82f6', emotional: '#f97316',
+  funny: '#eab308',        sensual: '#6d28d9',   aspirational: '#2563eb',
+  relatable: '#4f46e5',    dramatic: '#ef4444',  playful: '#f59e0b',
+  educational: '#0891b2',  confident: '#1d4ed8', flirty: '#7c3aed',
 };
 
 function fmtK(n: number) {
@@ -41,12 +41,12 @@ export function AiAnalysisPanel({ analysis, views, likes, comments, saves, engag
         className="px-4 py-3 flex items-center gap-2"
         style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
       >
-        <Sparkles size={13} style={{ color: '#833ab4' }} />
+        <Sparkles size={13} style={{ color: '#2563eb' }} />
         <span className="text-xs font-semibold text-neutral-900">AI Analysis</span>
         {analysis && (
           <span
             className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
-            style={{ background: analysis.hookScore >= 70 ? 'linear-gradient(135deg, #ff0069, #833ab4)' : '#d4d4d4' }}
+            style={{ background: analysis.hookScore >= 70 ? 'linear-gradient(135deg, #2563eb, #7c3aed)' : '#d4d4d4' }}
           >
             Hook {analysis.hookScore}/100
           </span>
@@ -70,7 +70,7 @@ export function AiAnalysisPanel({ analysis, views, likes, comments, saves, engag
                   style={{
                     width: `${analysis.hookScore}%`,
                     background: analysis.hookScore >= 70
-                      ? 'linear-gradient(135deg, #ff0069, #833ab4)'
+                      ? 'linear-gradient(135deg, #2563eb, #7c3aed)'
                       : analysis.hookScore >= 40
                       ? 'linear-gradient(135deg, #f97316, #eab308)'
                       : '#d4d4d4',
@@ -94,7 +94,7 @@ export function AiAnalysisPanel({ analysis, views, likes, comments, saves, engag
                   <span
                     key={e}
                     className="px-2 py-0.5 rounded-md text-[10px] font-semibold text-white capitalize"
-                    style={{ backgroundColor: EMOTION_COLORS[e.toLowerCase()] ?? '#833ab4' }}
+                    style={{ backgroundColor: EMOTION_COLORS[e.toLowerCase()] ?? '#2563eb' }}
                   >
                     {e}
                   </span>
@@ -134,7 +134,7 @@ export function AiAnalysisPanel({ analysis, views, likes, comments, saves, engag
               <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400 mb-2">Replicate this</p>
               {(showAllSugg ? analysis.suggestions : analysis.suggestions.slice(0, 3)).map((s, i) => (
                 <div key={i} className="flex items-start gap-1.5">
-                  <Sparkles size={9} className="mt-0.5 flex-shrink-0 text-violet-400" />
+                  <Sparkles size={9} className="mt-0.5 flex-shrink-0 text-blue-400" />
                   <p className="text-[11px] text-neutral-600 leading-snug">{s}</p>
                 </div>
               ))}
@@ -181,7 +181,7 @@ export function AiAnalysisPanel({ analysis, views, likes, comments, saves, engag
           {comments != null && <StatItem icon={<MessageCircle size={10} />} value={fmtK(comments)} />}
           {saves    != null && <StatItem icon={<Bookmark     size={10} />} value={fmtK(saves)}    />}
           {engagementRate != null && (
-            <StatItem icon={<TrendingUp size={10} />} value={`${engagementRate.toFixed(1)}%`} accent="#ff0069" />
+            <StatItem icon={<TrendingUp size={10} />} value={`${engagementRate.toFixed(1)}%`} accent="#2563eb" />
           )}
         </div>
       )}

@@ -103,7 +103,7 @@ export function MotionCriteria() {
     <ChecklistBox
       title="Motion Control"
       icon={<Target size={12} />}
-      accent="#ff0069"
+      accent="#2563eb"
       items={MOTION_CRITERIA}
       checked={checked}
       onToggle={toggle}

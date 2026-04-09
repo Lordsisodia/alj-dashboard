@@ -1660,6 +1660,169 @@ export const getRuleLeaderboard = query({
   },
 });
 
+// ── Saved posts with pipeline state join ────────────────────────────────────
+export const getSavedPostsWithPipelineState = query({
+  args: {
+    niche:          v.optional(v.string()),
+    sortBy:         v.optional(v.union(
+      v.literal("newest"),
+      v.literal("most-likes"),
+      v.literal("most-views"),
+      v.literal("most-saves"),
+      v.literal("top-engagement"),
+    )),
+    search:         v.optional(v.string()),
+    pipelineStatus: v.optional(v.union(
+      v.literal("all"),
+      v.literal("unassigned"),
+      v.literal("sent"),
+    )),
+  },
+  handler: async (ctx, args) => {
+    let posts = await ctx.db
+      .query("scrapedPosts")
+      .filter(q => q.or(q.eq(q.field("saved"), true), q.eq(q.field("savedForPipeline"), true)))
+      .collect();
+
+    posts = posts.filter(p => !p.externalId?.startsWith('seed_'));
+
+    // Force content type to reel
+    posts = posts.filter(p => p.contentType === 'reel');
+
+    if (args.niche && args.niche !== "all") {
+      posts = posts.filter(p => p.niche === args.niche);
+    }
+    if (args.search) {
+      const q = args.search.toLowerCase();
+      posts = posts.filter(p =>
+        p.handle.toLowerCase().includes(q) ||
+        (p.caption ?? '').toLowerCase().includes(q) ||
+        (p.hashtags ?? []).some((t: string) => t.toLowerCase().includes(q))
+      );
+    }
+
+    switch (args.sortBy) {
+      case "most-likes":
+        posts.sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0));
+        break;
+      case "most-views":
+        posts.sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
+        break;
+      case "most-saves":
+        posts.sort((a, b) => (b.saves ?? 0) - (a.saves ?? 0));
+        break;
+      case "top-engagement":
+        posts.sort((a, b) => (b.engagementRate ?? 0) - (a.engagementRate ?? 0));
+        break;
+      default:
+        posts.sort((a, b) => (b.postedAt ?? 0) - (a.postedAt ?? 0));
+    }
+
+    // Join scenes table for pipeline state
+    const allScenes = await ctx.db.query("scenes").collect();
+    const savedPostScenes = allScenes.filter(s => s.sourceType === 'saved_post');
+
+    // Build map: sourceId -> { count, latestStatus, latestApproval, modelNames[] }
+    const pipelineMap = new Map<string, {
+      count: number;
+      latestStatus?: string;
+      latestApproval?: string;
+      modelNames: string[];
+      latestCreatedAt: number;
+    }>();
+
+    for (const scene of savedPostScenes) {
+      if (!scene.sourceId) continue;
+      const key = scene.sourceId as string;
+      const existing = pipelineMap.get(key);
+      if (!existing) {
+        pipelineMap.set(key, {
+          count: 1,
+          latestStatus: scene.status,
+          latestApproval: scene.approvalState,
+          modelNames: scene.modelName ? [scene.modelName] : [],
+          latestCreatedAt: scene.createdAt,
+        });
+      } else {
+        existing.count++;
+        if (scene.createdAt > existing.latestCreatedAt) {
+          existing.latestStatus = scene.status;
+          existing.latestApproval = scene.approvalState;
+          existing.latestCreatedAt = scene.createdAt;
+        }
+        if (scene.modelName && !existing.modelNames.includes(scene.modelName)) {
+          existing.modelNames.push(scene.modelName);
+        }
+      }
+    }
+
+    // Attach pipeline state to each post
+    const postsWithPipeline = posts.map(p => {
+      const pState = pipelineMap.get(p._id as string);
+      return {
+        ...p,
+        pipeline: pState
+          ? {
+              count: pState.count,
+              latestStatus: pState.latestStatus,
+              latestApproval: pState.latestApproval,
+              assignedModelNames: pState.modelNames,
+            }
+          : { count: 0, latestStatus: undefined, latestApproval: undefined, assignedModelNames: [] },
+      };
+    });
+
+    // Filter by pipeline status if requested
+    const status = args.pipelineStatus ?? 'all';
+    if (status === 'unassigned') {
+      return postsWithPipeline.filter(p => p.pipeline.count === 0);
+    }
+    if (status === 'sent') {
+      return postsWithPipeline.filter(p => p.pipeline.count > 0);
+    }
+    return postsWithPipeline;
+  },
+});
+
+// ── Saved posts stats v2 (with pipeline awareness) ───────────────────────────
+export const getSavedStatsV2 = query({
+  args: {},
+  handler: async (ctx) => {
+    const posts = await ctx.db
+      .query("scrapedPosts")
+      .filter(q => q.or(q.eq(q.field("saved"), true), q.eq(q.field("savedForPipeline"), true)))
+      .collect();
+
+    const real = posts.filter(p => !p.externalId?.startsWith('seed_'));
+    const creators = new Set(real.map(p => p.handle));
+
+    // Get all scenes from saved posts
+    const allScenes = await ctx.db.query("scenes").collect();
+    const savedPostScenes = allScenes.filter(s => s.sourceType === 'saved_post');
+
+    // Posts with at least 1 scene (sent to pipeline)
+    const sentPostIds = new Set(savedPostScenes.map(s => s.sourceId as string).filter(Boolean));
+    const sentToPipeline = real.filter(p => sentPostIds.has(p._id as string)).length;
+    const unassigned = real.length - sentToPipeline;
+
+    // Scenes created in last 7 days
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const sentThisWeek = savedPostScenes.filter(s => s.createdAt > weekAgo).length;
+
+    // Most recent savedAt (use scrapedAt as proxy)
+    const lastSavedAt = real.reduce((max, p) => Math.max(max, p.scrapedAt ?? 0), 0) || null;
+
+    return {
+      total: real.length,
+      creators: creators.size,
+      sentToPipeline,
+      unassigned,
+      sentThisWeek,
+      lastSavedAt,
+    };
+  },
+});
+
 // ── One-time migration: patch stale documents missing required fields ──────────
 export const patchLegacyScrapedPosts = mutation({
   args: {},

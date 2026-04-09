@@ -64,7 +64,7 @@ export function QuickAnnotate({ tags, onChange }: QuickAnnotateProps) {
           {hasAny && (
             <span
               className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-              style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)', color: '#fff' }}
+              style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff' }}
             >
               {selectedCount} cat.
             </span>
@@ -92,7 +92,7 @@ export function QuickAnnotate({ tags, onChange }: QuickAnnotateProps) {
             key={p.label}
             onClick={() => applyPreset(p.tags)}
             className="text-[10px] font-semibold px-2 py-0.5 rounded-lg transition-all hover:bg-neutral-100"
-            style={{ border: '1px solid rgba(0,0,0,0.09)', color: '#525252' }}
+            style={{ border: '1px solid rgba(37,99,235,0.2)', color: '#1e40af', background: 'rgba(37,99,235,0.04)' }}
           >
             {p.label}
           </button>
@@ -108,7 +108,7 @@ export function QuickAnnotate({ tags, onChange }: QuickAnnotateProps) {
             <div key={cat.id}>
               <p
                 className="text-[10px] font-bold uppercase tracking-wide mb-1.5"
-                style={{ color: filled ? '#ff0069' : '#a3a3a3' }}
+                style={{ color: filled ? '#2563eb' : '#a3a3a3' }}
               >
                 {cat.label}
               </p>
@@ -123,8 +123,8 @@ export function QuickAnnotate({ tags, onChange }: QuickAnnotateProps) {
                       className="text-[10px] font-medium px-2.5 py-1 rounded-lg transition-all"
                       style={
                         active
-                          ? { background: 'linear-gradient(135deg, #ff0069, #833ab4)', color: '#fff', border: '1px solid transparent' }
-                          : { background: '#fff', color: '#525252', border: '1px solid rgba(0,0,0,0.1)' }
+                          ? { background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff', border: '1px solid transparent' }
+                          : { background: 'rgba(37,99,235,0.04)', color: '#1d4ed8', border: '1px solid rgba(37,99,235,0.18)' }
                       }
                     >
                       {opt}

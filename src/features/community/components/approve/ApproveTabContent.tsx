@@ -1,25 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import { Crown, Briefcase, User2, Layers, LayoutGrid, History, CheckCircle2 } from 'lucide-react';
 import { SwipeTabContent, type ViewMode } from '@/features/hub-swipe/components/SwipeTabContent';
 import type { SwipeSession, RatingRecord } from '@/features/hub-swipe/types';
 
 type Role = 'manager' | 'model' | 'va';
 
-const ROLE_CONFIG: Record<Role, {
-  label:    string;
-  icon:     React.ReactNode;
-  gradient: string;
-  pending:  number;
-  approved: number;
-}> = {
-  manager: { label: 'Manager', icon: <Crown    size={11} />, gradient: 'linear-gradient(135deg, #ff0069, #833ab4)', pending: 8,  approved: 24 },
-  model:   { label: 'Model',   icon: <User2    size={11} />, gradient: 'linear-gradient(135deg, #7c3aed, #4c1d95)', pending: 12, approved: 31 },
-  va:      { label: 'VA',      icon: <Briefcase size={11} />, gradient: 'linear-gradient(135deg, #0891b2, #0e7490)', pending: 15, approved: 42 },
-};
-
-const ROLES = Object.keys(ROLE_CONFIG) as Role[];
+const ROLES: Role[] = ['manager', 'model', 'va'];
 
 const MODE_CONFIG: { id: ViewMode; icon: React.ReactNode; label: string }[] = [
   { id: 'swipe', icon: <Layers     size={11} />, label: 'Swipe'   },
@@ -37,6 +27,20 @@ export function ApproveTabContent() {
   const [session,    setSession]    = useState<SwipeSession>(newSession);
   const [logCount,   setLogCount]   = useState(0);
   const [lastRated,  setLastRated]  = useState<Date | null>(null);
+
+  const queueStats = useQuery(api.hub.getHubQueueStats);
+
+  const ROLE_CONFIG: Record<Role, {
+    label:    string;
+    icon:     React.ReactNode;
+    gradient: string;
+    pending:  number;
+    approved: number;
+  }> = {
+    manager: { label: 'Manager', icon: <Crown    size={11} />, gradient: 'linear-gradient(135deg, #2563eb, #7c3aed)', pending: queueStats?.readyToSwipe ?? 0, approved: 24 },
+    model:   { label: 'Model',   icon: <User2    size={11} />, gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)', pending: queueStats?.readyToSwipe ?? 0, approved: 31 },
+    va:      { label: 'VA',      icon: <Briefcase size={11} />, gradient: 'linear-gradient(135deg, #6d28d9, #7c3aed)', pending: queueStats?.readyToSwipe ?? 0, approved: 42 },
+  };
 
   const role = ROLE_CONFIG[activeRole];
 
@@ -92,6 +96,19 @@ export function ApproveTabContent() {
             </span>
           </div>
 
+          {queueStats && (
+            <>
+              <span className="w-px h-4 bg-neutral-200 mx-3 flex-shrink-0" />
+              <div className="flex items-center gap-2 text-[11px] text-neutral-500 flex-shrink-0">
+                <span><span className="font-semibold text-neutral-800">{queueStats.readyToSwipe}</span> ready</span>
+                <span className="text-neutral-300">·</span>
+                <span><span className="font-semibold text-neutral-800">{queueStats.analysed}</span> analysed</span>
+                <span className="text-neutral-300">·</span>
+                <span><span className="font-semibold text-neutral-800">{queueStats.rated}</span> rated</span>
+              </div>
+            </>
+          )}
+
           <span className="w-px h-4 bg-neutral-200 mx-4 flex-shrink-0" />
 
           {/* Role pills */}
@@ -106,7 +123,7 @@ export function ApproveTabContent() {
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all"
                   style={
                     isActive
-                      ? { background: cfg.gradient, color: '#fff', boxShadow: '0 1px 6px rgba(0,0,0,0.18)' }
+                      ? { background: cfg.gradient, color: '#fff', boxShadow: '0 1px 6px rgba(37,99,235,0.25)' }
                       : { background: 'transparent', color: '#737373', border: '1px solid rgba(0,0,0,0.09)' }
                   }
                 >
@@ -140,7 +157,7 @@ export function ApproveTabContent() {
                   className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all"
                   style={
                     isActive
-                      ? { background: 'linear-gradient(135deg, #ff0069, #833ab4)', color: '#fff' }
+                      ? { background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff' }
                       : { background: 'transparent', color: '#a3a3a3' }
                   }
                 >

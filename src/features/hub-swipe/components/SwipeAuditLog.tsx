@@ -44,7 +44,7 @@ const DECISION_CONFIG: Record<SwipeDecision, { icon: React.ReactNode; color: str
   },
   sent: {
     icon: <Send size={11} />,
-    color: '#833ab4',
+    color: '#7c3aed',
     label: 'Sent',
   },
 };

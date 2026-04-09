@@ -76,8 +76,8 @@ export function SendToModelModal({ open, onClose, onConfirm }: SendToModelModalP
                       style={
                         active
                           ? {
-                              background: 'linear-gradient(135deg, rgba(255,0,105,0.08), rgba(131,58,180,0.08))',
-                              border: '1.5px solid rgba(255,0,105,0.35)',
+                              background: 'linear-gradient(135deg, rgba(37,99,235,0.08), rgba(124,58,237,0.08))',
+                              border: '1.5px solid rgba(37,99,235,0.35)',
                             }
                           : {
                               background: '#f5f5f4',
@@ -127,7 +127,7 @@ export function SendToModelModal({ open, onClose, onConfirm }: SendToModelModalP
                 <button
                   onClick={handleConfirm}
                   className="flex-1 py-2 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90"
-                  style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
+                  style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
                 >
                   <Send size={12} />
                   Send

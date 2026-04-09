@@ -37,7 +37,7 @@ export default function CommunityFeaturePage() {
     <ContentPageShell
       icon={<ProductIcon product="hub" size={32} />}
       title="Hub"
-      accentGradient="linear-gradient(135deg, #2563eb, #1d4ed8)"
+      accentGradient="linear-gradient(135deg, #2563eb, #7c3aed)"
       stat={{ label: 'Approved', value: approvedCount }}
       searchBarComponent={searchBar}
       searchPlaceholder="Search vault, creators, niches..."

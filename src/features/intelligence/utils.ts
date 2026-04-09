@@ -121,5 +121,6 @@ export function groupByDay<T>(
 export function igThumb(url: string): string {
   if (!url || !url.startsWith('http')) return url;           // CSS gradient - return as-is
   if (url.includes('localhost') || url.includes('127.0.0.1')) return url; // local
+  if (url.includes('r2.dev') || url.includes('r2.cloudflarestorage.com')) return url; // R2 - no proxy needed
   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
 }
