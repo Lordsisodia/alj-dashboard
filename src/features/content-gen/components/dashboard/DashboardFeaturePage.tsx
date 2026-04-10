@@ -1,91 +1,166 @@
 'use client';
 
-import { Sparkles, Play, CheckCircle2, Clock, Zap } from 'lucide-react';
+import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { Sparkles, Brain, Image, BookOpen } from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Doc } from '@/convex/_generated/dataModel';
+import { StatusStrip, timeAgo } from '@/components/ui/status-strip';
+import { ActivityFeed } from '@/components/ui/activity-feed';
 import { ModelSummaryCard } from './ModelSummaryCard';
-import { ActivityFeed } from './ActivityFeed';
-import { SEED_MODEL_SUMMARIES, SEED_ACTIVITY } from './types';
 
-function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: number; color: string }) {
+// ── Helper: needsWork (from ScenesFeaturePage) ────────────────────────────
+
+function needsWork(s: Doc<'scenes'>): boolean {
+  return s.status !== 'Queued' && s.status !== 'Generating' && s.status !== 'Done';
+}
+
+// ── Quick Links Row ──────────────────────────────────────────────────────
+
+function QuickLinksRow() {
+  const router = useRouter();
+
+  const links = [
+    { icon: Brain, label: 'Scenes', href: '/isso/content-gen?tab=scenes' },
+    { icon: Sparkles, label: 'Generate', href: '/isso/content-gen?tab=generate' },
+    { icon: Image, label: 'Gallery', href: '/isso/content-gen?tab=gallery' },
+    { icon: BookOpen, label: 'Hub', href: '/isso/community' },
+  ];
+
   return (
-    <div className="flex items-center gap-3 p-4 rounded-2xl flex-1 min-w-0"
-      style={{ backgroundColor: '#ffffff', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ backgroundColor: `${color}18` }}>
-        <span style={{ color }}>{icon}</span>
-      </div>
-      <div className="min-w-0">
-        <p className="text-2xl font-black text-neutral-900 leading-none">{value}</p>
-        <p className="text-[11px] text-neutral-400 mt-0.5 truncate">{label}</p>
-      </div>
+    <div className="flex gap-3">
+      {links.map(({ icon: Icon, label, href }) => (
+        <button
+          key={label}
+          onClick={() => router.push(href)}
+          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-2xl transition-all hover:bg-black/[0.05]"
+          style={{ backgroundColor: '#ffffff', border: '1px solid rgba(0,0,0,0.07)' }}
+        >
+          <Icon size={20} className="text-neutral-600" />
+          <span className="text-xs font-semibold text-neutral-600">{label}</span>
+        </button>
+      ))}
     </div>
   );
 }
 
 export default function DashboardFeaturePage() {
-  const models   = SEED_MODEL_SUMMARIES;
-  const activity = SEED_ACTIVITY;
+  const router = useRouter();
+  const scenes = useQuery(api.scenes.list, {}) ?? [];
+  const active = useQuery(api.contentGen.getActiveJobs) ?? [];
+  const history = useQuery(api.contentGen.getHistory, { limit: 100 }) ?? [];
+  const models = useQuery(api.models.getAll, {}) ?? [];
 
-  const totalToday    = models.reduce((s, m) => s + m.clipsToday, 0);
-  const totalApproved = models.reduce((s, m) => s + m.approved, 0);
-  const totalPending  = models.reduce((s, m) => s + m.pending, 0);
-  const generating    = activity.filter(e => e.type === 'generated').length;
+  // ── Compute StatusStrip stats ──────────────────────────────────────
+
+  const startOfDay = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today.getTime();
+  }, []);
+
+  const blocked = useMemo(() => scenes.filter(s => needsWork(s)).length, [scenes]);
+  const ready = useMemo(() => scenes.filter(s => s.status === 'Queued').length, [scenes]);
+  const live = useMemo(() => active.filter(j => j.status === 'Generating').length, [active]);
+  const doneToday = useMemo(
+    () => history.filter(j => j.status === 'Done' && (j.completedAt ?? 0) > startOfDay).length,
+    [history, startOfDay],
+  );
+  const lastGeneratedAt = useMemo(() => (history.length > 0 ? history[0]?.completedAt ?? 0 : 0), [history]);
+
+  // ── Determine pipeline status label ────────────────────────────────
+
+  const statusLabel = useMemo(() => {
+    if (live > 0) return 'Generating';
+    if (blocked === 0 && ready === 0) return 'Pipeline idle';
+    return 'Pipeline building';
+  }, [live, blocked, ready]);
+
+  const statusActive = live > 0;
+
+  // ── Compute per-model derivations ──────────────────────────────────
+
+  function modelDerivations(modelId: string) {
+    const modelScenes = scenes.filter(s => s.modelId === modelId);
+    const modelHistory = history.filter(h => h.modelId === modelId);
+    const clipsToday = modelHistory.filter(h => (h.completedAt ?? 0) > Date.now() - 86_400_000).length;
+    const approved = modelHistory.filter(h => h.outcome === 'Approved').length;
+    const blocked = modelScenes.filter(s => needsWork(s)).length;
+
+    return { clipsToday, approved, blocked };
+  }
 
   return (
-    <div className="p-5 flex flex-col gap-6">
+    <div className="p-5 flex flex-col gap-5">
 
-        {/* ── Stats row ─────────────────────────────────────────────── */}
-        <div className="flex gap-3">
-          <StatCard icon={<Sparkles size={16} />}    label="Generated today"  value={totalToday}    color="#8b5cf6" />
-          <StatCard icon={<CheckCircle2 size={16} />} label="Approved today"   value={totalApproved} color="#10b981" />
-          <StatCard icon={<Clock size={16} />}        label="Pending review"   value={totalPending}  color="#f59e0b" />
-          <StatCard icon={<Zap size={16} />}          label="Jobs dispatched"  value={generating}    color="#ff0069" />
-        </div>
+      {/* ── StatusStrip ─────────────────────────────────────────────── */}
+      <StatusStrip
+        status={{ label: statusLabel, active: statusActive }}
+        stats={[
+          { value: blocked, label: 'blocked' },
+          { value: ready, label: 'ready' },
+          { value: live, label: 'live' },
+          { value: doneToday, label: 'done today' },
+        ]}
+        rightSlot={
+          <span className="text-neutral-500">
+            Last generated {timeAgo(lastGeneratedAt)}
+          </span>
+        }
+        iconColor="text-emerald-600"
+      />
 
-        {/* ── Main two-column layout ─────────────────────────────────── */}
-        <div className="flex gap-5 min-h-0">
+      {/* ── Main two-column layout ─────────────────────────────────── */}
+      <div className="flex gap-5 min-h-0">
 
-          {/* Left: model breakdown */}
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400 mb-3">Models - Today</p>
-            <div className="grid grid-cols-2 gap-3">
-              {models.map(m => <ModelSummaryCard key={m.name} model={m} />)}
-            </div>
-
-            {/* Quick actions */}
-            <div className="mt-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400 mb-3">Quick Actions</p>
-              <div className="flex gap-2">
-                <button
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold text-white transition-all hover:brightness-105"
-                  style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
-                >
-                  <Sparkles size={14} /> Run Today's Queue
-                </button>
-                <button
-                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold text-neutral-600 transition-all hover:bg-black/[0.05]"
-                  style={{ backgroundColor: '#f5f5f4', border: '1px solid rgba(0,0,0,0.08)' }}
-                >
-                  <Play size={14} /> View Gallery
-                </button>
-              </div>
-            </div>
+        {/* Left: models grid + button */}
+        <div className="flex-1 min-w-0 space-y-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">Models - Today</p>
+          <div className="grid grid-cols-2 gap-3">
+            {models.map(m => {
+              const { clipsToday, approved, blocked } = modelDerivations(m._id);
+              return (
+                <ModelSummaryCard
+                  key={m._id}
+                  model={m}
+                  stats={{ clipsToday, approved, blocked }}
+                />
+              );
+            })}
           </div>
 
-          {/* Right: activity feed */}
-          <div className="w-72 flex-shrink-0 flex flex-col">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">Activity</p>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            </div>
-            <div
-              className="rounded-2xl overflow-hidden flex-1"
-              style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+          {/* Run Today's Queue button */}
+          <div style={{ width: 240 }}>
+            <button
+              onClick={() => router.push('/isso/content-gen?tab=generate')}
+              className="w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-105"
+              style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
             >
-              <ActivityFeed events={activity} />
-            </div>
+              <Sparkles size={14} /> Run Today's Queue
+            </button>
           </div>
-
         </div>
+
+        {/* Right: sticky ActivityFeed (280px) */}
+        <div
+          className="w-[280px] flex-shrink-0 rounded-xl overflow-hidden"
+          style={{
+            backgroundColor: '#fff',
+            border: '1px solid rgba(0,0,0,0.07)',
+            height: 'calc(100vh - 180px)',
+            position: 'sticky',
+            top: 0,
+          }}
+        >
+          <ActivityFeed />
+        </div>
+
+      </div>
+
+      {/* ── Quick Links Row ─────────────────────────────────────────── */}
+      <QuickLinksRow />
+
     </div>
   );
 }

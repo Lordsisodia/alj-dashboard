@@ -81,6 +81,7 @@
     "reactflow": "^11.11.4",
     "reaviz": "^16.1.2",
     "recharts": "^3.8.1",
+    "replicate": "^1.4.0",
     "sharp": "^0.34.5",
     "simplex-noise": "^4.0.3",
     "sonner": "^2.0.7",

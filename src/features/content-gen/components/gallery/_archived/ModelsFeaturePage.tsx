@@ -1,3 +1,6 @@
+// ARCHIVED 2026-04-10 — absorbed into Gallery page. Kept for reference; do not delete.
+// Original location: src/features/content-gen/components/ModelsFeaturePage.tsx
+
 'use client';
 
 import { useState } from 'react';
@@ -10,8 +13,8 @@ import { SkeletonCard } from './SkeletonCard';
 import { EmptyState } from './EmptyState';
 import { ModelGrid } from './ModelGrid';
 import { ModelPanel } from './ModelPanel';
-import { FILTER_CHIPS } from '../constants';
-import type { ModelDoc, PanelState } from '../types';
+import { FILTER_CHIPS } from '../../constants';
+import type { ModelDoc, PanelState } from '../../types';
 
 export default function ContentGenModelsFeaturePage() {
   const models     = useQuery(api.models.list, {}) as ModelDoc[] | undefined;

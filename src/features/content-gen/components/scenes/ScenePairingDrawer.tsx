@@ -5,7 +5,7 @@ import {
   X, Upload, ImagePlus, Wand2, Play, AlertTriangle,
   CheckCircle2, Loader2, ChevronRight, Plus,
 } from 'lucide-react';
-import { useMutation } from 'convex/react';
+import { useMutation, useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { cn } from '@/lib/utils';
 import type { Doc, Id } from '@/convex/_generated/dataModel';
@@ -60,15 +60,24 @@ export function ScenePairingDrawer({ scene, onClose }: Props) {
   const [uploading, setUploading]  = useState(false);
 
   const updateStartingImage = useMutation(api.scenes.updateStartingImage);
+  const dispatchKling = useAction(api.replicate.dispatchKlingJob);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     try {
-      // TODO: replace with R2/Convex storage upload when wired
-      const url = URL.createObjectURL(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/content-gen/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json();
       await updateStartingImage({ sceneId: scene._id, url, status: 'ready' });
+    } catch (err) {
+      console.error("Image upload error:", err);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -342,10 +351,26 @@ export function ScenePairingDrawer({ scene, onClose }: Props) {
 
           {isApprovedReady && (
             <button
-              disabled
-              title="Send to Generate - wired in a future phase"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold opacity-50 cursor-not-allowed"
-              style={{ background: '#1a1a1a', color: '#fff' }}
+              onClick={async () => {
+                if (!scene || !scene.startingImageUrl || !scene.referenceVideoUrl) return;
+                const mode = (scene.provider === 'Kling' ? 'pro' : undefined) as 'pro' | 'std' | undefined;
+                await dispatchKling({
+                  sceneId: scene._id,
+                  modelName: scene.modelName,
+                  brief: scene.sceneDescription,
+                  provider: scene.provider as 'FLUX' | 'Kling' | 'Higgsfield',
+                  startingImageUrl: scene.startingImageUrl,
+                  referenceVideoUrl: scene.referenceVideoUrl,
+                  mode: mode ?? 'pro',
+                  characterOrientation: 'video',
+                  keepOriginalSound: false,
+                });
+                onClose();
+              }}
+              disabled={!scene?.startingImageUrl || !scene?.referenceVideoUrl}
+              title={!scene?.startingImageUrl ? "Upload starting image first" : !scene?.referenceVideoUrl ? "Upload reference video first" : "Send to Generate"}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              style={!scene?.startingImageUrl || !scene?.referenceVideoUrl ? { borderColor: 'rgba(0,0,0,0.09)' } : { background: 'linear-gradient(135deg, #10b981, #059669)' }}
             >
               Send to Generate
               <ChevronRight size={12} />

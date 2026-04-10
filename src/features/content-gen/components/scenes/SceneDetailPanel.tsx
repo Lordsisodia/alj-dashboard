@@ -5,7 +5,7 @@ import {
   X, Upload, ImagePlus, Wand2, Play, AlertTriangle,
   CheckCircle2, Loader2, ChevronRight, Plus, MousePointerClick,
 } from 'lucide-react';
-import { useMutation } from 'convex/react';
+import { useMutation, useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Doc, Id } from '@/convex/_generated/dataModel';
 import { PROVIDER_COLORS } from './types';
@@ -133,15 +133,24 @@ export function SceneDetailPanel({ scene, allScenes, allModels, onDeselect }: Pr
   const fileInputRef              = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const updateStartingImage       = useMutation(api.scenes.updateStartingImage);
+  const dispatchKling             = useAction(api.replicate.dispatchKlingJob);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !scene) return;
     setUploading(true);
     try {
-      // TODO: replace with R2/Convex storage when wired
-      const url = URL.createObjectURL(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/content-gen/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json();
       await updateStartingImage({ sceneId: scene._id, url, status: 'ready' });
+    } catch (err) {
+      console.error("Image upload error:", err);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -216,75 +225,27 @@ export function SceneDetailPanel({ scene, allScenes, allModels, onDeselect }: Pr
         </div>
       </div>
 
-      {/* ── Body — two columns ── */}
-      <div className="flex gap-4 p-4 flex-1 overflow-y-auto">
+      {/* ── Body — single column ── */}
+      <div className="flex flex-col gap-4 p-4 flex-1 overflow-y-auto">
 
-        {/* Left — brief + source card + video */}
-        <div className="flex flex-col gap-3 flex-1 min-w-0">
-
-          {/* Your brief */}
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: '#7c3aed' }}>
-              Your brief
+        {/* 1. Your brief */}
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: '#059669' }}>
+            Your brief
+          </p>
+          <div
+            className="px-3 py-2 rounded-xl"
+            style={{ background: '#ecfdf5', border: '1px solid #d1fae5' }}
+          >
+            <p className="text-[11px] font-medium text-violet-900 leading-snug">
+              {scene.sceneDescription || 'No description'}
             </p>
-            <div
-              className="px-3 py-2 rounded-xl"
-              style={{ background: '#faf5ff', border: '1px solid #ede9fe' }}
-            >
-              <p className="text-[11px] font-medium text-violet-900 leading-snug">
-                {scene.sceneDescription || 'No description'}
-              </p>
-            </div>
-          </div>
-
-          {/* Original reel — imported analysis card */}
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-1.5">
-              Original reel
-            </p>
-            <ImportedReferenceCard scene={scene} />
-          </div>
-
-          {/* Reference video */}
-          <div>
-            <div className="flex justify-center">
-              <div
-                className="rounded-2xl overflow-hidden bg-neutral-900"
-                style={{ aspectRatio: '9/16', width: '100%', maxWidth: 160 }}
-              >
-                {scene.referenceVideoUrl ? (
-                  <video
-                    src={scene.referenceVideoUrl}
-                    className="w-full h-full object-cover"
-                    autoPlay loop muted playsInline controls
-                  />
-                ) : scene.referenceThumbnailUrl ? (
-                  <div className="relative w-full h-full">
-                    <img
-                      src={scene.referenceThumbnailUrl}
-                      alt="Reference"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <Play size={13} className="text-white fill-white ml-0.5" />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-neutral-800">
-                    <Play size={16} className="text-neutral-600" />
-                    <span className="text-[10px] text-neutral-500">No video yet</span>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Right — starting image */}
-        <div className="flex flex-col gap-3 flex-1 min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">
+        {/* 2. Starting Image */}
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-1.5">
             Starting Image
           </p>
 
@@ -292,7 +253,7 @@ export function SceneDetailPanel({ scene, allScenes, allModels, onDeselect }: Pr
           <div className="flex justify-center">
             <div
               className="rounded-2xl overflow-hidden"
-              style={{ aspectRatio: '9/16', width: '100%', maxWidth: 160 }}
+              style={{ aspectRatio: '9/16', width: '100%', maxWidth: 200 }}
             >
               {imgStatus === 'ready' && scene.startingImageUrl ? (
                 <img src={scene.startingImageUrl} alt="Starting" className="w-full h-full object-cover" />
@@ -341,8 +302,8 @@ export function SceneDetailPanel({ scene, allScenes, allModels, onDeselect }: Pr
 
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)' }} />
 
-          {/* Generate section */}
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">
+          {/* Generate from Reference stub */}
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mt-3">
             Generate from Reference
           </p>
           <p className="text-[11px] text-neutral-400 leading-relaxed">
@@ -368,12 +329,54 @@ export function SceneDetailPanel({ scene, allScenes, allModels, onDeselect }: Pr
             disabled
             title="Coming soon"
             className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold opacity-40 cursor-not-allowed"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff' }}
+            style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff' }}
           >
             <Wand2 size={11} />
             Generate from reference
           </button>
         </div>
+
+        {/* 3. Original Reel */}
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-1.5">
+            Original reel
+          </p>
+          <div className="flex justify-center">
+            <div
+              className="rounded-2xl overflow-hidden bg-neutral-900"
+              style={{ aspectRatio: '9/16', width: '100%', maxWidth: 200 }}
+            >
+              {scene.referenceVideoUrl ? (
+                <video
+                  src={scene.referenceVideoUrl}
+                  className="w-full h-full object-cover"
+                  autoPlay loop muted playsInline controls
+                />
+              ) : scene.referenceThumbnailUrl ? (
+                <div className="relative w-full h-full">
+                  <img
+                    src={scene.referenceThumbnailUrl}
+                    alt="Reference"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Play size={13} className="text-white fill-white ml-0.5" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-neutral-800">
+                  <Play size={16} className="text-neutral-600" />
+                  <span className="text-[10px] text-neutral-500">No video yet</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Analysis */}
+        <ImportedReferenceCard scene={scene} />
       </div>
 
       {/* ── Footer ── */}
@@ -385,10 +388,25 @@ export function SceneDetailPanel({ scene, allScenes, allModels, onDeselect }: Pr
 
         {isReadyToGen && (
           <button
-            disabled
-            title="Send to Generate - wired in a future phase"
-            className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold opacity-50 cursor-not-allowed"
-            style={{ background: '#1a1a1a', color: '#fff' }}
+            onClick={async () => {
+              if (!scene || !scene.startingImageUrl || !scene.referenceVideoUrl) return;
+              const mode = (scene.provider === 'Kling' ? 'pro' : undefined) as 'pro' | 'std' | undefined;
+              await dispatchKling({
+                sceneId: scene._id,
+                modelName: scene.modelName,
+                brief: scene.sceneDescription,
+                provider: scene.provider as 'FLUX' | 'Kling' | 'Higgsfield',
+                startingImageUrl: scene.startingImageUrl,
+                referenceVideoUrl: scene.referenceVideoUrl,
+                mode: mode ?? 'pro',
+                characterOrientation: 'video',
+                keepOriginalSound: false,
+              });
+            }}
+            disabled={!scene?.startingImageUrl || !scene?.referenceVideoUrl}
+            title={!scene?.startingImageUrl ? "Upload starting image first" : !scene?.referenceVideoUrl ? "Upload reference video first" : "Send to Generate"}
+            className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            style={!scene?.startingImageUrl || !scene?.referenceVideoUrl ? { borderColor: 'rgba(0,0,0,0.09)' } : { background: 'linear-gradient(135deg, #10b981, #059669)' }}
           >
             Send to Generate <ChevronRight size={12} />
           </button>
