@@ -3,15 +3,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, CheckCircle2, XCircle, Send, Clock } from 'lucide-react';
-import { PROVIDER_CFG } from '../queue/types';
-import type { HistoryJob, Outcome } from '../queue/types';
-
-const MODEL_COLOR: Record<string, string> = {
-  Tyler: '#f97316',
-  Ren:   '#14b8a6',
-  Ella:  '#3b82f6',
-  Amam:  '#f59e0b',
-};
+import { useMutation } from 'convex/react';
+import { PROVIDER_CFG, MODEL_HUE } from '../queue/types';
+import type { Outcome } from '../queue/types';
+import type { Doc } from '@/convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
 
 export function OutcomeOverlay({ outcome }: { outcome?: Outcome }) {
   if (!outcome || outcome === 'Pending Review') return null;
@@ -27,9 +23,10 @@ export function OutcomeOverlay({ outcome }: { outcome?: Outcome }) {
   );
 }
 
-export function GalleryCard({ job }: { job: HistoryJob }) {
+export function GalleryCard({ job }: { job: Doc<'contentGenJobs'> }) {
   const [hovered, setHovered] = useState(false);
-  const color  = MODEL_COLOR[job.modelName] ?? '#a78bfa';
+  const updateOutcome = useMutation(api.contentGen.updateOutcome);
+  const color  = MODEL_HUE[job.modelName] ?? '#a78bfa';
   const thumb  = job.thumbnailColor ?? '#888';
   const { bar } = PROVIDER_CFG[job.provider];
   const needsReview = !job.outcome || job.outcome === 'Pending Review';
@@ -53,9 +50,17 @@ export function GalleryCard({ job }: { job: HistoryJob }) {
           background: `linear-gradient(160deg, ${thumb}cc 0%, ${thumb}55 100%)`,
         }}
       >
-        <div className="w-10 h-10 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center">
-          <Play size={14} className="text-white ml-0.5" fill="white" />
-        </div>
+        {job.generatedVideoR2Url ? (
+          <video
+            src={job.generatedVideoR2Url}
+            className="absolute inset-0 w-full h-full object-cover"
+            poster={thumb}
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center">
+            <Play size={14} className="text-white ml-0.5" fill="white" />
+          </div>
+        )}
         <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ backgroundColor: bar }} />
         <OutcomeOverlay outcome={job.outcome} />
         {needsReview && (
@@ -74,18 +79,28 @@ export function GalleryCard({ job }: { job: HistoryJob }) {
               <button
                 className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[10px] font-semibold text-white hover:brightness-110 transition-all"
                 style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
+                onClick={() => updateOutcome({ jobId: job._id, outcome: 'Approved' })}
               >
                 <CheckCircle2 size={10} /> Approve
               </button>
               <button
-                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[10px] font-semibold text-white/90 hover:bg-white/20 transition-all"
-                style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)' }}
+                onClick={() => {
+                  if (job.generatedVideoR2Url) {
+                    // Open in new tab to download
+                    window.open(job.generatedVideoR2Url, '_blank');
+                  }
+                }}
+                disabled={!job.generatedVideoR2Url}
+                title={job.generatedVideoR2Url ? "Download video" : "Waiting for generation"}
+                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[10px] font-semibold text-white hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: 'rgba(16, 185, 129, 0.8)', border: '1px solid rgba(16, 185, 129, 0.3)' }}
               >
                 <Send size={10} /> Send
               </button>
               <button
                 className="w-8 flex items-center justify-center py-1.5 rounded-xl hover:bg-white/20 transition-all"
                 style={{ backgroundColor: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.15)' }}
+                onClick={() => updateOutcome({ jobId: job._id, outcome: 'Rejected' })}
               >
                 <XCircle size={10} className="text-white/70" />
               </button>

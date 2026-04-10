@@ -27,6 +27,7 @@ import type * as intelligenceNode from "../intelligenceNode.js";
 import type * as issues from "../issues.js";
 import type * as mediaUploads from "../mediaUploads.js";
 import type * as models from "../models.js";
+import type * as replicate from "../replicate.js";
 import type * as routines from "../routines.js";
 import type * as scenes from "../scenes.js";
 import type * as scraperImport from "../scraperImport.js";
@@ -59,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   issues: typeof issues;
   mediaUploads: typeof mediaUploads;
   models: typeof models;
+  replicate: typeof replicate;
   routines: typeof routines;
   scenes: typeof scenes;
   scraperImport: typeof scraperImport;

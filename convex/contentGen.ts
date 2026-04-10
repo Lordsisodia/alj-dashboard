@@ -1,4 +1,5 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
 // ── List generation jobs (ideas table, content-gen origin tagged by campaign prefix) ──
@@ -38,31 +39,54 @@ export const getStats = query({
   },
 });
 
-// ── Create a new generation job ───────────────────────────────────────────────
+// ── Create a new manual generation job (bypasses scenes) ──────────────────────
 
-export const createJob = mutation({
+export const createManualJob = mutation({
   args: {
-    modelId:   v.id("models"),
+    modelName: v.string(),
     brief:     v.string(),
-    generator: v.union(v.literal("flux"), v.literal("kling"), v.literal("higgsfield")),
-    style:     v.string(),
-    niche:     v.string(),
+    provider:  v.union(v.literal("FLUX"), v.literal("Kling"), v.literal("Higgsfield")),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("ideas", {
-      modelId:           args.modelId,
-      hook:              args.brief,
-      style:             args.style,
-      niche:             args.niche,
-      campaign:          `gen:${args.generator}`,   // tag + encode generator
-      steps:             [],
-      camera:            "",
-      onScreenText:      "",
-      endShot:           "",
-      captionSuggestion: "",
-      hashtags:          [],
-      status:            "generating",
+    return await ctx.db.insert("contentGenJobs", {
+      name: `MANUAL-${args.provider}-${Date.now().toString().slice(-4)}`,
+      modelName: args.modelName,
+      scene: args.brief,
+      provider: args.provider,
+      status: "Queued",
+      etaSeconds: 300,
+      createdAt: Date.now(),
     });
+  },
+});
+
+// ── Dispatch a scene job ───────────────────────────────────────────────────────
+
+export const dispatchJob = mutation({
+  args: {
+    sceneId:   v.id("scenes"),
+    modelName: v.string(),
+    sceneDesc: v.string(),
+    provider:  v.union(v.literal("FLUX"), v.literal("Kling"), v.literal("Higgsfield")),
+  },
+  handler: async (ctx, args) => {
+    const jobId = await ctx.db.insert("contentGenJobs", {
+      name: `SCENE-${args.provider}-${Date.now().toString().slice(-4)}`,
+      modelName: args.modelName,
+      scene: args.sceneDesc,
+      provider: args.provider,
+      status: "Queued",
+      etaSeconds: 300,
+      createdAt: Date.now(),
+    });
+    
+    // update the scene
+    await ctx.db.patch(args.sceneId, {
+      generatedJobId: jobId,
+      status: "Generating",
+    });
+    
+    return jobId;
   },
 });
 
@@ -260,5 +284,202 @@ export const seedJobs = mutation({
     });
 
     return { seeded: 6 };
+  },
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Phase 3.1 — Internal mutations for Replicate / Kling integration
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ── a) Insert a Queued contentGenJobs row from a Replicate dispatch ──────────
+
+export const internalCreateJobFromReplicate = internalMutation({
+  args: {
+    modelName:            v.string(),
+    brief:                v.string(),
+    provider:             v.union(v.literal("FLUX"), v.literal("Kling"), v.literal("Higgsfield")),
+    sceneId:              v.optional(v.id("scenes")),
+    mode:                 v.union(v.literal("std"), v.literal("pro")),
+    characterOrientation: v.union(v.literal("image"), v.literal("video")),
+    keepOriginalSound:    v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const jobId = await ctx.db.insert("contentGenJobs", {
+      name:                 `KLING-${args.mode.toUpperCase()}-${Date.now().toString().slice(-6)}`,
+      modelName:            args.modelName,
+      scene:                args.brief,
+      provider:             args.provider,
+      status:               "Queued",
+      progress:             0,
+      mode:                 args.mode,
+      characterOrientation: args.characterOrientation,
+      keepOriginalSound:    args.keepOriginalSound,
+      createdAt:            Date.now(),
+    });
+
+    // Link the scene to the job if provided
+    if (args.sceneId) {
+      await ctx.db.patch(args.sceneId, {
+        generatedJobId: jobId,
+        status: "Generating",
+      });
+    }
+
+    return jobId;
+  },
+});
+
+// ── b) Attach Replicate prediction ID to an existing job row ────────────────
+
+export const internalAttachPrediction = internalMutation({
+  args: {
+    jobId:                 v.id("contentGenJobs"),
+    replicatePredictionId: v.string(),
+  },
+  handler: async (ctx, { jobId, replicatePredictionId }) => {
+    await ctx.db.patch(jobId, { replicatePredictionId });
+  },
+});
+
+// ── c) Map Replicate webhook status to our schema ───────────────────────────
+
+export const internalUpdateFromWebhook = internalMutation({
+  args: {
+    jobId:            v.id("contentGenJobs"),
+    replicateStatus:  v.string(),
+    logs:             v.optional(v.string()),
+    output:           v.optional(v.string()),
+    error:            v.optional(v.string()),
+    metrics:          v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const job = await ctx.db.get(args.jobId);
+    if (!job) return;
+
+    const patch: Record<string, unknown> = {};
+
+    // Store logs (truncate to 2000 chars)
+    if (args.logs) {
+      patch.replicateLogs = args.logs.slice(0, 2000);
+    }
+
+    switch (args.replicateStatus) {
+      case "starting":
+        patch.status = "Generating";
+        patch.startedAt = Date.now();
+        break;
+
+      case "processing":
+        patch.status = "Generating";
+        if (args.metrics && typeof args.metrics === "object" && "predict_progress" in args.metrics) {
+          const prog = Number(args.metrics.predict_progress);
+          if (!isNaN(prog)) patch.progress = Math.round(prog * 100);
+        }
+        break;
+
+      case "succeeded":
+        // Stay "Generating" until downloadToR2 calls internalMarkDone.
+        // Store ephemeral URL for reference.
+        if (args.output) {
+          patch.generatedVideoUrl = args.output;
+        }
+        break;
+
+      case "failed":
+      case "canceled":
+        patch.status = "Failed";
+        patch.errorMessage = args.error ?? (args.replicateStatus === "canceled" ? "canceled" : "unknown error");
+        break;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await ctx.db.patch(args.jobId, patch as any);
+  },
+});
+
+// ── Public thin wrapper so webhook route (ConvexHttpClient) can call it ─────
+
+export const updateFromWebhookPublic = mutation({
+  args: {
+    jobId:            v.id("contentGenJobs"),
+    replicateStatus:  v.string(),
+    logs:             v.optional(v.string()),
+    output:           v.optional(v.string()),
+    error:            v.optional(v.string()),
+    metrics:          v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    // Delegate to the internal mutation logic inline (can't call internal from mutation ctx)
+    const job = await ctx.db.get(args.jobId);
+    if (!job) return;
+
+    const patch: Record<string, unknown> = {};
+
+    if (args.logs) {
+      patch.replicateLogs = args.logs.slice(0, 2000);
+    }
+
+    switch (args.replicateStatus) {
+      case "starting":
+        patch.status = "Generating";
+        patch.startedAt = Date.now();
+        break;
+
+      case "processing":
+        patch.status = "Generating";
+        if (args.metrics && typeof args.metrics === "object" && "predict_progress" in args.metrics) {
+          const prog = Number(args.metrics.predict_progress);
+          if (!isNaN(prog)) patch.progress = Math.round(prog * 100);
+        }
+        break;
+
+      case "succeeded":
+        if (args.output) {
+          patch.generatedVideoUrl = args.output;
+        }
+        break;
+
+      case "failed":
+      case "canceled":
+        patch.status = "Failed";
+        patch.errorMessage = args.error ?? (args.replicateStatus === "canceled" ? "canceled" : "unknown error");
+        break;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await ctx.db.patch(args.jobId, patch as any);
+  },
+});
+
+// ── d) Finalise a completed job after R2 download ───────────────────────────
+
+export const internalMarkDone = internalMutation({
+  args: {
+    jobId:              v.id("contentGenJobs"),
+    generatedVideoR2Url: v.string(),
+    durationSec:        v.optional(v.number()),
+    costUsd:            v.optional(v.number()),
+    sceneId:            v.optional(v.id("scenes")),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.jobId, {
+      status:              "Done",
+      progress:            100,
+      completedAt:         Date.now(),
+      generatedVideoR2Url: args.generatedVideoR2Url,
+      durationSec:         args.durationSec,
+      costUsd:             args.costUsd,
+    });
+
+    // Also patch the parent scene if provided
+    if (args.sceneId) {
+      const scene = await ctx.db.get(args.sceneId);
+      if (scene) {
+        await ctx.db.patch(args.sceneId, {
+          generatedVideoUrl: args.generatedVideoR2Url,
+          status: "Done",
+        });
+      }
+    }
   },
 });

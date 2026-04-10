@@ -1,5 +1,8 @@
+// ARCHIVED 2026-04-10 — absorbed into Gallery page. Kept for reference; do not delete.
+// Original location: src/features/content-gen/components/EmptyState.tsx
+
 import { Plus, Sparkles } from 'lucide-react';
-import { GRAD } from '../constants';
+import { GRAD } from '../../constants';
 
 interface Props {
   onAdd: () => void;
