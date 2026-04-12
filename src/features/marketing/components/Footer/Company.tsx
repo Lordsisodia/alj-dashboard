@@ -51,7 +51,7 @@ export default function FooterCompany() {
 
         {/* G2 rating */}
         <a
-          href="https://www.g2.com/products/isso/reviews"
+          href="https://www.g2.com/products/content-gen/reviews"
           target="_blank"
           rel="noopener noreferrer"
           className="flex gap-3 items-center transition-opacity hover:opacity-80 no-underline"

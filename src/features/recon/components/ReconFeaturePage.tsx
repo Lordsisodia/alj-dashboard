@@ -184,7 +184,7 @@ export default function ReconFeaturePage() {
         ]}
         activeTab={activeTab}
         onTabChange={(id) => { const t = id as Tab; setActiveTab(t); try { localStorage.setItem('recon-active-tab', t); } catch {} setShowFavorites(false); setSelectedCreator(null); setSearchQuery(''); }}
-        nextProduct={{ label: 'Intelligence', icon: <ProductIcon product="intelligence" size={16} />, href: '/isso/intelligence' }}
+        nextProduct={{ label: 'Intelligence', icon: <ProductIcon product="intelligence" size={16} />, href: '/content-gen/intelligence' }}
         filterRightSlot={activeTab === 'qualify' ? (
           <div className="flex items-center gap-2">
             <button

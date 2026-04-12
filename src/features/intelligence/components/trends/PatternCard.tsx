@@ -39,7 +39,7 @@ function ExpandedPosts({ cluster }: { cluster: PatternCluster }) {
               </div>
             </div>
             <button
-              onClick={() => router.push(`/isso/ideas?${new URLSearchParams({ niche: p.niche, format: p.contentType, hook: p.hook, from: p.handle }).toString()}`)}
+              onClick={() => router.push(`/content-gen/ideas?${new URLSearchParams({ niche: p.niche, format: p.contentType, hook: p.hook, from: p.handle }).toString()}`)}
               className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-semibold text-white flex-shrink-0"
               style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
             >

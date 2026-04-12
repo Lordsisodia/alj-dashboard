@@ -27,7 +27,7 @@ export function IssoDetailSidebar() {
             {section.items.map((item) => {
               const isActive =
                 pathname === item.href ||
-                (item.href !== '/isso' && pathname.startsWith(item.href + '/'));
+                (item.href !== '/content-gen' && pathname.startsWith(item.href + '/'));
               return (
                 <Link
                   key={item.href + item.label}

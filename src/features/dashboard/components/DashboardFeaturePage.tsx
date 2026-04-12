@@ -87,7 +87,7 @@ export default function DashboardFeaturePage() {
         { id: 'approvals',   label: '2. Approvals',   icon: <CheckSquare size={13} /> },
         { id: 'swipe-rate',  label: '3. Swipe & Rate', icon: <Layers size={13} /> },
       ]}
-      nextProduct={{ label: 'Content Gen', icon: <Sparkles size={13} />, href: '/isso/ideas' }}
+      nextProduct={{ label: 'Content Gen', icon: <Sparkles size={13} />, href: '/content-gen/ideas' }}
       activeTab={activeTab}
       onTabChange={(id) => setActiveTab(id as Tab)}
       filterChips={[

@@ -38,7 +38,7 @@ function OutlierCard({ post, index }: { post: OutlierPost; index: number }) {
 
         {/* Brief CTA on hover */}
         <button
-          onClick={() => router.push(`/isso/ideas?${new URLSearchParams({ niche: post.niche, format: post.contentType, hook: post.hook.slice(0, 80) }).toString()}`)}
+          onClick={() => router.push(`/content-gen/ideas?${new URLSearchParams({ niche: post.niche, format: post.contentType, hook: post.hook.slice(0, 80) }).toString()}`)}
           className="absolute bottom-2 left-2 right-2 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[9px] font-semibold text-white opacity-0 group-hover:opacity-100 transition-opacity"
           style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
         >
