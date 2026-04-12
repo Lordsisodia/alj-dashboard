@@ -6,14 +6,14 @@ import { ISSO_NAV_CONFIG } from './sidebar-config';
 import { cn } from '@/lib/utils';
 
 const SECTION_ROUTES: Record<string, string[]> = {
-  home:         ['/isso'],
-  hub:          ['/isso/approvals', '/isso/schedule', '/isso/community', '/isso/analytics'],
-  briefs:       ['/isso/ideas', '/isso/content', '/isso/models'],
-  intelligence: ['/isso/intelligence'],
-  recon:        ['/isso/recon'],
-  'content-gen':['/isso/content-gen'],
-  agents:       ['/isso/agents'],
-  team:         ['/isso/team', '/isso/settings'],
+  home:         ['/content-gen'],
+  hub:          ['/content-gen/approvals', '/content-gen/schedule', '/content-gen/community', '/content-gen/analytics'],
+  briefs:       ['/content-gen/ideas', '/content-gen/content', '/content-gen/models'],
+  intelligence: ['/content-gen/intelligence'],
+  recon:        ['/content-gen/recon'],
+  'content-gen':['/content-gen/content-gen'],
+  agents:       ['/content-gen/agents'],
+  team:         ['/content-gen/team', '/content-gen/settings'],
 };
 
 export function IssoIconNav() {

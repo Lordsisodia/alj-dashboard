@@ -89,7 +89,7 @@ export function OverviewTab({ model, onTabChange }: { model: ModelData; onTabCha
           {/* Quick actions */}
           <div className="flex gap-2">
             <a
-              href="/isso/content-gen"
+              href="/content-gen/content-gen"
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold text-white transition-all hover:brightness-105 active:scale-[0.98]"
               style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
             >
@@ -105,7 +105,7 @@ export function OverviewTab({ model, onTabChange }: { model: ModelData; onTabCha
               Analytics
             </button>
             <a
-              href="/isso/schedule"
+              href="/content-gen/schedule"
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-colors"
               style={{ border: '1px solid rgba(0,0,0,0.09)', color: '#525252' }}
             >

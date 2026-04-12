@@ -29,13 +29,13 @@ export function ModelRosterCard({ model, index }: { model: ModelData; index: num
       whileHover={{ scale: 1.005, boxShadow: '0 6px 20px rgba(0,0,0,0.09)' }}
       className="rounded-xl overflow-hidden cursor-pointer"
       style={cardStyle}
-      onClick={() => router.push(`/isso/models/${model.id}`)}
+      onClick={() => router.push(`/content-gen/models/${model.id}`)}
     >
       <div style={contentStyle}>
         <CardBandA model={model} health={health} />
         <CardBandB model={model} health={health} />
         <CardBandC model={model} />
-        <CardBandD model={model} health={health} onNavigate={() => router.push(`/isso/models/${model.id}`)} />
+        <CardBandD model={model} health={health} onNavigate={() => router.push(`/content-gen/models/${model.id}`)} />
       </div>
     </motion.div>
   );

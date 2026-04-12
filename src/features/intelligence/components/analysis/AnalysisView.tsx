@@ -220,7 +220,7 @@ export function AnalysisView({ days, niche }: Props) {
                   <p className="text-[10px] text-neutral-400">Upload a video and get AI hook analysis</p>
                 </div>
                 <Link
-                  href="/isso/tools"
+                  href="/content-gen/tools"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-white shrink-0"
                   style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
                 >

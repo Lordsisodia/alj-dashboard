@@ -22,10 +22,10 @@ function QuickLinksRow() {
   const router = useRouter();
 
   const links = [
-    { icon: Brain, label: 'Scenes', href: '/isso/content-gen?tab=scenes' },
-    { icon: Sparkles, label: 'Generate', href: '/isso/content-gen?tab=generate' },
-    { icon: Image, label: 'Gallery', href: '/isso/content-gen?tab=gallery' },
-    { icon: BookOpen, label: 'Hub', href: '/isso/community' },
+    { icon: Brain, label: 'Scenes', href: '/content-gen/content-gen?tab=scenes' },
+    { icon: Sparkles, label: 'Generate', href: '/content-gen/content-gen?tab=generate' },
+    { icon: Image, label: 'Gallery', href: '/content-gen/content-gen?tab=gallery' },
+    { icon: BookOpen, label: 'Hub', href: '/content-gen/community' },
   ];
 
   return (
@@ -133,7 +133,7 @@ export default function DashboardFeaturePage() {
           {/* Run Today's Queue button */}
           <div style={{ width: 240 }}>
             <button
-              onClick={() => router.push('/isso/content-gen?tab=generate')}
+              onClick={() => router.push('/content-gen/content-gen?tab=generate')}
               className="w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-105"
               style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
             >

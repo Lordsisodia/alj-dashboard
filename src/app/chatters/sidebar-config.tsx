@@ -19,9 +19,9 @@ export const CHATTER_NAV_CONFIG: SectionConfig[] = [
         title: 'Inbox',
         hideTitle: true,
         items: [
-          { label: 'Inbox',     href: '/isso/chatter',           icon: <MessageSquare size={16} /> },
-          { label: 'Chatter',   href: '/isso/chatter/chatter',   icon: <MessageSquare size={16} /> },
-          { label: 'Templates', href: '/isso/chatter/chatter',   icon: <CheckSquare size={16} /> },
+          { label: 'Inbox',     href: '/chatters',           icon: <MessageSquare size={16} /> },
+          { label: 'Chatter',   href: '/chatters/chatter',   icon: <MessageSquare size={16} /> },
+          { label: 'Templates', href: '/chatters/chatter',   icon: <CheckSquare size={16} /> },
         ],
       },
     ],
@@ -37,7 +37,7 @@ export const CHATTER_NAV_CONFIG: SectionConfig[] = [
         title: 'Models',
         hideTitle: true,
         items: [
-          { label: 'Models', href: '/isso/chatter/models', icon: <Users2 size={16} /> },
+          { label: 'Models', href: '/chatters/models', icon: <Users2 size={16} /> },
         ],
       },
     ],
@@ -53,8 +53,8 @@ export const CHATTER_NAV_CONFIG: SectionConfig[] = [
         title: 'Activity',
         hideTitle: true,
         items: [
-          { label: 'Activity', href: '/isso/chatter/agents', icon: <Activity size={16} /> },
-          { label: 'Reports',  href: '/isso/chatter/agents', icon: <BarChart2 size={16} /> },
+          { label: 'Activity', href: '/chatters/agents', icon: <Activity size={16} /> },
+          { label: 'Reports',  href: '/chatters/agents', icon: <BarChart2 size={16} /> },
         ],
       },
     ],
@@ -62,6 +62,6 @@ export const CHATTER_NAV_CONFIG: SectionConfig[] = [
 ];
 
 export const CHATTER_PERSISTENT_NAV: NavItem[] = [
-  { label: 'Notifications', href: '/isso/chatter/notifications', icon: <Bell size={16} />, badge: 'dot' as const },
-  { label: 'Settings',      href: '/isso/chatter/settings',      icon: <Settings size={16} /> },
+  { label: 'Notifications', href: '/chatters/notifications', icon: <Bell size={16} />, badge: 'dot' as const },
+  { label: 'Settings',      href: '/chatters/settings',      icon: <Settings size={16} /> },
 ];

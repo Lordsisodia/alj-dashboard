@@ -48,7 +48,7 @@ export function ModelDetailPage({ modelId }: { modelId: string }) {
       <div className="flex-1 flex flex-col items-center justify-center gap-3 text-neutral-400">
         <p className="text-lg font-semibold text-neutral-700">Model not found</p>
         <button
-          onClick={() => router.push('/isso/models')}
+          onClick={() => router.push('/content-gen/models')}
           className="text-sm text-neutral-500 hover:text-neutral-700 underline"
         >
           Back to Models
@@ -65,7 +65,7 @@ export function ModelDetailPage({ modelId }: { modelId: string }) {
         style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}
       >
         <button
-          onClick={() => router.push('/isso/models')}
+          onClick={() => router.push('/content-gen/models')}
           className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-700 transition-colors flex-shrink-0"
         >
           <ArrowLeft size={13} />

@@ -50,7 +50,7 @@ export function RatedCard({ post, index }: Props) {
         </div>
 
         <button
-          onClick={() => router.push(`/isso/ideas?${buildBriefParams(post)}`)}
+          onClick={() => router.push(`/content-gen/ideas?${buildBriefParams(post)}`)}
           className="absolute bottom-2 left-2 right-2 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[9px] font-semibold text-white opacity-0 group-hover:opacity-100 transition-opacity"
           style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
         >

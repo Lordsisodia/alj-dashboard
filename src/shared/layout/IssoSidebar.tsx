@@ -18,19 +18,19 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard",    href: "/isso" },
-  { icon: Calendar,        label: "Schedule",     href: "/isso/schedule" },
-  { icon: Lightbulb,       label: "Ideas",        href: "/isso/ideas" },
-  { icon: Upload,          label: "Content",      href: "/isso/content" },
-  { icon: Users,           label: "Models",       href: "/isso/models" },
-  { icon: BarChart2,       label: "Analytics",    href: "/isso/analytics" },
-  { icon: CheckSquare,     label: "Approvals",    href: "/isso/approvals" },
-  { icon: Rss,             label: "Feed",         href: "/isso/community" },
-  { icon: Search,          label: "Intelligence", href: "/isso/intelligence" },
-  { icon: Radar,           label: "Recon",        href: "/isso/recon" },
-  { icon: Bot,             label: "Agents",       href: "/isso/agents" },
-  { icon: UserPlus,        label: "Team",         href: "/isso/team" },
-  { icon: Settings,        label: "Settings",     href: "/isso/settings" },
+  { icon: LayoutDashboard, label: "Dashboard",    href: "/content-gen" },
+  { icon: Calendar,        label: "Schedule",     href: "/content-gen/schedule" },
+  { icon: Lightbulb,       label: "Ideas",        href: "/content-gen/ideas" },
+  { icon: Upload,          label: "Content",      href: "/content-gen/content" },
+  { icon: Users,           label: "Models",       href: "/content-gen/models" },
+  { icon: BarChart2,       label: "Analytics",    href: "/content-gen/analytics" },
+  { icon: CheckSquare,     label: "Approvals",    href: "/content-gen/approvals" },
+  { icon: Rss,             label: "Feed",         href: "/content-gen/community" },
+  { icon: Search,          label: "Intelligence", href: "/content-gen/intelligence" },
+  { icon: Radar,           label: "Recon",        href: "/content-gen/recon" },
+  { icon: Bot,             label: "Agents",       href: "/content-gen/agents" },
+  { icon: UserPlus,        label: "Team",         href: "/content-gen/team" },
+  { icon: Settings,        label: "Settings",     href: "/content-gen/settings" },
 ];
 
 const ACCOUNTS = [
@@ -101,7 +101,7 @@ export function IssoSidebar({ showCollapseToggle = true }: IssoSidebarProps) {
 
       {/* Logo */}
       <Link
-        href="/isso"
+        href="/content-gen"
         className="flex items-center gap-2 px-4 py-5 border-b transition-all hover:opacity-80"
         style={{ borderColor: "rgba(255,255,255,0.06)" }}
       >

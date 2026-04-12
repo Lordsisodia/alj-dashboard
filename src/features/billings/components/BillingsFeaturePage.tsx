@@ -6,7 +6,7 @@ import {
   CreditCard, TrendingUp, DollarSign, Users,
   Calendar, CheckCircle2, Clock, AlertCircle,
 } from 'lucide-react';
-import { ContentPageShell } from '@/shared/layout/ContentPageShell';
+import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 import { cn } from '@/lib/utils';
 import {
   CHATTER_PAY, VA_PAY, TEAM_PAYROLL, PAY_HISTORY,

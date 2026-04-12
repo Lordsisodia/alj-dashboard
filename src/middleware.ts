@@ -3,24 +3,29 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // ── Role → domain redirect map ─────────────────────────────────────────────────
-// Route groups don't appear in URLs  -  a file at (agency)/page.tsx is just /isso
+// Route groups don't appear in URLs  -  a file at (agency)/page.tsx is just /agency
 const ROLE_DOMAINS: Record<string, string> = {
-  owner:   "/isso/owners",
-  editor:  "/isso/editors",
-  chatter: "/isso/chatter",
-  viewer:  "/isso",
-  agency:  "/isso",
+  owner:   "/agency",
+  editor:  "/models",
+  chatter: "/chatters",
+  viewer:  "/content-gen",
+  agency:  "/content-gen",
 };
 
 // ── Route matchers ─────────────────────────────────────────────────────────────
-const isProtected = createRouteMatcher(["/isso(.*)"]);
+const isProtected = createRouteMatcher([
+  "/content-gen(.*)",
+  "/chatters(.*)",
+  "/agency(.*)",
+  "/models(.*)",
+]);
 
 // Role-restricted domain routes
 const domainRoutes = createRouteMatcher([
-  "/isso/owners(.*)",
-  "/isso/editors(.*)",
-  "/isso/chatter(.*)",
-  "/isso/contentgen(.*)",
+  "/agency(.*)",
+  "/models(.*)",
+  "/chatters(.*)",
+  "/content-gen(.*)",
 ]);
 
 // Partner routes that should NOT be edge-cached
@@ -37,11 +42,11 @@ const DYNAMIC_PARTNER_ROUTES = [
 
 // Role-based access control map
 const ROLE_ALLOWED_DOMAINS: Record<string, string[]> = {
-  owner:   ["/isso/owners", "/isso"],
-  editor:  ["/isso/editors", "/isso", "/isso/contentgen"],
-  chatter: ["/isso/chatter", "/isso"],
-  viewer:  ["/isso"],
-  agency:  ["/isso", "/isso/contentgen"],
+  owner:   ["/agency", "/content-gen"],
+  editor:  ["/models", "/content-gen"],
+  chatter: ["/chatters", "/content-gen"],
+  viewer:  ["/content-gen"],
+  agency:  ["/content-gen"],
 };
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
@@ -59,7 +64,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   const authObj = await auth();
   const { userId, redirectToSignIn } = authObj;
 
-  // ── 1. Protect /isso/* routes ──────────────────────────────────────────────
+  // ── 1. Protect new dashboard routes ───────────────────────────────────────────
   if (isProtected(req) && !userId) {
     if (process.env.NODE_ENV !== "development") {
       return redirectToSignIn();
@@ -69,11 +74,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // @ts-expect-error - role may be on publicMetadata
   const role = (authObj?.publicMetadata?.role as string) || "agency";
 
-  // ── 2. Role-based redirect on first access to /isso ─────────────────────────
-  if (userId && method === "GET" && (path === "/isso" || path === "/isso/")) {
-    const redirectTo = ROLE_DOMAINS[role] || "/isso";
-    // Only redirect if target differs from /isso to avoid infinite loop
-    if (redirectTo !== "/isso") {
+  // ── 2. Role-based redirect on first access to /content-gen ─────────────────────
+  if (userId && method === "GET" && (path === "/content-gen" || path === "/content-gen/")) {
+    const redirectTo = ROLE_DOMAINS[role] || "/content-gen";
+    // Only redirect if target differs from /content-gen to avoid infinite loop
+    if (redirectTo !== "/content-gen") {
       return NextResponse.redirect(new URL(redirectTo, req.url));
     }
   }
@@ -84,7 +89,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
     const isAllowed = allowed.some((prefix) => path.startsWith(prefix));
     if (!isAllowed) {
-      const redirectTo = ROLE_DOMAINS[role] || "/isso";
+      const redirectTo = ROLE_DOMAINS[role] || "/content-gen";
       return NextResponse.redirect(new URL(redirectTo, req.url));
     }
   }

@@ -68,7 +68,7 @@ export function OutlierCard({ post, rank, fullWidth = false, portrait = false }:
       whileHover={{ y: -2 }}
       transition={{ duration: 0.18 }}
     >
-      <Thumbnail post={post} rank={rank} hovered={hovered} portrait={portrait} onBrief={() => router.push(`/isso/ideas?${briefParams(post)}`)} />
+      <Thumbnail post={post} rank={rank} hovered={hovered} portrait={portrait} onBrief={() => router.push(`/content-gen/ideas?${briefParams(post)}`)} />
       <CardBody post={post} nicheColor={nicheColor} />
     </motion.div>
   );
