@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const OPENROUTER_API  = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL           = 'google/gemini-2.0-flash-001';
-export const PROMPT_VERSION = 'v1';
+const PROMPT_VERSION = 'v1';
 const MAX_VIDEO_BYTES = 15 * 1024 * 1024;
 
 function buildUserContent(post: {

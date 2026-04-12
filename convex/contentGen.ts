@@ -23,6 +23,21 @@ export const getJobs = query({
   },
 });
 
+// ── Fetch job details for notifications (webhook route) ───────────────────────
+
+export const getJobForNotification = query({
+  args: { jobId: v.id("contentGenJobs") },
+  handler: async (ctx, args) => {
+    const job = await ctx.db.get(args.jobId);
+    if (!job) return null;
+    return {
+      name: job.name,
+      modelName: job.modelName,
+      provider: job.provider,
+    };
+  },
+});
+
 // ── Stats for header pill ─────────────────────────────────────────────────────
 
 export const getStats = query({
@@ -169,18 +184,59 @@ export const retryJob = mutation({
       progress: undefined,
       errorMessage: undefined,
       etaSeconds: 300,
+      retryCount: ((job as any).retryCount ?? 0) + 1,
     });
   },
 });
 
-// ── Cancel a queued job ───────────────────────────────────────────────────────
+// ── Cancel a queued or generating job ────────────────────────────────────────
 
 export const cancelJob = mutation({
   args: { jobId: v.id("contentGenJobs") },
   handler: async (ctx, { jobId }) => {
     const job = await ctx.db.get(jobId);
-    if (!job || job.status !== "Queued") return;
-    await ctx.db.delete(jobId);
+    if (!job) return;
+    if (job.status === "Queued") {
+      // Queued jobs: just delete them (no work started)
+      await ctx.db.delete(jobId);
+    } else if (job.status === "Generating") {
+      // Generating jobs: mark as Failed with cancelledAt timestamp
+      // Full Replicate abort can come later when API key is available
+      await ctx.db.patch(jobId, {
+        status: "Failed",
+        errorMessage: "canceled",
+        cancelledAt: Date.now(),
+      });
+    }
+  },
+});
+
+// ── Submit a completed job for review (sets outcome + inserts approval record) ─
+
+export const submitForReview = mutation({
+  args: {
+    jobId: v.id("contentGenJobs"),
+  },
+  handler: async (ctx, { jobId }) => {
+    const job = await ctx.db.get(jobId);
+    if (!job || job.status !== "Done") return;
+
+    // Set outcome to Pending Review
+    await ctx.db.patch(jobId, { outcome: "Pending Review" });
+
+    // Insert into approvals table only if the job has a modelId
+    if (job.modelId) {
+      await ctx.db.insert("approvals", {
+        modelId: job.modelId,
+        accountHandle: job.modelName,
+        contentType: "Video",
+        caption: job.scene ?? "",
+        hashtags: [],
+        mediaUrl: job.generatedVideoR2Url ?? job.generatedVideoUrl,
+        submittedBy: "content-gen",
+        status: "pending",
+      });
+    }
   },
 });
 
@@ -196,7 +252,11 @@ export const updateOutcome = mutation({
     ),
   },
   handler: async (ctx, { jobId, outcome }) => {
-    await ctx.db.patch(jobId, { outcome });
+    const patch: Record<string, unknown> = { outcome };
+    if (outcome === 'Approved') {
+      patch.approvedAt = Date.now();
+    }
+    await ctx.db.patch(jobId, patch);
   },
 });
 

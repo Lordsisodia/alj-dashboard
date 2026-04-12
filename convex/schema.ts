@@ -382,10 +382,12 @@ export default defineSchema({
       v.literal("Rejected"),
       v.literal("Pending Review")
     )),
+    approvedAt:      v.optional(v.number()),   // set when approved
     completedAt:    v.optional(v.number()),
     durationSec:    v.optional(v.number()),
     thumbnailColor: v.optional(v.string()),   // hex placeholder until real thumb
     errorMessage:   v.optional(v.string()),
+    retryCount:     v.optional(v.number()),   // incremented on each retry
     createdAt:      v.number(),
     // ── Replicate / Kling integration (Phase 3.1) ──
     replicatePredictionId: v.optional(v.string()),
@@ -397,6 +399,7 @@ export default defineSchema({
     replicateLogs:         v.optional(v.string()),   // for debugging
     costUsd:               v.optional(v.number()),   // for dashboard metrics
     startedAt:             v.optional(v.number()),
+    cancelledAt:           v.optional(v.number()),
   }).index("by_status",  ["status"])
     .index("by_created", ["createdAt"])
     .index("by_model",   ["modelId"])
