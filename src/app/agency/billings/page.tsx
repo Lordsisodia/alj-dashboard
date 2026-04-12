@@ -1,5 +1,5 @@
-import BillingsFeaturePage from '@/features/billings/components/BillingsFeaturePage';
+import { AgencyBillingsPage } from '@/features/agency/billings/components';
 
 export default function OwnersBillingsPage() {
-  return <BillingsFeaturePage />;
+  return <AgencyBillingsPage />;
 }

@@ -1,16 +1,15 @@
 'use client';
 
 import {
-  LayoutDashboard, TrendingUp, BarChart2, Users2,
-  Calendar, UserPlus, DollarSign, Shield, Lightbulb,
-  CreditCard,
+  LayoutDashboard, TrendingUp, Briefcase, Users2,
+  Calendar, Settings, CreditCard, UserPlus, UserCheck,
+  CheckSquare, MessageSquare,
 } from 'lucide-react';
 import type { SectionConfig, NavItem } from '@/shared/layout/isso-sidebar/sidebar-config';
 
-// Owners domain - P&L, KPIs, and oversight focused
 export const OWNERS_NAV_CONFIG: SectionConfig[] = [
   {
-    id: 'dashboard',
+    id: 'overview',
     label: 'Overview',
     description: 'P&L summary, KPIs, and team health.',
     hotkey: '⌘1',
@@ -21,25 +20,27 @@ export const OWNERS_NAV_CONFIG: SectionConfig[] = [
         hideTitle: true,
         items: [
           { label: 'Dashboard',  href: '/agency',             icon: <LayoutDashboard size={16} /> },
-          { label: 'P&L Report', href: '/agency/reports',      icon: <DollarSign size={16} /> },
-          { label: 'Billings',  href: '/agency/billings',     icon: <CreditCard size={16} /> },
+          { label: 'Analytics',  href: '/agency/analytics',   icon: <TrendingUp size={16} /> },
+          { label: 'Billings',   href: '/agency/billings',    icon: <CreditCard size={16} /> },
         ],
       },
     ],
   },
   {
-    id: 'analytics',
-    label: 'Analytics',
-    description: 'Revenue and performance metrics.',
+    id: 'operations',
+    label: 'Operations',
+    description: 'Models, staff, and recruitment.',
     hotkey: '⌘2',
-    icon: <TrendingUp size={20} />,
+    icon: <Briefcase size={20} />,
     sections: [
       {
-        title: 'Analytics',
+        title: 'Operations',
         hideTitle: true,
         items: [
-          { label: 'Overview', href: '/agency/analytics', icon: <TrendingUp size={16} /> },
-          { label: 'Revenue',  href: '/agency/analytics', icon: <DollarSign size={16} /> },
+          { label: 'Models',      href: '/agency/models',          icon: <Users2 size={16} /> },
+          { label: 'Staff',       href: '/agency/staff',           icon: <UserCheck size={16} /> },
+          { label: 'Tasks',       href: '/agency/staff/tasks',     icon: <CheckSquare size={16} /> },
+          { label: 'Recruitment', href: '/agency/recruitment',     icon: <UserPlus size={16} /> },
         ],
       },
     ],
@@ -47,7 +48,7 @@ export const OWNERS_NAV_CONFIG: SectionConfig[] = [
   {
     id: 'team',
     label: 'Team',
-    description: 'Team performance and management.',
+    description: 'Team management and communications.',
     hotkey: '⌘3',
     icon: <Users2 size={20} />,
     sections: [
@@ -55,25 +56,8 @@ export const OWNERS_NAV_CONFIG: SectionConfig[] = [
         title: 'Team',
         hideTitle: true,
         items: [
-          { label: 'Overview', href: '/agency/team',  icon: <Users2 size={16} /> },
-          { label: 'Members',  href: '/agency/team',  icon: <UserPlus size={16} /> },
-          { label: 'Roles',    href: '/agency/team',  icon: <Shield size={16} /> },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ideas',
-    label: 'Ideas',
-    description: 'Content pipeline and briefs.',
-    hotkey: '⌘4',
-    icon: <Lightbulb size={20} />,
-    sections: [
-      {
-        title: 'Ideas',
-        hideTitle: true,
-        items: [
-          { label: 'Briefs', href: '/agency/ideas', icon: <Lightbulb size={16} /> },
+          { label: 'Team',  href: '/agency/team',  icon: <Users2 size={16} /> },
+          { label: 'Comms', href: '/agency/comms', icon: <MessageSquare size={16} /> },
         ],
       },
     ],
@@ -82,6 +66,5 @@ export const OWNERS_NAV_CONFIG: SectionConfig[] = [
 
 export const OWNERS_PERSISTENT_NAV: NavItem[] = [
   { label: 'Schedule', href: '/agency/schedule', icon: <Calendar size={16} /> },
-  { label: 'Models',  href: '/agency/models',  icon: <Users2 size={16} /> },
-  { label: 'Settings', href: '/agency/settings', icon: <Shield size={16} /> },
+  { label: 'Settings', href: '/agency/settings', icon: <Settings size={16} /> },
 ];

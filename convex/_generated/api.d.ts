@@ -19,6 +19,7 @@ import type * as contentGen from "../contentGen.js";
 import type * as costs from "../costs.js";
 import type * as creatorBriefs from "../creatorBriefs.js";
 import type * as featureRequests from "../featureRequests.js";
+import type * as feedback from "../feedback.js";
 import type * as hub from "../hub.js";
 import type * as insights from "../insights.js";
 import type * as insightsSeed from "../insightsSeed.js";
@@ -31,6 +32,7 @@ import type * as replicate from "../replicate.js";
 import type * as routines from "../routines.js";
 import type * as scenes from "../scenes.js";
 import type * as scraperImport from "../scraperImport.js";
+import type * as startingImage from "../startingImage.js";
 import type * as toolAnalyses from "../toolAnalyses.js";
 import type * as trackedAccounts from "../trackedAccounts.js";
 
@@ -52,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   costs: typeof costs;
   creatorBriefs: typeof creatorBriefs;
   featureRequests: typeof featureRequests;
+  feedback: typeof feedback;
   hub: typeof hub;
   insights: typeof insights;
   insightsSeed: typeof insightsSeed;
@@ -64,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   routines: typeof routines;
   scenes: typeof scenes;
   scraperImport: typeof scraperImport;
+  startingImage: typeof startingImage;
   toolAnalyses: typeof toolAnalyses;
   trackedAccounts: typeof trackedAccounts;
 }>;

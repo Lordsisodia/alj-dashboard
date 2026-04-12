@@ -221,6 +221,41 @@ export function IssoSidebarShell({ config }: { config?: SidebarConfig }) {
       {/* ── Detail panel (hidden when collapsed) ── */}
       {!collapsed && (
         <>
+          {/* Active section nav items */}
+          {activeConfig && activeConfig.sections.map((section) => (
+            <div key={section.title} className="px-3 mb-1 flex-shrink-0">
+              <div className="h-px w-full mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />
+              {!section.hideTitle && (
+                <p className="px-2 pb-1.5 text-[10px] uppercase tracking-[0.2em] text-neutral-600 select-none">{section.title}</p>
+              )}
+              <nav className="flex flex-col gap-0.5">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href + '/'));
+                  return (
+                    <Link
+                      key={item.href + item.label}
+                      href={item.href}
+                      className={cn(
+                        'group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all duration-150',
+                        isActive
+                          ? 'text-white bg-white/[0.08]'
+                          : 'text-neutral-500 hover:text-neutral-200 hover:bg-white/5'
+                      )}
+                    >
+                      <span className={cn(
+                        'flex-shrink-0 transition-colors',
+                        isActive ? 'text-[#ff0069]' : 'text-neutral-600 group-hover:text-neutral-400'
+                      )}>
+                        {item.icon}
+                      </span>
+                      <span className="truncate font-normal">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          ))}
+
           {/* Persistent nav links */}
           <div className="px-3 mb-1 flex-shrink-0">
             <div className="h-px w-full mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />

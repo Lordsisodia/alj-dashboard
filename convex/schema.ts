@@ -16,7 +16,8 @@ export default defineSchema({
     ofHandle: v.optional(v.string()),
     igHandle: v.optional(v.string()),
     avatarColor: v.string(),
-    avatarUrl: v.optional(v.string()),  // Real avatar photo URL (R2)
+    avatarUrl: v.optional(v.string()),        // Real avatar photo URL (R2)
+    referencePhotos: v.optional(v.array(v.string())), // Face reference photo URLs for FLUX
     active: v.boolean(),
     bio: v.optional(v.string()),
   }),
@@ -185,11 +186,29 @@ export default defineSchema({
   teamMembers: defineTable({
     name: v.string(),
     email: v.string(),
+    // Expanded role enum (R1, R6) — Part 3B addition
     role: v.union(
       v.literal("Admin"),
       v.literal("VA"),
-      v.literal("Editor")
+      v.literal("Editor"),
+      v.literal("Owner"),
+      v.literal("Partner"),
+      v.literal("MarketingManager"),
+      v.literal("Model"),
+      v.literal("Chatter"),
+      v.literal("Developer")
     ),
+    // Multiple roles per user (R3) — Part 3B addition
+    roles: v.optional(v.array(v.union(
+      v.literal("Owner"),
+      v.literal("Partner"),
+      v.literal("MarketingManager"),
+      v.literal("Editor"),
+      v.literal("VA"),
+      v.literal("Model"),
+      v.literal("Chatter"),
+      v.literal("Developer")
+    ))),
     status: v.union(
       v.literal("Online"),
       v.literal("Away"),
@@ -203,10 +222,16 @@ export default defineSchema({
       analytics: v.boolean(),
       manageTeam: v.boolean(),
       settings: v.boolean(),
+      canAssignRoles: v.optional(v.boolean()),  // only Owner can set true (R5) — Part 3B addition
     }),
     lastActive: v.optional(v.number()),
     inviteAccepted: v.boolean(),
     avatarColor: v.optional(v.string()),
+    // Hourly rate for shift cost calculation (A63) — Part 5B addition
+    hourlyRate: v.optional(v.number()),         // rate per hour in base currency units
+    hourlyRateCurrency: v.optional(v.string()), // ISO 4217: "THB", "GBP", "USD"
+    // Real-time presence heartbeat (A58) — Part 5C addition
+    lastHeartbeat: v.optional(v.number()),      // Unix ms — updated by client ping every ~30s
   }).index("by_email", ["email"]),
 
   // ── Activity log ──────────────────────────────────────────────────
@@ -223,7 +248,7 @@ export default defineSchema({
   trackedAccounts: defineTable({
     handle: v.string(),
     displayName: v.optional(v.string()),   // ownerFullName from scraper
-    platform: v.union(v.literal("instagram"), v.literal("tiktok")),
+    platform: v.union(v.literal("instagram"), v.literal("tiktok"), v.literal("twitter")),
     niche: v.string(),
     followerCount: v.number(),
     avatarUrl: v.optional(v.string()),
@@ -256,9 +281,12 @@ export default defineSchema({
     // computed score (persisted snapshot; live value lives in getCreatorStats)
     creatorScore:          v.optional(v.number()),
     creatorScoreUpdatedAt: v.optional(v.number()),
+    // links own accounts (isOwn=true) to model records (A18) — Part 3A addition
+    modelId:               v.optional(v.id("models")),
   }).index("by_handle", ["handle"])
     .index("by_status", ["status"])
-    .index("by_niche", ["niche"]),
+    .index("by_niche", ["niche"])
+    .index("by_model", ["modelId"]),
 
   // ── Scraped posts (Intelligence feed) ────────────────────────────
   scrapedPosts: defineTable({
@@ -461,6 +489,9 @@ export default defineSchema({
     generatedVideoUrl: v.optional(v.string()),  // mirrors contentGenJobs.generatedVideoR2Url for fast scene-list reads
     createdBy: v.optional(v.string()),
     createdAt: v.number(),
+    // ── Wizard state ──────────────────────────────────────────────────
+    wizardStep: v.optional(v.number()),                          // 1-4, persisted step
+    selectedReferencePhotoUrls: v.optional(v.array(v.string())), // model reference photos chosen in step 3
   })
     .index("by_status", ["status"])
     .index("by_approval", ["approvalState"])
@@ -844,5 +875,1325 @@ export default defineSchema({
     generatedAt:      v.number(),
   }).index('by_handle', ['handle'])
     .index('by_generated_at', ['generatedAt']),
+
+  // ── Agency Dashboard Pipeline Tables ──────────────────────────────────
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CONTENT PIPELINE TABLES (9 new tables)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // ── R&D Entries (content ideas backlog — the Sunday planning table) ──
+  rdEntries: defineTable({
+    // ── Identity
+    modelId: v.id("models"),
+    niche: v.string(),
+    theme: v.optional(v.string()),
+    category: v.optional(v.string()),
+
+    // ── Content
+    title: v.string(),
+    description: v.string(),
+    referenceReelUrl: v.optional(v.string()),
+    referencePostId: v.optional(v.id("scrapedPosts")),
+
+    // ── Source tracking
+    source: v.union(
+      v.literal("editor_sunday"),
+      v.literal("analytics"),
+      v.literal("model_swipe"),
+      v.literal("ai_suggestion"),
+      v.literal("manual")
+    ),
+
+    // ── Pipeline status
+    status: v.union(
+      v.literal("proposed"),
+      v.literal("approved"),
+      v.literal("assigned"),
+      v.literal("in_production"),
+      v.literal("completed"),
+      v.literal("rejected")
+    ),
+
+    // ── Approval
+    approvedBy: v.optional(v.string()),
+    approvedAt: v.optional(v.number()),
+    rejectionReason: v.optional(v.string()),
+
+    // ── Performance feedback loop
+    performanceTags: v.optional(v.array(v.string())),
+    linkedPostAnalysisId: v.optional(v.id("postAnalyses")),
+    engagementRate: v.optional(v.number()),
+    viewCount: v.optional(v.number()),
+
+    // ── Duplicate detection
+    contentHash: v.optional(v.string()),
+
+    // ── Priority & ordering
+    priorityScore: v.optional(v.number()),
+
+    // ── CapCut template linkage (E10) — Part 3F addition
+    capCutTemplateId: v.optional(v.id("capCutTemplates")),
+
+    // ── Metadata
+    createdBy: v.optional(v.string()),
+    contentRequestId: v.optional(v.id("contentRequests")),
+    createdAt: v.number(),
+  })
+    .index("by_model", ["modelId"])
+    .index("by_status", ["status"])
+    .index("by_model_status", ["modelId", "status"])
+    .index("by_source", ["source"])
+    .index("by_created", ["createdAt"])
+    .index("by_niche", ["niche"])
+    .searchIndex("search_rd", {
+      searchField: "description",
+      filterFields: ["niche", "status", "modelId"],
+    }),
+
+
+  // ── Content Requests (briefs sent to models) ─────────────────────────
+  contentRequests: defineTable({
+    // ── Identity
+    modelId: v.id("models"),
+    rdEntryId: v.optional(v.id("rdEntries")),
+
+    // ── Brief content
+    title: v.string(),
+    instructions: v.string(),
+    tips: v.optional(v.string()),
+    briefVideoUrl: v.optional(v.string()),
+    briefThumbnailUrl: v.optional(v.string()),
+
+    // ── Niche denormalisation (E3 — editor queue filter) — Part 3D addition
+    niche: v.optional(v.string()),
+
+    // ── Deadline & tracking
+    deadline: v.optional(v.number()),
+    reminderSentAt: v.optional(v.number()),
+
+    // ── Model response
+    status: v.union(
+      v.literal("draft"),
+      v.literal("sent"),
+      v.literal("acknowledged"),
+      v.literal("in_progress"),
+      v.literal("uploaded"),
+      v.literal("overdue"),
+      v.literal("cancelled")
+    ),
+    uploadedClipUrl: v.optional(v.string()),
+    googleDriveFileId: v.optional(v.string()),
+    uploadedAt: v.optional(v.number()),
+
+    // ── Gamification
+    pointsAwarded: v.optional(v.number()),
+    submittedEarly: v.optional(v.boolean()),
+
+    // ── Metadata
+    sentBy: v.optional(v.string()),
+    sentAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_model", ["modelId"])
+    .index("by_status", ["status"])
+    .index("by_model_status", ["modelId", "status"])
+    .index("by_deadline", ["deadline"])
+    .index("by_niche", ["niche"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Reels (edited content — master record per piece) ─────────────────
+  reels: defineTable({
+    // ── Identity
+    modelId: v.id("models"),
+    editorId: v.optional(v.id("teamMembers")),
+    contentRequestId: v.optional(v.id("contentRequests")),
+    rdEntryId: v.optional(v.id("rdEntries")),
+
+    // ── Content metadata
+    title: v.string(),
+    description: v.optional(v.string()),
+    niche: v.string(),
+    category: v.optional(v.string()),
+
+    // ── AI metadata
+    captionAI: v.optional(v.string()),
+    onScreenTextAI: v.optional(v.string()),
+    hookVariants: v.optional(v.array(v.string())),
+    suggestedHashtags: v.optional(v.array(v.string())),
+    viralityScore: v.optional(v.number()),
+
+    // ── Version tracking
+    currentVersion: v.number(),
+    latestVersionId: v.optional(v.id("reelVersions")),
+
+    // ── PTP status
+    ptpStatus: v.union(
+      v.literal("editing"),
+      v.literal("submitted"),
+      v.literal("approved"),
+      v.literal("revision"),
+      v.literal("scheduled")
+    ),
+    approvalId: v.optional(v.id("approvals")),
+    approvedBy: v.optional(v.string()),
+    approvedAt: v.optional(v.number()),
+    rejectionNote: v.optional(v.string()),
+    scheduledDate: v.optional(v.string()),
+
+    // ── Edit tracking
+    totalEditTimeSeconds: v.optional(v.number()),
+    editStartedAt: v.optional(v.number()),
+
+    // ── Storage
+    mediaUrl: v.optional(v.string()),
+    thumbnailUrl: v.optional(v.string()),
+    googleDriveUrl: v.optional(v.string()),
+
+    // ── Metadata
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_model", ["modelId"])
+    .index("by_editor", ["editorId"])
+    .index("by_ptp_status", ["ptpStatus"])
+    .index("by_model_ptp", ["modelId", "ptpStatus"])
+    .index("by_niche", ["niche"])
+    .index("by_created", ["createdAt"])
+    .index("by_updated", ["updatedAt"]),
+
+
+  // ── Reel Versions (V1, V2, V3... per reel) ──────────────────────────
+  reelVersions: defineTable({
+    // ── Identity
+    reelId: v.id("reels"),
+    versionNumber: v.number(),
+
+    // ── Media
+    mediaUrl: v.string(),
+    thumbnailUrl: v.optional(v.string()),
+    googleDriveUrl: v.optional(v.string()),
+    fileSizeBytes: v.optional(v.number()),
+
+    // ── AI metadata snapshot
+    captionAI: v.optional(v.string()),
+    onScreenTextAI: v.optional(v.string()),
+    viralityScore: v.optional(v.number()),
+
+    // ── Edit metadata
+    editTimeSeconds: v.optional(v.number()),
+    editorNotes: v.optional(v.string()),
+
+    // ── Review
+    status: v.union(
+      v.literal("uploaded"),
+      v.literal("submitted"),
+      v.literal("approved"),
+      v.literal("rejected")
+    ),
+    reviewedBy: v.optional(v.string()),
+    reviewedAt: v.optional(v.number()),
+    rejectionNote: v.optional(v.string()),
+
+    // ── Annotations (frame-accurate video annotation)
+    annotations: v.optional(v.array(v.object({
+      timestampSec: v.number(),
+      comment: v.string(),
+      authorName: v.string(),
+      createdAt: v.number(),
+    }))),
+
+    // ── Metadata
+    uploadedBy: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_reel", ["reelId"])
+    .index("by_reel_version", ["reelId", "versionNumber"])
+    .index("by_status", ["status"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Scheduled Posts (internal queue + Meta slot tracking) ─────────────
+  scheduledPosts: defineTable({
+    // ── Identity
+    modelId: v.id("models"),
+    reelId: v.optional(v.id("reels")),
+    approvalId: v.optional(v.id("approvals")),
+    scheduleId: v.optional(v.id("schedule")),
+    accountHandle: v.string(),
+
+    // ── Content
+    platform: v.union(
+      v.literal("instagram"),
+      v.literal("tiktok"),
+      v.literal("twitter"),
+      v.literal("onlyfans"),
+      v.literal("fansly")
+    ),
+    contentType: v.union(
+      v.literal("reel"),
+      v.literal("post"),
+      v.literal("story"),
+      v.literal("carousel")
+    ),
+    caption: v.optional(v.string()),
+    hashtags: v.optional(v.array(v.string())),
+    onScreenText: v.optional(v.string()),
+    mediaUrl: v.optional(v.string()),
+
+    // ── Scheduling
+    scheduledAt: v.number(),
+    bestTimeScore: v.optional(v.number()),
+
+    // ── Meta API slot tracking
+    metaSlotPosition: v.optional(v.number()),
+    metaMediaContainerId: v.optional(v.string()),
+    metaPostId: v.optional(v.string()),
+
+    // ── Duplicate detection (P16) — Part 3C addition
+    contentHash: v.optional(v.string()),
+
+    // ── Status
+    status: v.union(
+      v.literal("queued"),
+      v.literal("slot_assigned"),
+      v.literal("uploading_to_meta"),
+      v.literal("scheduled_meta"),
+      v.literal("published"),
+      v.literal("failed"),
+      v.literal("cancelled")
+    ),
+    errorMessage: v.optional(v.string()),
+    retryCount: v.optional(v.number()),
+
+    // ── SLA tracking
+    enteredQueueAt: v.optional(v.number()),
+    slotAssignedAt: v.optional(v.number()),
+    publishedAt: v.optional(v.number()),
+
+    // ── Metadata
+    scheduledBy: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_model", ["modelId"])
+    .index("by_status", ["status"])
+    .index("by_scheduled_at", ["scheduledAt"])
+    .index("by_model_platform", ["modelId", "platform"])
+    .index("by_platform_status", ["platform", "status"])
+    .index("by_account", ["accountHandle"])
+    .index("by_content_hash", ["contentHash"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Notifications (3-channel notification system) ────────────────────
+  notifications: defineTable({
+    // ── Recipient
+    recipientId: v.optional(v.id("teamMembers")),
+    recipientModelId: v.optional(v.id("models")),
+    recipientName: v.string(),
+
+    // ── Content
+    title: v.string(),
+    body: v.string(),
+    linkTo: v.optional(v.string()),
+
+    // ── Classification
+    type: v.union(
+      v.literal("content_request"),
+      v.literal("editing_task"),
+      v.literal("ptp_rejection"),
+      v.literal("ptp_submission"),
+      v.literal("model_uploaded"),
+      v.literal("shift_starting"),
+      v.literal("shift_late"),
+      v.literal("deadline_reminder"),
+      v.literal("approval_complete"),
+      v.literal("schedule_published"),
+      v.literal("gamification_milestone"),
+      v.literal("system"),
+      v.literal("digest")
+    ),
+    severity: v.union(
+      v.literal("high"),
+      v.literal("medium"),
+      v.literal("low")
+    ),
+
+    // ── Channel delivery status
+    channels: v.object({
+      inApp: v.boolean(),
+      push: v.boolean(),
+      telegram: v.boolean(),
+    }),
+    deliveredPush: v.optional(v.boolean()),
+    deliveredTelegram: v.optional(v.boolean()),
+
+    // ── Read status
+    isRead: v.boolean(),
+    readAt: v.optional(v.number()),
+
+    // ── Source reference
+    sourceTable: v.optional(v.string()),
+    sourceId: v.optional(v.string()),
+
+    // ── Send-time optimization (M50) — Part 3G addition
+    sendTimeOptimizationScore: v.optional(v.number()),
+    optimalSendAt: v.optional(v.number()),
+
+    // ── Metadata
+    sentAt: v.number(),
+    expiresAt: v.optional(v.number()),
+  })
+    .index("by_recipient", ["recipientId"])
+    .index("by_recipient_model", ["recipientModelId"])
+    .index("by_recipient_read", ["recipientId", "isRead"])
+    .index("by_type", ["type"])
+    .index("by_severity", ["severity"])
+    .index("by_sent_at", ["sentAt"]),
+
+
+  // ── Gamification Events (model points tracking) ──────────────────────
+  gamificationEvents: defineTable({
+    // ── Who
+    modelId: v.id("models"),
+
+    // ── What
+    action: v.union(
+      v.literal("swipe_right"),
+      v.literal("swipe_discard"),
+      v.literal("content_upload"),
+      v.literal("submit_early"),
+      v.literal("submit_on_time"),
+      v.literal("daily_target_hit"),
+      v.literal("weekly_target_hit"),
+      v.literal("stream_completed"),
+      v.literal("streak_day"),
+      v.literal("challenge_completed"),
+      v.literal("go_live"),
+      v.literal("pre_stream_checklist"),
+      v.literal("custom")
+    ),
+    points: v.number(),
+    multiplier: v.optional(v.number()),
+
+    // ── Context
+    description: v.optional(v.string()),
+    sourceTable: v.optional(v.string()),
+    sourceId: v.optional(v.string()),
+
+    // ── Challenge tracking
+    challengeId: v.optional(v.string()),
+    challengeWeek: v.optional(v.string()),
+
+    // ── Metadata
+    awardedBy: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_model", ["modelId"])
+    .index("by_model_action", ["modelId", "action"])
+    .index("by_model_created", ["modelId", "createdAt"])
+    .index("by_action", ["action"])
+    .index("by_created", ["createdAt"])
+    .index("by_challenge", ["challengeId"]),
+
+
+  // ── Shift Records (clock in/out tracking) ────────────────────────────
+  shiftRecords: defineTable({
+    // ── Who
+    userId: v.id("teamMembers"),
+
+    // ── Schedule reference
+    shiftScheduleId: v.optional(v.id("shiftSchedules")),
+    scheduledStart: v.optional(v.number()),
+    scheduledEnd: v.optional(v.number()),
+
+    // ── Actual times
+    actualStart: v.optional(v.number()),
+    actualEnd: v.optional(v.number()),
+
+    // ── Status
+    status: v.union(
+      v.literal("scheduled"),
+      v.literal("clocked_in"),
+      v.literal("on_time"),
+      v.literal("late"),
+      v.literal("early"),
+      v.literal("absent"),
+      v.literal("partial")
+    ),
+
+    // ── Lateness tracking
+    latenessMinutes: v.optional(v.number()),
+    deductionAmount: v.optional(v.number()),
+    deductionCurrency: v.optional(v.string()),
+
+    // ── Alerts
+    seniorAlertSent: v.optional(v.boolean()),
+
+    // ── Break tracking (A54) — Part 3H addition
+    breakMinutes: v.optional(v.number()),
+    breakCount: v.optional(v.number()),
+
+    // ── Notes
+    notes: v.optional(v.string()),
+
+    // ── Metadata
+    date: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_date", ["date"])
+    .index("by_user_date", ["userId", "date"])
+    .index("by_status", ["status"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Shift Schedules (who works when) ─────────────────────────────────
+  shiftSchedules: defineTable({
+    // ── Who
+    userId: v.id("teamMembers"),
+
+    // ── When
+    date: v.string(),
+    startTime: v.string(),
+    endTime: v.string(),
+
+    // ── Type
+    isDayOff: v.boolean(),
+    shiftType: v.optional(v.union(
+      v.literal("morning"),
+      v.literal("afternoon"),
+      v.literal("evening"),
+      v.literal("night"),
+      v.literal("split"),
+      v.literal("custom")
+    )),
+
+    // ── Swap workflow stub
+    swapRequestedWith: v.optional(v.id("teamMembers")),
+    swapStatus: v.optional(v.union(
+      v.literal("none"),
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("manager_approved"),
+      v.literal("rejected")
+    )),
+
+    // ── Cost tracking stub
+    estimatedCost: v.optional(v.number()),
+
+    // ── Recurrence support (A57) — Part 3E addition
+    recurrenceRule: v.optional(v.string()),
+    isRecurrenceInstance: v.optional(v.boolean()),
+    recurrenceParentId: v.optional(v.id("shiftSchedules")),
+
+    // ── Metadata
+    createdBy: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_date", ["date"])
+    .index("by_user_date", ["userId", "date"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // REMAINING TABLES (11 new tables — Part 2)
+  // ═══════════════════════════════════════════════════════════════════════
+
+
+  // ── Financial Records (Google Sheets mirror — P&L / Revenue / ROI) ──
+  financialRecords: defineTable({
+    // ── Classification
+    category: v.union(
+      v.literal("revenue"),
+      v.literal("payroll"),
+      v.literal("cost"),
+      v.literal("subscription"),
+      v.literal("model_cut")
+    ),
+    subcategory: v.optional(v.string()),
+
+    // ── Attribution
+    department: v.optional(v.string()),
+    staffUserId: v.optional(v.id("teamMembers")),
+    modelId: v.optional(v.id("models")),
+
+    // ── Financials
+    amount: v.number(),
+    currency: v.string(),
+    period: v.string(),
+    date: v.optional(v.string()),
+
+    // ── Projection
+    isProjected: v.optional(v.boolean()),
+    projectedAmount: v.optional(v.number()),
+
+    // ── Source tracking
+    source: v.union(
+      v.literal("sheets_sync"),
+      v.literal("manual"),
+      v.literal("api_sync"),
+      v.literal("computed")
+    ),
+    sheetsRowRef: v.optional(v.string()),
+    description: v.optional(v.string()),
+
+    // ── Sync metadata
+    syncedAt: v.optional(v.number()),
+    syncBatchId: v.optional(v.string()),
+
+    // ── Metadata
+    createdBy: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("by_category", ["category"])
+    .index("by_period", ["period"])
+    .index("by_category_period", ["category", "period"])
+    .index("by_department", ["department"])
+    .index("by_department_period", ["department", "period"])
+    .index("by_staff", ["staffUserId"])
+    .index("by_model", ["modelId"])
+    .index("by_model_period", ["modelId", "period"])
+    .index("by_source", ["source"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Webcam Sessions (streaming across 17 platforms) ─────────────────
+  webcamSessions: defineTable({
+    // ── Identity
+    modelId: v.id("models"),
+
+    // ── Platform
+    platform: v.string(),
+    accountHandle: v.optional(v.string()),
+    streamKeyId: v.optional(v.id("streamKeys")),
+
+    // ── Timing
+    startedAt: v.number(),
+    endedAt: v.optional(v.number()),
+    durationSeconds: v.optional(v.number()),
+    scheduledStartAt: v.optional(v.number()),
+
+    // ── Live status
+    isLive: v.boolean(),
+    streamUrl: v.optional(v.string()),
+
+    // ── Viewer metrics
+    viewerCount: v.optional(v.number()),
+    peakViewers: v.optional(v.number()),
+    avgViewers: v.optional(v.number()),
+
+    // ── Earnings
+    earnings: v.optional(v.number()),
+    earningsCurrency: v.optional(v.string()),
+    tipsCount: v.optional(v.number()),
+    topTipAmount: v.optional(v.number()),
+
+    // ── Post-stream summary
+    postStreamSummaryUrl: v.optional(v.string()),
+    postStreamSentAt: v.optional(v.number()),
+    postStreamSentTo: v.optional(v.string()),
+
+    // ── Pre-stream checklist
+    preStreamChecklistCompleted: v.optional(v.boolean()),
+    preStreamChecklistItems: v.optional(v.array(v.object({
+      label: v.string(),
+      completed: v.boolean(),
+    }))),
+
+    // ── Shift correlation
+    shiftScheduleId: v.optional(v.id("shiftSchedules")),
+
+    // ── Notes
+    notes: v.optional(v.string()),
+
+    // ── Metadata
+    createdAt: v.number(),
+  })
+    .index("by_model", ["modelId"])
+    .index("by_model_platform", ["modelId", "platform"])
+    .index("by_platform", ["platform"])
+    .index("by_started", ["startedAt"])
+    .index("by_model_started", ["modelId", "startedAt"])
+    .index("by_is_live", ["isLive"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Earnings Records (OF/Fans.ly model earnings) ────────────────────
+  earningsRecords: defineTable({
+    // ── Identity
+    modelId: v.id("models"),
+
+    // ── Platform & type
+    platform: v.union(
+      v.literal("onlyfans"),
+      v.literal("fansly"),
+      v.literal("webcam"),
+      v.literal("instagram"),
+      v.literal("tiktok"),
+      v.literal("other")
+    ),
+    contentType: v.optional(v.string()),
+    earningType: v.union(
+      v.literal("subscription"),
+      v.literal("tips"),
+      v.literal("ppv"),
+      v.literal("custom_content"),
+      v.literal("referral"),
+      v.literal("stream"),
+      v.literal("other")
+    ),
+
+    // ── Financials
+    grossAmount: v.number(),
+    netAmount: v.optional(v.number()),
+    currency: v.string(),
+    period: v.string(),
+
+    // ── Goal tracking
+    goalAmount: v.optional(v.number()),
+    goalCurrency: v.optional(v.string()),
+
+    // ── Payment tracking
+    paymentDate: v.optional(v.string()),
+    paymentStatus: v.optional(v.union(
+      v.literal("pending"),
+      v.literal("processing"),
+      v.literal("paid"),
+      v.literal("failed")
+    )),
+
+    // ── Source
+    source: v.union(
+      v.literal("api_sync"),
+      v.literal("manual"),
+      v.literal("sheets_sync")
+    ),
+    description: v.optional(v.string()),
+
+    // ── Metadata
+    recordedAt: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_model", ["modelId"])
+    .index("by_model_platform", ["modelId", "platform"])
+    .index("by_model_period", ["modelId", "period"])
+    .index("by_platform", ["platform"])
+    .index("by_period", ["period"])
+    .index("by_earning_type", ["earningType"])
+    .index("by_payment_status", ["paymentStatus"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Swipe Deck Items (model's daily content swipe queue) ────────────
+  swipeDeckItems: defineTable({
+    // ── Identity
+    modelId: v.id("models"),
+
+    // ── Source content
+    sourceType: v.union(
+      v.literal("scraped_post"),
+      v.literal("rd_entry"),
+      v.literal("ai_suggestion"),
+      v.literal("content_gen")
+    ),
+    sourceId: v.string(),
+    contentUrl: v.optional(v.string()),
+    thumbnailUrl: v.optional(v.string()),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+
+    // ── Content classification
+    niche: v.string(),
+    theme: v.optional(v.string()),
+
+    // ── Swipe action
+    action: v.union(
+      v.literal("pending"),
+      v.literal("saved"),
+      v.literal("make_now"),
+      v.literal("discarded")
+    ),
+    swipedAt: v.optional(v.number()),
+
+    // ── Daily drop tracking
+    droppedDate: v.string(),
+    dropPosition: v.optional(v.number()),
+
+    // ── Trend signals
+    isTrending: v.optional(v.boolean()),
+    trendScore: v.optional(v.number()),
+
+    // ── Conversion tracking
+    contentRequestId: v.optional(v.id("contentRequests")),
+    gamificationEventId: v.optional(v.string()),
+
+    // ── Metadata
+    createdAt: v.number(),
+  })
+    .index("by_model", ["modelId"])
+    .index("by_model_action", ["modelId", "action"])
+    .index("by_model_date", ["modelId", "droppedDate"])
+    .index("by_action", ["action"])
+    .index("by_dropped_date", ["droppedDate"])
+    .index("by_niche", ["niche"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Stream Keys (per-model per-platform OBS keys) ───────────────────
+  streamKeys: defineTable({
+    // ── Identity
+    modelId: v.id("models"),
+    platform: v.string(),
+
+    // ── Key data
+    keyEncrypted: v.string(),
+    keyHint: v.optional(v.string()),
+    serverUrl: v.optional(v.string()),
+
+    // ── Status
+    isActive: v.boolean(),
+    label: v.optional(v.string()),
+
+    // ── Usage tracking
+    lastUsedAt: v.optional(v.number()),
+    lastVerifiedAt: v.optional(v.number()),
+
+    // ── Metadata
+    createdBy: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("by_model", ["modelId"])
+    .index("by_model_platform", ["modelId", "platform"])
+    .index("by_active", ["isActive"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── User Preferences (per-user settings) ────────────────────────────
+  userPreferences: defineTable({
+    // ── Identity
+    userId: v.optional(v.id("teamMembers")),
+    modelId: v.optional(v.id("models")),
+
+    // ── Display preferences
+    language: v.string(),
+    timezone: v.string(),
+    dateFormat: v.optional(v.string()),
+    theme: v.optional(v.union(
+      v.literal("light"),
+      v.literal("dark"),
+      v.literal("system")
+    )),
+
+    // ── Notification preferences
+    notificationPrefs: v.object({
+      inAppEnabled: v.boolean(),
+      pushEnabled: v.boolean(),
+      telegramEnabled: v.boolean(),
+      telegramChatId: v.optional(v.string()),
+      digestMode: v.boolean(),
+      digestTime: v.optional(v.string()),
+      quietHoursStart: v.optional(v.string()),
+      quietHoursEnd: v.optional(v.string()),
+    }),
+
+    // ── Dashboard preferences
+    defaultView: v.optional(v.string()),
+    sidebarCollapsed: v.optional(v.boolean()),
+
+    // ── Metadata
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_model", ["modelId"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Challenges (weekly themed challenge definitions) ─────────────────
+  challenges: defineTable({
+    // ── Content
+    title: v.string(),
+    description: v.string(),
+    theme: v.optional(v.string()),
+
+    // ── Timing
+    week: v.string(),
+    startsAt: v.number(),
+    endsAt: v.number(),
+
+    // ── Target
+    targetAction: v.union(
+      v.literal("swipe_right"),
+      v.literal("content_upload"),
+      v.literal("submit_early"),
+      v.literal("stream_completed"),
+      v.literal("daily_target_hit"),
+      v.literal("go_live"),
+      v.literal("custom")
+    ),
+    targetCount: v.number(),
+    customTargetDescription: v.optional(v.string()),
+
+    // ── Rewards
+    bonusPoints: v.number(),
+    rewardDescription: v.optional(v.string()),
+    rewardId: v.optional(v.id("rewards")),
+
+    // ── Status
+    isActive: v.boolean(),
+    participantCount: v.optional(v.number()),
+    completedCount: v.optional(v.number()),
+
+    // ── Metadata
+    createdBy: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_week", ["week"])
+    .index("by_active", ["isActive"])
+    .index("by_starts", ["startsAt"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Approval Delegations (owner delegates PTP to managers per model) ─
+  approvalDelegations: defineTable({
+    // ── Who delegates
+    delegatorId: v.id("teamMembers"),
+
+    // ── Who receives authority
+    delegateId: v.id("teamMembers"),
+
+    // ── Scope
+    modelId: v.optional(v.id("models")),
+    contentTypes: v.optional(v.array(v.union(
+      v.literal("reel"),
+      v.literal("post"),
+      v.literal("story"),
+      v.literal("carousel")
+    ))),
+
+    // ── Validity
+    isActive: v.boolean(),
+    expiresAt: v.optional(v.number()),
+    reason: v.optional(v.string()),
+
+    // ── Metadata
+    createdAt: v.number(),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_delegator", ["delegatorId"])
+    .index("by_delegate", ["delegateId"])
+    .index("by_delegate_model", ["delegateId", "modelId"])
+    .index("by_active", ["isActive"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Rewards (monthly gamification reward catalog) ───────────────────
+  rewards: defineTable({
+    // ── Prize definition
+    title: v.string(),
+    description: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
+
+    // ── Requirements
+    pointsRequired: v.number(),
+    tier: v.optional(v.union(
+      v.literal("bronze"),
+      v.literal("silver"),
+      v.literal("gold"),
+      v.literal("platinum")
+    )),
+
+    // ── Availability
+    month: v.string(),
+    maxRedemptions: v.optional(v.number()),
+    currentRedemptions: v.optional(v.number()),
+
+    // ── Status
+    status: v.union(
+      v.literal("available"),
+      v.literal("claimed"),
+      v.literal("expired"),
+      v.literal("draft")
+    ),
+
+    // ── Winner tracking
+    winnerId: v.optional(v.id("models")),
+    winnerName: v.optional(v.string()),
+    awardedAt: v.optional(v.number()),
+    redeemedAt: v.optional(v.number()),
+    redemptionNotes: v.optional(v.string()),
+
+    // ── Metadata
+    createdBy: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_month", ["month"])
+    .index("by_status", ["status"])
+    .index("by_tier", ["tier"])
+    .index("by_month_status", ["month", "status"])
+    .index("by_winner", ["winnerId"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── CapCut Templates (template library by niche) ────────────────────
+  capCutTemplates: defineTable({
+    // ── Content
+    name: v.string(),
+    description: v.optional(v.string()),
+
+    // ── Classification
+    niche: v.string(),
+    category: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+
+    // ── Media
+    templateUrl: v.string(),
+    previewUrl: v.optional(v.string()),
+    previewThumbnailUrl: v.optional(v.string()),
+
+    // ── Usage tracking
+    usageCount: v.optional(v.number()),
+    lastUsedAt: v.optional(v.number()),
+    rating: v.optional(v.number()),
+
+    // ── Status
+    isActive: v.boolean(),
+
+    // ── Metadata
+    addedBy: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("by_niche", ["niche"])
+    .index("by_category", ["category"])
+    .index("by_active", ["isActive"])
+    .index("by_usage", ["usageCount"])
+    .index("by_created", ["createdAt"])
+    .searchIndex("search_templates", {
+      searchField: "name",
+      filterFields: ["niche", "category"],
+    }),
+
+
+  // ── Trend Feed Items (cached external trend intelligence) ───────────
+  trendFeedItems: defineTable({
+    // ── Source
+    platform: v.union(
+      v.literal("tiktok"),
+      v.literal("instagram"),
+      v.literal("youtube"),
+      v.literal("twitter")
+    ),
+
+    // ── Trend data
+    type: v.union(
+      v.literal("hashtag"),
+      v.literal("sound"),
+      v.literal("format"),
+      v.literal("topic"),
+      v.literal("effect")
+    ),
+    label: v.string(),
+    description: v.optional(v.string()),
+
+    // ── Relevance
+    niche: v.optional(v.string()),
+    trendScore: v.optional(v.number()),
+    viewCount: v.optional(v.number()),
+    growthRate: v.optional(v.number()),
+    region: v.optional(v.string()),
+
+    // ── Media
+    previewUrl: v.optional(v.string()),
+    externalUrl: v.optional(v.string()),
+
+    // ── Lifecycle
+    fetchedAt: v.number(),
+    expiresAt: v.number(),
+    isActive: v.boolean(),
+
+    // ── Metadata
+    fetchBatchId: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_platform", ["platform"])
+    .index("by_platform_type", ["platform", "type"])
+    .index("by_niche", ["niche"])
+    .index("by_trend_score", ["trendScore"])
+    .index("by_active", ["isActive"])
+    .index("by_fetched", ["fetchedAt"])
+    .index("by_expires", ["expiresAt"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // COVERAGE GAP TABLES (6 new tables — Part 4)
+  // ═══════════════════════════════════════════════════════════════════════
+
+
+  // ── Hashtag Groups (saved hashtag set templates) ─────────────────────
+  // Page: Content Scheduler hashtag panel (A32). Models/editors save
+  // frequently-used hashtag combos as named groups. Applied to scheduled
+  // posts with one click. Niche-scoped so irrelevant groups don't surface.
+  hashtagGroups: defineTable({
+    // ── Identity
+    name: v.string(),                           // e.g. "GFE Summer Set", "Fitness Core"
+
+    // ── Content
+    hashtags: v.array(v.string()),              // array of hashtag strings (without #)
+
+    // ── Classification
+    niche: v.optional(v.string()),              // e.g. "GFE", "Fitness", "General"
+
+    // ── Usage tracking
+    usageCount: v.optional(v.number()),         // how many times applied to a post
+
+    // ── Metadata
+    createdBy: v.optional(v.string()),          // team member name or "system"
+    createdAt: v.number(),                      // Unix ms
+  })
+    .index("by_niche", ["niche"])
+    .index("by_usage", ["usageCount"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Import Jobs (CSV import tracking) ────────────────────────────────
+  // Page: Bulk import flows (A33). One row per CSV import run. Tracks
+  // row-level success/failure so the user can see what imported and what
+  // failed. errorLog is a JSON-serialised array of {row, reason} objects.
+  importJobs: defineTable({
+    // ── File info
+    fileName: v.string(),                       // original uploaded filename
+
+    // ── Row counts
+    rowCount: v.number(),                       // total rows in CSV
+    successCount: v.optional(v.number()),       // rows successfully imported
+    errorCount: v.optional(v.number()),         // rows that failed
+
+    // ── Status
+    status: v.union(
+      v.literal("pending"),                     // queued, not yet started
+      v.literal("processing"),                  // actively importing
+      v.literal("completed"),                   // all rows processed (some may have errored)
+      v.literal("failed")                       // catastrophic failure — no rows imported
+    ),
+
+    // ── Error details
+    errorLog: v.optional(v.string()),           // JSON array of {row, reason} error objects
+
+    // ── Metadata
+    importedBy: v.optional(v.string()),         // team member who triggered the import
+    createdAt: v.number(),                      // Unix ms
+  })
+    .index("by_status", ["status"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── R&D Entry Relationships (graph view edges) ───────────────────────
+  // Page: R&D Graph View (P3). Directed edges between rdEntries for the
+  // knowledge graph visualisation. relationshipType describes how the
+  // target is related to the source. strength is 0-1 for edge weight.
+  rdEntryRelationships: defineTable({
+    // ── Edge endpoints
+    sourceEntryId: v.id("rdEntries"),           // origin node
+    targetEntryId: v.id("rdEntries"),           // destination node
+
+    // ── Edge type
+    relationshipType: v.union(
+      v.literal("similar"),                     // thematically similar content
+      v.literal("sequel"),                      // target is a follow-up to source
+      v.literal("variant")                      // target is a variation of source
+    ),
+
+    // ── Edge weight
+    strength: v.optional(v.number()),           // 0.0-1.0, used for graph edge thickness
+
+    // ── Metadata
+    createdBy: v.optional(v.string()),          // team member name or "system"
+    createdAt: v.number(),                      // Unix ms
+  })
+    .index("by_source", ["sourceEntryId"])
+    .index("by_target", ["targetEntryId"])
+    .index("by_type", ["relationshipType"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── AI Suggestion Sessions (AI chatbot conversation history) ─────────
+  // Page: Ideas Lab AI chatbot (E15). One row per chat session. messages
+  // is stored as an inline array of {role, content, ts} objects (same
+  // shape as toolAnalyses.chatHistory). context captures the page/model
+  // the session was started from for personalisation.
+  aiSuggestionSessions: defineTable({
+    // ── Identity
+    userId: v.optional(v.id("teamMembers")),    // which team member opened the session
+    modelId: v.optional(v.id("models")),        // which model the suggestions are for
+
+    // ── Conversation
+    messages: v.array(v.object({
+      role: v.union(v.literal("user"), v.literal("assistant")),
+      content: v.string(),                      // message text
+      ts: v.number(),                           // Unix ms timestamp
+    })),
+
+    // ── Context
+    context: v.optional(v.string()),            // e.g. "ideas_lab", "rd_table", "swipe_deck"
+
+    // ── AI model used
+    aiModelId: v.optional(v.string()),          // e.g. "gpt-4o", "claude-3-5-sonnet"
+
+    // ── Metadata
+    createdAt: v.number(),                      // Unix ms
+  })
+    .index("by_user", ["userId"])
+    .index("by_model", ["modelId"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Social Post Jobs (Ayrshare multi-platform posting) ───────────────
+  // Page: Integrations — Ayrshare (I8). One row per Ayrshare posting job.
+  // A single job can target multiple platforms simultaneously. results is
+  // a JSON-serialised Ayrshare response object per platform. Linked to
+  // the reel being posted for traceability.
+  socialPostJobs: defineTable({
+    // ── Source content
+    reelId: v.optional(v.id("reels")),          // which reel is being posted
+
+    // ── Targeting
+    platforms: v.array(v.string()),             // e.g. ["instagram", "tiktok", "twitter"]
+
+    // ── Status
+    status: v.union(
+      v.literal("pending"),                     // job created, not yet submitted to Ayrshare
+      v.literal("submitted"),                   // sent to Ayrshare API
+      v.literal("published"),                   // Ayrshare confirmed all platforms posted
+      v.literal("partial"),                     // some platforms succeeded, some failed
+      v.literal("failed")                       // all platforms failed
+    ),
+
+    // ── Ayrshare tracking
+    ayrshareJobId: v.optional(v.string()),      // Ayrshare's postId for status polling
+
+    // ── Results
+    results: v.optional(v.string()),            // JSON — Ayrshare per-platform response object
+
+    // ── Metadata
+    createdAt: v.number(),                      // Unix ms
+  })
+    .index("by_reel", ["reelId"])
+    .index("by_status", ["status"])
+    .index("by_ayrshare_job", ["ayrshareJobId"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Opus Clip Jobs (Opus Clip AI clip generation) ────────────────────
+  // Page: Integrations — Opus Clip (I10). One row per Opus Clip job.
+  // clips is a JSON-serialised array of {url, startSec, endSec, title}
+  // objects returned by Opus Clip. viralityScores mirrors the per-clip
+  // score Opus Clip provides for sorting.
+  opusClipJobs: defineTable({
+    // ── Source
+    sourceVideoUrl: v.string(),                 // full video URL sent to Opus Clip
+
+    // ── Status
+    status: v.union(
+      v.literal("pending"),                     // queued, not yet sent to Opus Clip
+      v.literal("processing"),                  // Opus Clip is processing
+      v.literal("completed"),                   // clips generated successfully
+      v.literal("failed")                       // job failed
+    ),
+
+    // ── Output
+    clips: v.optional(v.string()),              // JSON — array of {url, startSec, endSec, title}
+    viralityScores: v.optional(v.string()),     // JSON — array of per-clip virality scores
+
+    // ── Metadata
+    createdAt: v.number(),                      // Unix ms
+  })
+    .index("by_status", ["status"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // MINOR FIELD ADDITIONS — Part 5 New Tables
+  // (teamMembers field additions are inline above; new tables listed here)
+  // ═══════════════════════════════════════════════════════════════════════
+
+
+  // ── Alerts (decline detection + threshold breach persistence) ────────
+  // Feature: Analytics decline detection (A11). One row per breach event.
+  // Avoids re-alerting on the same breach via the resolvedAt lifecycle.
+  alerts: defineTable({
+    // ── What triggered it
+    metricName: v.string(),                     // e.g. "engagementRate", "subscribers", "views"
+    entityType: v.union(
+      v.literal("model"),                       // alert is for a model
+      v.literal("account"),                     // alert is for a tracked account
+      v.literal("agency")                       // agency-wide metric
+    ),
+    entityId: v.optional(v.string()),           // _id of the model/account (string for flexibility)
+
+    // ── Breach details
+    thresholdValue: v.number(),                 // configured threshold that was crossed
+    actualValue: v.number(),                    // actual value at time of breach
+    changePercent: v.optional(v.number()),      // % change that triggered the alert
+
+    // ── Severity
+    severity: v.union(
+      v.literal("warning"),                     // approaching threshold
+      v.literal("critical")                     // hard breach
+    ),
+
+    // ── Lifecycle
+    status: v.union(
+      v.literal("active"),                      // unresolved
+      v.literal("acknowledged"),                // seen by a manager
+      v.literal("resolved")                     // metric recovered or manually closed
+    ),
+    acknowledgedBy: v.optional(v.string()),     // team member name
+    acknowledgedAt: v.optional(v.number()),     // Unix ms
+    resolvedAt: v.optional(v.number()),         // Unix ms
+
+    // ── Metadata
+    createdAt: v.number(),                      // Unix ms — when breach was detected
+  })
+    .index("by_entity", ["entityId"])
+    .index("by_status", ["status"])
+    .index("by_severity", ["severity"])
+    .index("by_metric", ["metricName"])
+    .index("by_created", ["createdAt"]),
+
+
+  // ── Themes (content theme taxonomy — admin-managed lookup) ───────────
+  // Feature: Theme tagging across rdEntries, swipeDeckItems, challenges (E7).
+  // Admin-managed so seasonal themes (e.g. "Songkran 2027") can be added
+  // without a schema migration.
+  themes: defineTable({
+    // ── Identity
+    name: v.string(),                           // e.g. "Songkran", "Western", "Summer"
+    slug: v.string(),                           // URL-safe: "songkran", "western", "summer"
+
+    // ── Classification
+    niche: v.optional(v.string()),              // null = applies to all niches
+    season: v.optional(v.string()),             // e.g. "spring", "Q2", "Songkran 2026"
+    isActive: v.boolean(),                      // false = archived/hidden from pickers
+
+    // ── Display
+    color: v.optional(v.string()),              // hex color for badge display
+    emoji: v.optional(v.string()),              // optional emoji icon
+
+    // ── Metadata
+    createdBy: v.optional(v.string()),
+    createdAt: v.number(),                      // Unix ms
+  })
+    .index("by_slug", ["slug"])
+    .index("by_niche", ["niche"])
+    .index("by_active", ["isActive"])
+    .index("by_created", ["createdAt"]),
 
 });

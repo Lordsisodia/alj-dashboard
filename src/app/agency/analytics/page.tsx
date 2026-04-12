@@ -1,5 +1,5 @@
-import AnalyticsFeaturePage from '@/features/analytics/components/AnalyticsFeaturePage';
+import AgencyAnalyticsPage from '@/features/agency/analytics/components/AgencyAnalyticsPage';
 
 export default function OwnersAnalyticsPage() {
-  return <AnalyticsFeaturePage />;
+  return <AgencyAnalyticsPage />;
 }

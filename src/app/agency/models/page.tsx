@@ -1,5 +1,5 @@
-import ModelsFeaturePage from '@/features/models/components/ModelsFeaturePage';
+import { AgencyModelsPage } from '@/features/agency/models/components';
 
 export default function OwnersModelsPage() {
-  return <ModelsFeaturePage />;
+  return <AgencyModelsPage />;
 }
