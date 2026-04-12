@@ -336,7 +336,30 @@ export function SceneDetailPanel({ scene, allScenes, allModels, onDeselect }: Pr
           </button>
         </div>
 
-        {/* 3. Original Reel */}
+        {/* 3. Generated Video */}
+        {(scene.generatedVideoUrl) && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-1.5">
+              Generated video
+            </p>
+            <div className="flex justify-center">
+              <div
+                className="rounded-2xl overflow-hidden bg-neutral-900"
+                style={{ aspectRatio: '9/16', width: '100%', maxWidth: 200 }}
+              >
+                <video
+                  src={scene.generatedVideoUrl}
+                  className="w-full h-full object-cover rounded"
+                  controls
+                  muted
+                  playsInline
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 4. Original Reel */}
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-1.5">
             Original reel
@@ -375,7 +398,7 @@ export function SceneDetailPanel({ scene, allScenes, allModels, onDeselect }: Pr
           </div>
         </div>
 
-        {/* 4. Analysis */}
+        {/* 5. Analysis */}
         <ImportedReferenceCard scene={scene} />
       </div>
 

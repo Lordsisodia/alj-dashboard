@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { sendJobNotification } from "@/lib/notifications";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -67,6 +68,29 @@ export async function POST(req: NextRequest) {
         // Log to a monitoring service if available
       });
     }
+  }
+
+  // Send notification on terminal states (fire-and-forget to avoid webhook timeout)
+  if (body.status === "succeeded" || body.status === "failed") {
+    // Fetch job details for notification
+    convex.query(api.contentGen.getJobForNotification, { jobId })
+      .then(job => {
+        if (job) {
+          const notification = {
+            jobName: job.name,
+            modelName: job.modelName,
+            provider: job.provider,
+            status: (body.status === "succeeded" ? "completed" : "failed") as "completed" | "failed",
+            videoUrl: typeof body.output === "string" ? body.output : undefined,
+          };
+          sendJobNotification(notification).catch(err => {
+            console.error('[webhook] Notification failed:', err);
+          });
+        }
+      })
+      .catch(err => {
+        console.error('[webhook] Failed to fetch job for notification:', err);
+      });
   }
 
   return NextResponse.json({ ok: true });

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, CheckCircle2, XCircle, Send, Clock } from 'lucide-react';
+import { Play, CheckCircle2, XCircle, Send, Clock, Loader2 } from 'lucide-react';
 import { useMutation } from 'convex/react';
 import { PROVIDER_CFG, MODEL_HUE } from '../queue/types';
 import type { Outcome } from '../queue/types';
@@ -25,6 +25,7 @@ export function OutcomeOverlay({ outcome }: { outcome?: Outcome }) {
 
 export function GalleryCard({ job }: { job: Doc<'contentGenJobs'> }) {
   const [hovered, setHovered] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const updateOutcome = useMutation(api.contentGen.updateOutcome);
   const color  = MODEL_HUE[job.modelName] ?? '#a78bfa';
   const thumb  = job.thumbnailColor ?? '#888';
@@ -77,11 +78,29 @@ export function GalleryCard({ job }: { job: Doc<'contentGenJobs'> }) {
           >
             <div className="flex gap-1.5">
               <button
-                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[10px] font-semibold text-white hover:brightness-110 transition-all"
+                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[10px] font-semibold text-white hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
-                onClick={() => updateOutcome({ jobId: job._id, outcome: 'Approved' })}
+                disabled={uploading}
+                onClick={async () => {
+                  if (uploading) return;
+                  setUploading(true);
+                  try {
+                    await updateOutcome({ jobId: job._id, outcome: 'Approved' });
+                    const videoUrl = job.generatedVideoR2Url ?? job.generatedVideoUrl;
+                    if (videoUrl) {
+                      const res = await fetch('/api/drive/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ videoUrl, modelName: job.modelName, jobName: job.name }),
+                      });
+                      if (!res.ok) console.error('Drive upload failed:', await res.text());
+                    }
+                  } finally {
+                    setUploading(false);
+                  }
+                }}
               >
-                <CheckCircle2 size={10} /> Approve
+                {uploading ? <Loader2 size={10} className="animate-spin" /> : <CheckCircle2 size={10} />} Approve
               </button>
               <button
                 onClick={() => {
