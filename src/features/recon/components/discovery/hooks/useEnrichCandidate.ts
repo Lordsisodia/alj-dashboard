@@ -42,7 +42,7 @@ export function useEnrichCandidate(handle: string) {
       });
 
       if (data.relatedHandles?.length) {
-        for (const h of data.relatedHandles.slice(0, 10)) {
+        for (const h of data.relatedHandles.slice(0, 30)) {
           await upsertCandidate({
             handle: `@${h}`,
             displayName: h,

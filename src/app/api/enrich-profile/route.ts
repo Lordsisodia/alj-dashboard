@@ -1,7 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import sharp from 'sharp';
 
 // Actor: apify/instagram-profile-scraper (dSCLg0C3YEZ83HzYX)
 const APIFY_ACTOR = 'apify~instagram-profile-scraper';
+
+const R2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId:     process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+});
+const BUCKET      = process.env.R2_BUCKET      ?? 'ofm-saas-media';
+const PUBLIC_BASE = process.env.R2_PUBLIC_URL   ?? 'https://pub-6c398617211c499ea00c44c3d18564bc.r2.dev';
+
+async function uploadAvatarToR2(username: string, picUrl: string): Promise<string | null> {
+  try {
+    const res = await fetch(picUrl, {
+      headers: { 'Referer': 'https://www.instagram.com/', 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) return null;
+    const raw = Buffer.from(await res.arrayBuffer());
+    const compressed = await sharp(raw)
+      .resize(400, 400, { fit: 'cover', position: 'centre' })
+      .webp({ quality: 82 })
+      .toBuffer();
+    const key = `avatars/ig/${username}.webp`;
+    await R2.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: compressed, ContentType: 'image/webp' }));
+    return `${PUBLIC_BASE}/${key}`;
+  } catch (e) {
+    console.warn('[enrich-profile] R2 upload failed:', e);
+    return null;
+  }
+}
 
 export async function POST(req: NextRequest) {
   const { handle } = await req.json() as { handle: string };
@@ -27,6 +61,7 @@ export async function POST(req: NextRequest) {
       isPrivate:             false,
       igtvVideoCount:        Math.floor(Math.random() * 20),
       instagramId:           null,
+      relatedHandles:        [],
     });
   }
 
@@ -49,13 +84,22 @@ export async function POST(req: NextRequest) {
     const p = items[0];
     if (!p) return NextResponse.json({ error: 'No profile found' }, { status: 404 });
 
+    const rawAvatarUrl = p.profilePicUrlHD ?? p.profilePicUrl ?? null;
+    const stableAvatar = rawAvatarUrl ? await uploadAvatarToR2(username, rawAvatarUrl) : null;
+    const avatarUrl    = stableAvatar ?? rawAvatarUrl ?? null;
+
+    const relatedHandles: string[] = (p.relatedProfiles ?? [])
+      .map((r: { username?: string }) => r.username)
+      .filter((u): u is string => Boolean(u))
+      .slice(0, 30);
+
     return NextResponse.json({
       handle:                `@${p.username ?? username}`,
       followerCount:         p.followersCount         ?? 0,
       followsCount:          p.followsCount           ?? null,
       postsCount:            p.postsCount             ?? null,
       bio:                   p.biography              ?? null,
-      avatarUrl:             p.profilePicUrlHD ?? p.profilePicUrl ?? null,
+      avatarUrl,
       displayName:           p.fullName               || username,
       verified:              p.verified               ?? false,
       externalUrl:           p.externalUrl            ?? null,
@@ -66,6 +110,7 @@ export async function POST(req: NextRequest) {
       isPrivate:             p.private                ?? null,
       igtvVideoCount:        p.igtvVideoCount         ?? null,
       instagramId:           p.id                     ? String(p.id) : null,
+      relatedHandles,
     });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
@@ -90,4 +135,5 @@ interface ApifyProfile {
   private?:              boolean;
   igtvVideoCount?:       number;
   id?:                   string | number;
+  relatedProfiles?:      { username?: string }[];
 }

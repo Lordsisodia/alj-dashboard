@@ -1,39 +1,43 @@
 'use client';
 
-import { Play, Package, Bookmark } from 'lucide-react';
+import { Play, Package, Send, LayoutGrid } from 'lucide-react';
 
 interface HubQuickActionsProps {
   onStartSession: () => void;
   onBrowseVault: () => void;
-  onViewSaved: () => void;
+  onSendToClient: () => void;
 }
 
 const ACTIONS = [
   {
-    key: 'session',
+    key: 'session' as const,
     icon: <Play size={16} className="fill-white text-white" />,
     label: 'Start Swipe Session',
     sub: 'Rate content in your vault',
     gradient: true,
   },
   {
-    key: 'vault',
+    key: 'send' as const,
+    icon: <Send size={16} className="text-green-500" />,
+    label: 'Send to Client',
+    sub: 'Push approved content',
+    gradient: false,
+  },
+  {
+    key: 'vault' as const,
     icon: <Package size={16} className="text-violet-500" />,
     label: 'Browse Vault',
     sub: 'All collected inspiration',
     gradient: false,
   },
-  {
-    key: 'saved',
-    icon: <Bookmark size={16} className="text-amber-500" />,
-    label: 'View Saved',
-    sub: 'Your bookmarked content',
-    gradient: false,
-  },
-] as const;
+];
 
-export function HubQuickActions({ onStartSession, onBrowseVault, onViewSaved }: HubQuickActionsProps) {
-  const handlers = { session: onStartSession, vault: onBrowseVault, saved: onViewSaved };
+export function HubQuickActions({ onStartSession, onBrowseVault, onSendToClient }: HubQuickActionsProps) {
+  const handlers: Record<typeof ACTIONS[number]['key'], () => void> = {
+    session: onStartSession,
+    send: onSendToClient,
+    vault: onBrowseVault,
+  };
 
   return (
     <div
@@ -41,9 +45,10 @@ export function HubQuickActions({ onStartSession, onBrowseVault, onViewSaved }: 
       style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)' }}
     >
       <div
-        className="px-4 py-3"
+        className="px-4 py-3 flex items-center gap-2"
         style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
       >
+        <LayoutGrid size={13} className="text-neutral-400" />
         <p className="text-xs font-bold text-neutral-800">Quick Actions</p>
       </div>
       <div className="grid grid-cols-3 divide-x" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
@@ -57,7 +62,7 @@ export function HubQuickActions({ onStartSession, onBrowseVault, onViewSaved }: 
               className="w-9 h-9 rounded-xl flex items-center justify-center"
               style={
                 action.gradient
-                  ? { background: 'linear-gradient(135deg, #ff0069, #833ab4)' }
+                  ? { background: 'linear-gradient(135deg, #2563eb, #1d4ed8)' }
                   : { background: '#f5f5f4' }
               }
             >

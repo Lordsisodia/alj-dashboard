@@ -1,7 +1,7 @@
 // Recon types
 export type ReconPageProps = Record<string, never>;
 
-export type Tab = 'log' | 'discovery' | 'creators' | 'feed';
+export type Tab = 'log' | 'discovery' | 'creators' | 'qualify';
 
 export type CandidateStatus = 'pending' | 'approved' | 'rejected';
 
@@ -31,7 +31,7 @@ export interface Candidate {
 
 export interface DrawerState { posts: import('@/features/intelligence/types').DrawerPost[]; index: number; initialTab?: 'details' | 'ai' | 'transcript'; }
 
-export type CompetitorStatus = 'active' | 'paused';
+export type CompetitorStatus = 'active' | 'paused' | 'failed';
 export type JobStatus = 'idle' | 'running' | 'failed';
 
 export interface Competitor {
@@ -72,6 +72,8 @@ export interface Competitor {
   aiReason?:             string;
   // creatorCandidates fields not in trackedAccounts
   highlightReelCount?:   number;
+  avgViews?:             number;
+  outlierRatio?:         number;
   source?:               'pre_approved' | 'scraper' | 'manual';
   // posts-per-week from scrapedPosts aggregation
   postsThisWeek?:        number;
@@ -94,6 +96,7 @@ export type ConvexCandidate = {
   postsPerWeek?: number;
   suggestedBy?: string;
   addedAt: number;
+  enrichedAt?: number;
   status: 'pending' | 'approved' | 'rejected';
   source: 'pre_approved' | 'scraper' | 'manual';
   aiScore?: number;
@@ -101,11 +104,30 @@ export type ConvexCandidate = {
   aiReason?: string;
   enrichStatus?: string;
   avatarUrl?: string;
+  bio?: string;
+  verified?: boolean;
+  isPrivate?: boolean;
+  isBusinessAccount?: boolean;
+  externalUrl?: string;
+  igtvVideoCount?: number;
+  instagramId?: string;
+  highlightReelCount?: number;
 };
 
 // MappedCandidate = Candidate shape + Convex _id + enrich fields
 export type MappedCandidate = Candidate & {
   _convexId: string;
+  suggestedBy?: string | null;
   avatarUrl?: string;
   enrichStatus?: string;
+  enrichedAt?: number;
+  followsCount?: number;
+  postsCount?: number;
+  verified?: boolean;
+  isPrivate?: boolean;
+  isBusinessAccount?: boolean;
+  externalUrl?: string;
+  igtvVideoCount?: number;
+  instagramId?: string;
+  highlightReelCount?: number;
 };

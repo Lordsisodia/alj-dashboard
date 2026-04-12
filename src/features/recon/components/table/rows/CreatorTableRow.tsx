@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Heart, ExternalLink, Pause, Play, Sparkles, Film, ChevronRight } from 'lucide-react';
+import { Heart, Film } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { fadeUp, computeProfileHealth } from '../../../constants';
 import type { Competitor } from '../../../types';
@@ -10,18 +10,20 @@ import { ScoreBadge }       from '../../shared/ScoreBadge';
 import { ProfileHealthBar } from '../../shared/ProfileHealthBar';
 import { Sparkline }        from '../../shared/Sparkline';
 import { TABLE_COLS, COL_BORDER } from '../tableUtils';
+import { CreatorRowActionsMenu } from './CreatorRowActionsMenu';
 
 type Props = {
   c: Competitor & { _totalPosts?: number };
-  rowIdx: number; isSelected: boolean; isEnriching: boolean;
+  rowIdx: number; isSelected: boolean; isEnriching: boolean; isScraping: boolean;
   onOpen: (c: Competitor) => void;
   onSelect: (id: number, e: React.MouseEvent) => void;
   onFavorite: (id: number, e: React.MouseEvent) => void;
   onToggleStatus: (id: number, e: React.MouseEvent) => void;
   onEnrich: (id: number, e: React.MouseEvent) => void;
+  onScrape: () => void;
 };
 
-export function CreatorTableRow({ c, rowIdx, isSelected, isEnriching, onOpen, onSelect, onFavorite, onToggleStatus, onEnrich }: Props) {
+export function CreatorTableRow({ c, rowIdx, isSelected, isEnriching, isScraping, onOpen, onSelect, onFavorite, onToggleStatus, onEnrich, onScrape }: Props) {
   const isActive = c.status === 'active';
   const health   = computeProfileHealth(c);
 
@@ -89,17 +91,16 @@ export function CreatorTableRow({ c, rowIdx, isSelected, isEnriching, onOpen, on
         <button onClick={(e) => onFavorite(c.id, e)} className={cn('w-7 h-7 flex items-center justify-center rounded-lg transition-all flex-shrink-0', c.favorited ? 'text-[#ff0069]' : 'text-neutral-300 hover:text-neutral-400')}>
           <Heart size={13} fill={c.favorited ? '#ff0069' : 'none'} />
         </button>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={(e) => onEnrich(c.id, e)} disabled={isEnriching} className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium border transition-colors hover:bg-neutral-100 disabled:opacity-50" style={{ borderColor: 'rgba(0,0,0,0.08)', color: '#6b7280' }} title="Enrich via Apify">
-            <Sparkles size={10} className={isEnriching ? 'animate-spin' : ''} />{isEnriching ? 'Enriching...' : 'Enrich'}
-          </button>
-          <button onClick={(e) => onToggleStatus(c.id, e)} className="w-6 h-6 flex items-center justify-center rounded border transition-colors hover:bg-neutral-100" style={{ borderColor: 'rgba(0,0,0,0.08)', color: '#9ca3af' }}>
-            {isActive ? <Pause size={11} /> : <Play size={11} />}
-          </button>
-          <a href={`https://instagram.com/${c.handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="w-6 h-6 flex items-center justify-center rounded border transition-colors hover:bg-neutral-100" style={{ borderColor: 'rgba(0,0,0,0.08)', color: '#9ca3af' }}>
-            <ExternalLink size={11} />
-          </a>
-          <ChevronRight size={13} className="text-neutral-200 group-hover:text-neutral-400 transition-colors ml-0.5" />
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <CreatorRowActionsMenu
+            handle={c.handle}
+            isActive={isActive}
+            isEnriching={isEnriching}
+            isScraping={isScraping}
+            onToggleStatus={() => onToggleStatus(c.id, { stopPropagation: () => {} } as React.MouseEvent)}
+            onEnrich={() => onEnrich(c.id, { stopPropagation: () => {} } as React.MouseEvent)}
+            onScrape={onScrape}
+          />
         </div>
       </div>
     </motion.div>

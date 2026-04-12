@@ -1,0 +1,1038 @@
+'use client';
+
+import Link from 'next/link';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Zap, Sparkles, Video, Loader2, AlertTriangle, Wrench, ChevronDown, ExternalLink, Check } from 'lucide-react';
+import { toast } from 'sonner';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../../../convex/_generated/api';
+import { PipelineStatusStrip } from '../dashboard/PipelineStatusStrip';
+import { ScoreRing } from '../shared/ScoreRing';
+import { PostDetailDrawer } from '../drawer/PostDetailDrawer';
+import { SystemPromptPanel } from './SystemPromptPanel';
+import { GRAD } from '../../constants';
+import type { DrawerPost } from '../../types';
+
+type Phase = 'downloading' | 'analysing';
+
+type QueuePost = {
+  _id: string; handle: string; niche: string; contentType: string;
+  thumbnailUrl?: string | null; caption: string; engagementRate: number;
+  outlierRatio: number; videoUrl?: string; postedAt: number;
+  views: number; saves: number; likes: number;
+};
+
+const PURPLE_GRAD = 'linear-gradient(135deg, #6d28d9, #4c1d95)';
+const RUN_OPTIONS = [1, 5, 10, 25] as const;
+
+// ── Instagram icon SVG ────────────────────────────────────────────────────────
+
+function IgIcon({ size = 12 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+    </svg>
+  );
+}
+
+// ── Queue post card ───────────────────────────────────────────────────────────
+
+function QueuePostCard({ post, isExpired, isSelected, onSelect, onAnalyse }: { post: QueuePost; isExpired: boolean; isSelected: boolean; onSelect: () => void; onAnalyse: () => void }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const thumb    = post.thumbnailUrl ?? '';
+  const showGrad = !thumb || thumb.startsWith('linear-gradient') || imgFailed;
+  const igHandle = post.handle.replace(/^@/, '');
+  const initial  = igHandle.charAt(0).toUpperCase();
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -8, transition: { duration: 0.15 } }}
+      whileHover={{ y: -2, boxShadow: '0 6px 20px rgba(0,0,0,0.13)' }}
+      onClick={onSelect}
+      className="relative rounded-2xl overflow-hidden cursor-pointer"
+      style={{ border: isSelected ? '2px solid #6d28d9' : '1px solid rgba(0,0,0,0.07)', boxShadow: isSelected ? '0 0 0 2px rgba(109,40,217,0.15)' : undefined }}
+    >
+      {/* Portrait thumbnail */}
+      <div className="relative w-full" style={{ height: 200 }}>
+        {showGrad ? (
+          <div className="w-full h-full flex items-center justify-center" style={{ background: thumb && !imgFailed ? thumb : PURPLE_GRAD }}>
+            <span className="text-5xl font-black text-white/20 select-none">{initial}</span>
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={thumb} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer"
+            onError={() => setImgFailed(true)} />
+        )}
+
+        {/* Subtle bottom fade */}
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+
+        {/* Platform icon  -  top right */}
+        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+          <IgIcon size={13} />
+        </div>
+      </div>
+
+      {/* White info card  -  overlaps bottom of thumbnail */}
+      <div className="relative -mt-4 mx-2 mb-2 rounded-xl bg-white px-2.5 py-2" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.13)' }}>
+        {/* Handle + open link */}
+        <div className="flex items-center justify-between gap-1 mb-1">
+          <p className="text-[10px] font-semibold text-neutral-700 truncate">{post.handle}</p>
+          <a
+            href={`https://instagram.com/${igHandle}`}
+            target="_blank" rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="shrink-0 w-5 h-5 rounded-md bg-neutral-100 hover:bg-purple-50 flex items-center justify-center text-neutral-400 hover:text-purple-500 transition-colors"
+          >
+            <ExternalLink size={8} />
+          </a>
+        </div>
+        {/* Caption */}
+        <p className="text-[9px] text-neutral-500 truncate leading-snug mb-1.5">
+          {post.caption?.slice(0, 34) || post.niche}
+        </p>
+        {/* Pills + Analyse button */}
+        <div className="flex items-center gap-1">
+          <span className="inline-flex text-[8px] font-semibold px-1.5 py-0.5 rounded-full bg-neutral-100 text-neutral-500 capitalize whitespace-nowrap">{post.contentType}</span>
+          <span className="inline-flex text-[8px] font-bold px-1.5 py-0.5 rounded-full text-white whitespace-nowrap" style={{ background: PURPLE_GRAD }}>{post.outlierRatio.toFixed(1)}×</span>
+          {isExpired && <span title="Posted over 24h ago"><AlertTriangle size={8} className="text-amber-400" /></span>}
+          <button
+            onClick={e => { e.stopPropagation(); onAnalyse(); }}
+            className="ml-auto flex items-center gap-0.5 text-[8px] font-semibold px-1.5 py-0.5 rounded-full text-white whitespace-nowrap hover:brightness-110 transition-all"
+            style={{ background: PURPLE_GRAD }}
+          >
+            <Sparkles size={7} /> Analyse
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Analyzing pill (horizontal compact) ──────────────────────────────────────
+
+function AnalyzingCard({ post, phase }: { post: QueuePost; phase: Phase }) {
+  const progress = phase === 'downloading' ? '35%' : '72%';
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.88, transition: { duration: 0.15 } }}
+      className="flex-shrink-0 flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
+      style={{ width: 168, backgroundColor: '#fff', border: '1px solid rgba(109,40,217,0.18)' }}
+    >
+      {/* Pulsing orb */}
+      <div className="relative flex items-center justify-center shrink-0 w-8 h-8">
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{ background: PURPLE_GRAD }}
+          animate={{ scale: [1, 1.6, 1], opacity: [0.3, 0, 0.3] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <div className="w-8 h-8 rounded-full flex items-center justify-center relative z-10" style={{ background: PURPLE_GRAD }}>
+          <Loader2 size={13} className="animate-spin text-white" />
+        </div>
+      </div>
+
+      {/* Text + progress */}
+      <div className="flex-1 min-w-0">
+        <p className="text-[9px] font-semibold text-neutral-700 truncate">{post.handle}</p>
+        <p className="text-[8px] text-purple-500 mb-1.5">{phase === 'downloading' ? 'Downloading...' : 'Analysing...'}</p>
+        <div className="w-full h-1 rounded-full bg-neutral-100 overflow-hidden">
+          <motion.div
+            className="h-full rounded-full"
+            style={{ background: PURPLE_GRAD }}
+            initial={{ width: '10%' }}
+            animate={{ width: progress }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Analyzed portrait card (horizontal scroll gallery) ────────────────────────
+
+function AnalyzedPortraitCard({ post, isSelected, onClick }: { post: any; isSelected: boolean; onClick: () => void }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const thumb   = post.thumbnailUrl ?? '';
+  const showGrad = !thumb || thumb.startsWith('linear-gradient') || imgFailed;
+  const initial = (post.handle ?? '?').replace('@', '').charAt(0).toUpperCase();
+
+  return (
+    <motion.div
+      onClick={onClick}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.02 }}
+      className="relative flex-shrink-0 h-full rounded-xl overflow-hidden cursor-pointer"
+      style={{
+        width: 98,
+        border: isSelected ? '2px solid #6d28d9' : '1px solid rgba(0,0,0,0.08)',
+        boxShadow: isSelected ? '0 0 0 2px rgba(109,40,217,0.2)' : undefined,
+      }}
+    >
+      {/* Thumbnail */}
+      <div className="absolute inset-0">
+        {showGrad ? (
+          <div className="w-full h-full flex items-center justify-center" style={{ background: PURPLE_GRAD }}>
+            <span className="text-3xl font-black text-white/20 select-none">{initial}</span>
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={thumb} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />
+        )}
+      </div>
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none" />
+
+      {/* Selected check */}
+      {isSelected && (
+        <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
+          style={{ background: PURPLE_GRAD }}>
+          <Check size={8} className="text-white" />
+        </div>
+      )}
+
+      {/* Bottom info */}
+      <div className="absolute bottom-0 inset-x-0 px-1.5 pb-2">
+        <ScoreRing score={post.aiAnalysis?.hookScore ?? 0} size={24} />
+        <p className="text-[8px] font-semibold text-white truncate mt-1 leading-tight">{post.handle}</p>
+        {post.aiAnalysis?.emotions?.[0] && (
+          <span className="inline-block text-[7px] font-semibold px-1 py-0.5 rounded-full capitalize mt-0.5 text-white"
+            style={{ background: 'rgba(109,40,217,0.7)' }}>
+            {post.aiAnalysis.emotions[0]}
+          </span>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Queue post detail panel (right side, before analysis) ─────────────────────
+
+function QueuePostDetailPanel({ post, onAnalyse }: { post: QueuePost; onAnalyse: () => void }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const thumb    = post.thumbnailUrl ?? '';
+  const showGrad = !thumb || thumb.startsWith('linear-gradient') || imgFailed;
+
+  function fmt(n: number) {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
+    return `${n}`;
+  }
+
+  const hasVideo = !!post.videoUrl;
+  const isR2     = post.videoUrl?.startsWith('https://pub-') ?? false;
+  const hasStats = (post.views ?? 0) > 0 || (post.likes ?? 0) > 0 || (post.saves ?? 0) > 0;
+
+  return (
+    <motion.div
+      key={post._id}
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 12 }}
+      className="flex flex-1 min-h-0"
+    >
+      {/* Left: thumbnail column */}
+      <div className="relative shrink-0 bg-neutral-100" style={{ width: 290 }}>
+        {showGrad
+          ? <div className="w-full h-full" style={{ background: PURPLE_GRAD }} />
+          // eslint-disable-next-line @next/next/no-img-element
+          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        <div className="absolute bottom-3 left-3 right-3">
+          <p className="text-[13px] font-bold text-white leading-tight">{post.handle}</p>
+          <p className="text-[9px] text-white/70 capitalize mt-0.5">{post.niche} · {post.contentType}</p>
+        </div>
+        {/* Video status badge */}
+        <div className="absolute top-3 left-3">
+          <span className={`text-[8px] font-bold px-2 py-1 rounded-full ${isR2 ? 'bg-emerald-500/90 text-white' : hasVideo ? 'bg-amber-400/90 text-white' : 'bg-neutral-500/70 text-white'}`}>
+            {isR2 ? '● R2 Ready' : hasVideo ? '● CDN' : '○ No video'}
+          </span>
+        </div>
+      </div>
+
+      {/* Right: details */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4">
+
+          {/* Outlier ratio + ER */}
+          <div className="flex gap-2">
+            <div className="flex-1 rounded-xl px-3 py-2.5 text-center" style={{ backgroundColor: 'rgba(109,40,217,0.06)', border: '1px solid rgba(109,40,217,0.12)' }}>
+              <p className="text-[22px] font-black text-purple-700 leading-none">{post.outlierRatio.toFixed(1)}×</p>
+              <p className="text-[8px] font-bold text-purple-400 uppercase tracking-wide mt-0.5">Outlier Ratio</p>
+            </div>
+            <div className="flex-1 rounded-xl px-3 py-2.5 text-center" style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)' }}>
+              <p className="text-[22px] font-black text-neutral-700 leading-none">{((post.engagementRate ?? 0) * 100).toFixed(1)}%</p>
+              <p className="text-[8px] font-bold text-neutral-400 uppercase tracking-wide mt-0.5">Eng. Rate</p>
+            </div>
+          </div>
+
+          {/* Engagement stats */}
+          {hasStats && (
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { label: 'Likes',  value: fmt(post.likes  ?? 0) },
+                { label: 'Views',  value: fmt(post.views  ?? 0) },
+                { label: 'Saves',  value: fmt(post.saves  ?? 0) },
+              ].map(({ label, value }) => (
+                <div key={label} className="rounded-lg px-2 py-2 text-center"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}>
+                  <p className="text-[13px] font-bold text-neutral-700 leading-none">{value}</p>
+                  <p className="text-[8px] text-neutral-400 mt-1 uppercase tracking-wide">{label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Caption */}
+          {post.caption && (
+            <div>
+              <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-2">Caption</p>
+              <p className="text-[11px] text-neutral-600 leading-relaxed line-clamp-4">{post.caption}</p>
+            </div>
+          )}
+
+          {/* Video info */}
+          <div>
+            <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-2">Video</p>
+            <div className="rounded-xl px-3 py-2.5 space-y-1"
+              style={{ backgroundColor: isR2 ? 'rgba(5,150,105,0.05)' : 'rgba(0,0,0,0.03)', border: `1px solid ${isR2 ? 'rgba(5,150,105,0.15)' : 'rgba(0,0,0,0.07)'}` }}>
+              {isR2 ? (
+                <>
+                  <p className="text-[10px] font-semibold text-emerald-600">R2 video ready — full analysis available</p>
+                  <p className="text-[9px] text-neutral-400 font-mono truncate">{post.videoUrl}</p>
+                </>
+              ) : hasVideo ? (
+                <>
+                  <p className="text-[10px] font-semibold text-amber-600">Instagram CDN URL — may 403 on server fetch</p>
+                  <p className="text-[9px] text-neutral-400 font-mono truncate">{post.videoUrl?.slice(0, 60)}…</p>
+                </>
+              ) : (
+                <p className="text-[10px] text-neutral-400">No video URL scraped</p>
+              )}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer: Analyse button */}
+        <div className="shrink-0 px-4 pb-4 pt-2" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+          <button onClick={onAnalyse}
+            className="w-full py-2.5 rounded-xl text-[12px] font-semibold text-white transition-opacity hover:opacity-90 flex items-center justify-center gap-2"
+            style={{ background: PURPLE_GRAD }}>
+            <Sparkles size={13} /> Analyse this post
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Right detail panel ────────────────────────────────────────────────────────
+
+function PostDetailPanel({ post, onOpenDrawer }: { post: any; onOpenDrawer: () => void }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const thumb    = post.thumbnailUrl ?? '';
+  const showGrad = !thumb || thumb.startsWith('linear-gradient') || imgFailed;
+
+  // Defensive: aiAnalysis should always be present (query filters it), but if temporarily
+  // absent during a Convex subscription tick, show a neutral placeholder rather than
+  // silently unmounting the panel (which looks like the selection was cleared).
+  if (!post?.aiAnalysis) return (
+    <div className="flex flex-1 items-center justify-center text-neutral-300 text-[11px] font-medium">
+      Loading…
+    </div>
+  );
+
+  const score      = post.aiAnalysis.hookScore ?? 0;
+  const scoreColor = score >= 8 ? '#059669' : score >= 6 ? '#6d28d9' : score >= 4 ? '#ea580c' : '#dc2626';
+
+  function fmt(n: number) {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
+    return `${n}`;
+  }
+
+  function emotionStyle(e: string): { bg: string; color: string; border: string } {
+    const lower = e.toLowerCase();
+    if (['confident', 'bold', 'powerful', 'strong'].some(k => lower.includes(k)))
+      return { bg: 'rgba(5,150,105,0.08)',  color: '#059669', border: 'rgba(5,150,105,0.2)'  };
+    if (['playful', 'fun', 'happy', 'excited', 'joy'].some(k => lower.includes(k)))
+      return { bg: 'rgba(251,146,60,0.1)',   color: '#ea580c', border: 'rgba(251,146,60,0.2)' };
+    if (['curious', 'intrigued', 'interested'].some(k => lower.includes(k)))
+      return { bg: 'rgba(59,130,246,0.1)',   color: '#2563eb', border: 'rgba(59,130,246,0.2)' };
+    if (['desire', 'want', 'aspire', 'lust', 'appeal'].some(k => lower.includes(k)))
+      return { bg: 'rgba(236,72,153,0.1)',   color: '#db2777', border: 'rgba(236,72,153,0.2)' };
+    return { bg: 'rgba(109,40,217,0.08)',  color: '#6d28d9', border: 'rgba(109,40,217,0.15)' };
+  }
+
+  const hasEngagement = (post.likes ?? 0) > 0 || (post.views ?? 0) > 0 || (post.saves ?? 0) > 0;
+
+  return (
+    <motion.div
+      key={post._id}
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 12 }}
+      className="flex flex-1 min-h-0"
+    >
+      {/* Left: thumbnail column  -  9:16 portrait */}
+      <div className="relative shrink-0 bg-neutral-100" style={{ width: 290 }}>
+        {showGrad
+          ? <div className="w-full h-full" style={{ background: PURPLE_GRAD }} />
+          // eslint-disable-next-line @next/next/no-img-element
+          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        <div className="absolute bottom-3 left-3 right-3">
+          <p className="text-[13px] font-bold text-white leading-tight">{post.handle}</p>
+          <p className="text-[9px] text-white/70 capitalize mt-0.5">{post.niche} · {post.contentType}</p>
+        </div>
+      </div>
+
+      {/* Right: details */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4">
+
+          {/* Hook score + hook line side by side */}
+          <div className="flex gap-3 items-stretch">
+            <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-2xl"
+              style={{ backgroundColor: `${scoreColor}12`, border: `1.5px solid ${scoreColor}30` }}>
+              <span className="text-[22px] font-black leading-none" style={{ color: scoreColor }}>{score.toFixed(1)}</span>
+              <span className="text-[7px] font-bold uppercase tracking-wide mt-0.5" style={{ color: scoreColor }}>Hook</span>
+            </div>
+            <div className="flex-1 min-w-0 rounded-xl px-3 py-2.5" style={{ backgroundColor: 'rgba(109,40,217,0.05)', border: '1px solid rgba(109,40,217,0.12)' }}>
+              <p className="text-[8px] font-semibold text-purple-500 uppercase tracking-wider mb-1">Hook Line</p>
+              <p className="text-[11px] text-neutral-700 italic leading-snug">"{post.aiAnalysis.hookLine}"</p>
+            </div>
+          </div>
+
+          {/* Engagement stats row */}
+          {hasEngagement && (
+            <div className="grid grid-cols-4 gap-1.5">
+              {[
+                { label: 'Likes', value: fmt(post.likes ?? 0) },
+                { label: 'Views', value: fmt(post.views ?? 0) },
+                { label: 'Saves', value: fmt(post.saves ?? 0) },
+                { label: 'ER',    value: `${((post.engagementRate ?? 0) * 100).toFixed(1)}%` },
+              ].map(({ label, value }) => (
+                <div key={label} className="rounded-lg px-2 py-2 text-center"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}>
+                  <p className="text-[13px] font-bold text-neutral-700 leading-none">{value}</p>
+                  <p className="text-[8px] text-neutral-400 mt-1 uppercase tracking-wide">{label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Emotions — color-coded by type */}
+          {post.aiAnalysis.emotions?.length > 0 && (
+            <div>
+              <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-2">Emotions</p>
+              <div className="flex flex-wrap gap-1.5">
+                {post.aiAnalysis.emotions.map((e: string) => {
+                  const s = emotionStyle(e);
+                  return (
+                    <span key={e} className="text-[10px] font-semibold px-2.5 py-1 rounded-full capitalize"
+                      style={{ backgroundColor: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
+                      {e}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Breakdown */}
+          {post.aiAnalysis.breakdown && (
+            <div>
+              <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-2">Breakdown</p>
+              <p className="text-[11px] text-neutral-600 leading-relaxed">{post.aiAnalysis.breakdown}</p>
+            </div>
+          )}
+
+          {/* Suggestions  -  numbered action cards */}
+          {post.aiAnalysis.suggestions?.length > 0 && (
+            <div>
+              <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-2">Suggestions</p>
+              <div className="space-y-2">
+                {post.aiAnalysis.suggestions.map((s: string, i: number) => (
+                  <div key={i} className="flex gap-2.5 rounded-xl px-3 py-2.5"
+                    style={{ backgroundColor: 'rgba(109,40,217,0.04)', border: '1px solid rgba(109,40,217,0.1)' }}>
+                    <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white mt-0.5"
+                      style={{ background: PURPLE_GRAD }}>{i + 1}</span>
+                    <p className="text-[11px] text-neutral-600 leading-relaxed">{s}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="shrink-0 px-4 pb-4 pt-2" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+          <button onClick={onOpenDrawer}
+            className="w-full py-2.5 rounded-xl text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ background: PURPLE_GRAD }}>
+            Open full detail →
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function EmptyDetailState() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-4 px-8 text-center">
+      <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
+        style={{ backgroundColor: 'rgba(109,40,217,0.06)', border: '1px solid rgba(109,40,217,0.1)' }}>
+        <Sparkles size={22} className="text-purple-400" />
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-neutral-400">Select a post</p>
+        <p className="text-[11px] text-neutral-300 mt-1">Click any card in the Queue or Analyzed gallery to preview it here</p>
+      </div>
+    </div>
+  );
+}
+
+// ── Run All button with count picker ─────────────────────────────────────────
+
+function RunAllButton({ total, busy, onRun }: { total: number; busy: boolean; onRun: (n: number) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative w-full">
+      <div className="flex items-center rounded-lg overflow-hidden" style={{ background: PURPLE_GRAD }}>
+        <button
+          onClick={() => onRun(total)} disabled={busy}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold text-white hover:brightness-110 transition-all disabled:opacity-50 whitespace-nowrap"
+        >
+          {busy ? <><Loader2 size={10} className="animate-spin" /> Running...</> : <><Zap size={10} /> Run all {total} posts</>}
+        </button>
+        <div className="w-px h-4 bg-white/25 shrink-0" />
+        <button onClick={() => setOpen(v => !v)} disabled={busy}
+          className="shrink-0 flex items-center justify-center px-1.5 py-2 text-white hover:brightness-110 transition-all disabled:opacity-50">
+          <ChevronDown size={11} className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
+      {open && (
+        <div className="absolute bottom-full mb-1.5 left-0 right-0 rounded-xl py-1 z-50"
+          style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.09)', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }}>
+          {RUN_OPTIONS.filter(n => n < total).map(n => (
+            <button key={n} onClick={() => { onRun(n); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-[11px] text-neutral-700 hover:bg-black/[0.04] transition-colors text-left">
+              <Zap size={10} className="text-purple-600" /> Run {n} post{n > 1 ? 's' : ''}
+            </button>
+          ))}
+          <button onClick={() => { onRun(total); setOpen(false); }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-semibold text-purple-700 hover:bg-purple-50 transition-colors text-left">
+            <Zap size={10} className="text-purple-600" /> Run all {total} posts
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Column header ─────────────────────────────────────────────────────────────
+
+function ColHeader({ title, count, accentColor }: { title: string; count: number; accentColor: string }) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-2.5 shrink-0" style={{ borderBottom: `1px solid ${accentColor}18` }}>
+      <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: accentColor }}>{title}</p>
+      <span className="ml-auto px-1.5 py-0.5 rounded-md text-[10px] font-semibold tabular-nums"
+        style={{ backgroundColor: `${accentColor}18`, color: accentColor }}>{count}</span>
+    </div>
+  );
+}
+
+// ── Left column wrapper ───────────────────────────────────────────────────────
+
+function LeftSection({ title, count, accentColor, children, sizeClass, footerSlot }: {
+  title: string; count: number; accentColor: string;
+  children: React.ReactNode; sizeClass?: string; footerSlot?: React.ReactNode;
+}) {
+  return (
+    <div className={`flex flex-col rounded-xl overflow-hidden ${sizeClass ?? 'flex-1 min-h-0'}`}
+      style={{ border: '1px solid rgba(0,0,0,0.07)', borderLeft: `2px solid ${accentColor}`, backgroundColor: `${accentColor}08` }}>
+      <ColHeader title={title} count={count} accentColor={accentColor} />
+      <div className="flex-1 min-h-0 overflow-y-auto px-1.5 py-2 space-y-1.5 scrollbar-thin">
+        {children}
+      </div>
+      {footerSlot && (
+        <div className="shrink-0 px-2 pb-2 pt-1" style={{ borderTop: `1px solid ${accentColor}18` }}>
+          {footerSlot}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── List view rows (list mode only) ──────────────────────────────────────────
+
+function QueueListRow({ post, isExpired, onAnalyse }: { post: QueuePost; isExpired: boolean; onAnalyse: () => void }) {
+  const thumb  = post.thumbnailUrl ?? '';
+  const isGrad = !thumb || thumb.startsWith('linear-gradient');
+  return (
+    <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+      <div className="w-8 h-[46px] rounded-md overflow-hidden shrink-0 bg-neutral-100">
+        {isGrad ? <div className="w-full h-full" style={{ background: thumb || PURPLE_GRAD }} />
+          // eslint-disable-next-line @next/next/no-img-element
+          : <img src={thumb} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" />}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] font-semibold text-neutral-800 truncate">{post.handle}</p>
+        <p className="text-[10px] text-neutral-400">{post.niche} · {post.contentType} · {(post.engagementRate * 100).toFixed(1)}% ER</p>
+      </div>
+      <span className="text-[10px] font-bold text-white px-1.5 py-0.5 rounded shrink-0" style={{ background: GRAD }}>{post.outlierRatio.toFixed(1)}x</span>
+      {isExpired && <span className="text-[9px] font-bold text-amber-500 shrink-0">24h</span>}
+      <button onClick={onAnalyse} className="text-[10px] font-semibold px-2.5 py-1.5 rounded-lg text-white shrink-0 hover:opacity-90" style={{ background: GRAD }}>
+        Analyse
+      </button>
+    </div>
+  );
+}
+
+function AnalyzedListRow({ post, onClick }: { post: any; onClick: () => void }) {
+  const isGrad = post.thumbnailUrl?.startsWith('linear-gradient');
+  return (
+    <div onClick={onClick} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white cursor-pointer hover:border-purple-200 transition-colors" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+      <div className="w-8 h-[46px] rounded-md overflow-hidden shrink-0 bg-neutral-100">
+        {isGrad ? <div className="w-full h-full" style={{ background: post.thumbnailUrl }} />
+          // eslint-disable-next-line @next/next/no-img-element
+          : <img src={post.thumbnailUrl} alt={post.handle} className="w-full h-full object-cover" referrerPolicy="no-referrer" />}
+      </div>
+      <ScoreRing score={post.aiAnalysis.hookScore} size={30} />
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] font-semibold text-neutral-800 truncate">{post.handle}</p>
+        <p className="text-[9px] text-neutral-500 italic line-clamp-1">"{post.aiAnalysis.hookLine}"</p>
+      </div>
+      {post.aiAnalysis.emotions[0] && (
+        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full capitalize shrink-0" style={{ backgroundColor: 'rgba(109,40,217,0.1)', color: '#6d28d9' }}>
+          {post.aiAnalysis.emotions[0]}
+        </span>
+      )}
+      <span className="text-[10px] text-neutral-400 shrink-0">{((post.engagementRate ?? 0) * 100).toFixed(1)}% ER</span>
+    </div>
+  );
+}
+
+function EmptyState({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 py-8 text-neutral-300">
+      <Icon size={20} />
+      <p className="text-[11px] font-medium">{label}</p>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+// Module-level: persists selection across React remounts (Strict Mode, parent re-renders, etc.)
+// These vars live for the lifetime of the browser tab, surviving any component unmount/remount.
+let _persistedPostId: string | null = null;
+let _persistedSnapshot: any | null = null;
+
+export function AnalysisPageView() {
+  const queue         = useQuery(api.intelligence.getAnalysisQueue, { days: 90, limit: 50 });
+  const analysed      = useQuery(api.intelligence.getAnalysedPosts, { days: 90, limit: 40 });
+  const stats         = useQuery(api.intelligence.getStats, {});
+  const patchAnalysis    = useMutation(api.intelligence.patchAnalysis);
+  const insertAnalysisV2 = useMutation(api.intelligence.insertAnalysisV2);
+
+  const [inFlight,  setInFlight]  = useState<Map<string, Phase>>(new Map());
+  const [drawerOpen,       setDrawerOpen]       = useState(false);
+  const [drawerIndex,      setDrawerIndex]       = useState(0);
+  const [justAnalysedPost, setJustAnalysedPost] = useState<DrawerPost | null>(null);
+  const [drawerFromResult, setDrawerFromResult] = useState(false);
+  // ID + snapshot: survives both Convex subscription updates and component remounts
+  const [selectedPostId,       _setPostId]   = useState<string | null>(_persistedPostId);
+  const [selectedPostSnapshot, _setSnapshot] = useState<any | null>(_persistedSnapshot);
+  const [selectedQueuePost,    setSelectedQueuePost]    = useState<QueuePost | null>(null);
+  const [selectedTypeKey,      setSelectedTypeKey]      = useState('ofm_comprehensive');
+
+  // Wrappers keep module-level vars in sync so remounts re-hydrate to the last selection
+  function setSelectedPostId(id: string | null)   { _persistedPostId = id;  _setPostId(id);   }
+  function setSelectedPostSnapshot(p: any | null) { _persistedSnapshot = p; _setSnapshot(p);  }
+
+  // Prefer fresh Convex data; fall back to snapshot when post isn't in the current window
+  const freshPost    = selectedPostId ? (analysed ?? []).find((p: any) => p._id === selectedPostId) ?? null : null;
+  const selectedPost = freshPost ?? selectedPostSnapshot;
+
+  const activePrompt = useQuery(api.analysisPrompts.getActivePromptForType, { typeKey: selectedTypeKey });
+
+  // Diagnostic: fires whenever panel would unexpectedly hide — open DevTools to see why
+  useEffect(() => {
+    if (selectedPostId && !selectedPost) {
+      console.warn('[analysis-panel] selectedPostId set but selectedPost is null', {
+        selectedPostId,
+        snapshotId:    selectedPostSnapshot?._id ?? 'null',
+        freshPostId:   freshPost?._id   ?? 'null',
+        analysedCount: analysed?.length ?? 'undefined',
+        persistedId:   _persistedPostId ?? 'null',
+      });
+    }
+  });
+
+  const runAllBusyRef = useRef(false);
+  const [runAllBusy,  setRunAllBusy] = useState(false);
+
+  useEffect(() => () => { runAllBusyRef.current = false; }, []);
+
+  const inFlightIds   = new Set(inFlight.keys());
+  const queuePosts    = (queue ?? []).filter(p => !inFlightIds.has(p._id));
+  const inFlightPosts = (queue ?? []).filter(p =>  inFlightIds.has(p._id));
+
+  function isExpired(p: { postedAt?: number }) {
+    return typeof p.postedAt === 'number' && p.postedAt < Date.now() - 86_400_000;
+  }
+
+  const drawerPosts: DrawerPost[] =
+    drawerFromResult && justAnalysedPost
+      ? [justAnalysedPost]
+      : ((analysed ?? []) as unknown as DrawerPost[]);
+
+  function openDrawerFromAnalysed(index: number) {
+    setDrawerFromResult(false);
+    setDrawerIndex(index);
+    setDrawerOpen(true);
+  }
+
+  const handleAnalyse = useCallback(async (
+    post: QueuePost,
+    opts: { openDrawer?: boolean } = { openDrawer: true },
+  ) => {
+    setInFlight(prev => new Map(prev).set(post._id, 'downloading'));
+    try {
+      await new Promise(r => setTimeout(r, 500));
+      setInFlight(prev => new Map(prev).set(post._id, 'analysing'));
+
+      const res = await fetch('/api/intelligence/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post, systemPrompt: activePrompt?.prompt ?? null }),
+      });
+      if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+      const data = await res.json();
+
+      await patchAnalysis({
+        postId:      post._id as any,
+        transcript:  data.transcript ?? undefined,
+        hookScore:   data.hookScore  ?? 5,
+        hookLine:    data.hookLine   ?? '',
+        emotions:    data.emotions   ?? [],
+        breakdown:   data.breakdown  ?? '',
+        suggestions: data.suggestions ?? [],
+      });
+
+      // Fire-and-forget v2 feature vector extraction (non-blocking)
+      (async () => {
+        try {
+          const v2Res = await fetch('/api/intelligence/analyze-v2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ post }),
+          });
+          if (!v2Res.ok) return;
+          const v2 = await v2Res.json();
+          await insertAnalysisV2({
+            postId:                post._id as any,
+            handle:                post.handle,
+            niche:                 post.niche,
+            outlierRatio:          post.outlierRatio,
+            engagementRate:        post.engagementRate,
+            views:                 post.views  ?? 0,
+            saves:                 post.saves  ?? 0,
+            likes:                 post.likes  ?? 0,
+            hookStructure:         v2.hookStructure,
+            hookModality:          v2.hookModality,
+            firstFrameType:        v2.firstFrameType,
+            spokenFirstWords:      v2.spokenFirstWords ?? undefined,
+            onScreenTextFirstFrame: v2.onScreenTextFirstFrame ?? undefined,
+            curiosityGapPresent:   v2.curiosityGapPresent,
+            patternInterruptPresent: v2.patternInterruptPresent,
+            directAddress:         v2.directAddress,
+            hookDurationSec:       v2.hookDurationSec ?? undefined,
+            formatPrimary:         v2.formatPrimary,
+            setting:               v2.setting,
+            creatorOnScreen:       v2.creatorOnScreen,
+            faceVisibility:        v2.faceVisibility,
+            energyLevel:           v2.energyLevel,
+            cutsPerSecondBucket:   v2.cutsPerSecondBucket,
+            hasJumpCuts:           v2.hasJumpCuts,
+            hasSpeedRamps:         v2.hasSpeedRamps,
+            hasZoomPunches:        v2.hasZoomPunches,
+            hasSpokenWords:        v2.hasSpokenWords,
+            hasVoiceover:          v2.hasVoiceover,
+            musicEnergy:           v2.musicEnergy,
+            soundEffectsPresent:   v2.soundEffectsPresent,
+            speakingPace:          v2.speakingPace,
+            creatorExpressedEmotion: v2.creatorExpressedEmotion,
+            vibeKeyword:           v2.vibeKeyword,
+            captionHasCTA:         v2.captionHasCTA,
+            captionAddsContext:     v2.captionAddsContext,
+            captionRepeatsVideo:   v2.captionRepeatsVideo,
+            ctaType:               v2.ctaType,
+            captionLengthBucket:   v2.captionLengthBucket,
+            hashtagCount:          typeof v2.hashtagCount === 'number' ? v2.hashtagCount : undefined,
+            transcript:            v2.transcript ?? undefined,
+            onScreenTextFull:      v2.onScreenTextFull ?? undefined,
+            extractionConfidence:  v2.extractionConfidence,
+            extractionFlags:       v2.extractionFlags ?? [],
+            extractionModel:       v2.extractionModel,
+            promptVersion:         v2.promptVersion,
+            rawResponse:           v2.rawResponse ?? undefined,
+          });
+        } catch (e) {
+          console.warn('[analyze-v2] background extraction failed', e);
+        }
+      })();
+
+      if (opts.openDrawer) {
+        const snapshot: DrawerPost = {
+          ...(post as any),
+          platform: 'instagram', externalId: '',
+          saved: false, likes: 0, views: 0, saves: 0, comments: 0,
+          aiAnalysis: {
+            hookScore: data.hookScore ?? 5, hookLine: data.hookLine ?? '',
+            emotions: data.emotions ?? [], breakdown: data.breakdown ?? '',
+            suggestions: data.suggestions ?? [], transcript: data.transcript,
+            analyzedAt: Date.now(),
+          },
+        };
+        setJustAnalysedPost(snapshot);
+        setDrawerFromResult(true);
+        setDrawerIndex(0);
+        setDrawerOpen(true);
+      } else {
+        const score = (data.hookScore ?? 5).toFixed(1);
+        const when  = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        toast.success(`@${post.handle} analyzed  -  Hook score: ${score} *`, { description: when });
+      }
+    } catch (err) {
+      console.error('[analyse]', err);
+      toast.error(`Analysis failed for @${post.handle}`);
+    } finally {
+      setInFlight(prev => { const m = new Map(prev); m.delete(post._id); return m; });
+    }
+  }, [patchAnalysis, insertAnalysisV2, activePrompt]);
+
+  async function handleRunAll() {
+    if (runAllBusyRef.current) return;
+    runAllBusyRef.current = true;
+    setRunAllBusy(true);
+    try {
+      const batch = [...queuePosts];
+      for (const post of batch) {
+        if (!runAllBusyRef.current) break;
+        await handleAnalyse(post, { openDrawer: false });
+        await new Promise(r => setTimeout(r, 750));
+      }
+    } finally {
+      runAllBusyRef.current = false;
+      setRunAllBusy(false);
+    }
+  }
+
+  // ── Render ──────────────────────────────────────────────────────────────────
+  return (
+    <>
+      <div className="flex flex-col gap-3 flex-1 min-h-0">
+
+        <PipelineStatusStrip
+          totalIndexed={stats?.totalIndexed ?? 0}
+          postsThisWeek={stats?.postsThisWeek ?? 0}
+          latestScrapeAt={stats?.latestScrapeAt ?? 0}
+          inQueue={stats?.unanalysedCount}
+          analysedCount={stats?.analysedCount}
+          avgHookScore={stats?.avgHookScore}
+        />
+
+        {/* ── Auto pipeline view ── */}
+        <div className="flex gap-3 flex-1 min-h-0 min-w-0">
+
+            {/* Queue column */}
+            <LeftSection
+              title="Queue"
+              count={queuePosts.length}
+              accentColor="#6d28d9"
+              sizeClass="shrink-0 w-56 min-h-0 flex flex-col"
+              footerSlot={
+                queuePosts.length > 0 ? (
+                  <RunAllButton
+                    total={queuePosts.length}
+                    busy={runAllBusy}
+                    onRun={(n) => {
+                      if (n >= queuePosts.length) {
+                        handleRunAll();
+                      } else {
+                        const batch = queuePosts.slice(0, n);
+                        (async () => {
+                          for (const post of batch) {
+                            await handleAnalyse(post, { openDrawer: false });
+                            await new Promise(r => setTimeout(r, 750));
+                          }
+                        })();
+                      }
+                    }}
+                  />
+                ) : null
+              }
+            >
+              {queue === undefined
+                ? <div className="space-y-1.5">{[0,1,2,3].map(i => <div key={i} className="h-[96px] rounded-xl animate-pulse" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }} />)}</div>
+                : queuePosts.length === 0
+                  ? <EmptyState icon={Video} label="Queue is empty" />
+                  : (
+                    <AnimatePresence>
+                      {queuePosts.map(post => (
+                        <QueuePostCard
+                          key={post._id}
+                          post={post}
+                          isExpired={isExpired(post)}
+                          isSelected={selectedQueuePost?._id === post._id}
+                          onSelect={() => { setSelectedQueuePost(post); setSelectedPostId(null); setSelectedPostSnapshot(null); }}
+                          onAnalyse={() => handleAnalyse(post)}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  )}
+            </LeftSection>
+
+            {/* Middle: 3-row stack (Analyzing | Prompts | Analyzed) */}
+            <div className="flex-1 min-h-0 min-w-0 flex flex-col gap-3">
+
+              {/* Row 1: Analyzing pills strip */}
+              <div
+                className="shrink-0 rounded-xl overflow-hidden flex flex-col"
+                style={{
+                  height: 120,
+                  border: '1px solid rgba(0,0,0,0.07)',
+                  borderLeft: '2px solid #7c3aed',
+                  backgroundColor: 'rgba(124,58,237,0.04)',
+                }}
+              >
+                <ColHeader title="Analyzing" count={inFlightPosts.length} accentColor="#7c3aed" />
+                <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-center gap-2 px-2 py-1.5">
+                  <AnimatePresence>
+                    {inFlightPosts.length === 0 ? (
+                      <motion.div
+                        key="idle"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center gap-2 text-neutral-300 px-1"
+                      >
+                        <Loader2 size={13} className="opacity-30" />
+                        <p className="text-[11px] font-medium">Idle — click Analyse on a queued post to start</p>
+                      </motion.div>
+                    ) : (
+                      inFlightPosts.map(post => (
+                        <AnalyzingCard key={post._id} post={post} phase={inFlight.get(post._id) ?? 'analysing'} />
+                      ))
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Row 2: Analysis Prompts panel */}
+              <div className="flex-1 min-h-0">
+                <SystemPromptPanel
+                  selectedTypeKey={selectedTypeKey}
+                  onTypeChange={setSelectedTypeKey}
+                />
+              </div>
+
+              {/* Row 3: Analyzed portrait gallery */}
+              <div
+                className="shrink-0 rounded-xl overflow-hidden flex flex-col"
+                style={{
+                  height: 220,
+                  border: '1px solid rgba(0,0,0,0.07)',
+                  borderLeft: '2px solid #059669',
+                  backgroundColor: 'rgba(5,150,105,0.03)',
+                }}
+              >
+                <ColHeader title="Analyzed" count={analysed?.length ?? 0} accentColor="#059669" />
+                <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-stretch gap-2 px-2 py-2">
+                  {analysed === undefined
+                    ? [0,1,2].map(i => <div key={i} className="flex-shrink-0 h-full rounded-xl animate-pulse" style={{ width: 98, backgroundColor: 'rgba(0,0,0,0.05)' }} />)
+                    : analysed.length === 0
+                      ? <div className="flex flex-1 items-center justify-center gap-2 text-neutral-300"><Sparkles size={16} /><p className="text-[11px] font-medium">No analyses yet</p></div>
+                      : (
+                        <AnimatePresence>
+                          {(analysed as any[]).map((post) => (
+                            <AnalyzedPortraitCard
+                              key={post._id}
+                              post={post}
+                              isSelected={selectedPost?._id === post._id}
+                              onClick={() => { setSelectedPostId(post._id); setSelectedPostSnapshot(post); setSelectedQueuePost(null); }}
+                            />
+                          ))}
+                        </AnimatePresence>
+                      )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right detail panel  -  fixed width */}
+            <div
+              className="shrink-0 rounded-xl overflow-hidden flex flex-col"
+              style={{ width: 600, border: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#fff' }}
+            >
+              {selectedQueuePost ? (
+                <QueuePostDetailPanel
+                  post={selectedQueuePost}
+                  onAnalyse={() => {
+                    handleAnalyse(selectedQueuePost);
+                    setSelectedQueuePost(null);
+                  }}
+                />
+              ) : selectedPost ? (
+                <PostDetailPanel
+                  post={selectedPost}
+                  onOpenDrawer={() => {
+                    const idx = (analysed ?? []).findIndex((p: any) => p._id === selectedPostId);
+                    if (idx !== -1) openDrawerFromAnalysed(idx);
+                  }}
+                />
+              ) : (
+                <EmptyDetailState />
+              )}
+            </div>
+
+          </div>
+
+      </div>
+
+      <AnimatePresence>
+        {drawerOpen && drawerPosts.length > 0 && (
+          <PostDetailDrawer
+            posts={drawerPosts}
+            initialIndex={drawerIndex}
+            onClose={() => setDrawerOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+    </>
+  );
+}

@@ -33,7 +33,7 @@ export function AnalysedPostCard({ post, index, onClick }: Props) {
       onClick={() => onClick(post._id)}
       whileHover={{ y: -2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
     >
-      <div className="relative w-full" style={{ aspectRatio: '9/16', maxHeight: 140, overflow: 'hidden' }}>
+      <div className="relative w-full" style={{ aspectRatio: '9/16', overflow: 'hidden' }}>
         {isGrad
           ? <div className="w-full h-full" style={{ background: post.thumbnailUrl }} />
           : <Image src={post.thumbnailUrl} alt={post.handle} fill className="object-cover" referrerPolicy="no-referrer" />

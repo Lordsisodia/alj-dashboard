@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import sharp from 'sharp';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/convex/_generated/api';
 import { getApifyToken } from '@/lib/apifyTokens';
@@ -25,11 +26,13 @@ async function uploadAvatarToR2(username: string, picUrl: string): Promise<strin
       signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) return null;
-    const buffer      = Buffer.from(await res.arrayBuffer());
-    const contentType = res.headers.get('content-type') ?? 'image/jpeg';
-    const ext         = contentType.includes('png') ? 'png' : 'jpg';
-    const key         = `avatars/ig/${username}.${ext}`;
-    await R2.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: buffer, ContentType: contentType }));
+    const raw = Buffer.from(await res.arrayBuffer());
+    const compressed = await sharp(raw)
+      .resize(400, 400, { fit: 'cover', position: 'centre' })
+      .webp({ quality: 82 })
+      .toBuffer();
+    const key = `avatars/ig/${username}.webp`;
+    await R2.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: compressed, ContentType: 'image/webp' }));
     return `${PUBLIC_BASE}/${key}`;
   } catch {
     return null;
@@ -43,6 +46,8 @@ async function writeToConvex(enriched: Record<string, unknown>) {
     const n = (v: unknown) => (v != null ? (v as number) : undefined);
     const s = (v: unknown) => (v != null ? (v as string) : undefined);
     const b = (v: unknown) => (v != null ? (v as boolean) : undefined);
+
+    // 1. Upsert into creatorCandidates (discovery pipeline)
     await convex.mutation(api.candidates.upsert, {
       handle:             enriched.handle as string,
       displayName:        enriched.displayName as string,
@@ -66,6 +71,27 @@ async function writeToConvex(enriched: Record<string, unknown>) {
     });
     // Always patch enrichStatus=done directly — upsert INSERT path overrides it with 'idle'
     await convex.mutation(api.candidates.markEnriched, { handle: enriched.handle as string });
+
+    // 2. Push enriched data to trackedAccounts — overwrites placeholder values with real Apify data
+    await convex.mutation(api.trackedAccounts.syncEnrichedToTracked, {
+      handle:             enriched.handle as string,
+      displayName:        s(enriched.displayName),
+      followerCount:      n(enriched.followerCount),
+      avgEngagementRate:  n(enriched.avgEngagementRate),
+      avgViews:           n(enriched.avgViews),
+      outlierRatio:       n(enriched.outlierRatio),
+      highlightReelCount: n(enriched.highlightReelCount),
+      followsCount:       n(enriched.followsCount),
+      postsCount:         n(enriched.postsCount),
+      bio:                s(enriched.bio),
+      avatarUrl:          s(enriched.avatarUrl),
+      verified:           b(enriched.verified),
+      isPrivate:          b(enriched.isPrivate),
+      isBusinessAccount:  b(enriched.isBusinessAccount),
+      externalUrl:        s(enriched.externalUrl),
+      igtvVideoCount:     n(enriched.igtvVideoCount),
+      instagramId:        s(enriched.instagramId),
+    });
   } catch (e) {
     console.error('[enrich-candidate] Convex write failed:', e);
     throw e;
@@ -111,7 +137,9 @@ export async function POST(req: NextRequest) {
       .slice(0, 30);
 
     const rawAvatarUrl = p.profilePicUrlHD ?? p.profilePicUrl ?? null;
-    console.log(`[enrich] ${username} - rawAvatarUrl: ${rawAvatarUrl ? 'found' : 'MISSING'}`);
+    // No profile pic from Apify = strong signal the account is private
+    const likelyPrivate = !rawAvatarUrl || (p.private ?? false);
+    console.log(`[enrich] ${username} - rawAvatarUrl: ${rawAvatarUrl ? 'found' : 'MISSING'}, likelyPrivate: ${likelyPrivate}`);
 
     // Kick off R2 upload + Convex write in parallel — don't await them
     const avatarUpload = rawAvatarUrl
@@ -127,7 +155,7 @@ export async function POST(req: NextRequest) {
       bio:              p.biography           ?? null,
       avatarUrl:        null, // filled below after R2 upload
       verified:         p.verified            ?? false,
-      isPrivate:        p.private             ?? false,
+      isPrivate:        likelyPrivate,
       isBusinessAccount: p.isBusinessAccount   ?? false,
       instagramId:      p.id ? String(p.id)   : null,
       externalUrl:      p.externalUrl           ?? p.externalUrls?.[0]?.url ?? null,

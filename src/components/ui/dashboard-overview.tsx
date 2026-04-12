@@ -47,7 +47,7 @@ export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
             {title}
           </CardTitle>
           {IconComponent && (
-            <IconComponent className="h-3.5 w-3.5 text-neutral-400" aria-hidden="true" />
+            <IconComponent className="h-3.5 w-3.5 text-red-600" aria-hidden="true" />
           )}
         </CardHeader>
         <CardContent className="px-5 pb-4">

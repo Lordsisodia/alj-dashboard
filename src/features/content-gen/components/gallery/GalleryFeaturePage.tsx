@@ -1,181 +1,156 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Play, CheckCircle2, XCircle, Send, Clock } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { SEED_HISTORY } from '../queue/seed';
-import { PROVIDER_CFG } from '../queue/types';
-import type { HistoryJob, Outcome } from '../queue/types';
+import { useRef, useState, useEffect, useMemo } from 'react';
+import { useQuery } from 'convex/react';
+import { AnimatePresence } from 'framer-motion';
+import { Film, CheckCircle2, XCircle, Clock, ChevronDown } from 'lucide-react';
 
-const MODEL_COLOR: Record<string, string> = {
-  Tyler: '#f97316',
-  Ren:   '#14b8a6',
-  Ella:  '#3b82f6',
-  Amam:  '#f59e0b',
-};
+import { api } from '@/convex/_generated/api';
+import type { Doc } from '@/convex/_generated/dataModel';
 
-const OUTCOME_FILTERS = [
-  { id: 'all',            label: 'All'            },
-  { id: 'Pending Review', label: 'Needs Review'   },
-  { id: 'Approved',       label: 'Approved'       },
-  { id: 'Rejected',       label: 'Rejected'       },
-];
-
-function OutcomeOverlay({ outcome }: { outcome?: Outcome }) {
-  if (!outcome || outcome === 'Pending Review') return null;
-  const isApproved = outcome === 'Approved';
-  return (
-    <div
-      className="absolute top-2 right-2 flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
-      style={{ backgroundColor: isApproved ? '#10b981' : '#ef4444' }}
-    >
-      {isApproved ? <CheckCircle2 size={9} /> : <XCircle size={9} />}
-      {outcome}
-    </div>
-  );
-}
-
-function GalleryCard({ job }: { job: HistoryJob }) {
-  const [hovered, setHovered] = useState(false);
-  const color  = MODEL_COLOR[job.modelName] ?? '#a78bfa';
-  const thumb  = job.thumbnailColor ?? '#888';
-  const { bar } = PROVIDER_CFG[job.provider];
-  const needsReview = !job.outcome || job.outcome === 'Pending Review';
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.18 }}
-      className="group relative flex flex-col rounded-2xl overflow-hidden cursor-pointer"
-      style={{ border: needsReview ? '1.5px solid #fbbf24' : '1px solid rgba(0,0,0,0.07)' }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* 9:16 thumbnail */}
-      <div
-        className="w-full flex items-center justify-center relative"
-        style={{
-          aspectRatio: '9/16',
-          background: `linear-gradient(160deg, ${thumb}cc 0%, ${thumb}55 100%)`,
-        }}
-      >
-        {/* Play button */}
-        <div className="w-10 h-10 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center">
-          <Play size={14} className="text-white ml-0.5" fill="white" />
-        </div>
-
-        {/* Provider accent strip */}
-        <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ backgroundColor: bar }} />
-
-        {/* Outcome badge */}
-        <OutcomeOverlay outcome={job.outcome} />
-
-        {/* Pending review glow */}
-        {needsReview && (
-          <div className="absolute top-2 left-2 flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full text-amber-800" style={{ backgroundColor: '#fef3c7' }}>
-            <Clock size={9} /> Review
-          </div>
-        )}
-
-        {/* Hover action overlay */}
-        <AnimatePresence>
-          {hovered && (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.12 }}
-              className="absolute inset-0 flex flex-col justify-end p-2.5"
-              style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.65) 100%)' }}
-            >
-              <div className="flex gap-1.5">
-                <button
-                  className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[10px] font-semibold text-white hover:brightness-110 transition-all"
-                  style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
-                >
-                  <CheckCircle2 size={10} /> Approve
-                </button>
-                <button
-                  className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[10px] font-semibold text-white/90 hover:bg-white/20 transition-all"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)' }}
-                >
-                  <Send size={10} /> Send
-                </button>
-                <button
-                  className="w-8 flex items-center justify-center py-1.5 rounded-xl hover:bg-white/20 transition-all"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.15)' }}
-                >
-                  <XCircle size={10} className="text-white/70" />
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Caption strip */}
-      <div className="px-2.5 py-2" style={{ backgroundColor: '#fafaf9' }}>
-        <p className="text-[11px] font-semibold text-neutral-700 truncate">{job.name}</p>
-        <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-          <span className="text-[10px] text-neutral-500 truncate">{job.modelName}</span>
-          <span className="text-[9px] text-neutral-300">·</span>
-          <span
-            className="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
-            style={{ backgroundColor: PROVIDER_CFG[job.provider].badgeBg, color: PROVIDER_CFG[job.provider].badgeText }}
-          >
-            {job.provider}
-          </span>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+import { StatusStrip, timeAgo } from '@/components/ui/status-strip';
+import { GalleryCard } from './GalleryCard';
+import type { Outcome } from '../queue/types';
 
 export default function GalleryFeaturePage() {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const history = useQuery(api.contentGen.getHistory, { limit: 200 }) ?? [];
+  const models  = useQuery(api.models.getAll) ?? [];
 
-  const jobs = SEED_HISTORY; // swap for useQuery(api.contentGen.getHistory)
+  const [modelFilter, setModelFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | Outcome>('all');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onMouseDown(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, []);
+
+  const total = history.length;
+  const approved = history.filter(j => j.outcome === 'Approved').length;
+  const rejected = history.filter(j => j.outcome === 'Rejected').length;
+  const pending = history.filter(j => !j.outcome || j.outcome === 'Pending Review').length;
+  const lastCompletedAt = history[0]?.completedAt ?? 0;
 
   const filtered = useMemo(() => {
-    return jobs
-      .filter(j => activeFilter === 'all' || j.outcome === activeFilter || (activeFilter === 'Pending Review' && !j.outcome));
-  }, [jobs, activeFilter]);
+    return history.filter(job => {
+      if (modelFilter !== 'all' && job.modelId !== modelFilter) return false;
+      if (statusFilter !== 'all') {
+        if (statusFilter === 'Pending Review') {
+          if (job.outcome && job.outcome !== 'Pending Review') return false;
+        } else if (job.outcome !== statusFilter) return false;
+      }
+      return true;
+    });
+  }, [history, modelFilter, statusFilter]);
 
-  const needsReview = jobs.filter(j => !j.outcome || j.outcome === 'Pending Review').length;
+  const selectedModel = models.find(m => m._id === modelFilter);
+  const filterLabel = selectedModel ? selectedModel.name : 'All models';
 
   return (
-    <div className="p-5">
-      <div className="flex items-center gap-1 mb-4">
-        {OUTCOME_FILTERS.map(f => (
+    <div className="p-5 flex flex-col gap-4">
+      <StatusStrip
+        status={{ label: 'Gallery', active: total > 0 }}
+        stats={[
+          { icon: <Film size={11} />, value: total, label: 'clips' },
+          { icon: <CheckCircle2 size={11} />, value: approved, label: 'approved', accent: '#059669' },
+          { icon: <XCircle size={11} />, value: rejected, label: 'rejected', accent: '#ef4444' },
+          { icon: <Clock size={11} />, value: pending, label: 'pending review' },
+        ]}
+        iconColor="text-emerald-600"
+        rightSlot={
+          lastCompletedAt ? (
+            <div className="flex items-center gap-1.5">
+              <Clock size={10} className="text-emerald-600" />
+              <span className="text-[11px]">Last: <span className="font-medium text-neutral-700">{timeAgo(lastCompletedAt)}</span></span>
+            </div>
+          ) : null
+        }
+      />
+
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative flex-shrink-0" ref={dropdownRef}>
           <button
-            key={f.id}
-            onClick={() => setActiveFilter(f.id)}
-            className={cn(
-              'px-3 py-1 rounded-lg text-xs font-medium transition-colors',
-              activeFilter === f.id
-                ? 'text-neutral-900 bg-black/[0.07]'
-                : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
-            )}
+            onClick={() => setDropdownOpen(o => !o)}
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-neutral-600 px-2.5 py-1 rounded-lg hover:bg-neutral-100 transition-colors"
+            style={{ border: '1px solid rgba(0,0,0,0.08)' }}
           >
-            {f.label}
+            {selectedModel && (
+              <span
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: selectedModel.avatarColor }}
+              />
+            )}
+            {filterLabel}
+            <ChevronDown size={10} className={`transition-transform duration-150 ${dropdownOpen ? 'rotate-180' : ''}`} />
           </button>
-        ))}
+
+          {dropdownOpen && (
+            <div
+              className="absolute top-full left-0 mt-1.5 rounded-xl py-1 z-50 min-w-[140px]"
+              style={{
+                background: '#fff',
+                border: '1px solid rgba(0,0,0,0.09)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+              }}
+            >
+              <button
+                onClick={() => { setModelFilter('all'); setDropdownOpen(false); }}
+                className="w-full text-left px-3 py-1.5 text-[11px] font-medium hover:bg-neutral-50 transition-colors"
+                style={{ color: modelFilter === 'all' ? '#111' : '#6b7280' }}
+              >
+                All models
+              </button>
+              {models.map(m => (
+                <button
+                  key={m._id}
+                  onClick={() => { setModelFilter(m._id); setDropdownOpen(false); }}
+                  className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium hover:bg-neutral-50 transition-colors"
+                  style={{ color: modelFilter === m._id ? '#111' : '#6b7280' }}
+                >
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: m.avatarColor }} />
+                  {m.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {(['all', 'Approved', 'Rejected', 'Pending Review'] as const).map(status => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status === 'all' ? 'all' : status)}
+              className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
+              style={{
+                backgroundColor: statusFilter === status ? '#10b981' : '#f3f4f6',
+                color: statusFilter === status ? '#fff' : '#6b7280',
+              }}
+            >
+              {status === 'all' ? 'All' : status}
+            </button>
+          ))}
+        </div>
       </div>
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 gap-3">
-            <Play size={28} className="text-neutral-200" />
-            <p className="text-sm font-medium text-neutral-300 select-none">No clips here yet</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-            <AnimatePresence mode="popLayout">
-              {filtered.map(job => <GalleryCard key={job._id} job={job} />)}
-            </AnimatePresence>
-          </div>
-        )}
-      </div>
+
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-48 gap-3">
+          <Film size={28} className="text-neutral-200" />
+          <p className="text-sm font-medium text-neutral-300">No finished clips yet</p>
+          <p className="text-xs text-neutral-400">Approved generations will appear here</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+          <AnimatePresence mode="popLayout">
+            {filtered.map(job => <GalleryCard key={job._id} job={job} />)}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
   );
 }

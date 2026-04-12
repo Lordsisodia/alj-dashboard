@@ -407,6 +407,9 @@ export interface ContentPageShellProps {
   showViewToggle?: boolean;
   viewMode?: 'grid' | 'list';
   onViewModeChange?: (mode: 'grid' | 'list') => void;
+  // Accent gradient — drives action button + active tab colour
+  // Defaults to red (Recon). Pass a CSS gradient string to override (e.g. Intelligence purple).
+  accentGradient?: string;
   // Content
   children?: ReactNode;
 }
@@ -439,6 +442,7 @@ export function ContentPageShell({
   showViewToggle = false,
   viewMode: viewModeProp,
   onViewModeChange,
+  accentGradient = 'linear-gradient(135deg, #dc2626, #991b1b)',
   children,
 }: ContentPageShellProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -507,7 +511,7 @@ export function ContentPageShell({
         <div ref={dropdownRef} className="relative flex-shrink-0">
           <div
             className="flex items-center h-9 rounded-xl overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, #dc2626, #991b1b)' }}
+            style={{ background: accentGradient }}
           >
             <button
               onClick={onAction}
@@ -575,7 +579,7 @@ export function ContentPageShell({
                     : 'text-neutral-400 hover:text-neutral-600 hover:bg-black/[0.04]'
                 )}
                 style={activeTab === tab.id
-                  ? { background: 'linear-gradient(135deg, #dc2626, #991b1b)' }
+                  ? { background: accentGradient }
                   : undefined
                 }
               >
@@ -641,7 +645,7 @@ export function ContentPageShell({
       )}
 
       {/* ── Content area ───────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
         {children}
       </div>
     </div>

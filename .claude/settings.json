@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Agent"
+    ],
+    "deny": []
+  },
+  "env": {
+    "PROJECT": "isso-dashboard",
+    "AGENT_ID": "agency.clients-pm",
+    "AGENT_DIR": "${workspaceFolder}",
+    "SISO_TASKS_DB": "/Users/shaansisodia/SISO_Workspace/.SystemDB/sisosystem.db"
+  },
+  "hooks": {}
+}
