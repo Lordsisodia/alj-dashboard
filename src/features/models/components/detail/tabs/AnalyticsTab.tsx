@@ -130,7 +130,7 @@ export function AnalyticsTab({ model }: { model: ModelData }) {
         </div>
       </div>
 
-      <a href="/isso/analytics" className="block text-xs font-medium text-center" style={{ color: '#ff0069' }}>
+      <a href="/content-gen/analytics" className="block text-xs font-medium text-center" style={{ color: '#ff0069' }}>
         View full analytics →
       </a>
     </div>

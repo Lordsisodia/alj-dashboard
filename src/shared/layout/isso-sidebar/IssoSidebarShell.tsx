@@ -138,7 +138,7 @@ export function IssoSidebarShell({ config }: { config?: SidebarConfig }) {
     section.sections.some(s =>
       s.items.some(item =>
         pathname === item.href ||
-        (item.href !== '/isso' && pathname.startsWith(item.href + '/'))
+        (item.href !== '/content-gen' && pathname.startsWith(item.href + '/'))
       )
     )
   )?.id ?? (navConfig[0]?.id ?? 'hub');
@@ -186,7 +186,7 @@ export function IssoSidebarShell({ config }: { config?: SidebarConfig }) {
           const btn = (
             <Link
               key={section.id}
-              href={section.sections[0]?.items[0]?.href ?? '/isso'}
+              href={section.sections[0]?.items[0]?.href ?? '/content-gen'}
               className={cn(
                 'relative flex items-center justify-center rounded-[10px] transition-all duration-150 flex-shrink-0 overflow-hidden',
                 'w-12 h-12',

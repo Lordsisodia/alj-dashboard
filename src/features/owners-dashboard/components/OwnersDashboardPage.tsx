@@ -7,7 +7,7 @@ import {
   BarChart2, FileText, Calendar, ChevronRight,
   ArrowUpRight, ArrowDownRight,
 } from 'lucide-react';
-import { ContentPageShell } from '@/shared/layout/ContentPageShell';
+import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 
 // ── Seed data ────────────────────────────���─────────────────────────���─────────
 
@@ -32,10 +32,10 @@ const TEAM_SUMMARY = [
 ];
 
 const QUICK_LINKS = [
-  { label: 'Billings & Payroll', href: '/isso/owners/billings', icon: CreditCard, color: '#ff0069' },
-  { label: 'P&L Reports',        href: '/isso/owners/reports',  icon: FileText,   color: '#833ab4' },
-  { label: 'Team Management',    href: '/isso/owners/team',     icon: Users,      color: '#22c55e' },
-  { label: 'Schedule Overview',  href: '/isso/owners/schedule', icon: Calendar,   color: '#f59e0b' },
+  { label: 'Billings & Payroll', href: '/agency/billings', icon: CreditCard, color: '#ff0069' },
+  { label: 'P&L Reports',        href: '/agency/reports',  icon: FileText,   color: '#833ab4' },
+  { label: 'Team Management',    href: '/agency/team',     icon: Users,      color: '#22c55e' },
+  { label: 'Schedule Overview',  href: '/agency/schedule', icon: Calendar,   color: '#f59e0b' },
 ];
 
 // ── Components ──────────────────────────────────────────────────────────────���
@@ -122,7 +122,7 @@ export default function OwnersDashboardPage() {
                   This Month
                 </span>
               </div>
-              <Link href="/isso/owners/reports" className="text-[11px] font-medium text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 transition-colors">
+              <Link href="/agency/reports" className="text-[11px] font-medium text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 transition-colors">
                 Full Report <ChevronRight size={12} />
               </Link>
             </div>
@@ -138,7 +138,7 @@ export default function OwnersDashboardPage() {
                 </div>
                 <p className="text-sm font-semibold text-neutral-900">Team</p>
               </div>
-              <Link href="/isso/owners/team" className="text-[11px] font-medium text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 transition-colors">
+              <Link href="/agency/team" className="text-[11px] font-medium text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 transition-colors">
                 Manage <ChevronRight size={12} />
               </Link>
             </div>
@@ -162,7 +162,7 @@ export default function OwnersDashboardPage() {
                 <span className="text-xs text-neutral-500">Monthly Payroll</span>
                 <span className="text-sm font-bold text-neutral-900">£3,520</span>
               </div>
-              <Link href="/isso/owners/billings" className="text-[11px] font-medium text-[#ff0069] mt-1 flex items-center gap-0.5">
+              <Link href="/agency/billings" className="text-[11px] font-medium text-[#ff0069] mt-1 flex items-center gap-0.5">
                 View Billings <ChevronRight size={11} />
               </Link>
             </div>

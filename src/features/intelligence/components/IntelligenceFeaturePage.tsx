@@ -206,7 +206,7 @@ export default function IntelligenceFeaturePage() {
         ]}
         activeTab={activeTab}
         onTabChange={id => setActiveTab(id as Tab)}
-        nextProduct={{ label: 'Hub', icon: <ProductIcon product="hub" size={16} />, href: '/isso/community' }}
+        nextProduct={{ label: 'Hub', icon: <ProductIcon product="hub" size={16} />, href: '/content-gen/community' }}
         filterRightSlot={activeTab !== 'dashboard' ? (
           <div className="flex items-center gap-2">
             {activeTab === 'analysis' && (

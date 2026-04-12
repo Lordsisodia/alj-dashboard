@@ -52,7 +52,7 @@ export function OutlierSpotlight({ post }: Props) {
           <span className="text-[10px] text-neutral-400">{(post.engagementRate * 100).toFixed(1)}% ER</span>
           <span className="text-[10px] text-neutral-400">{post.views.toLocaleString()} views</span>
           <button
-            onClick={() => router.push(`/isso/ideas?${new URLSearchParams({ niche: post.niche, format: post.contentType, hook: post.hook.slice(0, 80) }).toString()}`)}
+            onClick={() => router.push(`/content-gen/ideas?${new URLSearchParams({ niche: post.niche, format: post.contentType, hook: post.hook.slice(0, 80) }).toString()}`)}
             className="ml-auto flex items-center gap-1 text-[9px] font-semibold px-2 py-1 rounded-lg text-white"
             style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
           >

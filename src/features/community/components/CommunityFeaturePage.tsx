@@ -66,7 +66,7 @@ export default function CommunityFeaturePage() {
       ]}
       activeTab={activeTab}
       onTabChange={(id) => setActiveTab(id as Tab)}
-      nextProduct={{ label: 'Content Gen', icon: <ProductIcon product="content-gen" size={13} />, href: '/isso/ideas' }}
+      nextProduct={{ label: 'Content Gen', icon: <ProductIcon product="content-gen" size={13} />, href: '/content-gen/ideas' }}
       filterRightSlot={activeTab !== 'dashboard' ? (
         <div className="flex items-center gap-2">
           <button

@@ -128,7 +128,7 @@ export function DashboardView() {
             </div>
             <div className="grid grid-cols-3 divide-x" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
               <button
-                onClick={() => router.push('/isso/intelligence?tab=analysis')}
+                onClick={() => router.push('/content-gen/intelligence?tab=analysis')}
                 className="flex flex-col items-center gap-2 px-4 py-4 transition-colors hover:bg-neutral-50 text-center"
               >
                 <div
@@ -143,7 +143,7 @@ export function DashboardView() {
                 </div>
               </button>
               <button
-                onClick={() => router.push('/isso/intelligence?tab=feed')}
+                onClick={() => router.push('/content-gen/intelligence?tab=feed')}
                 className="flex flex-col items-center gap-2 px-4 py-4 transition-colors hover:bg-neutral-50 text-center"
               >
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#f5f5f4' }}>
@@ -155,7 +155,7 @@ export function DashboardView() {
                 </div>
               </button>
               <button
-                onClick={() => router.push('/isso/intelligence?tab=insights')}
+                onClick={() => router.push('/content-gen/intelligence?tab=insights')}
                 className="flex flex-col items-center gap-2 px-4 py-4 transition-colors hover:bg-neutral-50 text-center"
               >
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#f5f5f4' }}>

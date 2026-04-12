@@ -10,7 +10,7 @@ export default function SignUpRoute() {
   const router = useRouter();
 
   useEffect(() => {
-    if (isSignedIn) router.replace('/isso');
+    if (isSignedIn) router.replace('/content-gen');
   }, [isSignedIn, router]);
 
   return (
@@ -18,8 +18,8 @@ export default function SignUpRoute() {
       <SignUp
         routing="path"
         path="/sign-up"
-        forceRedirectUrl="/isso"
-        fallbackRedirectUrl="/isso"
+        forceRedirectUrl="/content-gen"
+        fallbackRedirectUrl="/content-gen"
         signInUrl="/sign-in"
       />
     </div>

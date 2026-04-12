@@ -20,7 +20,7 @@ function DatePill({
   return (
     <a
       data-cal-config='{"layout":"month_view"}'
-      data-cal-link="team/isso/isso-demo"
+      data-cal-link="team/content-gen/isso-demo"
       data-cal-namespace="isso-demo"
       href="#"
       className={`date-pill w-inline-block${isToday ? ' is-today' : ''}`}
@@ -130,7 +130,7 @@ export default function CalendarPopup() {
               <div className="calendar-pop-cta">
                 <a
                   data-cal-config='{"layout":"month_view"}'
-                  data-cal-link="team/isso/isso-demo"
+                  data-cal-link="team/content-gen/isso-demo"
                   data-cal-namespace="isso-demo"
                   href="#"
                   className="button-light button-primary w-inline-block"

@@ -20,9 +20,9 @@ export const OWNERS_NAV_CONFIG: SectionConfig[] = [
         title: 'Overview',
         hideTitle: true,
         items: [
-          { label: 'Dashboard',  href: '/isso/owners',             icon: <LayoutDashboard size={16} /> },
-          { label: 'P&L Report', href: '/isso/owners/reports',      icon: <DollarSign size={16} /> },
-          { label: 'Billings',  href: '/isso/owners/billings',     icon: <CreditCard size={16} /> },
+          { label: 'Dashboard',  href: '/agency',             icon: <LayoutDashboard size={16} /> },
+          { label: 'P&L Report', href: '/agency/reports',      icon: <DollarSign size={16} /> },
+          { label: 'Billings',  href: '/agency/billings',     icon: <CreditCard size={16} /> },
         ],
       },
     ],
@@ -38,8 +38,8 @@ export const OWNERS_NAV_CONFIG: SectionConfig[] = [
         title: 'Analytics',
         hideTitle: true,
         items: [
-          { label: 'Overview', href: '/isso/owners/analytics', icon: <TrendingUp size={16} /> },
-          { label: 'Revenue',  href: '/isso/owners/analytics', icon: <DollarSign size={16} /> },
+          { label: 'Overview', href: '/agency/analytics', icon: <TrendingUp size={16} /> },
+          { label: 'Revenue',  href: '/agency/analytics', icon: <DollarSign size={16} /> },
         ],
       },
     ],
@@ -55,9 +55,9 @@ export const OWNERS_NAV_CONFIG: SectionConfig[] = [
         title: 'Team',
         hideTitle: true,
         items: [
-          { label: 'Overview', href: '/isso/owners/team',  icon: <Users2 size={16} /> },
-          { label: 'Members',  href: '/isso/owners/team',  icon: <UserPlus size={16} /> },
-          { label: 'Roles',    href: '/isso/owners/team',  icon: <Shield size={16} /> },
+          { label: 'Overview', href: '/agency/team',  icon: <Users2 size={16} /> },
+          { label: 'Members',  href: '/agency/team',  icon: <UserPlus size={16} /> },
+          { label: 'Roles',    href: '/agency/team',  icon: <Shield size={16} /> },
         ],
       },
     ],
@@ -73,7 +73,7 @@ export const OWNERS_NAV_CONFIG: SectionConfig[] = [
         title: 'Ideas',
         hideTitle: true,
         items: [
-          { label: 'Briefs', href: '/isso/owners/ideas', icon: <Lightbulb size={16} /> },
+          { label: 'Briefs', href: '/agency/ideas', icon: <Lightbulb size={16} /> },
         ],
       },
     ],
@@ -81,7 +81,7 @@ export const OWNERS_NAV_CONFIG: SectionConfig[] = [
 ];
 
 export const OWNERS_PERSISTENT_NAV: NavItem[] = [
-  { label: 'Schedule', href: '/isso/owners/schedule', icon: <Calendar size={16} /> },
-  { label: 'Models',  href: '/isso/owners/models',  icon: <Users2 size={16} /> },
-  { label: 'Settings', href: '/isso/owners/settings', icon: <Shield size={16} /> },
+  { label: 'Schedule', href: '/agency/schedule', icon: <Calendar size={16} /> },
+  { label: 'Models',  href: '/agency/models',  icon: <Users2 size={16} /> },
+  { label: 'Settings', href: '/agency/settings', icon: <Shield size={16} /> },
 ];

@@ -49,7 +49,7 @@ function LiveMonitoringCard({ model, index }: { model: (typeof MODELS)[0]; index
       transition={{ delay: index * 0.07 }}
       className="rounded-xl overflow-hidden cursor-pointer"
       style={{ backgroundColor: '#fff', border: `1px solid ${model.color}30`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-      onClick={() => router.push(`/isso/models/${model.id}`)}
+      onClick={() => router.push(`/content-gen/models/${model.id}`)}
     >
       <div className="p-4">
         {/* Header */}
@@ -90,7 +90,7 @@ function LiveMonitoringCard({ model, index }: { model: (typeof MODELS)[0]; index
         <button
           className="mt-3 w-full text-[11px] font-medium py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors"
           style={{ backgroundColor: `${model.color}12`, color: model.color }}
-          onClick={(e) => { e.stopPropagation(); router.push(`/isso/models/${model.id}`); }}
+          onClick={(e) => { e.stopPropagation(); router.push(`/content-gen/models/${model.id}`); }}
         >
           View model <ArrowRight size={11} />
         </button>
@@ -123,7 +123,7 @@ function OnboardingCard({ model, index }: { model: (typeof MODELS)[0]; index: nu
       transition={{ delay: index * 0.07 }}
       className="rounded-xl overflow-hidden cursor-pointer relative"
       style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-      onClick={() => router.push(`/isso/models/${model.id}`)}
+      onClick={() => router.push(`/content-gen/models/${model.id}`)}
     >
       {/* Urgency stripe */}
       {urgencyRemaining !== null && (
@@ -284,7 +284,7 @@ export function OnboardingView() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer"
           style={{ backgroundColor: '#fef3c7', border: '1px solid #fde68a' }}
-          onClick={() => router.push(`/isso/models/${urgentModel.id}`)}
+          onClick={() => router.push(`/content-gen/models/${urgentModel.id}`)}
         >
           <Zap size={12} style={{ color: '#d97706' }} />
           <span className="text-[11px] font-semibold" style={{ color: '#92400e' }}>

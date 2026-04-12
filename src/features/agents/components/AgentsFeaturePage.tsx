@@ -73,7 +73,7 @@ export default function AgentsFeaturePage() {
       ]}
       activeTab={activeTab}
       onTabChange={id => setActiveTab(id as Tab)}
-      nextProduct={{ label: 'Recon', icon: <ProductIcon product="recon" size={16} />, href: '/isso/recon' }}
+      nextProduct={{ label: 'Recon', icon: <ProductIcon product="recon" size={16} />, href: '/content-gen/recon' }}
       filterChips={activeTab === 'activity' ? [
         { id: 'all', label: 'All' }, { id: 'running', label: 'Running' },
         { id: 'completed', label: 'Completed' }, { id: 'failed', label: 'Failed' },
