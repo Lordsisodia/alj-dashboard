@@ -82,9 +82,9 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
         title: 'Recon',
         hideTitle: true,
         items: [
-          { label: 'Creators',     href: '/isso/recon',      icon: <Radar size={16} /> },
-          { label: 'Feed',         href: '/isso/community',  icon: <Rss size={16} /> },
-          { label: 'Scraping Log', href: '/isso/recon',      icon: <Activity size={16} /> },
+          { label: 'Creators',     href: '/content-gen/recon',      icon: <Radar size={16} /> },
+          { label: 'Feed',         href: '/content-gen/community',  icon: <Rss size={16} /> },
+          { label: 'Scraping Log', href: '/content-gen/recon',      icon: <Activity size={16} /> },
         ],
       },
     ],
@@ -100,9 +100,9 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
         title: 'Intelligence',
         hideTitle: true,
         items: [
-          { label: 'Trends',   href: '/isso/intelligence', icon: <TrendingUp size={16} /> },
-          { label: 'Analysis', href: '/isso/intelligence', icon: <ScanSearch size={16} /> },
-          { label: 'Insights', href: '/isso/intelligence', icon: <Lightbulb  size={16} /> },
+          { label: 'Trends',   href: '/content-gen/intelligence', icon: <TrendingUp size={16} /> },
+          { label: 'Analysis', href: '/content-gen/intelligence', icon: <ScanSearch size={16} /> },
+          { label: 'Insights', href: '/content-gen/intelligence', icon: <Lightbulb  size={16} /> },
         ],
       },
     ],
@@ -118,7 +118,7 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
         title: 'Hub',
         hideTitle: true,
         items: [
-          { label: 'Swipe & Rate',  href: '/isso/community', icon: <Rss size={16} /> },
+          { label: 'Swipe & Rate',  href: '/content-gen/community', icon: <Rss size={16} /> },
         ],
       },
     ],
@@ -134,11 +134,11 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
         title: 'Content Gen',
         hideTitle: true,
         items: [
-          { label: 'Dashboard', href: '/isso/content-gen',          icon: <LayoutDashboard size={16} /> },
-          { label: 'Scenes',    href: '/isso/content-gen/scenes',   icon: <Layers size={16} /> },
-          { label: 'Generate',  href: '/isso/content-gen/generate', icon: <Sparkles size={16} /> },
-          { label: 'Gallery',   href: '/isso/content-gen/gallery',  icon: <Upload size={16} /> },
-          { label: 'Models',    href: '/isso/content-gen/models',   icon: <Users2 size={16} /> },
+          { label: 'Dashboard', href: '/content-gen/content-gen',          icon: <LayoutDashboard size={16} /> },
+          { label: 'Scenes',    href: '/content-gen/content-gen/scenes',   icon: <Layers size={16} /> },
+          { label: 'Generate',  href: '/content-gen/content-gen/generate', icon: <Sparkles size={16} /> },
+          { label: 'Gallery',   href: '/content-gen/content-gen/gallery',  icon: <Upload size={16} /> },
+          { label: 'Models',    href: '/content-gen/content-gen/models',   icon: <Users2 size={16} /> },
         ],
       },
     ],
@@ -154,9 +154,9 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
         title: 'Agents',
         hideTitle: true,
         items: [
-          { label: 'Activity',  href: '/isso/agents', icon: <Activity size={16} /> },
-          { label: 'Reports',   href: '/isso/agents', icon: <FileText size={16} /> },
-          { label: 'Requests',  href: '/isso/agents', icon: <MessageSquare size={16} /> },
+          { label: 'Activity',  href: '/content-gen/agents', icon: <Activity size={16} /> },
+          { label: 'Reports',   href: '/content-gen/agents', icon: <FileText size={16} /> },
+          { label: 'Requests',  href: '/content-gen/agents', icon: <MessageSquare size={16} /> },
         ],
       },
     ],
@@ -165,12 +165,12 @@ export const ISSO_NAV_CONFIG: SectionConfig[] = [
 
 // Persistent sidebar pages - always visible, not inside any product
 export const PERSISTENT_NAV = [
-  { label: 'Schedule',      href: '/isso/schedule',       icon: <Calendar size={16} /> },
-  { label: 'Analytics',     href: '/isso/analytics',      icon: <BarChart2 size={16} /> },
-  { label: 'Models',        href: '/isso/models',         icon: <Users2 size={16} /> },
-  { label: 'Team',          href: '/isso/team',           icon: <UserPlus size={16} /> },
-  { label: 'Notifications', href: '/isso/notifications',  icon: <Bell size={16} />, badge: 'dot' as const },
-  { label: 'Tools',         href: '/isso/tools',           icon: <Wrench size={16} /> },
+  { label: 'Schedule',      href: '/content-gen/schedule',       icon: <Calendar size={16} /> },
+  { label: 'Analytics',     href: '/content-gen/analytics',      icon: <BarChart2 size={16} /> },
+  { label: 'Models',        href: '/content-gen/models',         icon: <Users2 size={16} /> },
+  { label: 'Team',          href: '/content-gen/team',           icon: <UserPlus size={16} /> },
+  { label: 'Notifications', href: '/content-gen/notifications',  icon: <Bell size={16} />, badge: 'dot' as const },
+  { label: 'Tools',         href: '/content-gen/tools',           icon: <Wrench size={16} /> },
 ];
 
 export function getSectionConfig(id: string): SectionConfig | undefined {
@@ -187,9 +187,9 @@ export interface PlatformItem {
 }
 
 export const PLATFORMS_NAV: PlatformItem[] = [
-  { id: 'instagram', label: 'Instagram', href: '/isso/instagram', icon: InstagramIcon },
-  { id: 'tiktok',    label: 'TikTok',    href: '/isso/tiktok',    icon: TikTokIcon,   comingSoon: true },
-  { id: 'youtube',   label: 'YouTube',   href: '/isso/youtube',   icon: YouTubeIcon,  comingSoon: true },
-  { id: 'x',         label: 'X',         href: '/isso/x',         icon: XIcon,        comingSoon: true },
-  { id: 'pinterest', label: 'Pinterest', href: '/isso/pinterest', icon: PinterestIcon, comingSoon: true },
+  { id: 'instagram', label: 'Instagram', href: '/content-gen/instagram', icon: InstagramIcon },
+  { id: 'tiktok',    label: 'TikTok',    href: '/content-gen/tiktok',    icon: TikTokIcon,   comingSoon: true },
+  { id: 'youtube',   label: 'YouTube',   href: '/content-gen/youtube',   icon: YouTubeIcon,  comingSoon: true },
+  { id: 'x',         label: 'X',         href: '/content-gen/x',         icon: XIcon,        comingSoon: true },
+  { id: 'pinterest', label: 'Pinterest', href: '/content-gen/pinterest', icon: PinterestIcon, comingSoon: true },
 ];

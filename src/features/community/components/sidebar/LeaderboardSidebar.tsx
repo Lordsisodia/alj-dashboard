@@ -77,7 +77,7 @@ export function LeaderboardSidebar() {
           ))}
         </div>
         <div className="px-4 py-2.5 text-center" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-          <a href="/isso/recon" className="text-[11px] font-semibold hover:underline" style={{ color: '#2563eb' }}>
+          <a href="/content-gen/recon" className="text-[11px] font-semibold hover:underline" style={{ color: '#2563eb' }}>
             View creators list →
           </a>
         </div>

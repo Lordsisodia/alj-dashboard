@@ -20,8 +20,8 @@ export const EDITORS_NAV_CONFIG: SectionConfig[] = [
         title: 'Hub',
         hideTitle: true,
         items: [
-          { label: 'Dashboard',  href: '/isso/editors',              icon: <LayoutDashboard size={16} /> },
-          { label: 'Approvals', href: '/isso/editors/approvals',   icon: <CheckSquare size={16} /> },
+          { label: 'Dashboard',  href: '/models',              icon: <LayoutDashboard size={16} /> },
+          { label: 'Approvals', href: '/models/approvals',   icon: <CheckSquare size={16} /> },
         ],
       },
     ],
@@ -37,9 +37,9 @@ export const EDITORS_NAV_CONFIG: SectionConfig[] = [
         title: 'Content Gen',
         hideTitle: true,
         items: [
-          { label: 'Ideas',    href: '/isso/editors/ideas',               icon: <Lightbulb size={16} /> },
-          { label: 'Generate', href: '/isso/editors/content-gen/generate', icon: <Sparkles size={16} /> },
-          { label: 'Gallery',  href: '/isso/editors/content-gen/gallery', icon: <Upload size={16} /> },
+          { label: 'Ideas',    href: '/models/ideas',               icon: <Lightbulb size={16} /> },
+          { label: 'Generate', href: '/models/content-gen/generate', icon: <Sparkles size={16} /> },
+          { label: 'Gallery',  href: '/models/content-gen/gallery', icon: <Upload size={16} /> },
         ],
       },
     ],
@@ -55,7 +55,7 @@ export const EDITORS_NAV_CONFIG: SectionConfig[] = [
         title: 'Schedule',
         hideTitle: true,
         items: [
-          { label: 'Calendar',  href: '/isso/editors/schedule', icon: <Calendar size={16} /> },
+          { label: 'Calendar',  href: '/models/schedule', icon: <Calendar size={16} /> },
         ],
       },
     ],
@@ -71,7 +71,7 @@ export const EDITORS_NAV_CONFIG: SectionConfig[] = [
         title: 'Models',
         hideTitle: true,
         items: [
-          { label: 'Models',  href: '/isso/editors/models', icon: <Users2 size={16} /> },
+          { label: 'Models',  href: '/models/models', icon: <Users2 size={16} /> },
         ],
       },
     ],
@@ -79,7 +79,7 @@ export const EDITORS_NAV_CONFIG: SectionConfig[] = [
 ];
 
 export const EDITORS_PERSISTENT_NAV: NavItem[] = [
-  { label: 'Analytics',     href: '/isso/editors/analytics',     icon: <BarChart2 size={16} /> },
-  { label: 'Models',        href: '/isso/editors/models',        icon: <Users2 size={16} /> },
-  { label: 'Notifications', href: '/isso/editors/notifications', icon: <Bell size={16} />, badge: 'dot' as const },
+  { label: 'Analytics',     href: '/models/analytics',     icon: <BarChart2 size={16} /> },
+  { label: 'Models',        href: '/models/models',        icon: <Users2 size={16} /> },
+  { label: 'Notifications', href: '/models/notifications', icon: <Bell size={16} />, badge: 'dot' as const },
 ];

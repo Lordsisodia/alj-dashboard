@@ -125,7 +125,7 @@ export function InsightCards({ trends, insights }: Props) {
           </div>
           {card.brief && (
             <button
-              onClick={() => router.push(`/isso/ideas?${new URLSearchParams(card.brief!).toString()}`)}
+              onClick={() => router.push(`/content-gen/ideas?${new URLSearchParams(card.brief!).toString()}`)}
               className="flex items-center gap-1 text-[9px] font-semibold self-start px-2 py-1 rounded-lg text-white transition-opacity hover:opacity-85"
               style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
             >

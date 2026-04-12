@@ -1,7 +1,7 @@
 'use client';
 
 import { Users, ShieldCheck, Layers } from 'lucide-react';
-import { ProductIcon } from '@/shared/layout/ProductIcon';
+import { ProductIcon } from '@/isso/layout/ProductIcon';
 
 export function EmptyState({ filter }: { filter: 'pending' | 'approved' | 'scraped' }) {
   const configs = {

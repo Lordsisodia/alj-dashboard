@@ -36,7 +36,7 @@ export default function ContentGenFeaturePage() {
       searchPlaceholder="Search..."
       actionLabel="New Scene"
       actionIcon={<Sparkles size={14} />}
-      onAction={() => router.push('/isso/community?tab=saved')}
+      onAction={() => router.push('/content-gen/community?tab=saved')}
       accentGradient="linear-gradient(135deg, #10b981, #059669)"
       filterRightSlot={<LiveActivityButton accentColor="#10b981" />}
       tabs={[
@@ -47,7 +47,7 @@ export default function ContentGenFeaturePage() {
       ]}
       activeTab={activeTab}
       onTabChange={id => setActiveTab(id as Tab)}
-      nextProduct={{ label: 'Agents', icon: <ProductIcon product="agents" size={16} />, href: '/isso/agents' }}
+      nextProduct={{ label: 'Agents', icon: <ProductIcon product="agents" size={16} />, href: '/content-gen/agents' }}
     >
       <AnimatePresence mode="wait">
         <motion.div

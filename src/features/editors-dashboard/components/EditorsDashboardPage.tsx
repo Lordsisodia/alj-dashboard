@@ -7,7 +7,7 @@ import {
   Layers, Clock, ChevronRight, Image, Video,
   Lightbulb, Users,
 } from 'lucide-react';
-import { ContentPageShell } from '@/shared/layout/ContentPageShell';
+import { ContentPageShell } from '@/isso/layout/ContentPageShell';
 
 // ── Seed data ────────────────────────────────────────────────────────────────
 
@@ -34,10 +34,10 @@ const UPCOMING_SCHEDULE = [
 ];
 
 const CONTENT_TOOLS = [
-  { label: 'Generate Brief',  href: '/isso/editors/ideas',               icon: Lightbulb, color: '#ff0069', desc: 'AI-powered content ideas' },
-  { label: 'Generate Content', href: '/isso/editors/content-gen/generate', icon: Sparkles,  color: '#833ab4', desc: 'Create AI reels & images' },
-  { label: 'Gallery',          href: '/isso/editors/content-gen/gallery',  icon: Image,     color: '#22c55e', desc: 'Browse generated content' },
-  { label: 'Models',           href: '/isso/editors/models',               icon: Users,     color: '#f59e0b', desc: 'Model references & assets' },
+  { label: 'Generate Brief',  href: '/models/ideas',               icon: Lightbulb, color: '#ff0069', desc: 'AI-powered content ideas' },
+  { label: 'Generate Content', href: '/models/content-gen/generate', icon: Sparkles,  color: '#833ab4', desc: 'Create AI reels & images' },
+  { label: 'Gallery',          href: '/models/content-gen/gallery',  icon: Image,     color: '#22c55e', desc: 'Browse generated content' },
+  { label: 'Models',           href: '/models/models',               icon: Users,     color: '#f59e0b', desc: 'Model references & assets' },
 ];
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
@@ -112,7 +112,7 @@ export default function EditorsDashboardPage() {
                   {APPROVAL_QUEUE.length}
                 </span>
               </div>
-              <Link href="/isso/editors/approvals" className="text-[11px] font-medium text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 transition-colors">
+              <Link href="/models/approvals" className="text-[11px] font-medium text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 transition-colors">
                 View All <ChevronRight size={12} />
               </Link>
             </div>
@@ -144,7 +144,7 @@ export default function EditorsDashboardPage() {
                 </div>
                 <p className="text-sm font-semibold text-neutral-900">Up Next</p>
               </div>
-              <Link href="/isso/editors/schedule" className="text-[11px] font-medium text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 transition-colors">
+              <Link href="/models/schedule" className="text-[11px] font-medium text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 transition-colors">
                 Calendar <ChevronRight size={12} />
               </Link>
             </div>

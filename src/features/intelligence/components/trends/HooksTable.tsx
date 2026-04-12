@@ -16,7 +16,7 @@ function HookRowItem({ hook, index, hovered, onHover, onLeave }: { hook: HookRow
   const color  = NICHE_COLORS[hook.niche] ?? '#833ab4';
 
   function goToBrief() {
-    router.push(`/isso/ideas?${new URLSearchParams({ niche: hook.niche, format: hook.contentType, hook: hook.hook, from: hook.handle }).toString()}`);
+    router.push(`/content-gen/ideas?${new URLSearchParams({ niche: hook.niche, format: hook.contentType, hook: hook.hook, from: hook.handle }).toString()}`);
   }
 
   return (

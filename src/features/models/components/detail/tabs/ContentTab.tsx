@@ -25,7 +25,7 @@ export function ContentTab({ model }: { model: ModelData }) {
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-semibold text-neutral-800">Active Briefs</p>
           <a
-            href="/isso/ideas"
+            href="/content-gen/ideas"
             className="flex items-center gap-1 text-xs font-medium"
             style={{ color: '#ff0069' }}
           >
