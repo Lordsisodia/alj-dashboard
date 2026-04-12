@@ -76,9 +76,9 @@ export const AGENCY_NAV_CONFIG: SectionConfig[] = [
         hideTitle: true,
         items: [
           { label: 'Dashboard',  href: '/content-gen/content-gen',         icon: <LayoutDashboard size={16} /> },
-          { label: 'Scenes',    href: '/content-gen/content-gen/scenes',  icon: <Layers size={16} /> },
-          { label: 'Generate',   href: '/content-gen/content-gen/generate', icon: <Sparkles size={16} /> },
-          { label: 'Gallery',    href: '/content-gen/content-gen/gallery', icon: <Upload size={16} /> },
+          { label: 'Scenes',    href: '/content-gen/scenes',  icon: <Layers size={16} /> },
+          { label: 'Generate',   href: '/content-gen/generate', icon: <Sparkles size={16} /> },
+          { label: 'Gallery',    href: '/content-gen/gallery', icon: <Upload size={16} /> },
         ],
       },
     ],
