@@ -5,7 +5,7 @@ import { api } from "./_generated/api";
 // Run via: npx convex run backfill:enrichedCandidatesToTrackedAccounts
 export const enrichedCandidatesToTrackedAccounts = action({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<{ total: number; inserted: number; skipped: number }> => {
     const candidates = await ctx.runQuery(api.candidates.list, { status: "approved" });
     const enriched = candidates.filter((c) => c.enrichStatus === "done");
 

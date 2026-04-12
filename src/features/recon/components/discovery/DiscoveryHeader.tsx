@@ -22,7 +22,7 @@ export function DiscoveryHeader({
       <StatPill icon={<Users      size={10} />} value={pending}        label="pending"        color="#7f1d1d" />
       <StatPill icon={<ScanSearch  size={10} />} value={scraped}        label="scraped"        color="#991b1b" />
       <StatPill icon={<XCircle     size={10} />} value={rejected}       label="rejected"       color="#7f1d1d" />
-      <StatPill icon={<TrendingUp  size={10} />} value={totalTracked}    label="total tracked"  color="#991b1b" />
+      <StatPill icon={<TrendingUp  size={10} />} value={totalTracked}    label="approved"       color="#991b1b" />
       <StatPill icon={<FileStack   size={10} />} value={Math.round(avgViews).toLocaleString()} label="avg views"     color="#7f1d1d" />
       <StatPill icon={<TrendingUp  size={10} />} value={avgEngagement.toFixed(1) + '%'} label="avg eng."  color="#7f1d1d" />
       <StatPill icon={<Users       size={10} />} value={Math.round(avgFollowers).toLocaleString()} label="avg followers" color="#7f1d1d" />

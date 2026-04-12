@@ -1,5 +1,6 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 // ── Apify Instagram Reel Scraper output formats ───────────────────────────────
 //
@@ -75,11 +76,18 @@ export const importFromScraper = mutation({
       videoViewCount: v.optional(v.number()),
       videoPlayCount: v.optional(v.number()),
       hashtags:       v.optional(v.array(v.string())),
+      isVideo:        v.optional(v.boolean()),
+      type:           v.optional(v.string()),
+      productType:    v.optional(v.string()),
     })),
     nicheOverride: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const inserted = { accounts: 0, posts: 0, skipped: 0 };
+
+    // Collect existing shortcodes once up-front to avoid O(n²) queries inside the loop
+    const allExisting = await ctx.db.query("scrapedPosts").collect();
+    const existingByShortcode = new Map(allExisting.map(p => [p.externalId, p]));
 
     for (const raw of args.posts) {
       const handle = raw.ownerUsername ? `@${raw.ownerUsername}` : null;
@@ -99,9 +107,9 @@ export const importFromScraper = mutation({
       const likes    = raw.likesCount ?? 0;
       const comments = raw.commentsCount ?? 0;
 
-      // New format: videoViewCount is the definitive view count
-      // Old format: viewsCount; fall back to 0
-      const views = raw.videoViewCount ?? raw.viewsCount ?? 0;
+      // videoViewCount = Apify reel-scraper field; videoPlayCount = alt field name
+      // viewsCount = legacy format; fall back to 0 for non-video posts
+      const views = raw.videoViewCount ?? raw.videoPlayCount ?? raw.viewsCount ?? 0;
 
       // For ER: use views as reach proxy when views > 0, otherwise fall back to likes*10
       const reach = views > 0 ? views : likes * 10;
@@ -115,7 +123,7 @@ export const importFromScraper = mutation({
       let account = await ctx.db
         .query("trackedAccounts")
         .withIndex("by_handle", q => q.eq("handle", handle))
-        .unique();
+        .first();
 
       if (!account) {
         const accountId = await ctx.db.insert("trackedAccounts", {
@@ -142,21 +150,18 @@ export const importFromScraper = mutation({
       }
 
       // ── Upsert: skip duplicate shortcode, backfill missing fields ──────
-      const existing = await ctx.db
-        .query("scrapedPosts")
-        .collect();
-      const existingPost = existing.find(p => p.externalId === shortcode);
+      const existingPost = existingByShortcode.get(shortcode);
       if (existingPost) {
         const patch: Record<string, unknown> = {};
         if (raw.videoUrl && !existingPost.videoUrl) patch.videoUrl = raw.videoUrl;
-        // Backfill views if new format has videoViewCount and old value was 0
-        if (raw.videoViewCount && existingPost.views === 0) {
-          patch.views = raw.videoViewCount;
-          patch.reach = raw.videoViewCount;
-          const newER = raw.videoViewCount > 0
-            ? parseFloat(((likes + comments) / raw.videoViewCount).toFixed(4))
+        // Backfill views if new format has view count and old value was 0
+        const backfillViews = raw.videoViewCount ?? raw.videoPlayCount;
+        if (backfillViews && existingPost.views === 0) {
+          patch.views = backfillViews;
+          patch.reach = backfillViews;
+          patch.engagementRate = backfillViews > 0
+            ? parseFloat(((likes + comments) / backfillViews).toFixed(4))
             : 0;
-          patch.engagementRate = newER;
         }
         if (Object.keys(patch).length > 0) {
           await ctx.db.patch(existingPost._id, patch);
@@ -171,14 +176,27 @@ export const importFromScraper = mutation({
         ? parseFloat((views / followerCount).toFixed(4))
         : undefined;
 
-      await ctx.db.insert("scrapedPosts", {
+      // Determine content type from Apify signals
+      const contentType: "reel" | "post" | "carousel" | "story" =
+        raw.productType === 'clips' || raw.productType === 'reel'
+          ? 'reel'
+          : raw.type === 'Sidecar' || raw.productType === 'carousel_container'
+            ? 'carousel'
+            : raw.isVideo === true || (raw.videoViewCount ?? raw.videoPlayCount ?? 0) > 0
+              ? 'reel'
+              : 'post';
+
+      const thumbnailCdnUrl = raw.displayUrl ?? "";
+      const postId = await ctx.db.insert("scrapedPosts", {
         externalId:    shortcode,
         accountId:     account!._id,
         handle,
         platform:      "instagram",
-        contentType:   "reel",
+        contentType,
         niche,
-        thumbnailUrl:  raw.displayUrl ?? "",
+        thumbnailUrl:            thumbnailCdnUrl,
+        thumbnailSourceUrl:      thumbnailCdnUrl || undefined,
+        thumbnailDownloadStatus: thumbnailCdnUrl ? "pending" : undefined,
         caption,
         hashtags,
         likes,
@@ -195,6 +213,9 @@ export const importFromScraper = mutation({
         saved:         false,
         boardIds:      [],
       });
+      if (thumbnailCdnUrl) {
+        await ctx.scheduler.runAfter(0, api.intelligenceNode.downloadThumbnailToR2, { postId });
+      }
       inserted.posts++;
     }
 

@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Heart, X, Send, Play, Eye } from 'lucide-react';
 import type { SwipeReel, TagSelection } from '../types';
-import { isTagSelectionComplete } from './WhyTagPanel';
+import { igThumb } from '@/features/intelligence/utils';
 
 function fmtK(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
@@ -29,34 +29,27 @@ export function SwipeStack({
   onSendToModel,
   onEmpty,
 }: SwipeStackProps) {
-  const [topIdx, setTopIdx] = useState(0);
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-18, 0, 18]);
   const likeOpacity = useTransform(x, [20, 120], [0, 1]);
   const passOpacity = useTransform(x, [-120, -20], [1, 0]);
 
-  const tagsReady = isTagSelectionComplete(tags);
   const isDragging = useRef(false);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      if (topIdx >= queue.length) return;
+      if (queue.length === 0) return;
       if (e.key === 'ArrowLeft')  triggerPass();
-      if (e.key === 'ArrowRight' && tagsReady) triggerLike();
+      if (e.key === 'ArrowRight') triggerLike();
       if (e.key === 'ArrowUp')    onSendToModel();
     }
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topIdx, queue.length, tagsReady]);
+  }, [queue.length]);
 
   function advance() {
     animate(x, 0, { duration: 0 });
-    setTopIdx((i) => {
-      const next = i + 1;
-      if (next >= queue.length) onEmpty();
-      return next;
-    });
   }
 
   function triggerLike() {
@@ -73,7 +66,7 @@ export function SwipeStack({
     });
   }
 
-  if (topIdx >= queue.length) {
+  if (queue.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full py-16 text-neutral-400">
         <div className="text-4xl mb-3">🎉</div>
@@ -83,7 +76,7 @@ export function SwipeStack({
     );
   }
 
-  const visibleCards = queue.slice(topIdx, topIdx + 3);
+  const visibleCards = queue.slice(0, 3);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -122,7 +115,7 @@ export function SwipeStack({
               onDragStart={() => { isDragging.current = true; }}
               onDragEnd={(_, info) => {
                 isDragging.current = false;
-                if (info.offset.x > DRAG_THRESHOLD && tagsReady) {
+                if (info.offset.x > DRAG_THRESHOLD) {
                   triggerLike();
                 } else if (info.offset.x < -DRAG_THRESHOLD) {
                   triggerPass();
@@ -134,7 +127,7 @@ export function SwipeStack({
               style={{
                 width: 220,
                 height: 360,
-                background: reel.gradient,
+                background: reel.gradient ?? '#18181b',
                 border: '1px solid rgba(0,0,0,0.08)',
                 boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
                 x,
@@ -142,6 +135,17 @@ export function SwipeStack({
                 zIndex: 20,
               }}
             >
+              {/* Real thumbnail image */}
+              {reel.thumbnailUrl?.startsWith('http') && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={igThumb(reel.thumbnailUrl)}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                  draggable={false}
+                />
+              )}
+
               {/* Like overlay */}
               <motion.div
                 className="absolute inset-0 flex items-center justify-center rounded-2xl pointer-events-none"
@@ -191,17 +195,27 @@ export function SwipeStack({
               <div
                 className="absolute bottom-0 left-0 right-0 px-3 py-3"
                 style={{
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)',
                 }}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
-                    style={{ background: reel.creator.color }}
-                  >
-                    {reel.creator.initials}
-                  </div>
-                  <span className="text-white text-[11px] font-semibold">{reel.creator.handle}</span>
+                  {reel.creator.avatarUrl ? (
+                    <img
+                      src={reel.creator.avatarUrl}
+                      alt={reel.creator.handle}
+                      className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
+                      style={{ background: reel.creator.color }}
+                    >
+                      {reel.creator.initials}
+                    </div>
+                  )}
+                  <span className="text-white text-[11px] font-semibold truncate max-w-[140px]">
+                    {reel.creator.displayName ?? reel.creator.handle}
+                  </span>
                 </div>
                 <p className="text-white text-[10px] opacity-80 line-clamp-2">{reel.caption}</p>
               </div>
@@ -230,24 +244,23 @@ export function SwipeStack({
           className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
           style={{
             background: '#fff',
-            border: '2px solid rgba(131,58,180,0.25)',
-            boxShadow: '0 4px 14px rgba(131,58,180,0.1)',
+            border: '2px solid rgba(37,99,235,0.25)',
+            boxShadow: '0 4px 14px rgba(37,99,235,0.1)',
           }}
           title="Send to model (↑)"
         >
-          <Send size={14} className="text-violet-500" />
+          <Send size={14} className="text-blue-500" />
         </button>
 
         <button
           onClick={triggerLike}
-          disabled={!tagsReady}
-          className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
           style={{
-            background: tagsReady ? 'linear-gradient(135deg, #ff0069, #833ab4)' : '#e5e5e5',
+            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
             border: '2px solid transparent',
-            boxShadow: tagsReady ? '0 4px 18px rgba(255,0,105,0.3)' : 'none',
+            boxShadow: '0 4px 18px rgba(37,99,235,0.3)',
           }}
-          title={tagsReady ? 'Rate (→)' : 'Select at least 1 tag per category first'}
+          title="Rate (→)"
         >
           <Heart size={18} className="text-white fill-white" />
         </button>
@@ -255,7 +268,7 @@ export function SwipeStack({
 
       {/* Queue counter */}
       <p className="text-[11px] text-neutral-400">
-        {topIdx + 1} of {queue.length} · {queue.length - topIdx - 1} remaining
+        {queue.length} remaining
       </p>
     </div>
   );

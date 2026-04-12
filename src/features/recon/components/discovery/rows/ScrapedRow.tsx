@@ -7,9 +7,7 @@ import type { MappedCandidate } from '../data';
 export function ScrapedRow({ c }: { c: MappedCandidate }) {
   const [imgError, setImgError] = useState(false);
   const showAvatar = !!c.avatarUrl && !imgError;
-  const avatarSrc  = c.avatarUrl
-    ? (c.avatarUrl.includes('r2.dev') ? c.avatarUrl : `/api/recon/avatar?url=${encodeURIComponent(c.avatarUrl)}`)
-    : '';
+  const avatarSrc  = c.avatarUrl ?? '';
 
   return (
     <motion.div
@@ -37,7 +35,12 @@ export function ScrapedRow({ c }: { c: MappedCandidate }) {
           {c.initials}
         </span>
       )}
-      <p className="text-[11px] font-medium text-neutral-700 truncate flex-1">{c.handle}</p>
+      <div className="flex flex-col min-w-0 flex-1">
+        <p className="text-[11px] font-medium text-neutral-700 truncate">{c.handle}</p>
+        {c.suggestedBy && (
+          <p className="text-[9px] text-neutral-400 truncate">via {c.suggestedBy}</p>
+        )}
+      </div>
     </motion.div>
   );
 }

@@ -12,7 +12,7 @@ interface Props {
   isSelected: boolean;
   isEvaluating?: boolean;
   index?: number;
-  onSelect: () => void;
+  onSelect?: () => void;
   onApprove?: (e: React.MouseEvent) => void;
   onReject?: (e: React.MouseEvent) => void;
   // Enriched data available when flipped
@@ -23,6 +23,8 @@ interface Props {
     outlierRatio?: number;
   };
   onFlip?: (handle: string) => void;
+  /** Prevent click from opening the detail side panel (used for unapproved cards) */
+  disableSelect?: boolean;
 }
 
 function Confetti({ x, y, color }: { x: number; y: number; color: string }) {
@@ -45,7 +47,7 @@ function Confetti({ x, y, color }: { x: number; y: number; color: string }) {
   return <>{particles}</>;
 }
 
-export function CandidateRow({ candidate, isSelected, index = 0, onSelect, onApprove, onReject, enrichedData, onFlip }: Props) {
+export function CandidateRow({ candidate, isSelected, index = 0, onSelect, onApprove, onReject, enrichedData, onFlip, disableSelect }: Props) {
   const [decision, setDecision] = useState<Decision>(null);
   const [confetti, setConfetti] = useState<{ x: number; y: number; color: string } | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -115,7 +117,7 @@ export function CandidateRow({ candidate, isSelected, index = 0, onSelect, onApp
         <motion.div
           ref={cardRef}
           layout
-          onClick={onSelect}
+          onClick={disableSelect ? undefined : onSelect}
           onDoubleClick={handleDoubleClick}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
@@ -184,7 +186,12 @@ export function CandidateRow({ candidate, isSelected, index = 0, onSelect, onApp
           >
             {candidate.initials}
           </span>
-          <p className="text-[11px] font-medium text-neutral-700 truncate flex-1">{candidate.handle}</p>
+          <div className="flex flex-col min-w-0 flex-1">
+            <p className="text-[11px] font-semibold text-neutral-800 truncate">{candidate.handle}</p>
+            {(candidate as { suggestedBy?: string | null }).suggestedBy && (
+              <p className="text-[9px] text-neutral-400 truncate">via {(candidate as { suggestedBy?: string | null }).suggestedBy}</p>
+            )}
+          </div>
 
           {onApprove && (
             <button

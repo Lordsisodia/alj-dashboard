@@ -2,15 +2,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import {
-  StackedNormalizedAreaChart,
+  AreaChart,
   LinearXAxis,
   LinearXAxisTickSeries,
   LinearXAxisTickLabel,
   LinearYAxis,
   LinearYAxisTickSeries,
-  StackedNormalizedAreaSeries,
-  Line,
   Area,
   Gradient,
   GradientStop,
@@ -19,81 +19,69 @@ import {
 } from 'reaviz';
 import { TrendingUp, TrendingDown, FileStack, Users, Zap } from 'lucide-react';
 
-// ── Legend ────────────────────────────────────────────────────────────────────
+// ── Single-series colour ───────────────────────────────────────────────────────
 
-const LEGEND = [
-  { name: 'GFE',       color: '#fca5a5' },
-  { name: 'ABG',       color: '#dc2626' },
-  { name: 'Lifestyle', color: '#7f1d1d' },
-];
-
-const COLOR_SCHEME = ['#fca5a5', '#dc2626', '#7f1d1d'];
-
-// ── Chart data - 14 days of niche scraping volume ────────────────────────────
-
-const now = new Date();
-function daysAgo(n: number) {
-  const d = new Date(now);
-  d.setDate(d.getDate() - n);
-  return d;
-}
-
-const RAW_DATA = [
-  {
-    key: 'GFE',
-    data: [47,52,38,61,55,43,58,71,49,63,44,57,68,73].map((v, i) => ({
-      key: daysAgo(13 - i), data: v,
-    })),
-  },
-  {
-    key: 'ABG',
-    data: [31,28,35,42,38,29,44,37,51,45,33,48,41,54].map((v, i) => ({
-      key: daysAgo(13 - i), data: v,
-    })),
-  },
-  {
-    key: 'Lifestyle',
-    data: [19,22,17,25,21,18,27,20,24,29,16,23,31,26].map((v, i) => ({
-      key: daysAgo(13 - i), data: v,
-    })),
-  },
-];
-
-// ── Metric rows ───────────────────────────────────────────────────────────────
-
-const METRICS = [
-  {
-    id: 'posts',
-    icon: <FileStack size={16} color="#dc2626" />,
-    label: 'Posts scraped today',
-    value: '284',
-    trend: 'up',
-    trendLabel: '+23%',
-    good: true,
-  },
-  {
-    id: 'creators',
-    icon: <Users size={16} color="#dc2626" />,
-    label: 'Active creators',
-    value: '4 / 8',
-    trend: 'down',
-    trendLabel: '-1',
-    good: false,
-  },
-  {
-    id: 'velocity',
-    icon: <Zap size={16} color="#dc2626" />,
-    label: 'Avg posts / creator',
-    value: '71',
-    trend: 'up',
-    trendLabel: '+12%',
-    good: true,
-  },
-];
+const CHART_COLOR = '#ef4444';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function ScrapingReport() {
+  const stats    = useQuery(api.intelligence.getReconDashboardStats);
+  const volume   = useQuery(api.intelligence.getDailyScrapedVolume, { days: 14 });
+
+  // Real metric values derived from DB
+  const postsToday   = stats?.postsToday   ?? 0;
+  const activeCount  = stats?.activeCreators  ?? 0;
+  const totalCount   = stats?.totalCreators   ?? 0;
+  const postsThisWk  = stats?.postsThisWeek  ?? 0;
+  const avgPerCreator = activeCount > 0 ? Math.round(postsThisWk / activeCount) : 0;
+
+  // Trend direction for velocity (positive = more posts this week than last, neutral if 0)
+  const velocityTrend = postsThisWk > 0 ? 'up' : 'neutral';
+  const velocityGood  = postsThisWk > 0;
+
+  const metrics = [
+    {
+      id: 'posts',
+      icon: <FileStack size={16} color={CHART_COLOR} />,
+      label: 'Posts scraped today',
+      value: String(postsToday),
+      trend: 'up' as const,
+      trendLabel: 'today',
+      good: true,
+    },
+    {
+      id: 'creators',
+      icon: <Users size={16} color={CHART_COLOR} />,
+      label: 'Active creators',
+      value: `${activeCount} / ${totalCount}`,
+      trend: 'neutral' as const,
+      trendLabel: '',
+      good: true,
+    },
+    {
+      id: 'velocity',
+      icon: <Zap size={16} color={CHART_COLOR} />,
+      label: 'Avg posts / creator',
+      value: String(avgPerCreator),
+      trend: velocityTrend,
+      trendLabel: 'this week',
+      good: velocityGood,
+    },
+  ];
+
+  // Transform volume data to reaviz's {key:Date,data:number} shape.
+  // Buckets are ordered oldest→newest, so index maps directly to day offset.
+  const chartData = React.useMemo(() => {
+    if (!volume) return [];
+    const now = Date.now();
+    const len = volume.length;
+    return volume.map((v, i) => ({
+      key:  new Date(now - (len - 1 - i) * 24 * 60 * 60 * 1000),
+      data: v.total ?? 0,
+    }));
+  }, [volume]);
+
   return (
     <>
       <style jsx global>{`
@@ -108,28 +96,26 @@ export function ScrapingReport() {
         style={{ border: '1px solid rgba(0,0,0,0.07)' }}
       >
         {/* Title */}
-        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+        <div className="px-5 pt-3 pb-1 flex items-center justify-between">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-400">
             Scraping Report
           </p>
           <p className="text-[10px] text-neutral-300">Last 14 days</p>
         </div>
 
-        {/* Legend */}
-        <div className="flex items-center gap-4 px-5 pb-3">
-          {LEGEND.map(item => (
-            <div key={item.name} className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: item.color }} />
-              <span className="text-[10px] text-neutral-400">{item.name}</span>
-            </div>
-          ))}
+        {/* Legend — single series */}
+        <div className="flex items-center gap-4 px-5 pb-2">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: CHART_COLOR }} />
+            <span className="text-[10px] text-neutral-400">Daily volume</span>
+          </div>
         </div>
 
         {/* Chart */}
-        <div className="px-2 h-[160px]">
-          <StackedNormalizedAreaChart
-            height={160}
-            data={RAW_DATA}
+        <div className="px-2 h-[170px]">
+          <AreaChart
+            height={170}
+            data={chartData}
             xAxis={
               <LinearXAxis
                 type="time"
@@ -153,21 +139,16 @@ export function ScrapingReport() {
               />
             }
             series={
-              <StackedNormalizedAreaSeries
-                line={<Line strokeWidth={2} />}
-                area={
-                  <Area
-                    gradient={
-                      <Gradient
-                        stops={[
-                          <GradientStop key={1} stopOpacity={0} />,
-                          <GradientStop key={2} offset="80%" stopOpacity={0.15} />,
-                        ]}
-                      />
-                    }
+              <Area
+                gradient={
+                  <Gradient
+                    stops={[
+                      <GradientStop key={1} stopOpacity={0} />,
+                      <GradientStop key={2} offset="80%" stopOpacity={0.15} />,
+                    ]}
                   />
                 }
-                colorScheme={COLOR_SCHEME}
+                color={() => CHART_COLOR}
               />
             }
             gridlines={
@@ -181,13 +162,13 @@ export function ScrapingReport() {
           className="flex flex-col divide-y px-5 pt-1 pb-2"
           style={{ borderTop: '1px solid rgba(0,0,0,0.06)', borderColor: 'rgba(0,0,0,0.05)' }}
         >
-          {METRICS.map((m, i) => (
+          {metrics.map((m, i) => (
             <motion.div
               key={m.id}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.06 }}
-              className="flex items-center justify-between py-3"
+              className="flex items-center justify-between py-2"
             >
               <div className="flex items-center gap-2 text-neutral-500">
                 {m.icon}
@@ -202,10 +183,8 @@ export function ScrapingReport() {
                     color: m.good ? '#4a8a2d' : '#dc2626',
                   }}
                 >
-                  {m.trend === 'up'
-                    ? <TrendingUp size={9} />
-                    : <TrendingDown size={9} />
-                  }
+                  {m.trend === 'up' && <TrendingUp size={9} />}
+                  {m.trend === 'down' && <TrendingDown size={9} />}
                   {m.trendLabel}
                 </div>
               </div>

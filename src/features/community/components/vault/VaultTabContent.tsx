@@ -1,26 +1,36 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Shuffle, Rss } from 'lucide-react';
-import { PostCard } from '../feed/PostCard';
+import { useState, useRef, useEffect } from 'react';
+import { Play, Radio, CheckCircle2, Bookmark, LayoutGrid, List, Search, User, ChevronDown, Check } from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { FeedView } from '@/features/intelligence/components/feed/FeedView';
+import { FilterPill } from '@/features/recon/components/table/filters/FilterPill';
+import { ViewToggle } from '@/components/ui/view-toggle';
 import { LeaderboardSidebar } from '../sidebar/LeaderboardSidebar';
-import { POSTS, NICHE_CONFIG } from '../../constants';
-import type { Niche, ContentType } from '../../types';
+import { POSTS } from '../../constants';
+import type { SortId } from '@/features/intelligence/types';
 
-const NICHES: { id: 'all' | Niche; label: string }[] = [
-  { id: 'all',       label: 'All'       },
-  { id: 'fitness',   label: 'Fitness'   },
-  { id: 'lifestyle', label: 'Lifestyle' },
-  { id: 'fashion',   label: 'Fashion'   },
-  { id: 'wellness',  label: 'Wellness'  },
+const NICHE_OPTS = [
+  { value: 'fitness',   label: 'Fitness'   },
+  { value: 'lifestyle', label: 'Lifestyle' },
+  { value: 'fashion',   label: 'Fashion'   },
+  { value: 'wellness',  label: 'Wellness'  },
 ];
 
-const TYPES: { id: 'all' | ContentType; label: string }[] = [
-  { id: 'all',       label: 'All'       },
-  { id: 'Reel',      label: 'Reels'     },
-  { id: 'Post',      label: 'Posts'     },
-  { id: 'Carousel',  label: 'Carousels' },
+const TYPE_OPTS = [
+  { value: 'Reel',     label: 'Reels'     },
+  { value: 'Post',     label: 'Posts'     },
+  { value: 'Carousel', label: 'Carousels' },
+];
+
+const SORT_OPTS: { value: SortId; label: string }[] = [
+  { value: 'top-engagement', label: 'Top Engagement' },
+  { value: 'most-views',     label: 'Most Views'     },
+  { value: 'most-likes',     label: 'Most Likes'     },
+  { value: 'most-saves',     label: 'Most Saves'     },
+  { value: 'newest',         label: 'Newest'         },
+  { value: 'trending',       label: 'Trending'       },
 ];
 
 interface VaultTabContentProps {
@@ -28,135 +38,228 @@ interface VaultTabContentProps {
 }
 
 export function VaultTabContent({ onStartSession }: VaultTabContentProps) {
-  const [niche, setNiche]   = useState<'all' | Niche>('all');
-  const [type,  setType]    = useState<'all' | ContentType>('all');
+  const [niche,    setNiche]    = useState('');
+  const [type,     setType]     = useState('');
+  const [sortBy,   setSortBy]   = useState<SortId>('top-engagement');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [handle,   setHandle]   = useState('');
 
-  const filtered = POSTS.filter(p => {
-    const matchNiche = niche === 'all' || p.niche === niche;
-    const matchType  = type  === 'all' || p.type  === type;
-    return matchNiche && matchType;
-  });
+  const accounts = useQuery(api.trackedAccounts.list) ?? [];
 
-  const reelCount     = POSTS.filter(p => p.type === 'Reel').length;
-  const postCount     = POSTS.filter(p => p.type === 'Post').length;
-  const carouselCount = POSTS.filter(p => p.type === 'Carousel').length;
-  const approvedCount = POSTS.filter(p => p.approved).length;
+  const total    = POSTS.length;
+  const approved = POSTS.filter(p => p.approved).length;
+  const saved    = POSTS.filter(p => p.saved).length;
 
   return (
-    <div className="flex h-full" style={{ backgroundColor: '#fafafa' }}>
-      {/* Main area */}
-      <div className="flex-1 min-w-0 overflow-y-auto p-4 space-y-3">
-        {/* Toolbar */}
-        <div className="flex flex-col gap-2">
-          {/* Row 1: niche + swipe CTA */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {NICHES.map(n => {
-                const active = niche === n.id;
-                const cfg = n.id !== 'all' ? NICHE_CONFIG[n.id] : null;
-                return (
-                  <button
-                    key={n.id}
-                    onClick={() => setNiche(n.id)}
-                    className="px-3 py-1 rounded-lg text-[11px] font-semibold transition-all"
-                    style={
-                      active
-                        ? {
-                            background: cfg
-                              ? cfg.color
-                              : 'linear-gradient(135deg, #ff0069, #833ab4)',
-                            color: '#fff',
-                          }
-                        : { background: '#fff', color: '#737373', border: '1px solid rgba(0,0,0,0.09)' }
-                    }
-                  >
-                    {n.label}
-                  </button>
-                );
-              })}
-            </div>
-            <button
-              onClick={onStartSession}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white flex-shrink-0 transition-opacity hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #ff0069, #833ab4)' }}
-            >
-              <Shuffle size={12} />
-              Start Swipe Session
-            </button>
+    <div className="flex flex-col h-full" style={{ backgroundColor: '#fafafa' }}>
+
+      {/* ── Stats strip ─────────────────────────────────────────────────── */}
+      <div className="px-4 pt-4 flex-shrink-0">
+        <div
+          className="flex items-center gap-0 px-4 py-2.5 rounded-xl bg-white"
+          style={{ border: '1px solid rgba(0,0,0,0.07)' }}
+        >
+          {/* Status */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <span className="relative flex h-2 w-2 flex-shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-60" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+            </span>
+            <span className="text-[11px] font-bold text-neutral-700">Vault</span>
           </div>
 
-          {/* Row 2: type filters */}
-          <div className="flex items-center gap-1.5">
-            {TYPES.map(t => {
-              const active = type === t.id;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => setType(t.id)}
-                  className="px-3 py-1 rounded-lg text-[11px] font-semibold transition-all"
-                  style={
-                    active
-                      ? { background: '#171717', color: '#fff' }
-                      : { background: '#fff', color: '#737373', border: '1px solid rgba(0,0,0,0.09)' }
-                  }
-                >
-                  {t.label}
-                </button>
-              );
-            })}
+          <span className="w-px h-4 bg-neutral-200 mx-4 flex-shrink-0" />
+
+          {/* Totals */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <span className="flex items-center gap-1 text-[11px] text-neutral-500">
+              <Radio size={10} className="text-blue-500" />
+              <span className="font-semibold text-neutral-800">{total}</span> posts
+            </span>
+            <span className="flex items-center gap-1 text-[11px] text-neutral-500">
+              <CheckCircle2 size={10} className="text-blue-500" />
+              <span className="font-semibold text-neutral-800">{approved}</span> approved
+            </span>
+            <span className="flex items-center gap-1 text-[11px] text-neutral-500">
+              <Bookmark size={10} className="text-blue-500" />
+              <span className="font-semibold text-neutral-800">{saved}</span> saved
+            </span>
           </div>
+
+          <span className="w-px h-4 bg-neutral-200 mx-4 flex-shrink-0" />
+
+          {/* Filters inline */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <FilterPill
+              label="Niche"
+              options={NICHE_OPTS}
+              value={niche}
+              onChange={v => setNiche(v as string)}
+              accentColor="#2563eb"
+            />
+            <FilterPill
+              label="Type"
+              options={TYPE_OPTS}
+              value={type}
+              onChange={v => setType(v as string)}
+              accentColor="#2563eb"
+            />
+            <FilterPill
+              label="Sort"
+              options={SORT_OPTS}
+              value={sortBy}
+              onChange={v => setSortBy(v as SortId)}
+              accentColor="#2563eb"
+              neutral
+            />
+            <CreatorPill
+              accounts={accounts}
+              value={handle}
+              onChange={setHandle}
+            />
+          </div>
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* View toggle */}
+          <ViewToggle
+            value={viewMode}
+            onChange={setViewMode}
+            options={[
+              { value: 'grid', icon: <LayoutGrid size={11} /> },
+              { value: 'list', icon: <List size={11} /> },
+            ]}
+          />
+
+          <span className="w-px h-4 bg-neutral-200 mx-3 flex-shrink-0" />
+
+          {/* Start Swipe */}
+          <button
+            onClick={onStartSession}
+            className="flex items-center justify-center w-7 h-7 rounded-lg text-white flex-shrink-0 transition-opacity hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)' }}
+          >
+            <Play size={10} className="fill-white" />
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-1 min-h-0">
+        {/* Main area */}
+        <div className="flex-1 min-w-0 overflow-y-auto p-4">
+
+          {/* Feed */}
+          <FeedView
+            sortBy={sortBy}
+            niche={niche}
+            contentType={type}
+            handle={handle || undefined}
+            viewMode={viewMode}
+            columns={3}
+            visibility={{ brandDetails: true, likeCount: true, viewCount: true, saveCount: true }}
+            onPostClick={() => {}}
+          />
         </div>
 
-        {/* Stats bar */}
-        <p className="text-[10px] text-neutral-400">
-          {POSTS.length} total · {reelCount} reels · {postCount} posts · {carouselCount} carousels · {approvedCount} approved
-        </p>
-
-        {/* Grid */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${niche}-${type}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24">
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3"
-                  style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}
-                >
-                  <Rss size={24} className="text-neutral-300" />
-                </div>
-                <p className="text-sm font-medium text-neutral-500">Nothing here</p>
-                <p className="text-xs text-neutral-400 mt-0.5">No posts match the current filters</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-                {filtered.map((post, i) => (
-                  <motion.div
-                    key={post.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.04 }}
-                  >
-                    <PostCard post={post} />
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
+        {/* Sidebar */}
+        <div className="hidden xl:block w-72 flex-shrink-0 flex flex-col py-4">
+          <LeaderboardSidebar />
+        </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Leaderboard sidebar */}
-      <div
-        className="hidden xl:block w-72 flex-shrink-0 overflow-y-auto p-4"
-        style={{ borderLeft: '1px solid rgba(0,0,0,0.06)' }}
+// ── Creator filter pill with search ──────────────────────────────────────────
+
+interface CreatorPillProps {
+  accounts: { handle: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}
+
+function CreatorPill({ accounts, value, onChange }: CreatorPillProps) {
+  const [open,   setOpen]   = useState(false);
+  const [search, setSearch] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, []);
+
+  const filtered = accounts
+    .map(a => a.handle)
+    .filter(h => h.toLowerCase().includes(search.toLowerCase()));
+
+  const isActive = !!value;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all select-none whitespace-nowrap border"
+        style={isActive
+          ? { backgroundColor: 'rgba(37,99,235,0.06)', color: '#2563eb', borderColor: 'rgba(37,99,235,0.18)' }
+          : { color: '#525252', borderColor: 'transparent', backgroundColor: 'transparent' }
+        }
       >
-        <LeaderboardSidebar />
-      </div>
+        <User size={10} />
+        {isActive ? value : 'Creator'}
+        <ChevronDown size={10} className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute left-0 top-[calc(100%+6px)] w-52 rounded-xl z-50 overflow-hidden"
+          style={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.09)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
+        >
+          {/* Search */}
+          <div className="px-2 pt-2 pb-1">
+            <div className="relative">
+              <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+              <input
+                autoFocus
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search creator..."
+                className="w-full pl-7 pr-3 py-1.5 rounded-lg text-[11px] text-neutral-700 placeholder:text-neutral-400 focus:outline-none"
+                style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid transparent' }}
+              />
+            </div>
+          </div>
+
+          {/* Options */}
+          <div className="max-h-52 overflow-y-auto py-1">
+            {value && (
+              <button
+                onClick={() => { onChange(''); setSearch(''); setOpen(false); }}
+                className="w-full flex items-center px-3 py-2 text-xs text-neutral-400 hover:bg-black/[0.04] transition-colors"
+              >
+                Clear filter
+              </button>
+            )}
+            {filtered.length === 0 && (
+              <p className="px-3 py-3 text-[11px] text-neutral-400 text-center">No creators found</p>
+            )}
+            {filtered.map(h => (
+              <button
+                key={h}
+                onClick={() => { onChange(h); setSearch(''); setOpen(false); }}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs text-neutral-700 hover:bg-black/[0.04] transition-colors"
+              >
+                {h}
+                {value === h && <Check size={11} style={{ color: '#2563eb' }} />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

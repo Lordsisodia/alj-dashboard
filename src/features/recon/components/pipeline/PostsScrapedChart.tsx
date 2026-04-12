@@ -59,10 +59,11 @@ export function PostsScrapedChart({ data }: PostsScrapedChartProps) {
           margin={{ top: 8, right: 4, bottom: 28, left: 4 }}
         >
           <CartesianGrid stroke="rgba(0,0,0,0.05)" strokeDasharray="3,3" />
-          <XAxis dataKey="label" maxLabels={7} />
-          <Bar dataKey="total" fill="#dc2626" animationType="grow" />
+          <XAxis dataKey="label" {...{ maxLabels: 7 } as any} />
+          <Bar dataKey="total" fill="#dc2626" {...{ animationType: 'grow' } as any} />
           <RechartsTooltip
-            content={({ point }) => {
+            content={(tooltipProps: any) => {
+              const point = tooltipProps.point;
               const p = point as { label: string; total: number };
               return (
                 <div className="flex flex-col gap-1 px-3 py-2 text-[11px] bg-white rounded-lg shadow-lg border border-neutral-100">

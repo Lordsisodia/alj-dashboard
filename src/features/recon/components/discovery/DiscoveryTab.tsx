@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Zap, Trash2 } from 'lucide-react';
+import { Loader2, Zap, Trash2, Users, CheckCircle, Database, XCircle, TrendingUp, Tag, Clock } from 'lucide-react';
+import { groupScrapedByDate } from './scrapedGrouping';
 import {
   DndContext,
   DragOverlay,
@@ -18,7 +20,6 @@ import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import type { CandidateStatus } from '../../types';
 import {
-  DiscoveryHeader,
   CandidateRow,
   EmptyState,
   ApprovedRow,
@@ -40,6 +41,7 @@ import {
 } from '.';
 import { COMPETITORS } from '../../creatorData';
 import { useDiscoveryTab } from '../../hooks/useDiscoveryTab';
+import { StatusStrip, timeAgo } from '@/components/ui/status-strip';
 
 // -- Main component ---------------------------------------------------------------
 
@@ -77,14 +79,16 @@ export function DiscoveryTab({
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   // Convex
+  const pipelineStats  = useQuery(api.intelligence.getStats, {});
   const rawCandidates  = useQuery(api.candidates.list, {}) ?? undefined;
   const blockedHandles = useQuery(api.candidates.listBlocked, {}) ?? [];
   const seedPreApproved = useMutation(api.candidates.seedPreApproved);
   const updateStatus    = useMutation(api.candidates.updateStatus);
   const upsertCandidate = useMutation(api.candidates.upsert);
-  const clearDuplicates = useMutation(api.candidates.clearDuplicates);
-  const deleteAndBlock  = useMutation(api.candidates.deleteAndBlock);
-  const setEnrichStatus = useMutation(api.candidates.setEnrichStatus);
+  const clearDuplicates       = useMutation(api.candidates.clearDuplicates);
+  const deleteAndBlock        = useMutation(api.candidates.deleteAndBlock);
+  const setEnrichStatus       = useMutation(api.candidates.setEnrichStatus);
+  const approveTrackedAccount = useMutation(api.trackedAccounts.approveCandidate);
 
   // Seed pre-approved on first load if DB is empty
   useEffect(() => {
@@ -117,7 +121,9 @@ export function DiscoveryTab({
   const approved   = allMapped.filter(c => c.status === 'approved' && matches(c));
   const scrapingHandles = new Set(scrapingItems.map(i => i.handle));
   const approvedPending = approved.filter(c => c.enrichStatus !== 'done' && !scrapingHandles.has(c.handle));
-  const scraped   = approved.filter(c => c.enrichStatus === 'done').sort((a, b) => b.followersRaw - a.followersRaw);
+  const scrapedFlat   = approved.filter(c => c.enrichStatus === 'done');
+  const scrapedGroups = groupScrapedByDate(scrapedFlat);
+  const scraped       = scrapedFlat; // kept for stats (avgViews, avgEngagement, etc.)
   const rejected  = allMapped.filter(c => c.status === 'rejected' && matches(c));
 
   // Header stats
@@ -142,6 +148,29 @@ export function DiscoveryTab({
   async function handleApprove(c: MappedCandidate) {
     await updateStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'approved' }).catch(console.error);
     setApprovedGlow(n => n + 1);
+    await approveTrackedAccount({
+      handle:            c.handle,
+      displayName:       c.displayName,
+      niche:             c.niche || 'Unknown',
+      avatarColor:       c.avatarColor || '#833ab4',
+      followerCount:     c.followersRaw ?? 0,
+      avgEngagementRate: parseFloat(c.engagementRate) || 0,
+      // Extended signals — pass whatever the candidate has
+      ...(c.avgViews           !== undefined && { avgViews:           c.avgViews }),
+      ...(c.outlierRatio       !== undefined && { outlierRatio:       c.outlierRatio }),
+      ...(c.highlightReelCount !== undefined && { highlightReelCount: c.highlightReelCount }),
+      ...(c.postsPerWeek       !== undefined && { postsPerWeek:       c.postsPerWeek }),
+      ...(c.followsCount       !== undefined && { followsCount:       c.followsCount }),
+      ...(c.postsCount         !== undefined && { postsCount:         c.postsCount }),
+      ...(c.bio                !== undefined && { bio:                c.bio }),
+      ...(c.avatarUrl          !== undefined && { avatarUrl:          c.avatarUrl }),
+      ...(c.verified           !== undefined && { verified:           c.verified }),
+      ...(c.isPrivate          !== undefined && { isPrivate:          c.isPrivate }),
+      ...(c.isBusinessAccount  !== undefined && { isBusinessAccount:  c.isBusinessAccount }),
+      ...(c.externalUrl        !== undefined && { externalUrl:        c.externalUrl }),
+      ...(c.igtvVideoCount     !== undefined && { igtvVideoCount:     c.igtvVideoCount }),
+      ...(c.instagramId        !== undefined && { instagramId:        c.instagramId }),
+    }).catch(console.error);
     if (!c.avatarUrl && !c.followersRaw) {
       await setEnrichStatus({ id: c._convexId as Id<'creatorCandidates'>, status: 'idle' }).catch(console.error);
     }
@@ -181,7 +210,7 @@ export function DiscoveryTab({
         if (data.relatedHandles?.length) {
           const filtered = data.relatedHandles.filter((h: string) => !blockedSet.has(`@${h.replace('@', '')}`.toLowerCase()));
           await Promise.allSettled(
-            filtered.slice(0, 10).map((h: string) =>
+            filtered.slice(0, 30).map((h: string) =>
               upsertCandidate({ handle: `@${h.replace('@', '')}`, displayName: h.replace('@', ''), status: 'pending', source: 'scraper', suggestedBy: c.handle }).catch(() => {})
             )
           );
@@ -246,7 +275,23 @@ export function DiscoveryTab({
 
   return (
     <div className="px-6 py-6 w-full space-y-4 overflow-visible">
-      <DiscoveryHeader pending={pending.length} scraped={scraped.length} rejected={rejected.length} totalTracked={approved.length} avgViews={avgViews} avgEngagement={avgEngagement} avgFollowers={avgFollowers} topNiche={topNiche} />
+      <StatusStrip
+        status={{ label: scrapingItems.length > 0 ? 'Scraping active' : 'Pipeline idle', active: scrapingItems.length > 0 }}
+        stats={[
+          { icon: <Users       size={10} />, value: pending.length,                   label: 'pending'  },
+          { icon: <CheckCircle size={10} />, value: approved.length,                  label: 'approved' },
+          { icon: <Database    size={10} />, value: scraped.length,                   label: 'scraped'  },
+          { icon: <XCircle     size={10} />, value: rejected.length,                  label: 'rejected' },
+          ...(topNiche       ? [{ icon: <Tag        size={10} />, value: topNiche,                         label: 'top niche' }] : []),
+          ...(scraped.length > 0 ? [{ icon: <TrendingUp size={10} />, value: avgEngagement.toFixed(1) + '%', label: 'avg ER'   }] : []),
+        ]}
+        rightSlot={
+          <>
+            <Clock size={10} className="text-red-600" />
+            <span>Last scrape: <span className="font-medium text-neutral-700">{timeAgo(pipelineStats?.latestScrapeAt ?? 0)}</span></span>
+          </>
+        }
+      />
 
       <AnimatePresence>
         {showAnalytics && (
@@ -272,7 +317,7 @@ export function DiscoveryTab({
                 {loading ? <AnimatePresence>{[0,1,2,3].map(i => <SkeletonRow key={i} />)}</AnimatePresence> : pending.length === 0 ? <EmptyState filter="pending" /> : (
                   <AnimatePresence>{pending.map((c, i) => (
                     <DraggableCard key={c._convexId} id={c._convexId} column="unapproved">
-                      <CandidateRow candidate={c} index={i} isSelected={selectedId === c._convexId} onSelect={() => setSelectedId(selectedId === c._convexId ? null : c._convexId)} onApprove={e => { e.stopPropagation(); handleApprove(c); }} onReject={e => { e.stopPropagation(); handleReject(c); }} />
+                      <CandidateRow candidate={c} index={i} isSelected={selectedId === c._convexId} disableSelect onApprove={e => { e.stopPropagation(); handleApprove(c); }} onReject={e => { e.stopPropagation(); handleReject(c); }} />
                     </DraggableCard>
                   ))}</AnimatePresence>
                 )}
@@ -306,7 +351,26 @@ export function DiscoveryTab({
             <DroppableZone id="scraped" isOver={overColumn === 'scraped'}>
               <PipelineColumn title="Scraped" count={scraped.length} accentColor="#7f1d1d" columnBg="rgba(127,29,29,0.03)" tooltip="Approved creators with enriched profile data pulled from Instagram." glowKey={scrapedGlow}>
                 {scraped.length === 0 ? <p className="text-[11px] text-center py-8" style={{ color: 'rgba(127,29,29,0.3)' }}>Scrape an approved card to see results</p> : (
-                  scraped.map(c => <DraggableCard key={c._convexId} id={c._convexId} column="scraped"><ScrapedRow c={c} /></DraggableCard>)
+                  scrapedGroups.map((group, groupIdx) => (
+                    <React.Fragment key={group.label}>
+                      <div
+                        className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-neutral-400 select-none"
+                        style={{
+                          borderTop: groupIdx > 0 ? '1px solid rgba(0,0,0,0.05)' : undefined,
+                          marginTop: groupIdx > 0 ? 8 : 0,
+                        }}
+                      >
+                        <span className="text-red-600">{group.label}</span>
+                        <span className="text-neutral-300">·</span>
+                        <span className="text-neutral-300">{group.items.length}</span>
+                      </div>
+                      {group.items.map(c => (
+                        <DraggableCard key={c._convexId} id={c._convexId} column="scraped">
+                          <ScrapedRow c={c} />
+                        </DraggableCard>
+                      ))}
+                    </React.Fragment>
+                  ))
                 )}
               </PipelineColumn>
             </DroppableZone>

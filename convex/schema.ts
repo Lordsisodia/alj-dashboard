@@ -16,6 +16,7 @@ export default defineSchema({
     ofHandle: v.optional(v.string()),
     igHandle: v.optional(v.string()),
     avatarColor: v.string(),
+    avatarUrl: v.optional(v.string()),  // Real avatar photo URL (R2)
     active: v.boolean(),
     bio: v.optional(v.string()),
   }),
@@ -227,7 +228,7 @@ export default defineSchema({
     followerCount: v.number(),
     avatarUrl: v.optional(v.string()),
     avatarColor: v.optional(v.string()),
-    status: v.union(v.literal("active"), v.literal("paused")),
+    status: v.union(v.literal("active"), v.literal("paused"), v.literal("failed")),
     lastScrapedAt: v.optional(v.number()),
     postsScraped: v.optional(v.number()),
     avgEngagementRate: v.optional(v.number()),
@@ -247,6 +248,14 @@ export default defineSchema({
     isPrivate:             v.optional(v.boolean()),
     igtvVideoCount:        v.optional(v.number()),
     instagramId:           v.optional(v.string()),
+    // signals lost at approval hand-off
+    avgViews:              v.optional(v.number()),
+    outlierRatio:          v.optional(v.number()),
+    highlightReelCount:    v.optional(v.number()),
+    postsPerWeek:          v.optional(v.number()),
+    // computed score (persisted snapshot; live value lives in getCreatorStats)
+    creatorScore:          v.optional(v.number()),
+    creatorScoreUpdatedAt: v.optional(v.number()),
   }).index("by_handle", ["handle"])
     .index("by_status", ["status"])
     .index("by_niche", ["niche"]),
@@ -264,7 +273,16 @@ export default defineSchema({
       v.literal("story")
     ),
     niche: v.string(),
-    thumbnailUrl: v.string(),     // CDN url - no video stored
+    thumbnailUrl: v.string(),          // R2 permanent URL after download; original CDN url until then
+    thumbnailSourceUrl:      v.optional(v.string()),   // original Instagram CDN url (ephemeral)
+    thumbnailDownloadStatus: v.optional(v.union(
+      v.literal("pending"),
+      v.literal("downloading"),
+      v.literal("ready"),
+      v.literal("expired"),
+      v.literal("failed")
+    )),
+    thumbnailDownloadError:  v.optional(v.string()),
     caption: v.string(),
     hashtags: v.array(v.string()),
     likes: v.number(),
@@ -278,6 +296,16 @@ export default defineSchema({
     firstComment: v.optional(v.string()), // top comment - sentiment signal
     outlierRatio: v.optional(v.number()), // views / followerCount - virality signal
     videoUrl: v.optional(v.string()),     // R2 permanent video URL (mp4)
+    videoSourceUrl:      v.optional(v.string()),   // original IG CDN url (ephemeral)
+    videoDownloadStatus: v.optional(v.union(
+      v.literal("pending"),
+      v.literal("downloading"),
+      v.literal("ready"),
+      v.literal("expired"),
+      v.literal("failed")
+    )),
+    videoDownloadError:  v.optional(v.string()),
+    videoDownloadedAt:   v.optional(v.number()),
     saved: v.optional(v.boolean()),           // user saved to swipe file
     boardIds: v.optional(v.array(v.string())), // which boards it's saved to
     baselineScore: v.optional(v.number()), // viral multiplier vs account average
@@ -297,6 +325,7 @@ export default defineSchema({
     .index("by_content_type", ["contentType"])
     .index("by_posted_at", ["postedAt"])
     .index("by_engagement", ["engagementRate"])
+    .index("by_download_status", ["videoDownloadStatus"])
     .searchIndex("search_caption", {
       searchField: "caption",
       filterFields: ["niche", "contentType"],
@@ -353,14 +382,91 @@ export default defineSchema({
       v.literal("Rejected"),
       v.literal("Pending Review")
     )),
+    approvedAt:      v.optional(v.number()),   // set when approved
     completedAt:    v.optional(v.number()),
     durationSec:    v.optional(v.number()),
     thumbnailColor: v.optional(v.string()),   // hex placeholder until real thumb
     errorMessage:   v.optional(v.string()),
+    retryCount:     v.optional(v.number()),   // incremented on each retry
     createdAt:      v.number(),
+    // ── Replicate / Kling integration (Phase 3.1) ──
+    replicatePredictionId: v.optional(v.string()),
+    mode:                  v.optional(v.union(v.literal("std"), v.literal("pro"))),
+    characterOrientation:  v.optional(v.union(v.literal("image"), v.literal("video"))),
+    keepOriginalSound:     v.optional(v.boolean()),
+    generatedVideoUrl:     v.optional(v.string()),   // Replicate ephemeral URL
+    generatedVideoR2Url:   v.optional(v.string()),   // R2 permanent URL after download
+    replicateLogs:         v.optional(v.string()),   // for debugging
+    costUsd:               v.optional(v.number()),   // for dashboard metrics
+    startedAt:             v.optional(v.number()),
+    cancelledAt:           v.optional(v.number()),
   }).index("by_status",  ["status"])
     .index("by_created", ["createdAt"])
-    .index("by_model",   ["modelId"]),
+    .index("by_model",   ["modelId"])
+    .index("by_replicate_prediction_id", ["replicatePredictionId"]),
+
+  // ── Scenes (approved video ideas waiting to be generated) ────────
+  scenes: defineTable({
+    modelId: v.id("models"),
+    modelName: v.string(), // denormalised for fast display
+    sourceType: v.union(
+      v.literal("saved_post"),  // from scrapedPosts.savedForPipeline
+      v.literal("idea"),         // from ideas table
+      v.literal("manual")        // created in Scenes tab
+    ),
+    sourceId: v.optional(v.string()), // _id of the source record
+    sceneDescription: v.string(), // the prompt / what to recreate
+    // ── Source post snapshot (denormalised at creation for saved_post scenes) ──
+    sourceHandle:         v.optional(v.string()),
+    sourceNiche:          v.optional(v.string()),
+    sourceVerified:       v.optional(v.boolean()),
+    sourceViews:          v.optional(v.number()),
+    sourceEngagementRate: v.optional(v.number()),
+    sourceOutlierRatio:   v.optional(v.number()),
+    sourceCaption:        v.optional(v.string()),
+    sourceHookLine:       v.optional(v.string()),
+    sourceEmotions:       v.optional(v.array(v.string())),
+    referenceVideoUrl: v.optional(v.string()),     // the post being recreated
+    referenceThumbnailUrl: v.optional(v.string()),
+    startingImageUrl: v.optional(v.string()),
+    startingImageStatus: v.union(
+      v.literal("missing"),
+      v.literal("generating"),
+      v.literal("ready"),
+      v.literal("failed")
+    ),
+    startingImageError: v.optional(v.string()),
+    priorityScore: v.number(), // 0-100, higher = higher priority
+    provider: v.union(
+      v.literal("FLUX"),
+      v.literal("Kling"),
+      v.literal("Higgsfield")
+    ),
+    status: v.union(
+      v.literal("Pending"),    // awaiting starting image or approval
+      v.literal("Queued"),     // approved + ready, waiting for generation slot
+      v.literal("Generating"), // active generation job
+      v.literal("Done")        // job finished
+    ),
+    approvalState: v.union(
+      v.literal("draft"),
+      v.literal("pending_review"),
+      v.literal("approved"),
+      v.literal("rejected")
+    ),
+    approvedBy: v.optional(v.string()),
+    approvedAt: v.optional(v.number()),
+    rejectionReason: v.optional(v.string()),
+    generatedJobId: v.optional(v.id("contentGenJobs")),
+    generatedVideoUrl: v.optional(v.string()),  // mirrors contentGenJobs.generatedVideoR2Url for fast scene-list reads
+    createdBy: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_approval", ["approvalState"])
+    .index("by_model", ["modelId"])
+    .index("by_priority", ["priorityScore"])
+    .index("by_created", ["createdAt"]),
 
   // ── Feature Requests ─────────────────────────────────────────────
   featureRequests: defineTable({
@@ -589,6 +695,133 @@ export default defineSchema({
       nextBillingDate: v.optional(v.number()),
     }),
   }),
+
+  // ── Analysis prompts (versioned system prompts for intelligence analysis) ──
+  analysisPrompts: defineTable({
+    typeKey:   v.string(),   // e.g. "ofm_comprehensive", "hook_focus"
+    typeLabel: v.string(),   // display label
+    version:   v.number(),   // auto-incremented per typeKey
+    name:      v.string(),   // user label e.g. "v1", "fashion-focused"
+    prompt:    v.string(),   // system prompt text (user editable)
+    isActive:  v.boolean(),  // one active version per typeKey
+    createdAt: v.number(),
+  }).index('by_type', ['typeKey'])
+    .index('by_type_active', ['typeKey', 'isActive']),
+
+  // ── Post analyses V2 — structured feature vector per video ──────────────────────────
+  postAnalyses: defineTable({
+    postId:         v.id("scrapedPosts"),
+    handle:         v.string(),
+    niche:          v.string(),
+    outlierRatio:   v.optional(v.number()),
+    engagementRate: v.number(),
+    views:          v.number(),
+    saves:          v.number(),
+    likes:          v.number(),
+
+    hookStructure: v.union(
+      v.literal("question"), v.literal("shock_claim"), v.literal("negation"),
+      v.literal("listicle"), v.literal("pov"), v.literal("before_after"),
+      v.literal("visual_hook"), v.literal("transformation_tease"),
+      v.literal("direct_command"), v.literal("storytime"),
+      v.literal("other"), v.literal("unknown"),
+    ),
+    hookModality: v.union(
+      v.literal("spoken"), v.literal("on_screen_text"), v.literal("visual_only"),
+      v.literal("audio_cue"), v.literal("mixed"), v.literal("unknown"),
+    ),
+    firstFrameType: v.union(
+      v.literal("face_closeup"), v.literal("face_medium"), v.literal("body_full"),
+      v.literal("product"), v.literal("environment"), v.literal("text_card"),
+      v.literal("action_in_progress"), v.literal("unknown"),
+    ),
+    spokenFirstWords:        v.optional(v.string()),
+    onScreenTextFirstFrame:  v.optional(v.string()),
+    curiosityGapPresent:     v.boolean(),
+    patternInterruptPresent: v.boolean(),
+    directAddress:           v.boolean(),
+    hookDurationSec:         v.optional(v.number()),
+
+    formatPrimary: v.union(
+      v.literal("talking_head"), v.literal("voiceover_b_roll"), v.literal("pov_action"),
+      v.literal("transition_montage"), v.literal("lipsync"), v.literal("tutorial_demo"),
+      v.literal("reaction"), v.literal("skit_scripted"), v.literal("text_on_screen_silent"),
+      v.literal("product_showcase"), v.literal("thirst_trap_static"),
+      v.literal("before_after_reveal"), v.literal("dance_performance"),
+      v.literal("day_in_life_vlog"), v.literal("other"), v.literal("unknown"),
+    ),
+    setting: v.union(
+      v.literal("home_bedroom"), v.literal("home_other"), v.literal("gym"),
+      v.literal("outdoor_urban"), v.literal("outdoor_nature"), v.literal("studio"),
+      v.literal("car"), v.literal("mirror"), v.literal("other"), v.literal("unknown"),
+    ),
+    creatorOnScreen: v.boolean(),
+    faceVisibility: v.union(
+      v.literal("full"), v.literal("partial"), v.literal("obscured"),
+      v.literal("none"), v.literal("unknown"),
+    ),
+    energyLevel:         v.number(),
+    cutsPerSecondBucket: v.union(
+      v.literal("low"), v.literal("med"), v.literal("high"),
+      v.literal("extreme"), v.literal("unknown"),
+    ),
+    hasJumpCuts:    v.boolean(),
+    hasSpeedRamps:  v.boolean(),
+    hasZoomPunches: v.boolean(),
+
+    hasSpokenWords:      v.boolean(),
+    hasVoiceover:        v.boolean(),
+    musicEnergy: v.union(
+      v.literal("none"), v.literal("low"), v.literal("mid"), v.literal("high"),
+    ),
+    soundEffectsPresent: v.boolean(),
+    speakingPace: v.union(
+      v.literal("slow"), v.literal("normal"), v.literal("fast"),
+      v.literal("rapid"), v.literal("unknown"),
+    ),
+
+    creatorExpressedEmotion: v.union(
+      v.literal("neutral"), v.literal("confident"), v.literal("playful"),
+      v.literal("seductive"), v.literal("intense"), v.literal("vulnerable"),
+      v.literal("excited"), v.literal("deadpan"), v.literal("angry"),
+      v.literal("joyful"), v.literal("unknown"),
+    ),
+    vibeKeyword: v.union(
+      v.literal("aspirational"), v.literal("relatable"), v.literal("educational"),
+      v.literal("provocative"), v.literal("cozy"), v.literal("hype"),
+      v.literal("controversial"), v.literal("wholesome"), v.literal("premium"),
+      v.literal("raw_authentic"), v.literal("humorous"), v.literal("motivational"),
+      v.literal("sensual"), v.literal("unknown"),
+    ),
+
+    captionHasCTA:       v.boolean(),
+    captionAddsContext:  v.boolean(),
+    captionRepeatsVideo: v.boolean(),
+    ctaType: v.union(
+      v.literal("save"), v.literal("comment"), v.literal("share"),
+      v.literal("follow"), v.literal("dm"), v.literal("link_bio"),
+      v.literal("none"), v.literal("unknown"),
+    ),
+    captionLengthBucket: v.union(
+      v.literal("short"), v.literal("medium"), v.literal("long"),
+    ),
+    hashtagCount:     v.optional(v.number()),
+    transcript:       v.optional(v.string()),
+    onScreenTextFull: v.optional(v.string()),
+
+    extractionModel:      v.string(),
+    promptVersion:        v.string(),
+    extractionConfidence: v.number(),
+    extractionFlags:      v.array(v.string()),
+    analyzedAt:           v.number(),
+    rawResponse:          v.optional(v.string()),
+  })
+    .index("by_post_id",        ["postId"])
+    .index("by_niche",          ["niche"])
+    .index("by_niche_format",   ["niche", "formatPrimary"])
+    .index("by_niche_hook",     ["niche", "hookStructure"])
+    .index("by_format_energy",  ["formatPrimary", "energyLevel"])
+    .index("by_prompt_version", ["promptVersion"]),
 
   // -- Creator briefs (Recon — OpenRouter AI-generated profiles) ------------------------
   creatorBriefs: defineTable({

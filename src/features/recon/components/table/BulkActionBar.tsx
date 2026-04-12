@@ -1,18 +1,19 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Heart, HeartOff, X, Loader2 } from 'lucide-react';
+import { Sparkles, Heart, HeartOff, X, Loader2, Download } from 'lucide-react';
 
 interface Props {
-  count:          number;
-  enrichingCount: number;
-  onEnrich:       () => void;
-  onFavorite:     () => void;
-  onUnfavorite:   () => void;
-  onClear:        () => void;
+  count:            number;
+  enrichingCount:   number;
+  onEnrich:         () => void;
+  onFavorite:       () => void;
+  onUnfavorite:     () => void;
+  onClear:          () => void;
+  onScrapeSelected?: () => void;
 }
 
-export function BulkActionBar({ count, enrichingCount, onEnrich, onFavorite, onUnfavorite, onClear }: Props) {
+export function BulkActionBar({ count, enrichingCount, onEnrich, onFavorite, onUnfavorite, onClear, onScrapeSelected }: Props) {
   const isBusy = enrichingCount > 0;
 
   return (
@@ -73,6 +74,19 @@ export function BulkActionBar({ count, enrichingCount, onEnrich, onFavorite, onU
           >
             <HeartOff size={11} />
           </button>
+
+          {/* Scrape posts */}
+          {onScrapeSelected && (
+            <button
+              onClick={onScrapeSelected}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all"
+              style={{ backgroundColor: 'rgba(99,102,241,0.20)', color: '#a5b4fc' }}
+              title="Scrape posts for all selected"
+            >
+              <Download size={11} />
+              Scrape posts
+            </button>
+          )}
 
           <div className="w-px h-5 bg-white/10 mx-1" />
 

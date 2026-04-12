@@ -97,7 +97,7 @@ export function PulseReportCard({ stats, trends, hookStats, insights }: Props) {
     <div className="rounded-xl overflow-hidden" style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)' }}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3"
-        style={{ background: 'linear-gradient(135deg, rgba(255,0,105,0.04), rgba(131,58,180,0.04))', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+        style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
             <Sparkles size={13} className="text-white" />
@@ -110,13 +110,13 @@ export function PulseReportCard({ stats, trends, hookStats, insights }: Props) {
         <button
           onClick={generate}
           disabled={loading}
-          className="flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1.5 rounded-lg text-white transition-opacity disabled:opacity-50"
-          style={{ background: GRAD }}
+          className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50 hover:bg-neutral-50"
+          style={{ border: '1px solid rgba(0,0,0,0.10)', color: '#833ab4' }}
         >
           {loading
             ? <RefreshCw size={10} className="animate-spin" />
             : <Sparkles size={10} />}
-          {loading ? 'Generating…' : 'Generate'}
+          {loading ? 'Generating...' : 'Generate'}
         </button>
       </div>
 
@@ -126,8 +126,23 @@ export function PulseReportCard({ stats, trends, hookStats, insights }: Props) {
       )}
 
       {!pulse && !loading && !error && (
-        <div className="px-4 py-6 text-center">
-          <p className="text-[11px] text-neutral-400">No report yet. Click Generate to create your weekly brief.</p>
+        <div className="px-4 py-8 flex flex-col items-center gap-3 text-center">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(131,58,180,0.08)' }}>
+            <Sparkles size={16} style={{ color: '#833ab4' }} />
+          </div>
+          <div>
+            <p className="text-[11px] font-medium text-neutral-600">No report yet</p>
+            <p className="text-[10px] text-neutral-400 mt-0.5">Generate your weekly AI brief</p>
+          </div>
+          <button
+            onClick={generate}
+            disabled={loading}
+            className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-2 rounded-lg text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+            style={{ background: GRAD }}
+          >
+            <Sparkles size={11} />
+            Generate Brief
+          </button>
         </div>
       )}
 

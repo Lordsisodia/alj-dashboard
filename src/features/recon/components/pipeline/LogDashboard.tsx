@@ -1,26 +1,33 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Database, Clock, FileStack, Users } from 'lucide-react';
+import { Radar } from 'lucide-react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { COMPETITORS, DAILY_VOLUME } from '../../constants'; // COMPETITORS seeds initial state
+import { COMPETITORS } from '../../constants'; // COMPETITORS seeds initial state
 import type { Competitor } from '../../types';
 import { useLogDashboard } from '../../hooks/useLogDashboard';
-import { PostsScrapedChart } from './PostsScrapedChart';
-import { PipelineFunnel }    from './PipelineFunnel';
-import { ActivityFeed }      from '../detail/widgets/ActivityFeed';
-import { ScrapingReport }    from '@/components/ui/scraping-report';
-import { DashboardMetricCard } from '@/components/ui/dashboard-overview';
+import IncidentHeatmapReportCard from '@/components/ui/heat-map-xl';
+import { PipelineStatusStrip }  from '@/features/intelligence/components/dashboard/PipelineStatusStrip';
+import { ActivityFeed }         from '../detail/widgets/ActivityFeed';
+import { ScrapingReport }       from '@/components/ui/scraping-report';
+import { PostsScrapedBarChart } from './PostsScrapedBarChart';
+import { HubQuickActions }      from '@/features/community/components/dashboard/HubQuickActions';
 
-const TOTAL_IN_LIBRARY = DAILY_VOLUME.reduce((s, d) => s + d.total, 0);
 
+interface LogDashboardProps {
+  extraCreators?:      Competitor[];
+  onStartDiscovery?:   () => void;
+  onAddCreator?:       () => void;
+  onRunAll?:           () => void;
+}
 
 export function LogDashboard({
   extraCreators = [],
-}: {
-  extraCreators?: Competitor[];
-} = {}) {
+  onStartDiscovery,
+  onAddCreator,
+  onRunAll,
+}: LogDashboardProps = {}) {
   const { runAllTrigger } = useLogDashboard();
   const [competitors, setCompetitors] = useState<Competitor[]>(COMPETITORS);
 
@@ -54,7 +61,7 @@ export function LogDashboard({
   const postsToday  = dbStats?.postsToday  ?? competitors.filter(c => c.status === 'active').reduce((s, c) => s + c.postsToday, 0);
   const activeCount = dbStats?.activeCreators ?? competitors.filter(c => c.status === 'active').length;
   const totalCount  = dbStats?.totalCreators  ?? competitors.length;
-  const library     = dbStats?.totalInLibrary ?? TOTAL_IN_LIBRARY;
+  const library     = dbStats?.totalInLibrary ?? 0;
   const lastRunAt   = dbStats?.lastRunAt      ?? null;
 
   function fmtLastRun(ts: number | null) {
@@ -62,69 +69,53 @@ export function LogDashboard({
     return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
 
-
   return (
     <div className="flex items-start w-full">
 
       {/* -- Main content column ------------------------------------- */}
       <div className="flex-1 flex flex-col min-w-0">
 
-        {/* ① Pipeline funnel — first thing you see */}
+        {/* ① Pipeline status strip — all metrics inlined */}
         <div className="px-3 pt-4">
-          <PipelineFunnel counts={dbStats?.funnel} />
-        </div>
-
-        {/* ② Metric cards */}
-        <div className="grid grid-cols-4 gap-3 px-3 mt-3">
-          <DashboardMetricCard
-            title="Posts today"
-            value={String(postsToday)}
-            icon={Database}
-            trendChange="+23% vs yesterday"
-            trendType="up"
-          />
-          <DashboardMetricCard
-            title="Active creators"
-            value={`${activeCount} / ${totalCount}`}
-            icon={Users}
-            trendChange={`${totalCount - activeCount} paused`}
-            trendType="neutral"
-          />
-          <DashboardMetricCard
-            title="Total in library"
-            value={library.toLocaleString()}
-            icon={FileStack}
-            trendChange="posts scraped all-time"
-            trendType="up"
-          />
-          <DashboardMetricCard
-            title="Last run"
-            value={fmtLastRun(lastRunAt)}
-            icon={Clock}
-            trendChange="Next: ~6:00 PM · every 3h"
-            trendType="neutral"
+          <PipelineStatusStrip
+            totalIndexed={library}
+            postsThisWeek={dbStats?.postsThisWeek ?? 0}
+            latestScrapeAt={lastRunAt ?? 0}
+            postsToday={postsToday}
+            activeCreators={activeCount}
+            totalCreators={totalCount}
+            lastRunFormatted={fmtLastRun(lastRunAt)}
           />
         </div>
 
-        {/* ③ Posts scraped chart — full width */}
-        <div className="px-3 pt-3">
-          <PostsScrapedChart data={DAILY_VOLUME} />
+        {/* ② Heatmap + Scraping report side by side */}
+        <div className="px-3 pt-3 grid grid-cols-2 gap-3 items-start">
+          <IncidentHeatmapReportCard />
+          <div className="flex flex-col gap-3">
+            <ScrapingReport />
+            <PostsScrapedBarChart />
+          </div>
         </div>
 
-        {/* ④ Scraping report */}
-        <div className="px-3 pt-3 pb-6">
-          <ScrapingReport />
+        {/* ③ Quick actions */}
+        <div className="px-3 mt-3 pb-6">
+          <HubQuickActions
+            onStartSession={onStartDiscovery ?? (() => {})}
+            onBrowseVault={onAddCreator ?? (() => {})}
+            onSendToClient={onRunAll ?? (() => {})}
+          />
         </div>
 
       </div>
 
       {/* -- Right sidebar: Live Activity ---------------------------- */}
       <div
-        className="w-72 flex-shrink-0 sticky top-0 self-start"
+        className="w-72 flex-shrink-0 sticky top-0 self-start flex flex-col relative rounded-2xl overflow-hidden mx-3 mt-4 mb-6"
         style={{
-          borderLeft: '1px solid rgba(0,0,0,0.06)',
-          height: 'calc(100vh - 98px)',
-          overflowY: 'auto',
+          border: '1px solid rgba(0,0,0,0.07)',
+          backgroundColor: '#fff',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+          height: 'calc(100vh - 200px)',
         }}
       >
         <ActivityFeed />

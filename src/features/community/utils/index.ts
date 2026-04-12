@@ -1,0 +1,1 @@
+export { fmtK } from '../utils';

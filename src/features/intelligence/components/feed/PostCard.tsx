@@ -10,11 +10,13 @@ import { fadeUp, NICHE_COLORS } from '../../constants';
 import { fmtNum, timeAgo, avatarColor, igThumb, creatorVelocity, nicheERDelta, type CreatorStats, type NicheERMap } from '../../utils';
 import { BoardPickerDropdown } from './BoardPickerDropdown';
 import { VideoLightbox } from '../shared/VideoLightbox';
+import { ScoreRing } from '../shared/ScoreRing';
 import type { Post, VisibilityState } from '../../types';
 
 interface Props {
   post:             Post;
   visibility:       VisibilityState;
+  columns?:         number;
   onPostClick?:    () => void;
   onAnalyzeClick?: () => void;
   creatorStatsMap?: Record<string, CreatorStats>;
@@ -23,16 +25,36 @@ interface Props {
 
 function CardHeader({ post, visibility, onAnalyzeClick, velocity, erDelta }: { post: Post; visibility: VisibilityState; onAnalyzeClick?: () => void; velocity?: { direction: 'up' | 'down' | 'same'; pct: number }; erDelta?: string }) {
   const nicheColor = NICHE_COLORS[post.niche] ?? '#833ab4';
-  const avColor    = avatarColor(post.handle);
+  const avColor    = post.avatarColor ?? avatarColor(post.handle);
+  const initials   = post.handle.replace('@', '').charAt(0).toUpperCase();
+  const [avatarErr, setAvatarErr] = useState(false);
+
+  // Only use avatarUrl if it's an R2 URL (stable)  - Instagram CDN URLs expire in 24h
+  const isR2 = post.avatarUrl?.includes('r2.dev') || post.avatarUrl?.includes('cloudflare');
+  const showAvatar = isR2 && !avatarErr;
+
   return (
     <div className="flex items-center justify-between px-3 pt-3 pb-2">
       <div className="flex items-center gap-2 min-w-0">
-        <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: avColor }}>
-          {post.handle.replace('@', '').charAt(0).toUpperCase()}
+        {/* Avatar with niche colour ring */}
+        <div
+          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden"
+          style={{
+            backgroundColor: avColor,
+            boxShadow: `0 0 0 2px #fff, 0 0 0 3.5px ${nicheColor}`,
+          }}
+        >
+          {showAvatar
+            ? <Image src={post.avatarUrl!} alt={post.handle} width={28} height={28} className="object-cover w-full h-full" onError={() => setAvatarErr(true)} />
+            : initials
+          }
         </div>
+
         {visibility.brandDetails && (
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-xs font-semibold text-neutral-800 truncate">{post.handle}</span>
+            <span className="text-xs font-semibold text-neutral-800 truncate">
+              {post.displayName ?? post.handle}
+            </span>
             {velocity && velocity.direction !== 'same' && (
               <span className={`text-[10px] font-bold flex-shrink-0 ${velocity.direction === 'up' ? 'text-green-600' : 'text-red-400'}`}>
                 {velocity.direction === 'up' ? '▲' : '▼'}{velocity.pct}%
@@ -41,10 +63,8 @@ function CardHeader({ post, visibility, onAnalyzeClick, velocity, erDelta }: { p
           </div>
         )}
       </div>
+
       <div className="flex items-center gap-1.5 flex-shrink-0">
-        {visibility.brandDetails && (
-          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md text-white" style={{ backgroundColor: nicheColor }}>{post.niche}</span>
-        )}
         {erDelta && (
           <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${erDelta.startsWith('+') ? 'text-green-600 bg-green-50' : erDelta.startsWith('-') ? 'text-red-400 bg-red-50' : 'text-neutral-500 bg-neutral-100'}`}>
             {erDelta}
@@ -69,11 +89,17 @@ function CardHeader({ post, visibility, onAnalyzeClick, velocity, erDelta }: { p
 function CardThumbnail({ post, onPlay, onExpand }: { post: Post; onPlay: () => void; onExpand: () => void }) {
   const isVideo    = post.contentType === 'reel' || post.contentType === 'story';
   const isRealImg  = post.thumbnailUrl.startsWith('http');
+  const [imgError, setImgError] = useState(false);
+
+  const fallbackBg = post.thumbnailUrl.startsWith('http')
+    ? `linear-gradient(135deg, ${avatarColor(post.handle)}30, ${avatarColor(post.handle)}60)`
+    : post.thumbnailUrl;
+
   return (
     <div className="relative mx-3 rounded-xl overflow-hidden cursor-pointer" style={{ aspectRatio: isVideo ? '9/16' : '4/5' }} onClick={onPlay}>
-      {isRealImg
-        ? <Image src={igThumb(post.thumbnailUrl)} alt={post.handle} fill className="object-cover" />
-        : <div className="absolute inset-0" style={{ background: post.thumbnailUrl }} />
+      {isRealImg && !imgError
+        ? <Image src={igThumb(post.thumbnailUrl)} alt={post.handle} fill className="object-cover" onError={() => setImgError(true)} />
+        : <div className="absolute inset-0" style={{ background: fallbackBg }} />
       }
       {isVideo && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -92,11 +118,21 @@ function CardThumbnail({ post, onPlay, onExpand }: { post: Post; onPlay: () => v
       <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md text-[9px] font-semibold text-white uppercase tracking-wide" style={{ backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>
         {post.contentType}
       </div>
+      {post.aiAnalysis?.hookScore != null && (
+        <div className="absolute bottom-2 right-2">
+          <ScoreRing score={post.aiAnalysis.hookScore} size={30} />
+        </div>
+      )}
+      {post.aiAnalysis?.emotions?.[0] && (
+        <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded-md text-[9px] font-semibold text-white capitalize" style={{ backgroundColor: 'rgba(109,40,217,0.7)', backdropFilter: 'blur(4px)' }}>
+          {post.aiAnalysis.emotions[0]}
+        </div>
+      )}
     </div>
   );
 }
 
-export function PostCard({ post, visibility, onPostClick, onAnalyzeClick, creatorStatsMap, nicheERMap }: Props) {
+export function PostCard({ post, visibility, columns = 4, onPostClick, onAnalyzeClick, creatorStatsMap, nicheERMap }: Props) {
   const [playing, setPlaying] = useState(false);
   const toggleSave = useMutation(api.intelligence.toggleSave);
   const isVideo    = post.contentType === 'reel' || post.contentType === 'story';
@@ -129,9 +165,40 @@ export function PostCard({ post, visibility, onPostClick, onAnalyzeClick, creato
                 {post.engagementRate.toFixed(1)}%
               </span>
             )}
-            {saveRate !== null && (
+            {saveRate !== null && columns < 6 && (
               <span className="text-[10px] font-medium text-neutral-400" title="Save rate">
                 {saveRate.toFixed(2)}% sv
+              </span>
+            )}
+          </div>
+        )}
+
+        {post.aiAnalysis?.hookLine && (
+          <p className="px-3 pt-2 text-[9px] text-neutral-400 italic line-clamp-2">
+            &ldquo;{post.aiAnalysis.hookLine}&rdquo;
+          </p>
+        )}
+
+        {post.v2Analysis && (post.v2Analysis.vibeKeyword !== 'unknown' || post.v2Analysis.hookStructure !== 'unknown') && (
+          <div className="flex items-center gap-1.5 px-3 pt-1.5 flex-wrap">
+            {post.v2Analysis.vibeKeyword && post.v2Analysis.vibeKeyword !== 'unknown' && (
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md text-white capitalize" style={{ backgroundColor: 'rgba(124,58,237,0.75)' }}>
+                {post.v2Analysis.vibeKeyword.replace(/_/g, ' ')}
+              </span>
+            )}
+            {post.v2Analysis.hookStructure && post.v2Analysis.hookStructure !== 'unknown' && (
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md capitalize" style={{ backgroundColor: 'rgba(124,58,237,0.1)', color: '#7c3aed' }}>
+                {post.v2Analysis.hookStructure.replace(/_/g, ' ')}
+              </span>
+            )}
+            {post.v2Analysis.curiosityGapPresent && (
+              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(234,179,8,0.1)', color: '#a16207' }}>
+                curiosity gap
+              </span>
+            )}
+            {post.v2Analysis.patternInterruptPresent && (
+              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(59,130,246,0.1)', color: '#1d4ed8' }}>
+                pattern interrupt
               </span>
             )}
           </div>
